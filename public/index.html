@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KUSA FlightOps — N33AP Final Beta</title>
+<style>
+:root{--bg:#071b33;--panel:#0d294a;--panel2:#12365f;--text:#edf5ff;--muted:#9db6cf;--ok:#55d18b;--warn:#ffca58;--bad:#ff6b6b;--line:#2a4b70}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
+header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+h1{margin:0;font-size:25px}.sub,.small{font-size:12px;color:var(--muted)}main{max-width:1600px;margin:auto;padding:20px}
+.grid{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:18px}
+.card h2{font-size:16px;margin:0 0 12px}.row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.metric{background:var(--panel2);padding:12px;border-radius:10px}.metric b{display:block;font-size:21px;margin-top:3px}
+label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}input,button,select{width:100%;padding:9px;border-radius:8px;border:1px solid var(--line);background:#06182c;color:var(--text)}
+button{background:#174c80;font-weight:bold;cursor:pointer}table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:8px;border-bottom:1px solid var(--line);text-align:right}td:first-child,th:first-child{text-align:left}
+.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}.status{font-size:12px;font-weight:bold}.cabin{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.seat{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px}
+.wx{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:12px}.callout{border-left:4px solid var(--warn);padding:10px 12px;background:#0a223e;border-radius:8px}.raw{white-space:pre-wrap;font-size:11px;color:#c8d8e8}
+canvas{width:100%;height:300px;background:#06182c;border-radius:10px}
+@media(max-width:1000px){.grid{grid-template-columns:1fr}.row{grid-template-columns:1fr 1fr}}
+
+
+
+.pax-check{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
+.pax-check>div{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px}
+.pax-check b{display:block;font-size:20px;margin-top:3px}
+.cabin-shell{position:relative;max-width:760px;margin:0 auto;background:#081f39;border:2px solid #345b82;border-radius:90px 90px 36px 36px;padding:58px 44px 48px;overflow:hidden}
+.cockpit-label,.aft-label{text-align:center;font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:bold}
+.cockpit-label{position:absolute;top:18px;left:0;right:0}
+.aft-label{position:absolute;bottom:15px;left:0;right:0}
+.cabin-centerline{position:absolute;top:50px;bottom:42px;left:50%;border-left:1px dashed #355678;opacity:.8}
+.cabin-seat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 70px;position:relative;z-index:1}
+.cabin-seat-grid .seat-spacer{visibility:hidden;height:1px}
+.cabin-seat{min-height:86px;border:2px solid #42688e;border-radius:16px 16px 10px 10px;background:#102f51;color:var(--text);padding:10px;cursor:pointer;text-align:left;position:relative}
+.cabin-seat:hover{border-color:#6f96bb}
+.cabin-seat.occupied{border-color:var(--ok);background:#113a4b}
+.cabin-seat.selected{outline:3px solid var(--warn);outline-offset:2px}
+.cabin-seat .seat-num{font-size:17px;font-weight:bold}
+.cabin-seat .seat-person{font-size:12px;margin-top:5px}
+.cabin-seat .seat-weight{font-size:11px;color:var(--muted);margin-top:2px}
+.cabin-seat .occupied-dot{position:absolute;right:10px;top:10px;width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.seat-editor{margin-top:14px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#081f39}
+.seat-editor-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}
+.seat-editor-title button{width:auto;padding:7px 12px}
+@media(max-width:850px){.pax-check{grid-template-columns:1fr 1fr}.cabin-shell{padding-left:22px;padding-right:22px}.cabin-seat-grid{gap:12px 34px}}
+@media(max-width:560px){.pax-check{grid-template-columns:1fr 1fr}.cabin-seat-grid{gap:10px 18px}.cabin-seat{min-height:78px;padding:8px}}
+
+
+.passenger-type-bar{margin:10px 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#071a2e}
+.n33ap-cabin{position:relative;max-width:700px;margin:0 auto;padding:64px 52px 58px;background:#081d34;border:2px solid #3d6287;border-radius:110px 110px 42px 42px;overflow:hidden}
+.cabin-nose,.cabin-tail{text-align:center;font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--muted)}
+.cabin-nose{position:absolute;top:20px;left:0;right:0}
+.cabin-tail{position:absolute;bottom:18px;left:0;right:0}
+.cabin-aisle{position:absolute;top:54px;bottom:52px;left:50%;border-left:2px dashed #31506f;opacity:.7}
+.cabin-row{display:grid;grid-template-columns:1fr 1fr;gap:84px;margin-bottom:18px;position:relative;z-index:2}
+.cabin-row-single{align-items:center}
+.cabin-fixture{border:1px dashed #31506f;border-radius:10px;padding:20px 8px;text-align:center;color:var(--muted);font-size:10px}
+.tap-seat{min-height:82px;border:2px solid #42688e;border-radius:18px 18px 10px 10px;background:#102f51;color:var(--text);padding:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.tap-seat.occupied{background:#113f48;border-color:var(--ok)}
+.tap-seat.unseated-target{border-style:dashed}
+.seat-number{font-size:22px;font-weight:800;line-height:1}
+.seat-name{font-size:11px;color:var(--muted)}
+.seat-occupant{font-size:11px;font-weight:700;margin-top:3px}
+.aft-lounge-box{position:relative;z-index:2;border:1px solid #31506f;border-radius:18px;padding:28px 14px 14px;margin-top:4px;background:#0a213a}
+.aft-lounge-label{position:absolute;top:7px;left:0;right:0;text-align:center;font-size:10px;letter-spacing:.12em;color:var(--muted);font-weight:bold}
+.aft-lounge-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 44px}
+.lounge-seat{min-height:72px}
+.seat-assignment-footer{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.unseated-box,.seat-instruction{border:1px solid var(--line);border-radius:10px;padding:12px;background:#071a2e}
+.unseated-pool{display:flex;gap:7px;flex-wrap:wrap;margin-top:7px}
+.pax-chip{border:1px solid var(--warn);border-radius:999px;padding:5px 9px;font-size:12px;background:#2d2511}
+.pax-roster{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pax-roster button{width:auto;padding:8px 10px;border-radius:999px}
+.pax-roster button.unseated{border-color:var(--warn)}
+@media(max-width:650px){
+ .n33ap-cabin{padding-left:20px;padding-right:20px}
+ .cabin-row{gap:30px}
+ .aft-lounge-grid{gap:10px 22px}
+ .seat-assignment-footer{grid-template-columns:1fr}
+ .tap-seat{min-height:76px}
+}
+
+
+.section2-continue{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:16px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#0a223c}
+.section2-continue button{width:auto;min-width:240px;font-size:15px;font-weight:800;padding:12px 16px}
+@media(max-width:650px){.section2-continue{flex-direction:column;align-items:stretch}.section2-continue button{width:100%;min-width:0}}
+
+</style>
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#071b33">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+</head>
+<body>
+<header>
+<div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
+<div class="status warn">DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE</div>
+</header>
+<main>
+<div class="card">
+<h2>1. Mission Setup</h2>
+<div class="row">
+<div><label>Origin</label><input id="dep" value="KBPT" maxlength="4"></div>
+<div><label>Destination</label><input id="dest" value="KDAL" maxlength="4"></div>
+<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
+<div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
+</div>
+
+<div class="row" style="margin-top:10px">
+<div><label>Number of Passengers</label><input id="paxRequested" type="number" value="0" min="0" max="9"></div>
+<div><label>Departure Runway</label><select id="depRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
+<div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
+<div><label>Load Airport / Weather Data</label><button onclick="loadMission()">Load / Refresh Mission</button></div>
+</div>
+
+<div class="row" style="margin-top:10px">
+<div><label>Captain Weight lb</label><input id="captWt" type="number" value="190" min="0" oninput="recalculate()"></div>
+<div><label>First Officer Weight lb</label><input id="foWt" type="number" value="190" min="0" oninput="recalculate()"></div>
+<div><label>Total Baggage lb</label><input id="totalBag" type="number" value="0" min="0" oninput="recalculate()"></div>
+<div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
+</div>
+<div id="missionStatus" class="small" style="margin-top:10px">Ready.</div>
+</div>
+
+<div class="card">
+<h2>2. Passenger Seating — Tap to Move</h2>
+<div class="small" style="margin-bottom:12px">
+FlightOps preloads the number of passengers entered in Mission Setup beginning with Seat 1. Tap an occupied seat to move that passenger to the Unseated PAX pool. Tap an empty seat to place the next unseated passenger there.
+</div>
+
+<div class="pax-check">
+<div><span class="small">PAX Entered</span><b id="paxRequestedDisplay">0</b></div>
+<div><span class="small">PAX Seated</span><b id="paxSeatedDisplay">0</b></div>
+<div><span class="small">Unseated PAX</span><b id="paxUnseatedDisplay">0</b></div>
+<div><span class="small">Seat Check</span><b id="seatCheck" class="ok">MATCH</b></div>
+</div>
+
+<div class="passenger-type-bar">
+<div class="small"><b>Passenger defaults:</b> Adult Male 180 lb • Adult Female 150 lb • Child 70 lb. Tap a passenger in the roster below to change type or actual weight.</div>
+</div>
+
+<div class="n33ap-cabin">
+<div class="cabin-nose">FLIGHT DECK</div>
+<div class="cabin-aisle"></div>
+
+<div class="cabin-row cabin-row-1">
+<button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Row 1 LH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button>
+<button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Row 1 RH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button>
+</div>
+
+<div class="cabin-row cabin-row-2">
+<button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Row 2 LH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button>
+<button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Row 2 RH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button>
+</div>
+
+<div class="cabin-row cabin-row-single">
+<button type="button" class="tap-seat single-seat-position" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Single Seat</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button>
+<div class="cabin-fixture">CABIN / AISLE</div>
+</div>
+
+<div class="aft-lounge-box">
+<div class="aft-lounge-label">AFT LOUNGE</div>
+<div class="aft-lounge-grid">
+<button type="button" class="tap-seat lounge-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Lounge</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button>
+<button type="button" class="tap-seat lounge-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Lounge</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button>
+<button type="button" class="tap-seat lounge-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Aft Divan</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button>
+<button type="button" class="tap-seat lounge-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft Divan</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button>
+</div>
+</div>
+
+<div class="cabin-tail">AFT CABIN / BAGGAGE</div>
+</div>
+
+<div class="seat-assignment-footer">
+<div class="unseated-box">
+<div class="small">UNSEATED PAX</div>
+<div id="unseatedPool" class="unseated-pool"><span class="small">None</span></div>
+</div>
+<div class="seat-instruction">
+<b id="seatActionMessage">All entered passengers are seated.</b>
+<div class="small">Tap seat = remove/place passenger. Passenger identity and weight move with the passenger.</div>
+</div>
+</div>
+
+<div id="paxRoster" class="pax-roster"></div>
+
+<div id="paxEditor" class="seat-editor" style="display:none">
+<div class="seat-editor-title">
+<div><b id="paxEditorName">Passenger</b><div class="small">Change passenger category or enter actual weight.</div></div>
+<button type="button" id="closePaxEditor">Close</button>
+</div>
+<div class="row">
+<div>
+<label>Passenger Type</label>
+<select id="paxEditorType">
+<option value="male">Adult Male — 180 lb</option>
+<option value="female">Adult Female — 150 lb</option>
+<option value="child">Child — 70 lb</option>
+</select>
+</div>
+<div><label>Actual Weight lb</label><input id="paxEditorWeight" type="number" min="1" value="180"></div>
+<div><label>Apply</label><button type="button" id="applyPaxEditor">Update Passenger</button></div>
+</div>
+</div>
+
+<div id="seatMismatch" class="callout small" style="display:none;margin-top:12px">
+PAX entered does not equal PAX seated. Weight & balance is flagged incomplete until all entered passengers are assigned to seats.
+</div>
+
+<div class="section2-continue">
+<div>
+  <div class="small">When seating is complete</div>
+  <b>Refresh airport/weather data and continue to calculated results.</b>
+</div>
+<button type="button" id="continueResultsBtn">Continue to Mission Results</button>
+</div>
+</div>
+
+<div class="grid" id="missionResultsStart">
+<section>
+
+<div class="card">
+<h2>3. Mission Results</h2>
+<div class="row">
+<div class="wx"><div class="small">Origin</div><b id="depTitle">KBPT</b><div id="depAirport" class="small"></div></div>
+<div class="wx"><div class="small">Departure Runway</div><b id="depRwySummary">—</b><div id="depWindSummary" class="small"></div></div>
+<div class="wx"><div class="small">Pressure Altitude</div><b id="depPA">—</b></div>
+<div class="wx"><div class="small">Density Altitude</div><b id="depDA">—</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Destination</div><b id="destTitle">KDAL</b><div id="destAirport" class="small"></div></div>
+<div class="wx"><div class="small">Destination Runway</div><b id="destRwySummary">—</b><div id="destWindSummary" class="small"></div></div>
+<div class="wx"><div class="small">Pressure Altitude</div><b id="destPA">—</b></div>
+<div class="wx"><div class="small">Density Altitude</div><b id="destDA">—</b></div>
+</div>
+<table style="margin-top:12px">
+<thead><tr><th></th><th>METAR</th><th>TAF</th></tr></thead>
+<tbody>
+<tr><td>Origin</td><td class="raw" id="depMetar">—</td><td class="raw" id="depTaf">—</td></tr>
+<tr><td>Destination</td><td class="raw" id="destMetar">—</td><td class="raw" id="destTaf">—</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>4. Calculated Weight & Balance</h2>
+<div class="row">
+<div class="wx"><div class="small">Basic Empty Weight</div><b>21,479 lb</b></div>
+<div class="wx"><div class="small">Crew</div><b id="crewCalc">380 lb</b></div>
+<div class="wx"><div class="small">Passengers</div><b id="paxCalc">0 lb</b></div>
+<div class="wx"><div class="small">Baggage</div><b id="bagCalc">0 lb</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Zero-Fuel Weight</div><b id="zfw">—</b></div>
+<div class="wx"><div class="small">Ramp Weight</div><b id="rampWt">—</b></div>
+<div class="wx"><div class="small">Takeoff Weight</div><b id="takeoffWt">—</b></div>
+<div class="wx"><div class="small">Landing Weight</div><b id="landingWt">—</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Zero-Fuel CG Arm</div><b id="cgarm">—</b></div>
+<div class="wx"><div class="small">Zero-Fuel CG</div><b id="cgmac">—</b></div>
+<div class="wx"><div class="small">CG Limits</div><b id="cgLimits">—</b></div>
+<div class="wx"><div class="small">W&B Status</div><b id="envStatus">—</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Fuel on Board</div><b id="fuelCalc">0 lb</b></div>
+<div class="wx"><div class="small">Mission Fuel Required</div><b id="missionFuelCalc">0 lb</b></div>
+<div class="wx"><div class="small">Planned Landing Fuel</div><b id="landingFuelCalc">0 lb</b></div>
+<div class="wx"><div class="small">Fuel Reserve</div><b id="fuelReserveCalc">0 lb</b></div>
+</div>
+<div class="callout small" style="margin-top:12px">
+Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusive <b>CG</b> is still locked until the approved DTM912 Section 2 variable fuel-moment schedule is validated.
+</div>
+</div>
+
+
+<div class="card">
+<h2>V-Speed Card</h2>
+<div class="row">
+<div class="wx"><div class="small">V1</div><b id="vsV1">—</b><div class="small" id="vsV1src">Performance data required</div></div>
+<div class="wx"><div class="small">VR</div><b id="vsVR">—</b><div class="small" id="vsVRsrc">Performance data required</div></div>
+<div class="wx"><div class="small">VFT</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">Definition/data source required</div></div>
+<div class="wx"><div class="small">VFS</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">Definition/data source required</div></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">VREF</div><b id="vsVREF">—</b><div class="small" id="vsVREFsrc">Landing chart data required</div></div>
+<div class="wx"><div class="small">Takeoff Weight</div><b id="vsTOW">—</b></div>
+<div class="wx"><div class="small">Landing Weight</div><b id="vsLDW">—</b></div>
+<div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
+</div>
+<div class="callout small" style="margin-top:12px">
+V1, VR and VREF are chart-derived performance speeds and will populate automatically when the validated Falcon 50-4 performance curves are loaded. VFT and VFS are included in the card but remain locked until their exact N33AP/Falcon 50-4 definitions and source tables are identified.
+</div>
+</div>
+
+<div class="card">
+<h2>Seat & Baggage Loading Detail</h2>
+<table>
+<thead><tr><th>Position</th><th>Occupant / Load</th><th>Arm</th><th>Weight</th><th>Moment</th></tr></thead>
+<tbody id="autoLoadTable"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>Zero-Fuel CG Envelope</h2>
+<canvas id="cgChart"></canvas>
+</div>
+
+<div class="card">
+<h2>5. Available Runways</h2>
+<table>
+<thead><tr><th>Airport</th><th>RWY</th><th>Heading</th><th>Length</th><th>Width</th><th>Surface</th><th>HW</th><th>TW</th><th>XW</th></tr></thead>
+<tbody id="runways"></tbody>
+</table>
+</div>
+
+<div class="card">
+<h2>6. Performance Evaluation</h2>
+<div class="callout small">
+Selected runway lengths and calculated mission weights are automatic. Falcon performance chart outputs remain manual until the -4 chart data is digitized and validated.
+</div>
+
+<h3 style="font-size:14px">Takeoff</h3>
+<div class="row">
+<div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
+<div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
+<div><label>Climb-Limited Weight lb</label><input id="perfClimbWt" type="number"></div>
+<div><label>Field-Limited Weight lb</label><input id="perfFieldWt" type="number"></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div><label>Balanced Field Length ft</label><input id="perfBFL" type="number"></div>
+<div><label>V1 kt</label><input id="perfV1" type="number" step=".1"></div>
+<div><label>VR = V2 kt</label><input id="perfVR" type="number" step=".1"></div>
+<div><label>2nd Segment Net Gradient %</label><input id="perfGrad" type="number" step=".1"></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div><label>Obstacle Clearance</label><select id="perfObs"><option value="">Not evaluated</option><option value="true">Verified</option><option value="false">Not cleared</option></select></div>
+<div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
+<div class="wx"><div class="small">Max Allowable TOW</div><b id="toMax">—</b></div>
+<div class="wx"><div class="small">Takeoff Status</div><b id="toStatus">—</b></div>
+</div>
+<table style="margin-top:10px">
+<tr><td>Limiting Factor</td><td id="toLimit">—</td></tr>
+<tr><td>Weight Margin</td><td id="toWtMargin">—</td></tr>
+<tr><td>Runway Margin</td><td id="toRwyMargin">—</td></tr>
+<tr><td>Speeds</td><td id="toSpeeds">—</td></tr>
+</table>
+
+<h3 style="font-size:14px;margin-top:18px">Landing</h3>
+<div class="row">
+<div><label>Runway Length ft</label><input id="landRwyLen" type="number" readonly></div>
+<div><label>Actual Landing Weight lb</label><input id="landWt" type="number" readonly></div>
+<div><label>Climb-Limited Landing Weight lb</label><input id="landClimbWt" type="number"></div>
+<div><label>Landing Field Length ft</label><input id="landFieldLen" type="number"></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div><label>VREF kt</label><input id="landVref" type="number" step=".1"></div>
+<div><label>Evaluate</label><button onclick="evaluateLanding()">Evaluate Landing</button></div>
+<div class="wx"><div class="small">Max Allowable Landing Weight</div><b id="landMax">—</b></div>
+<div class="wx"><div class="small">Landing Status</div><b id="landStatus">—</b></div>
+</div>
+</div>
+
+<div class="card">
+<h2>Aircraft Reference — N33AP</h2>
+<div class="row">
+<div><label>Basic Empty Weight</label><input value="21,479.30 lb" readonly></div>
+<div><label>Basic Empty Moment</label><input value="127,185.96 in-lb" readonly></div>
+<div><label>Max Zero Fuel</label><input value="25,570 lb" readonly></div>
+<div><label>Max Takeoff</label><input value="40,780 lb" readonly></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div><label>Max Landing</label><input value="35,715 lb" readonly></div>
+<div><label>Minimum Flight Weight</label><input value="18,959 lb" readonly></div>
+<div><label>MAC</label><input value="111.77 in" readonly></div>
+<div><label>Fuel Capacity</label><input value="15,514 lb" readonly></div>
+</div>
+</div>
+
+</section>
+
+<aside>
+<div class="card">
+<h2>Mission Summary</h2>
+<table>
+<tr><td>Origin</td><td id="sumDep">KBPT</td></tr>
+<tr><td>Destination</td><td id="sumDest">KDAL</td></tr>
+<tr><td>Departure Runway</td><td id="sumDepRwy">—</td></tr>
+<tr><td>Destination Runway</td><td id="sumDestRwy">—</td></tr>
+<tr><td>Passengers</td><td id="sumPax">0</td></tr>
+<tr><td>Fuel on Board</td><td id="sumFuel">0 lb</td></tr>
+<tr><td>Mission Fuel</td><td id="sumMissionFuel">0 lb</td></tr>
+<tr><td>FAA airport data</td><td id="sumFAA" class="warn">NOT LOADED</td></tr>
+<tr><td>Live METAR/TAF</td><td id="sumWX" class="warn">NOT LOADED</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>Weight Limits</h2>
+<table>
+<tr><td>ZFW</td><td id="limZFW">—</td></tr>
+<tr><td>Ramp</td><td id="limRamp">—</td></tr>
+<tr><td>Takeoff</td><td id="limTO">—</td></tr>
+<tr><td>Landing</td><td id="limLand">—</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>Fuel Check</h2>
+<table>
+<tr><td>On Board</td><td id="sideFOB">0 lb</td></tr>
+<tr><td>Mission Required</td><td id="sideMission">0 lb</td></tr>
+<tr><td>Taxi</td><td id="sideTaxi">0 lb</td></tr>
+<tr><td>Landing Fuel</td><td id="sideLanding">0 lb</td></tr>
+<tr><td>Reserve</td><td id="sideReserve">0 lb</td></tr>
+<tr><td>Status</td><td id="fuelStatusSide">—</td></tr>
+</table>
+</div>
+
+<div class="card">
+<h2>System Status</h2>
+<table>
+<tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr>
+<tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr>
+<tr><td>Runway selection</td><td class="ok">AUTO</td></tr>
+<tr><td>FAA airport backend</td><td class="ok">ACTIVE</td></tr>
+<tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr>
+<tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr>
+<tr><td>Fuel CG calculation</td><td class="warn">DTM912 PENDING</td></tr>
+<tr><td>Falcon chart interpolation</td><td class="warn">NEXT PHASE</td></tr>
+</table>
+</div>
+</aside>
+</div>
+</main>
+<script src="/config.js"></script>
+<script>
+const FLIGHTOPS_API_BASE=(window.FLIGHTOPS_API_BASE||"").replace(/\/$/,"");
+function apiUrl(path){return FLIGHTOPS_API_BASE+path}
+
+const emptyWeight=21479.30,emptyMoment=127185.96,maxZFW=25570,maxRamp=40780,maxTO=40780,maxLand=35715,maxFuel=15514;
+const paxDefaults={male:180,female:150,child:70};
+const paxLabels={male:"Adult Male",female:"Adult Female",child:"Child"};
+const seats=[
+ {n:1,arm:-172.73,station:"Row 1"},
+ {n:2,arm:-172.73,station:"Row 1"},
+ {n:3,arm:-118.79,station:"Row 2"},
+ {n:4,arm:-118.79,station:"Row 2"},
+ {n:5,arm:-60.61,station:"Single Seat"},
+ {n:6,arm:-57.58,station:"Aft Lounge"},
+ {n:7,arm:-41.82,station:"Aft Lounge"},
+ {n:8,arm:0,station:"Aft Lounge"},
+ {n:9,arm:0,station:"Aft Lounge"}
+];
+const baggageStations=[
+ {name:"Baggage Compartment I",arm:82.65,limit:681},
+ {name:"Baggage Compartment II",arm:101.71,limit:762},
+ {name:"Baggage Compartment III",arm:123.95,limit:762}
+];
+const fwd=[[18959,14.0],[30618,14.0],[35715,19.2],[40300,22.99],[40780,23.3]];
+const aft=[[18959,32.0],[40300,32.0],[40780,29.57]];
+
+let missionData=null;
+let passengers=[];
+let seatAssignments=Array(9).fill(null); // stores passenger id
+let editingPaxId=null;
+
+const $=id=>document.getElementById(id);
+const num=id=>+$((id)).value||0;
+const esc=x=>x==null?"—":x;
+function pctMacFromArm(arm){return 25+arm/1.1177}
+function interp(p,w){if(w<=p[0][0])return p[0][1];if(w>=p[p.length-1][0])return p[p.length-1][1];for(let i=0;i<p.length-1;i++){let a=p[i],b=p[i+1];if(w>=a[0]&&w<=b[0])return a[1]+(b[1]-a[1])*(w-a[0])/(b[0]-a[0])}}
+
+function setPassengerCount(){
+ const requested=Math.max(0,Math.min(9,Math.round(num("paxRequested"))));
+ $("paxRequested").value=requested;
+
+ const oldPassengers=passengers.slice();
+ passengers=[];
+ for(let i=0;i<requested;i++){
+   const existing=oldPassengers[i];
+   passengers.push(existing?{...existing,id:i+1}:{id:i+1,type:"male",weight:180});
+ }
+ seatAssignments=Array(9).fill(null);
+ passengers.forEach((p,i)=>{seatAssignments[i]=p.id});
+ closePaxEditor();
+ renderSeating();
+ recalculate();
+}
+
+function getPassenger(id){return passengers.find(p=>p.id===id)||null}
+function getUnseatedPassengers(){
+ const seated=new Set(seatAssignments.filter(Boolean));
+ return passengers.filter(p=>!seated.has(p.id));
+}
+function seatForPax(id){return seatAssignments.findIndex(x=>x===id)}
+
+function seatTapped(index){
+ const occupantId=seatAssignments[index];
+ if(occupantId){
+   seatAssignments[index]=null;
+   $("seatActionMessage").textContent=`PAX ${occupantId} removed from Seat ${index+1}. Tap an empty seat to place an unseated passenger.`;
+ }else{
+   const unseated=getUnseatedPassengers();
+   if(!unseated.length){
+     $("seatActionMessage").textContent="No unseated passengers available. Tap an occupied seat first to move someone.";
+     return;
+   }
+   const p=unseated[0];
+   seatAssignments[index]=p.id;
+   $("seatActionMessage").textContent=`PAX ${p.id} placed in Seat ${index+1}.`;
+ }
+ renderSeating();
+ recalculate();
+}
+
+function renderSeating(){
+ const unseated=getUnseatedPassengers();
+ document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>{
+   const i=+btn.dataset.seatIndex;
+   const pid=seatAssignments[i];
+   const p=pid?getPassenger(pid):null;
+   btn.classList.toggle("occupied",!!p);
+   btn.classList.toggle("unseated-target",!p&&unseated.length>0);
+   $("seatOccupant"+i).textContent=p?`PAX ${p.id} • ${paxLabels[p.type]} • ${p.weight} lb`:"EMPTY";
+   btn.setAttribute("aria-label",p?`Seat ${i+1}, Passenger ${p.id}, tap to remove`:`Seat ${i+1}, empty, tap to place passenger`);
+ });
+
+ $("unseatedPool").innerHTML="";
+ if(!unseated.length){
+   $("unseatedPool").innerHTML='<span class="small">None</span>';
+   if(passengers.length) $("seatActionMessage").textContent="All entered passengers are seated.";
+ }else{
+   unseated.forEach(p=>{
+     const chip=document.createElement("span");
+     chip.className="pax-chip";
+     chip.textContent=`PAX ${p.id} • ${p.weight} lb`;
+     $("unseatedPool").appendChild(chip);
+   });
+ }
+
+ $("paxRoster").innerHTML="";
+ passengers.forEach(p=>{
+   const b=document.createElement("button");
+   b.type="button";
+   const si=seatForPax(p.id);
+   if(si<0)b.classList.add("unseated");
+   b.textContent=`PAX ${p.id} • ${paxLabels[p.type]} • ${p.weight} lb${si>=0?` • S${si+1}`:" • UNSEATED"}`;
+   b.addEventListener("click",()=>openPaxEditor(p.id));
+   $("paxRoster").appendChild(b);
+ });
+}
+
+function openPaxEditor(id){
+ const p=getPassenger(id);if(!p)return;
+ editingPaxId=id;
+ $("paxEditorName").textContent=`Passenger ${id}`;
+ $("paxEditorType").value=p.type;
+ $("paxEditorWeight").value=p.weight;
+ $("paxEditor").style.display="block";
+}
+function closePaxEditor(){editingPaxId=null;$("paxEditor").style.display="none"}
+function applyPaxEditor(){
+ const p=getPassenger(editingPaxId);if(!p)return;
+ p.type=$("paxEditorType").value;
+ p.weight=Math.max(1,+$("paxEditorWeight").value||paxDefaults[p.type]);
+ renderSeating();recalculate();closePaxEditor();
+}
+function distributeBaggage(total){
+ let remaining=Math.max(0,total),out=[];
+ baggageStations.forEach(s=>{const load=Math.min(remaining,s.limit);out.push({...s,load});remaining-=load});
+ return{stations:out,overflow:remaining};
+}
+function draw(w,cg){
+ const c=$("cgChart");if(!c)return;
+ const dpr=devicePixelRatio||1,W=c.clientWidth,H=300;c.width=W*dpr;c.height=H*dpr;
+ const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
+ const minW=18000,maxW=41000,minCG=10,maxCG=35,px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>H-35-(v-minW)/(maxW-minW)*(H-60);
+ x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
+ for(let ww=20000;ww<=40000;ww+=5000){x.fillText(ww.toLocaleString(),4,py(ww)+4);x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke()}
+ x.strokeStyle="#ffca58";x.lineWidth=2;x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
+ x.strokeStyle="#55d18b";x.beginPath();aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
+ x.fillStyle="#edf5ff";x.beginPath();x.arc(px(cg),py(w),6,0,Math.PI*2);x.fill();
+}
+function updateVSpeedCard(tow,landing){
+ $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";
+ $("vsLDW").textContent=Math.round(landing).toLocaleString()+" lb";
+ const v1=valueOrNull("perfV1"),vr=valueOrNull("perfVR"),vref=valueOrNull("landVref");
+ $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";
+ $("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";
+ $("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
+}
+function recalculate(){
+ const requested=passengers.length;
+ const seatedCount=seatAssignments.filter(Boolean).length;
+ const unseated=requested-seatedCount;
+ const capt=num("captWt"),fo=num("foWt"),crew=capt+fo,bag=Math.max(0,num("totalBag"));
+ let fob=Math.min(maxFuel,Math.max(0,num("fuel")));$("fuel").value=fob;
+ let missionFuel=Math.min(maxFuel,Math.max(0,num("missionFuel")));$("missionFuel").value=missionFuel;
+ const taxi=Math.max(0,num("taxiFuel"));
+
+ let w=emptyWeight,m=emptyMoment,paxWeight=0,loadRows=[];
+ w+=crew;m+=crew*(-275.88);
+ loadRows.push({name:"Flight Deck",desc:"Captain + First Officer",arm:-275.88,load:crew,moment:crew*(-275.88)});
+
+ seats.forEach((s,i)=>{
+   const pid=seatAssignments[i],p=pid?getPassenger(pid):null,load=p?p.weight:0;
+   paxWeight+=load;w+=load;m+=load*s.arm;
+   loadRows.push({name:`Seat ${s.n}`,desc:p?`PAX ${p.id} — ${paxLabels[p.type]}`:"Empty",arm:s.arm,load,moment:load*s.arm});
+ });
+
+ const bd=distributeBaggage(bag);
+ bd.stations.forEach(s=>{w+=s.load;m+=s.load*s.arm;loadRows.push({name:s.name,desc:"Baggage",arm:s.arm,load:s.load,moment:s.load*s.arm})});
+
+ const zfw=w,arm=m/w,pct=pctMacFromArm(arm),fl=interp(fwd,w),al=interp(aft,w);
+ const ramp=zfw+fob,tow=ramp-taxi,landingFuel=Math.max(0,fob-missionFuel),landing=zfw+landingFuel,reserve=fob-missionFuel;
+ const seatMatch=requested===seatedCount,fuelOK=reserve>=0;
+ const wbOK=seatMatch&&pct>=fl&&pct<=al&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
+
+ $("paxRequestedDisplay").textContent=requested;
+ $("paxSeatedDisplay").textContent=seatedCount;
+ $("paxUnseatedDisplay").textContent=unseated;
+ $("seatCheck").textContent=seatMatch?"MATCH":"MISMATCH";
+ $("seatCheck").className=seatMatch?"ok":"bad";
+ $("seatMismatch").style.display=seatMatch?"none":"block";
+
+ $("crewCalc").textContent=crew.toLocaleString()+" lb";
+ $("paxCalc").textContent=paxWeight.toLocaleString()+" lb";
+ $("bagCalc").textContent=bag.toLocaleString()+" lb";
+ $("fuelCalc").textContent=fob.toLocaleString()+" lb";
+ $("missionFuelCalc").textContent=missionFuel.toLocaleString()+" lb";
+ $("landingFuelCalc").textContent=landingFuel.toLocaleString()+" lb";
+ $("fuelReserveCalc").textContent=reserve.toLocaleString()+" lb";
+ $("zfw").textContent=Math.round(zfw).toLocaleString()+" lb";
+ $("rampWt").textContent=Math.round(ramp).toLocaleString()+" lb";
+ $("takeoffWt").textContent=Math.round(tow).toLocaleString()+" lb";
+ $("landingWt").textContent=Math.round(landing).toLocaleString()+" lb";
+ $("cgarm").textContent=arm.toFixed(2)+'"';
+ $("cgmac").textContent=pct.toFixed(2)+"%";
+ $("cgLimits").textContent=`${fl.toFixed(2)}–${al.toFixed(2)}%`;
+
+ const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS");env.className=wbOK?"ok":"bad";
+ $("limZFW").textContent=`${Math.round(zfw).toLocaleString()} / ${maxZFW.toLocaleString()} lb`;
+ $("limRamp").textContent=`${Math.round(ramp).toLocaleString()} / ${maxRamp.toLocaleString()} lb`;
+ $("limTO").textContent=`${Math.round(tow).toLocaleString()} / ${maxTO.toLocaleString()} lb`;
+ $("limLand").textContent=`${Math.round(landing).toLocaleString()} / ${maxLand.toLocaleString()} lb`;
+ $("sumPax").textContent=`${seatedCount} / ${requested}`;
+ $("sumFuel").textContent=fob.toLocaleString()+" lb";
+ $("sumMissionFuel").textContent=missionFuel.toLocaleString()+" lb";
+ $("sideFOB").textContent=fob.toLocaleString()+" lb";$("sideMission").textContent=missionFuel.toLocaleString()+" lb";
+ $("sideTaxi").textContent=taxi.toLocaleString()+" lb";$("sideLanding").textContent=landingFuel.toLocaleString()+" lb";
+ $("sideReserve").textContent=reserve.toLocaleString()+" lb";
+ const fs=$("fuelStatusSide");fs.textContent=fuelOK?"SUFFICIENT":"INSUFFICIENT";fs.className=fuelOK?"ok":"bad";
+
+ const tb=$("autoLoadTable");tb.innerHTML="";
+ loadRows.forEach(r=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${r.name}</td><td>${r.desc}</td><td>${r.arm.toFixed(2)} in</td><td>${Math.round(r.load).toLocaleString()} lb</td><td>${Math.round(r.moment).toLocaleString()}</td>`;tb.appendChild(tr)});
+ if(bd.overflow>0){const tr=document.createElement("tr");tr.innerHTML=`<td class="bad"><b>BAGGAGE OVERFLOW</b></td><td>Over approved compartments</td><td>—</td><td class="bad">${Math.round(bd.overflow)} lb</td><td>—</td>`;tb.appendChild(tr)}
+
+ $("perfTOW").value=Math.round(tow);$("landWt").value=Math.round(landing);
+ updateVSpeedCard(tow,landing);draw(zfw,pct);selectedRunwayChanged();
+}
+function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
+function populatePoint(prefix,x){
+ $(prefix+"Airport").textContent=`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
+ $(prefix+"PA").textContent=esc(x.pressure_altitude_ft)+" ft";$(prefix+"DA").textContent=esc(x.density_altitude_ft)+" ft";
+ $(prefix+"Metar").textContent=esc((x.metar||{}).raw);$(prefix+"Taf").textContent=esc((x.taf||{}).raw);
+}
+function fillRunwaySelect(id,runways){
+ const sel=$(id);sel.innerHTML="";
+ if(!runways||!runways.length){sel.innerHTML='<option value="">No runway data</option>';return}
+ runways.forEach((rw,i)=>{const opt=document.createElement("option");opt.value=i;const wc=rw.wind_components||{},wind=wc.headwind_kt!=null?` • HW ${wc.headwind_kt} / TW ${wc.tailwind_kt} / XW ${wc.crosswind_kt}`:"";opt.textContent=`${rw.runway_id} • ${esc(rw.length_ft)} ft${wind}`;sel.appendChild(opt)});
+}
+function selectedRunwayChanged(){
+ if(!missionData)return;
+ const depRw=(missionData.departure.runways||[])[+$("depRunway").value],destRw=(missionData.destination.runways||[])[+$("destRunway").value];
+ if(depRw){$("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;const w=depRw.wind_components||{};$("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDepRwy").textContent=depRw.runway_id;$("perfRwyLen").value=depRw.length_ft||""}
+ if(destRw){$("destRwySummary").textContent=`RWY ${destRw.runway_id} • ${esc(destRw.length_ft)} ft`;const w=destRw.wind_components||{};$("destWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDestRwy").textContent=destRw.runway_id;$("landRwyLen").value=destRw.length_ft||""}
+}
+async function loadMission(){
+ const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim();$("dep").value=dep;$("dest").value=dest;$("missionStatus").textContent="Loading airport and weather data...";
+ try{
+   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}`));if(!r.ok)throw new Error(await r.text());missionData=await r.json();
+   $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;
+   populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
+   const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
+   $("sumWX").textContent="LIVE";$("sumWX").className="ok";$("sumFAA").textContent=(missionData.departure.runways||[]).length?"LOADED":"NO RUNWAY DATA";$("sumFAA").className=(missionData.departure.runways||[]).length?"ok":"warn";
+   $("missionStatus").innerHTML='<span class="ok">Mission loaded.</span>';selectedRunwayChanged();recalculate();
+ }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
+}
+function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
+async function evaluateTakeoff(){
+ const obs=$("perfObs").value,body={runway_length_ft:valueOrNull("perfRwyLen"),actual_takeoff_weight_lb:valueOrNull("perfTOW"),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),second_segment_net_gradient_pct:valueOrNull("perfGrad"),obstacle_clearance_verified:obs===""?null:(obs==="true")};
+ const r=await fetch(apiUrl("/api/performance/takeoff"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
+ $("toMax").textContent=j.max_allowable_takeoff_weight_lb.toLocaleString()+" lb";$("toStatus").textContent=j.status;$("toStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";$("toLimit").textContent=j.limiting_factor;$("toWtMargin").textContent=j.weight_margin_lb.toLocaleString()+" lb";$("toRwyMargin").textContent=j.runway_margin_ft==null?"—":j.runway_margin_ft.toLocaleString()+" ft";$("toSpeeds").textContent=`V1 ${j.v1_kt??"—"} / VR ${j.vr_v2_kt??"—"} kt`;updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+}
+async function evaluateLanding(){
+ const body={runway_length_ft:valueOrNull("landRwyLen"),actual_landing_weight_lb:valueOrNull("landWt"),climb_limited_weight_lb:valueOrNull("landClimbWt"),landing_field_length_ft:valueOrNull("landFieldLen"),vref_kt:valueOrNull("landVref")};
+ const r=await fetch(apiUrl("/api/performance/landing"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();$("landMax").textContent=j.max_allowable_landing_weight_lb.toLocaleString()+" lb";$("landStatus").textContent=j.status;$("landStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+}
+
+async function continueToResults(){
+ const requested=passengers.length;
+ const seated=seatAssignments.filter(Boolean).length;
+
+ if(requested!==seated){
+   $("seatActionMessage").textContent=`Seat assignment incomplete: ${seated} seated / ${requested} entered.`;
+   $("seatMismatch").style.display="block";
+   $("seatCheck").textContent="MISMATCH";
+   $("seatCheck").className="bad";
+   $("seatMismatch").scrollIntoView({behavior:"smooth",block:"center"});
+   return;
+ }
+
+ const btn=$("continueResultsBtn");
+ const old=btn.textContent;
+ btn.disabled=true;
+ btn.textContent="Refreshing Mission…";
+
+ try{
+   await loadMission();
+   recalculate();
+   const target=$("missionResultsStart");
+   if(target) target.scrollIntoView({behavior:"smooth",block:"start"});
+ }finally{
+   btn.disabled=false;
+   btn.textContent=old;
+ }
+}
+
+async function startupCheck(){
+ try{const r=await fetch(apiUrl("/api/diagnostics")),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
+}
+
+document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
+$("paxRequested").addEventListener("change",setPassengerCount);
+$("paxRequested").addEventListener("blur",setPassengerCount);
+$("paxEditorType").addEventListener("change",e=>$("paxEditorWeight").value=paxDefaults[e.target.value]);
+$("applyPaxEditor").addEventListener("click",applyPaxEditor);
+$("closePaxEditor").addEventListener("click",closePaxEditor);
+$("continueResultsBtn").addEventListener("click",continueToResults);
+["captWt","foWt","totalBag","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref"].forEach(id=>$(id).addEventListener("input",recalculate));
+
+setPassengerCount();
+startupCheck();
+addEventListener("resize",recalculate);
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+}
+</script>
+</body></html>

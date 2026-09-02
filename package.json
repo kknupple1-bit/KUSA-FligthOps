@@ -1,0 +1,15 @@
+{
+  "name": "kusa-flightops",
+  "version": "2.3.0",
+  "private": true,
+  "main": "server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "4.21.2"
+  }
+}

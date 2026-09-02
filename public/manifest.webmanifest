@@ -1,0 +1,9 @@
+{
+  "name": "KUSA FlightOps",
+  "short_name": "FlightOps",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#071b33",
+  "theme_color": "#071b33",
+  "description": "KUSA FlightOps mission, W&B and Falcon 50-4 performance application."
+}
