@@ -82,6 +82,15 @@ canvas{width:100%;height:300px;background:#06182c;border-radius:10px}
 .section2-continue button{width:auto;min-width:240px;font-size:15px;font-weight:800;padding:12px 16px}
 @media(max-width:650px){.section2-continue{flex-direction:column;align-items:stretch}.section2-continue button{width:100%;min-width:0}}
 
+
+.weather-decode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.decoded-weather{min-height:120px}
+.decoded-text{font-size:13px;line-height:1.55;margin-top:6px;white-space:normal}
+.decoded-line{padding:2px 0}
+.decoded-period{padding:7px 0;border-top:1px solid rgba(255,255,255,.10)}
+.decoded-period:first-child{border-top:0}
+details summary{cursor:pointer;margin-top:8px}
+@media(max-width:800px){.weather-decode-grid{grid-template-columns:1fr}}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
@@ -229,13 +238,28 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="wx"><div class="small">Pressure Altitude</div><b id="destPA">—</b></div>
 <div class="wx"><div class="small">Density Altitude</div><b id="destDA">—</b></div>
 </div>
-<table style="margin-top:12px">
-<thead><tr><th></th><th>METAR</th><th>TAF</th></tr></thead>
-<tbody>
-<tr><td>Origin</td><td class="raw" id="depMetar">—</td><td class="raw" id="depTaf">—</td></tr>
-<tr><td>Destination</td><td class="raw" id="destMetar">—</td><td class="raw" id="destTaf">—</td></tr>
-</tbody>
-</table>
+<div class="weather-decode-grid" style="margin-top:14px">
+  <div class="wx decoded-weather">
+    <div class="small">Origin — Decoded METAR</div>
+    <div id="depMetar" class="decoded-text">—</div>
+    <details><summary class="small">Raw METAR</summary><div class="raw small" id="depMetarRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather">
+    <div class="small">Origin — Decoded TAF</div>
+    <div id="depTaf" class="decoded-text">—</div>
+    <details><summary class="small">Raw TAF</summary><div class="raw small" id="depTafRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather">
+    <div class="small">Destination — Decoded METAR</div>
+    <div id="destMetar" class="decoded-text">—</div>
+    <details><summary class="small">Raw METAR</summary><div class="raw small" id="destMetarRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather">
+    <div class="small">Destination — Decoded TAF</div>
+    <div id="destTaf" class="decoded-text">—</div>
+    <details><summary class="small">Raw TAF</summary><div class="raw small" id="destTafRaw">—</div></details>
+  </div>
+</div>
 </div>
 
 <div class="card">
@@ -706,13 +730,94 @@ function recalculate(){
  if(bd.overflow>0){const tr=document.createElement("tr");tr.innerHTML=`<td class="bad"><b>BAGGAGE OVERFLOW</b></td><td>Over approved compartments</td><td>—</td><td class="bad">${Math.round(bd.overflow)} lb</td><td>—</td>`;tb.appendChild(tr)}
 
  $("perfTOW").value=Math.round(tow);$("landWt").value=Math.round(landing);
- updateVSpeedCard(tow,landing);draw(zfw,pct);selectedRunwayChanged();
+ selectedRunwayChanged();
+ if(missionData){
+   const toAuto=autoTO();
+   const ldAuto=autoLDG();
+   if(toAuto.ok){
+     $("toSpeeds").textContent=`V1 ${toAuto.v1.toFixed(1)} / VR=V2 ${toAuto.vr.toFixed(1)} kt • BFL ${Math.round(toAuto.bfl).toLocaleString()} ft`;
+     $("toLimit").textContent=`AUTO TABLE • ${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5`;
+   }else{
+     $("perfV1").value="";$("perfVR").value="";$("perfBFL").value="";
+     $("toSpeeds").textContent="—";
+     $("toLimit").textContent=toAuto.msg;
+   }
+   if(!ldAuto.ok){$("landVref").value="";$("landFieldLen").value="";}
+ }
+ updateVSpeedCard(tow,landing);
+ draw(zfw,pct);
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
+function fmtUtc(v){
+ if(!v)return "time unavailable";
+ const d=new Date(v);
+ if(Number.isNaN(d.getTime()))return String(v);
+ return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"});
+}
+function windText(dir,spd,gust){
+ const s=Number(spd);
+ if(!Number.isFinite(s)||s===0)return "Wind calm";
+ const d=(dir==null||dir==="VRB"||Number(dir)===0)?"variable":`${String(Math.round(Number(dir))).padStart(3,"0")}°`;
+ return `Wind ${d} at ${Math.round(s)} kt${Number(gust)>0?`, gusting ${Math.round(Number(gust))} kt`:""}`;
+}
+function cloudText(clouds){
+ if(!Array.isArray(clouds)||!clouds.length)return "Clouds not reported";
+ const names={SKC:"clear",CLR:"clear",FEW:"few",SCT:"scattered",BKN:"broken",OVC:"overcast",VV:"vertical visibility"};
+ return clouds.map(c=>{
+   const cov=c.cover||c.coverage||c.skyCover||"";
+   const base=c.base!=null?c.base:c.base_ft_agl;
+   const label=names[String(cov).toUpperCase()]||String(cov).toLowerCase();
+   return base!=null?`${label} at ${Number(base).toLocaleString()} ft AGL`:label;
+ }).join(", ");
+}
+function visibilityText(v){
+ if(v==null||v==="")return "Visibility not reported";
+ const n=Number(v);
+ return Number.isFinite(n)?`Visibility ${n} statute mile${n===1?"":"s"}`:`Visibility ${v}`;
+}
+function formatMetarDecoded(m,altInHg){
+ if(!m)return '<span class="warn">METAR unavailable</span>';
+ const lines=[];
+ lines.push(`<div class="decoded-line"><b>${m.flight_category||"METAR"}</b> • observed ${fmtUtc(m.obs_time)}</div>`);
+ lines.push(`<div class="decoded-line">${windText(m.wind_dir,m.wind_kt,m.wind_gust_kt)}</div>`);
+ lines.push(`<div class="decoded-line">${visibilityText(m.visibility_sm)}</div>`);
+ if(m.wx)lines.push(`<div class="decoded-line">Weather: ${m.wx}</div>`);
+ lines.push(`<div class="decoded-line">${cloudText(m.clouds)}</div>`);
+ const t=Number(m.temp_c),d=Number(m.dewpoint_c);
+ if(Number.isFinite(t)||Number.isFinite(d))lines.push(`<div class="decoded-line">Temperature ${Number.isFinite(t)?t+"°C":"—"} • Dew point ${Number.isFinite(d)?d+"°C":"—"}</div>`);
+ if(altInHg!=null)lines.push(`<div class="decoded-line">Altimeter ${Number(altInHg).toFixed(2)} inHg</div>`);
+ return lines.join("");
+}
+function fcstWind(f){return windText(f.wdir??f.wind_dir??f.windDir,f.wspd??f.wind_kt??f.windSpeed,f.wgst??f.wind_gust_kt??f.windGust)}
+function formatTafDecoded(t){
+ if(!t)return '<span class="warn">TAF unavailable</span>';
+ const head=`<div class="decoded-line"><b>Valid</b> ${fmtUtc(t.valid_from)} to ${fmtUtc(t.valid_to)}</div>`;
+ const fc=Array.isArray(t.forecast)?t.forecast:[];
+ if(!fc.length)return head+'<div class="decoded-line">Forecast periods not available in decoded feed.</div>';
+ const periods=fc.map(f=>{
+   const from=f.timeFrom??f.validTimeFrom??f.valid_from??f.fcstTimeFrom;
+   const to=f.timeTo??f.validTimeTo??f.valid_to??f.fcstTimeTo;
+   const change=f.changeIndicator??f.change_indicator??f.fcstChange??f.change||"Forecast";
+   const vis=f.visib??f.visibility??f.visibility_sm;
+   const wx=f.wxString??f.wx??f.weather;
+   const clouds=f.clouds||f.sky||[];
+   const bits=[fcstWind(f),visibilityText(vis)];
+   if(wx)bits.push(`Weather: ${wx}`);
+   bits.push(cloudText(clouds));
+   return `<div class="decoded-period"><b>${change}</b> • ${fmtUtc(from)} to ${fmtUtc(to)}<br>${bits.join(" • ")}</div>`;
+ }).join("");
+ return head+periods;
+}
+
 function populatePoint(prefix,x){
  $(prefix+"Airport").textContent=`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
- $(prefix+"PA").textContent=esc(x.pressure_altitude_ft)+" ft";$(prefix+"DA").textContent=esc(x.density_altitude_ft)+" ft";
- $(prefix+"Metar").textContent=esc((x.metar||{}).raw);$(prefix+"Taf").textContent=esc((x.taf||{}).raw);
+ $(prefix+"PA").textContent=esc(x.pressure_altitude_ft)+" ft";
+ $(prefix+"DA").textContent=esc(x.density_altitude_ft)+" ft";
+ $(prefix+"Metar").innerHTML=formatMetarDecoded(x.metar,x.altimeter_inhg);
+ $(prefix+"Taf").innerHTML=formatTafDecoded(x.taf);
+ const mr=$(prefix+"MetarRaw"),tr=$(prefix+"TafRaw");
+ if(mr)mr.textContent=esc((x.metar||{}).raw);
+ if(tr)tr.textContent=esc((x.taf||{}).raw);
 }
 function fillRunwaySelect(id,runways){
  const sel=$(id);sel.innerHTML="";
@@ -724,6 +829,10 @@ function selectedRunwayChanged(){
  const depRw=(missionData.departure.runways||[])[+$("depRunway").value],destRw=(missionData.destination.runways||[])[+$("destRunway").value];
  if(depRw){$("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;const w=depRw.wind_components||{};$("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDepRwy").textContent=depRw.runway_id;$("perfRwyLen").value=depRw.length_ft||""}
  if(destRw){$("destRwySummary").textContent=`RWY ${destRw.runway_id} • ${esc(destRw.length_ft)} ft`;const w=destRw.wind_components||{};$("destWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDestRwy").textContent=destRw.runway_id;$("landRwyLen").value=destRw.length_ft||""}
+ if(valueOrNull("perfTOW")){
+   autoTO(); autoLDG();
+   updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+ }
 }
 async function loadMission(){
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim();$("dep").value=dep;$("dest").value=dest;$("missionStatus").textContent="Loading airport and weather data...";

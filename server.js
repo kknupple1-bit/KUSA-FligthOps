@@ -14,7 +14,7 @@ const pressureAlt=(e,a)=>e==null||a==null?null:Number(e)+(29.92-Number(a))*1000;
 function densityAlt(pa,t){if(pa==null||t==null)return null;const isa=15-1.98*(Number(pa)/1000);return Number(pa)+120*(Number(t)-isa);}
 function windComponents(h,d,s){if(h==null||d==null||s==null)return null;const a=(Number(d)-Number(h))*Math.PI/180,head=Math.cos(a)*Number(s),cross=Math.sin(a)*Number(s);return{headwind_kt:Math.round(Math.max(head,0)*10)/10,tailwind_kt:Math.round(Math.max(-head,0)*10)/10,crosswind_kt:Math.round(Math.abs(cross)*10)/10};}
 async function awc(name,params){const u=new URL(`${AWC}/${name}`);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u,{headers:{"Accept":"application/json","User-Agent":"KUSA-FlightOps/2.1"}});if(r.status===204)return null;if(!r.ok)throw new Error(`AWC ${name}: ${r.status}`);return await r.json();}
-function normMetar(m){if(!m)return null;return{icao:m.icaoId,raw:m.rawOb,obs_time:m.reportTime||m.obsTime,temp_c:m.temp,dewpoint_c:m.dewp,wind_dir:m.wdir,wind_kt:m.wspd,wind_gust_kt:m.wgst,visibility_sm:m.visib,altimeter_hpa:m.altim,flight_category:m.fltCat,clouds:m.clouds};}
+function normMetar(m){if(!m)return null;return{icao:m.icaoId,raw:m.rawOb,obs_time:m.reportTime||m.obsTime,temp_c:m.temp,dewpoint_c:m.dewp,wind_dir:m.wdir,wind_kt:m.wspd,wind_gust_kt:m.wgst,visibility_sm:m.visib,altimeter_hpa:m.altim,flight_category:m.fltCat,wx:m.wxString||m.wx||null,clouds:m.clouds};}
 function normTaf(t){if(!t)return null;return{icao:t.icaoId,raw:t.rawTAF,issue_time:t.issueTime,valid_from:t.validTimeFrom,valid_to:t.validTimeTo,forecast:t.fcsts};}
 
 let runwayDb={};
