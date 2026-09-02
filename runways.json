@@ -1,0 +1,48 @@
+{
+  "KBPT": {
+    "airport": {
+      "ident": "KBPT",
+      "name": "Jack Brooks Regional Airport",
+      "elevation_ft": 15
+    },
+    "runways": [
+      {
+        "runway_id": "12/30",
+        "length_ft": 6750,
+        "width_ft": 150,
+        "surface": "Asphalt",
+        "heading": 120
+      },
+      {
+        "runway_id": "16/34",
+        "length_ft": 5070,
+        "width_ft": 150,
+        "surface": "Asphalt",
+        "heading": 160
+      }
+    ]
+  },
+  "KDAL": {
+    "airport": {
+      "ident": "KDAL",
+      "name": "Dallas Love Field",
+      "elevation_ft": 487
+    },
+    "runways": [
+      {
+        "runway_id": "13L/31R",
+        "length_ft": 7752,
+        "width_ft": 150,
+        "surface": "Concrete",
+        "heading": 130
+      },
+      {
+        "runway_id": "13R/31L",
+        "length_ft": 8800,
+        "width_ft": 150,
+        "surface": "Concrete",
+        "heading": 130
+      }
+    ]
+  }
+}

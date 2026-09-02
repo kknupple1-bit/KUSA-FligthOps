@@ -1,18 +1,6 @@
-KUSA FLIGHTOPS v2.3 — GODADDY NODE.JS
-
-WORKFLOW UPDATE
-- Section 1 keeps Load / Refresh Mission for early airport/weather/runway loading.
-- Section 2 now ends with Continue to Mission Results.
-- The Section 2 button first checks PAX Entered vs PAX Seated.
-- If seating is incomplete, the pilot stays in Section 2 and receives a mismatch warning.
-- If seating matches, FlightOps refreshes the mission/weather/runway data, recalculates W&B, and scrolls directly to Mission Results.
-
-SECTION 2 SEATING
-- Tap occupied seat: move passenger to Unseated PAX.
-- Tap empty seat: place next unseated passenger.
-- Passenger identity/type/weight move with the passenger.
-- PAX entered must equal PAX seated before continuing.
-
-UPLOAD THIS ZIP DIRECTLY TO GODADDY NODE.JS HOSTING AS THE NEXT VERSION.
-
-DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
+KUSA FlightOps v2.4 Auto Performance
+Primary working performance source: FlightSafety International Falcon 50 Pilot Checklist Rev 8.4.
+Digitized: P-2/P-3 S+20 takeoff V1/BFL and VR=V2; P-4/P-5 Slats Only takeoff where published table cells were legible; P-18/P-19 S+48 landing; P-20/P-21 S+20 landing.
+No extrapolation. Unsupported conditions display SOURCE LOCKED.
+FlightSafety material is FOR TRAINING PURPOSES ONLY; FAA-approved AFM takes precedence.
+Development / Not for Flight Use.
