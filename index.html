@@ -91,6 +91,115 @@ canvas{width:100%;height:300px;background:#06182c;border-radius:10px}
 .decoded-period:first-child{border-top:0}
 details summary{cursor:pointer;margin-top:8px}
 @media(max-width:800px){.weather-decode-grid{grid-template-columns:1fr}}
+
+.floorplan-cabin{
+  position:relative;
+  max-width:1080px;
+  margin:0 auto;
+  padding:56px 34px 40px;
+  min-height:420px;
+  background:#081d34;
+  border:2px solid #3d6287;
+  border-radius:24px;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns: 82px 150px 36px 150px 165px 150px 36px 150px 96px;
+  grid-template-rows: 34px 84px 84px 84px 84px;
+  gap:14px 10px;
+  align-items:center;
+}
+.cabin-titlebar{
+  position:absolute; top:10px; left:0; right:0; text-align:center;
+  font-size:12px; letter-spacing:.14em; font-weight:800; color:var(--muted);
+}
+.cabin-side-label{
+  position:absolute; top:36px; font-size:10px; letter-spacing:.15em; color:var(--muted); font-weight:700;
+}
+.left-side{ left:42px; }
+.right-side{ right:42px; }
+.floor-centerline{
+  position:absolute; top:46px; bottom:24px; left:50%;
+  border-left:2px dashed #31506f; opacity:.75;
+}
+.zone{
+  border:1px dashed #31506f;
+  border-radius:12px;
+  padding:10px 8px;
+  text-align:center;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+  background:#0a223c;
+}
+.closet-zone{ grid-column:1; grid-row:1 / span 1; align-self:start; }
+.galley-zone{ grid-column:1; grid-row:2 / span 2; }
+.exit-zone{ grid-column:5; grid-row:2; }
+.lav-zone{ grid-column:9; grid-row:4; }
+.airstair-zone{ grid-column:9; grid-row:5; }
+.slot{ position:relative; z-index:2; }
+.s2{ grid-column:2; grid-row:2; }
+.s1{ grid-column:8; grid-row:2; }
+.s4{ grid-column:2; grid-row:3; }
+.s3{ grid-column:8; grid-row:3; }
+.s5{ grid-column:2; grid-row:4; }
+.lounge-block{
+  grid-column:6 / span 3; grid-row:4 / span 1;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:8px;
+  position:relative;
+  border:1px solid #31506f;
+  border-radius:16px;
+  padding:24px 10px 10px;
+  background:#0a223c;
+}
+.lounge-label{
+  position:absolute; top:7px; left:0; right:0;
+  text-align:center; font-size:10px; letter-spacing:.12em; color:var(--muted); font-weight:800;
+}
+.s6,.s7,.s8{ grid-column:auto; grid-row:auto; }
+.s9{ grid-column:2; grid-row:5; }
+.tap-seat{
+  min-height:82px;
+  border:2px solid #42688e;
+  border-radius:18px 18px 10px 10px;
+  background:#102f51;
+  color:var(--text);
+  padding:9px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  width:100%;
+}
+.tap-seat.occupied{ background:#113f48; border-color:var(--ok); }
+.tap-seat.unseated-target{ border-style:dashed; }
+.seat-number{ font-size:22px; font-weight:800; line-height:1; }
+.seat-name{ font-size:11px; color:var(--muted); }
+.seat-occupant{ font-size:11px; font-weight:700; margin-top:3px; text-align:center; }
+@media(max-width:980px){
+  .floorplan-cabin{
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows:auto;
+    grid-template-rows:none;
+    min-height:unset;
+    padding:56px 18px 24px;
+  }
+  .cabin-side-label,.floor-centerline{ display:none; }
+  .closet-zone,.galley-zone,.exit-zone,.lav-zone,.airstair-zone,
+  .s2,.s1,.s4,.s3,.s5,.s9,.lounge-block{
+    grid-column:auto !important; grid-row:auto !important;
+  }
+  .lounge-block{ grid-template-columns:repeat(3,1fr); }
+}
+@media(max-width:640px){
+  .floorplan-cabin{ grid-template-columns:1fr; }
+  .lounge-block{ grid-template-columns:1fr; }
+}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
@@ -144,37 +253,37 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
 <div class="small"><b>Passenger defaults:</b> Adult Male 180 lb • Adult Female 150 lb • Child 70 lb. Tap a passenger in the roster below to change type or actual weight.</div>
 </div>
 
-<div class="n33ap-cabin">
-<div class="cabin-nose">FLIGHT DECK</div>
-<div class="cabin-aisle"></div>
+<div class="n33ap-cabin floorplan-cabin">
+  <div class="cabin-titlebar">N33AP CABIN LAYOUT</div>
 
-<div class="cabin-row cabin-row-1">
-<button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Row 1 LH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button>
-<button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Row 1 RH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button>
-</div>
+  <div class="cabin-side-label left-side">LEFT SIDE</div>
+  <div class="cabin-side-label right-side">RIGHT SIDE</div>
 
-<div class="cabin-row cabin-row-2">
-<button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Row 2 LH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button>
-<button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Row 2 RH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button>
-</div>
+  <div class="zone galley-zone">GALLEY / ENTRY</div>
+  <div class="zone closet-zone">CLOSET</div>
+  <div class="zone exit-zone">EMERGENCY EXIT</div>
+  <div class="zone lav-zone">LAV</div>
+  <div class="zone airstair-zone">AIRSTAIR ACCESS / AFT AREA</div>
 
-<div class="cabin-row cabin-row-single">
-<button type="button" class="tap-seat single-seat-position" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Single Seat</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button>
-<div class="cabin-fixture">CABIN / AISLE</div>
-</div>
+  <div class="floor-centerline"></div>
 
-<div class="aft-lounge-box">
-<div class="aft-lounge-label">AFT LOUNGE</div>
-<div class="aft-lounge-grid">
-<button type="button" class="tap-seat lounge-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Lounge</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button>
-<button type="button" class="tap-seat lounge-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Lounge</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button>
-<button type="button" class="tap-seat lounge-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Aft Divan</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button>
-<button type="button" class="tap-seat lounge-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft Divan</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button>
-</div>
-</div>
+  <div class="seat slot s2"><button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Forward LH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button></div>
+  <div class="seat slot s1"><button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Forward RH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button></div>
 
-<div class="cabin-tail">AFT CABIN / BAGGAGE</div>
-</div>
+  <div class="seat slot s4"><button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Mid LH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button></div>
+  <div class="seat slot s3"><button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Mid RH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button></div>
+
+  <div class="seat slot s5"><button type="button" class="tap-seat" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Single LH</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button></div>
+
+  <div class="lounge-block">
+    <div class="lounge-label">AFT LOUNGE / DIVAN</div>
+    <div class="seat slot s6"><button type="button" class="tap-seat lounge-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Divan</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button></div>
+    <div class="seat slot s7"><button type="button" class="tap-seat lounge-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Divan</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button></div>
+    <div class="seat slot s8"><button type="button" class="tap-seat lounge-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Divan</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button></div>
+  </div>
+
+  <div class="seat slot s9"><button type="button" class="tap-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft LH</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button></div>
+</div></div>
 
 <div class="seat-assignment-footer">
 <div class="unseated-box">
@@ -225,7 +334,7 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <section>
 
 <div class="card">
-<h2>3. Mission Results</h2>
+<h2>3. Mission Results — Decoded Weather</h2>
 <div class="row">
 <div class="wx"><div class="small">Origin</div><b id="depTitle">KBPT</b><div id="depAirport" class="small"></div></div>
 <div class="wx"><div class="small">Departure Runway</div><b id="depRwySummary">—</b><div id="depWindSummary" class="small"></div></div>
@@ -238,6 +347,7 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="wx"><div class="small">Pressure Altitude</div><b id="destPA">—</b></div>
 <div class="wx"><div class="small">Density Altitude</div><b id="destDA">—</b></div>
 </div>
+<div class="small" id="weatherDecodeStatus" style="margin-top:12px">Decoded METAR/TAF will populate after Load / Refresh Mission.</div>
 <div class="weather-decode-grid" style="margin-top:14px">
   <div class="wx decoded-weather">
     <div class="small">Origin — Decoded METAR</div>
@@ -309,7 +419,7 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 <div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-V1, VR and VREF are chart-derived performance speeds and will populate automatically when the validated Falcon 50-4 performance curves are loaded. VFT and VFS are included in the card but remain locked until their exact N33AP/Falcon 50-4 definitions and source tables are identified.
+<b>Automatic working data:</b> V1 and VR=V2 are interpolated from the digitized FlightSafety takeoff tables; VREF is interpolated from the digitized landing tables when mission conditions are inside the published ranges. VFT and VFS remain source-locked pending an identified approved source. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 </div>
 
@@ -662,6 +772,12 @@ function updateVSpeedCard(tow,landing){
  $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";
  $("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";
  $("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
+ $("vsV1src").textContent=v1==null?"Outside table / mission data required":"FlightSafety P-2–P-5";
+ $("vsVRsrc").textContent=vr==null?"Outside table / mission data required":"FlightSafety P-2–P-5";
+ $("vsVREFsrc").textContent=vref==null?"Outside table / mission data required":"FlightSafety P-18–P-21";
+ const have=v1!=null&&vr!=null&&vref!=null;
+ $("vsStatus").textContent=have?"AUTO TABLE DATA":"SOURCE LOCKED";
+ $("vsStatus").className=have?"ok":"warn";
 }
 function recalculate(){
  const requested=passengers.length;
@@ -797,7 +913,7 @@ function formatTafDecoded(t){
  const periods=fc.map(f=>{
    const from=f.timeFrom??f.validTimeFrom??f.valid_from??f.fcstTimeFrom;
    const to=f.timeTo??f.validTimeTo??f.valid_to??f.fcstTimeTo;
-   const change=f.changeIndicator??f.change_indicator??f.fcstChange??f.change||"Forecast";
+   const change=(f.changeIndicator??f.change_indicator??f.fcstChange??f.change??"Forecast");
    const vis=f.visib??f.visibility??f.visibility_sm;
    const wx=f.wxString??f.wx??f.weather;
    const clouds=f.clouds||f.sky||[];
@@ -818,6 +934,7 @@ function populatePoint(prefix,x){
  const mr=$(prefix+"MetarRaw"),tr=$(prefix+"TafRaw");
  if(mr)mr.textContent=esc((x.metar||{}).raw);
  if(tr)tr.textContent=esc((x.taf||{}).raw);
+ const s=$("weatherDecodeStatus"); if(s)s.innerHTML='<span class="ok">Decoded weather loaded.</span> Raw reports remain available under each expandable section.';
 }
 function fillRunwaySelect(id,runways){
  const sel=$(id);sel.innerHTML="";
