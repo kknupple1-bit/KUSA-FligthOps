@@ -6,7 +6,13 @@ const PORT = process.env.PORT || 3000;
 const AWC = "https://aviationweather.gov/api/data";
 
 app.use(express.json({limit:"1mb"}));
-app.use(express.static(path.join(__dirname,"public"),{maxAge:"1h",etag:true}));
+app.use((req,res,next)=>{
+  res.set("Cache-Control","no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma","no-cache");
+  res.set("Expires","0");
+  next();
+});
+app.use(express.static(path.join(__dirname,"public"),{maxAge:0,etag:false}));
 
 const first=x=>Array.isArray(x)?(x[0]||null):x;
 const hpaToInhg=h=>h==null?null:Number(h)*0.0295299830714;
@@ -14,7 +20,7 @@ const pressureAlt=(e,a)=>e==null||a==null?null:Number(e)+(29.92-Number(a))*1000;
 function densityAlt(pa,t){if(pa==null||t==null)return null;const isa=15-1.98*(Number(pa)/1000);return Number(pa)+120*(Number(t)-isa);}
 function windComponents(h,d,s){if(h==null||d==null||s==null)return null;const a=(Number(d)-Number(h))*Math.PI/180,head=Math.cos(a)*Number(s),cross=Math.sin(a)*Number(s);return{headwind_kt:Math.round(Math.max(head,0)*10)/10,tailwind_kt:Math.round(Math.max(-head,0)*10)/10,crosswind_kt:Math.round(Math.abs(cross)*10)/10};}
 async function awc(name,params){const u=new URL(`${AWC}/${name}`);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u,{headers:{"Accept":"application/json","User-Agent":"KUSA-FlightOps/2.1"}});if(r.status===204)return null;if(!r.ok)throw new Error(`AWC ${name}: ${r.status}`);return await r.json();}
-function normMetar(m){if(!m)return null;return{icao:m.icaoId,raw:m.rawOb,obs_time:m.reportTime||m.obsTime,temp_c:m.temp,dewpoint_c:m.dewp,wind_dir:m.wdir,wind_kt:m.wspd,wind_gust_kt:m.wgst,visibility_sm:m.visib,altimeter_hpa:m.altim,flight_category:m.fltCat,wx:m.wxString||m.wx||null,clouds:m.clouds};}
+function normMetar(m){if(!m)return null;return{icao:m.icaoId||m.icao,raw:m.rawOb||m.raw||m.raw_text,obs_time:m.reportTime||m.obsTime||m.obs_time,temp_c:m.temp??m.temp_c,dewpoint_c:m.dewp??m.dewpoint_c,wind_dir:m.wdir??m.wind_dir,wind_kt:m.wspd??m.wind_kt,wind_gust_kt:m.wgst??m.wind_gust_kt,visibility_sm:m.visib??m.visibility_sm,altimeter_hpa:m.altim??m.altimeter_hpa,flight_category:m.fltCat||m.flight_category,wx:m.wxString||m.wx||m.weather||null,clouds:m.clouds||m.sky||[]};}
 function normTaf(t){if(!t)return null;return{icao:t.icaoId,raw:t.rawTAF,issue_time:t.issueTime,valid_from:t.validTimeFrom,valid_to:t.validTimeTo,forecast:t.fcsts};}
 
 let runwayDb={};
@@ -55,8 +61,8 @@ function evalLanding(p){
  return{max_allowable_landing_weight_lb:Math.round(max),limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),vref_kt:p.vref_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"};
 }
 
-app.get("/api/health",(req,res)=>res.json({ok:true,platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length}));
-app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,awc_metar:ok,awc_message:msg,runway_source:Object.keys(runwayDb).length>0,runway_airports_loaded:Object.keys(runwayDb).length});});
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"2.9.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length}));
+app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,build:"2.9.0",awc_metar:ok,awc_message:msg,runway_source:Object.keys(runwayDb).length>0,runway_airports_loaded:Object.keys(runwayDb).length});});
 app.get("/api/mission",async(req,res)=>{try{const dep=req.query.dep||"KBPT",dest=req.query.dest||"KDAL";const [departure,destination]=await Promise.all([airportBundle(dep),airportBundle(dest)]);res.json({departure,destination});}catch(e){res.status(502).json({error:String(e.message||e)});}});
 app.post("/api/admin/ensure-nasr",(req,res)=>res.json({managed_centrally:true,runway_airports_loaded:Object.keys(runwayDb).length}));
 app.post("/api/admin/refresh-nasr",(req,res)=>res.json({managed_centrally:true,message:"Central NASR refresh module pending.",runway_airports_loaded:Object.keys(runwayDb).length}));

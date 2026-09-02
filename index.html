@@ -206,6 +206,8 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v2.9</div>
+
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
 <div class="status warn">DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE</div>
@@ -350,22 +352,22 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="small" id="weatherDecodeStatus" style="margin-top:12px">Decoded METAR/TAF will populate after Load / Refresh Mission.</div>
 <div class="weather-decode-grid" style="margin-top:14px">
   <div class="wx decoded-weather">
-    <div class="small">Origin — Decoded METAR</div>
+    <div class="small"><b>Origin — METAR (Decoded)</b></div>
     <div id="depMetar" class="decoded-text">—</div>
     <details><summary class="small">Raw METAR</summary><div class="raw small" id="depMetarRaw">—</div></details>
   </div>
   <div class="wx decoded-weather">
-    <div class="small">Origin — Decoded TAF</div>
+    <div class="small"><b>Origin — TAF (Decoded)</b></div>
     <div id="depTaf" class="decoded-text">—</div>
     <details><summary class="small">Raw TAF</summary><div class="raw small" id="depTafRaw">—</div></details>
   </div>
   <div class="wx decoded-weather">
-    <div class="small">Destination — Decoded METAR</div>
+    <div class="small"><b>Destination — METAR (Decoded)</b></div>
     <div id="destMetar" class="decoded-text">—</div>
     <details><summary class="small">Raw METAR</summary><div class="raw small" id="destMetarRaw">—</div></details>
   </div>
   <div class="wx decoded-weather">
-    <div class="small">Destination — Decoded TAF</div>
+    <div class="small"><b>Destination — TAF (Decoded)</b></div>
     <div id="destTaf" class="decoded-text">—</div>
     <details><summary class="small">Raw TAF</summary><div class="raw small" id="destTafRaw">—</div></details>
   </div>
@@ -766,18 +768,13 @@ function draw(w,cg){
  x.fillStyle="#edf5ff";x.beginPath();x.arc(px(cg),py(w),6,0,Math.PI*2);x.fill();
 }
 function updateVSpeedCard(tow,landing){
- $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";
- $("vsLDW").textContent=Math.round(landing).toLocaleString()+" lb";
+ $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";$("vsLDW").textContent=Math.round(landing).toLocaleString()+" lb";
  const v1=valueOrNull("perfV1"),vr=valueOrNull("perfVR"),vref=valueOrNull("landVref");
- $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";
- $("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";
- $("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
- $("vsV1src").textContent=v1==null?"Outside table / mission data required":"FlightSafety P-2–P-5";
- $("vsVRsrc").textContent=vr==null?"Outside table / mission data required":"FlightSafety P-2–P-5";
- $("vsVREFsrc").textContent=vref==null?"Outside table / mission data required":"FlightSafety P-18–P-21";
- const have=v1!=null&&vr!=null&&vref!=null;
- $("vsStatus").textContent=have?"AUTO TABLE DATA":"SOURCE LOCKED";
- $("vsStatus").className=have?"ok":"warn";
+ $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";$("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";$("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
+ $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":"FlightSafety P-2–P-5";
+ $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
+ $("vsVREFsrc").textContent=vref==null?"Landing weight outside published table":"FlightSafety P-18–P-21 • weight based";
+ const count=[v1,vr,vref].filter(v=>v!=null).length;$("vsStatus").textContent=count===3?"AUTO TABLE DATA":count>0?`PARTIAL AUTO DATA (${count}/3)`:"SOURCE LOCKED";$("vsStatus").className=count>0?"ok":"warn";
 }
 function recalculate(){
  const requested=passengers.length;
@@ -850,80 +847,30 @@ function recalculate(){
  if(missionData){
    const toAuto=autoTO();
    const ldAuto=autoLDG();
-   if(toAuto.ok){
-     $("toSpeeds").textContent=`V1 ${toAuto.v1.toFixed(1)} / VR=V2 ${toAuto.vr.toFixed(1)} kt • BFL ${Math.round(toAuto.bfl).toLocaleString()} ft`;
-     $("toLimit").textContent=`AUTO TABLE • ${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5`;
-   }else{
-     $("perfV1").value="";$("perfVR").value="";$("perfBFL").value="";
-     $("toSpeeds").textContent="—";
-     $("toLimit").textContent=toAuto.msg;
-   }
-   if(!ldAuto.ok){$("landVref").value="";$("landFieldLen").value="";}
+   const speedParts=[];
+   if(toAuto.v1!=null)speedParts.push(`V1 ${toAuto.v1.toFixed(1)}`);
+   if(toAuto.vr!=null)speedParts.push(`VR=V2 ${toAuto.vr.toFixed(1)}`);
+   if(toAuto.bfl!=null)speedParts.push(`BFL ${Math.round(toAuto.bfl).toLocaleString()} ft`);
+   $("toSpeeds").textContent=speedParts.length?speedParts.join(" • "):"—";
+   $("toLimit").textContent=toAuto.v1!=null
+     ? `AUTO TABLE • ${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5${toAuto.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`
+     : (toAuto.msg||"V1/BFL source locked");
+   if(ldAuto.vref==null)$("landVref").value="";
+   if(ldAuto.lfl==null)$("landFieldLen").value="";
  }
  updateVSpeedCard(tow,landing);
  draw(zfw,pct);
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
-function fmtUtc(v){
- if(!v)return "time unavailable";
- const d=new Date(v);
- if(Number.isNaN(d.getTime()))return String(v);
- return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"});
-}
-function windText(dir,spd,gust){
- const s=Number(spd);
- if(!Number.isFinite(s)||s===0)return "Wind calm";
- const d=(dir==null||dir==="VRB"||Number(dir)===0)?"variable":`${String(Math.round(Number(dir))).padStart(3,"0")}°`;
- return `Wind ${d} at ${Math.round(s)} kt${Number(gust)>0?`, gusting ${Math.round(Number(gust))} kt`:""}`;
-}
-function cloudText(clouds){
- if(!Array.isArray(clouds)||!clouds.length)return "Clouds not reported";
- const names={SKC:"clear",CLR:"clear",FEW:"few",SCT:"scattered",BKN:"broken",OVC:"overcast",VV:"vertical visibility"};
- return clouds.map(c=>{
-   const cov=c.cover||c.coverage||c.skyCover||"";
-   const base=c.base!=null?c.base:c.base_ft_agl;
-   const label=names[String(cov).toUpperCase()]||String(cov).toLowerCase();
-   return base!=null?`${label} at ${Number(base).toLocaleString()} ft AGL`:label;
- }).join(", ");
-}
-function visibilityText(v){
- if(v==null||v==="")return "Visibility not reported";
- const n=Number(v);
- return Number.isFinite(n)?`Visibility ${n} statute mile${n===1?"":"s"}`:`Visibility ${v}`;
-}
-function formatMetarDecoded(m,altInHg){
- if(!m)return '<span class="warn">METAR unavailable</span>';
- const lines=[];
- lines.push(`<div class="decoded-line"><b>${m.flight_category||"METAR"}</b> • observed ${fmtUtc(m.obs_time)}</div>`);
- lines.push(`<div class="decoded-line">${windText(m.wind_dir,m.wind_kt,m.wind_gust_kt)}</div>`);
- lines.push(`<div class="decoded-line">${visibilityText(m.visibility_sm)}</div>`);
- if(m.wx)lines.push(`<div class="decoded-line">Weather: ${m.wx}</div>`);
- lines.push(`<div class="decoded-line">${cloudText(m.clouds)}</div>`);
- const t=Number(m.temp_c),d=Number(m.dewpoint_c);
- if(Number.isFinite(t)||Number.isFinite(d))lines.push(`<div class="decoded-line">Temperature ${Number.isFinite(t)?t+"°C":"—"} • Dew point ${Number.isFinite(d)?d+"°C":"—"}</div>`);
- if(altInHg!=null)lines.push(`<div class="decoded-line">Altimeter ${Number(altInHg).toFixed(2)} inHg</div>`);
- return lines.join("");
-}
-function fcstWind(f){return windText(f.wdir??f.wind_dir??f.windDir,f.wspd??f.wind_kt??f.windSpeed,f.wgst??f.wind_gust_kt??f.windGust)}
-function formatTafDecoded(t){
- if(!t)return '<span class="warn">TAF unavailable</span>';
- const head=`<div class="decoded-line"><b>Valid</b> ${fmtUtc(t.valid_from)} to ${fmtUtc(t.valid_to)}</div>`;
- const fc=Array.isArray(t.forecast)?t.forecast:[];
- if(!fc.length)return head+'<div class="decoded-line">Forecast periods not available in decoded feed.</div>';
- const periods=fc.map(f=>{
-   const from=f.timeFrom??f.validTimeFrom??f.valid_from??f.fcstTimeFrom;
-   const to=f.timeTo??f.validTimeTo??f.valid_to??f.fcstTimeTo;
-   const change=(f.changeIndicator??f.change_indicator??f.fcstChange??f.change??"Forecast");
-   const vis=f.visib??f.visibility??f.visibility_sm;
-   const wx=f.wxString??f.wx??f.weather;
-   const clouds=f.clouds||f.sky||[];
-   const bits=[fcstWind(f),visibilityText(vis)];
-   if(wx)bits.push(`Weather: ${wx}`);
-   bits.push(cloudText(clouds));
-   return `<div class="decoded-period"><b>${change}</b> • ${fmtUtc(from)} to ${fmtUtc(to)}<br>${bits.join(" • ")}</div>`;
- }).join("");
- return head+periods;
-}
+function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
+function firstVal(o,ks){for(const k of ks){if(o&&o[k]!=null&&o[k]!=="")return o[k]}return null}
+function windTextObj(o){const dir=firstVal(o,["wind_dir","wdir","windDir","wind_direction"]);const spd=Number(firstVal(o,["wind_kt","wspd","windSpeed","wind_speed_kt"]));const gust=Number(firstVal(o,["wind_gust_kt","wgst","windGust","wind_gust"]));if(!Number.isFinite(spd)||spd===0)return"Wind calm";let d="variable";if(dir!=null&&String(dir).toUpperCase()!=="VRB"&&Number.isFinite(Number(dir)))d=`${String(Math.round(Number(dir))).padStart(3,"0")}°`;return`Wind ${d} at ${Math.round(spd)} kt${Number.isFinite(gust)&&gust>0?`, gusting ${Math.round(gust)} kt`:""}`}
+function visibilityText(v){if(v==null||v==="")return"Visibility not reported";const n=Number(v);return Number.isFinite(n)?`Visibility ${n} statute mile${n===1?"":"s"}`:`Visibility ${v}`}
+function cloudText(c){if(!Array.isArray(c)||!c.length)return"Clouds not reported";const n={SKC:"clear",CLR:"clear",FEW:"few",SCT:"scattered",BKN:"broken",OVC:"overcast",VV:"vertical visibility"};return c.map(x=>{const cov=firstVal(x,["cover","coverage","skyCover","amount"])||"";const base=firstVal(x,["base","base_ft_agl","baseFtAgl","altitude"]);const label=n[String(cov).toUpperCase()]||String(cov).toLowerCase();return base!=null?`${label} at ${Number(base).toLocaleString()} ft AGL`:label}).join(", ")}
+function formatMetarDecoded(m,altInHg){if(!m)return'<span class="warn">METAR unavailable</span>';const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);const cat=firstVal(m,["flight_category","fltCat","category"])||"METAR";const vis=firstVal(m,["visibility_sm","visib","visibility"]);const wx=firstVal(m,["wx","wxString","weather"]);const t=Number(firstVal(m,["temp_c","temp","temperature"]));const d=Number(firstVal(m,["dewpoint_c","dewp","dewpoint"]));const clouds=firstVal(m,["clouds","sky"])||[];const alt=altInHg??firstVal(m,["altimeter_inhg","altimeter"]);const lines=[];lines.push(`<div class="decoded-line"><b>${cat}</b> • observed ${fmtUtc(obs)}</div>`);lines.push(`<div class="decoded-line">${windTextObj(m)}</div>`);lines.push(`<div class="decoded-line">${visibilityText(vis)}</div>`);if(wx)lines.push(`<div class="decoded-line">Weather: ${wx}</div>`);lines.push(`<div class="decoded-line">${cloudText(clouds)}</div>`);if(Number.isFinite(t)||Number.isFinite(d))lines.push(`<div class="decoded-line">Temperature ${Number.isFinite(t)?t+"°C":"—"} • Dew point ${Number.isFinite(d)?d+"°C":"—"}</div>`);if(alt!=null&&Number.isFinite(Number(alt)))lines.push(`<div class="decoded-line">Altimeter ${Number(alt).toFixed(2)} inHg</div>`);return lines.join("")}
+function formatTafDecoded(t){if(!t)return'<span class="warn">TAF unavailable</span>';const vf=firstVal(t,["valid_from","validTimeFrom","fcstTimeFrom","startTime"]);const vt=firstVal(t,["valid_to","validTimeTo","fcstTimeTo","endTime"]);let out=`<div class="decoded-line"><b>Valid</b> ${fmtUtc(vf)} to ${fmtUtc(vt)}</div>`;const fc=firstVal(t,["forecast","forecasts","fcsts","periods"]);if(!Array.isArray(fc)||!fc.length)return out+'<div class="decoded-line">Forecast periods unavailable from decoded feed; raw TAF retained below.</div>';out+=fc.map(f=>{const from=firstVal(f,["timeFrom","validTimeFrom","valid_from","fcstTimeFrom","startTime"]);const to=firstVal(f,["timeTo","validTimeTo","valid_to","fcstTimeTo","endTime"]);const ch=firstVal(f,["changeIndicator","change_indicator","fcstChange","change"])||"Forecast";const vis=firstVal(f,["visib","visibility","visibility_sm"]);const wx=firstVal(f,["wxString","wx","weather"]);const clouds=firstVal(f,["clouds","sky"])||[];const bits=[windTextObj(f),visibilityText(vis)];if(wx)bits.push(`Weather: ${wx}`);bits.push(cloudText(clouds));return`<div class="decoded-period"><b>${ch}</b> • ${fmtUtc(from)} to ${fmtUtc(to)}<br>${bits.join(" • ")}</div>`}).join("");return out}
+
+
 
 function populatePoint(prefix,x){
  $(prefix+"Airport").textContent=`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
@@ -932,9 +879,9 @@ function populatePoint(prefix,x){
  $(prefix+"Metar").innerHTML=formatMetarDecoded(x.metar,x.altimeter_inhg);
  $(prefix+"Taf").innerHTML=formatTafDecoded(x.taf);
  const mr=$(prefix+"MetarRaw"),tr=$(prefix+"TafRaw");
- if(mr)mr.textContent=esc((x.metar||{}).raw);
- if(tr)tr.textContent=esc((x.taf||{}).raw);
- const s=$("weatherDecodeStatus"); if(s)s.innerHTML='<span class="ok">Decoded weather loaded.</span> Raw reports remain available under each expandable section.';
+ if(mr)mr.textContent=esc(firstVal(x.metar||{},["raw","rawOb","raw_text"])||"—");
+ if(tr)tr.textContent=esc(firstVal(x.taf||{},["raw","rawTAF","raw_text"])||"—");
+ const s=$("weatherDecodeStatus");if(s)s.innerHTML='<span class="ok">Decoded METAR/TAF loaded.</span> Raw reports remain available below.';
 }
 function fillRunwaySelect(id,runways){
  const sel=$(id);sel.innerHTML="";
@@ -954,7 +901,7 @@ function selectedRunwayChanged(){
 async function loadMission(){
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim();$("dep").value=dep;$("dest").value=dest;$("missionStatus").textContent="Loading airport and weather data...";
  try{
-   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}`));if(!r.ok)throw new Error(await r.text());missionData=await r.json();
+   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
    $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;
    populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
    const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
@@ -963,15 +910,31 @@ async function loadMission(){
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
 }
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
-function depTempC(){if(!missionData)return null;const m=missionData.departure.metar||{};for(const v of [m.temp_c,m.temperature_c,m.temp,m.temperature]){const n=Number(v);if(Number.isFinite(n))return n}return null}
-function autoTO(){if(!missionData)return{ok:false,msg:"Load mission first"};const cfg=$("toConfig").value,pa=Number(missionData.departure.pressure_altitude_ft),t=depTempC(),wk=(valueOrNull("perfTOW")||0)/1000;if(!Number.isFinite(pa)||t==null||!wk)return{ok:false,msg:"Missing PA, temperature, or TOW"};const r=fsTakeoff(cfg,pa,t,wk);if(!r)return{ok:false,msg:"Outside digitized FlightSafety table range"};$("perfV1").value=r.v1.toFixed(1);$("perfVR").value=r.vr.toFixed(1);$("perfBFL").value=Math.round(r.bfl);return{ok:true,cfg,...r}}
-function autoLDG(){if(!missionData)return{ok:false,msg:"Load mission first"};const cfg=$("landConfig").value,pa=Number(missionData.destination.pressure_altitude_ft),wk=(valueOrNull("landWt")||0)/1000;if(!Number.isFinite(pa)||!wk)return{ok:false,msg:"Missing destination PA or landing weight"};const r=fsLanding(cfg,pa,wk);if(!r)return{ok:false,msg:"Outside digitized FlightSafety landing table range"};const vref=cfg==="S20"?r.speed-5:r.speed;$("landVref").value=vref.toFixed(1);$("landFieldLen").value=Math.round(r.lfl);return{ok:true,cfg,vref,...r}}
-
-async function evaluateTakeoff(){
- const a=autoTO();if(!a.ok){$("toStatus").textContent="SOURCE LOCKED";$("toStatus").className="warn";$("toLimit").textContent=a.msg;return}
- const obs=$("perfObs").value,body={runway_length_ft:valueOrNull("perfRwyLen"),actual_takeoff_weight_lb:valueOrNull("perfTOW"),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),second_segment_net_gradient_pct:valueOrNull("perfGrad"),obstacle_clearance_verified:obs===""?null:(obs==="true")};
- const r=await fetch(apiUrl("/api/performance/takeoff"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
- $("toMax").textContent=j.max_allowable_takeoff_weight_lb.toLocaleString()+" lb";$("toStatus").textContent=j.status;$("toStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";$("toLimit").textContent=j.limiting_factor+" • "+FS_PERF.takeoff[a.cfg].label+" • FS P-2–P-5";$("toWtMargin").textContent=j.weight_margin_lb.toLocaleString()+" lb";$("toRwyMargin").textContent=j.runway_margin_ft==null?"—":j.runway_margin_ft.toLocaleString()+" ft";$("toSpeeds").textContent=`V1 ${a.v1.toFixed(1)} / VR=V2 ${a.vr.toFixed(1)} kt • BFL ${Math.round(a.bfl).toLocaleString()} ft`;updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+function depTempC(){if(!missionData)return null;const m=missionData.departure.metar||{};for(const v of [m.temp_c,m.temperature_c,m.temp,m.temperature]){if(v===null||v===undefined||v==="")continue;const n=Number(v);if(Number.isFinite(n))return n}return null}
+function autoTO(){
+ if(!missionData)return{ok:false,msg:"Load mission first",v1:null,vr:null,bfl:null};
+ const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],wk=(valueOrNull("perfTOW")||0)/1000;
+ const vr=d?interpScalarN(d.vr,wk):null;if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
+ let pa=Number(missionData.departure.pressure_altitude_ft),t=depTempC(),r=null,reason="";
+ if(!Number.isFinite(pa))reason="Departure pressure altitude unavailable";else if(t==null)reason="Departure temperature unavailable";else if(d){
+   let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
+   r=fsTakeoff(cfg,lookupPA,t,wk);if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
+ }
+ if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
+ return{ok:vr!=null||!!r,cfg,vr,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
+}
+function autoLDG(){
+ if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
+ const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],wk=(valueOrNull("landWt")||0)/1000;
+ const published=d?interpScalarN(d.speed,wk):null;const vref=published==null?null:(cfg==="S20"?published-5:published);
+ if(vref!=null)$("landVref").value=vref.toFixed(1);else $("landVref").value="";
+ let pa=Number(missionData.destination.pressure_altitude_ft),r=null,reason="";
+ if(!Number.isFinite(pa))reason="Destination pressure altitude unavailable";else if(d){
+   let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
+   r=fsLanding(cfg,lookupPA,wk);if(!r)reason="Landing distance outside digitized FlightSafety table range";else r.paBasis=paBasis
+ }
+ if(r)$("landFieldLen").value=Math.round(r.lfl);else $("landFieldLen").value="";
+ return{ok:vref!=null||!!r,cfg,vref,speed:published,speedLabel:d?.speedLabel||"VREF",ld:r?r.ld:null,lfl:r?r.lfl:null,paBasis:r?r.paBasis:null,msg:reason}
 }
 async function evaluateLanding(){
  const a=autoLDG();if(!a.ok){$("landStatus").textContent="SOURCE LOCKED";$("landStatus").className="warn";return}
@@ -979,7 +942,7 @@ async function evaluateLanding(){
  const r=await fetch(apiUrl("/api/performance/landing"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();$("landMax").textContent=j.max_allowable_landing_weight_lb.toLocaleString()+" lb";$("landStatus").textContent=j.status;$("landStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";$("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed.toFixed(1)} kt • LD ${Math.round(a.ld)} ft • LFL ${Math.round(a.lfl)} ft • FS P-18–P-21`;updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
 }
 async function startupCheck(){
- try{const r=await fetch(apiUrl("/api/diagnostics")),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
+ try{const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
 }
 
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
@@ -999,7 +962,14 @@ addEventListener("resize",recalculate);
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+  window.addEventListener("load", async () => {
+    try {
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+      const keys=await caches.keys();
+      for(const k of keys) await caches.delete(k);
+    } catch(e) {}
+  });
 }
 </script>
 </body></html>
