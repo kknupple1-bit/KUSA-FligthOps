@@ -17,3 +17,16 @@ v2.9 CHANGES
 - Raw METAR/TAF remain expandable below decoded weather.
 
 DEVELOPMENT / NOT FOR FLIGHT USE.
+
+
+v3.0 CHANGES
+- Section 2 cabin map redrawn closer to the uploaded Falcon 50 floor plan.
+- Seat 9 moved aft on the left side instead of stacking directly under Seat 5.
+- Seats 6/7/8 grouped as the aft lounge/divan block on the right side.
+- Lav and airstair zones moved to the aft-right area and kept visible inside the frame.
+- V-Speed Card labels updated to match the FlightSafety convention:
+  VR -> VR=V2
+  VFT -> Vfr
+  VFS -> 1.5Vs
+- Existing automatic data logic for V1, VR=V2, and VREF is unchanged.
+- Vfr and 1.5Vs remain source-locked until their exact approved source values are identified.
