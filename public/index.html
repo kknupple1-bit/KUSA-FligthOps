@@ -236,7 +236,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.9</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.1</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -538,7 +538,7 @@ Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel mom
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Takeoff CG</div><b id="cgTakeoff">—</b><div class="small" id="cgTakeoffArm">—</div></div>
 <div class="wx"><div class="small">Landing CG</div><b id="cgLanding">—</b><div class="small" id="cgLandingArm">—</div></div>
-<div class="wx"><div class="small">Trace Status</div><b id="cgTraceStatus" class="warn">ESTIMATED</b><div class="small" id="cgTraceNote">Fuel arm model pending</div></div>
+<div class="wx"><div class="small">Trace Status</div><b id="cgTraceStatus" class="ok">DTM912 FUEL MOMENT</b><div class="small" id="cgTraceNote">Rev 13 • Section 2 • interpolated within published fuel points</div></div>
 <div class="wx"><div class="small">Zero-Fuel CG</div><b id="cgZeroFuel">—</b><div class="small" id="cgZeroFuelArm">—</div></div>
 </div>
 <div class="callout small" style="margin-top:12px">
@@ -564,6 +564,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="row">
 <div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only</option></select></div>
 </div>
+<div id="toConfigNote" class="small" style="margin-top:8px">Takeoff configuration changes will auto-refresh the available FlightSafety numbers.</div>
 <div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
 <div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
@@ -593,6 +594,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="row">
 <div><label>Landing Configuration</label><select id="landConfig"><option value="S48">Slats + Flaps 48°</option><option value="S20">Slats + Flaps 20°</option></select></div>
 </div>
+<div id="landConfigNote" class="small" style="margin-top:8px">Landing configuration changes will auto-refresh VREF and landing field length.</div>
 <div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="landRwyLen" type="number" readonly></div>
 <div><label>Actual Landing Weight lb</label><input id="landWt" type="number" readonly></div>
@@ -605,6 +607,12 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="wx"><div class="small">Max Allowable Landing Weight</div><b id="landMax">—</b></div>
 <div class="wx"><div class="small">Landing Status</div><b id="landStatus">—</b></div>
 </div>
+<table style="margin-top:10px">
+<tr><td>Limiting Factor</td><td id="landLimit">—</td></tr>
+<tr><td>Weight Margin</td><td id="landWtMargin">—</td></tr>
+<tr><td>Runway Margin</td><td id="landRwyMargin">—</td></tr>
+<tr><td>Landing Data</td><td id="landDataSummary">—</td></tr>
+</table>
 </div>
 
 <div class="card">
@@ -672,8 +680,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>FAA airport backend</td><td class="ok">ACTIVE</td></tr>
 <tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr>
-<tr><td>Fuel CG calculation</td><td class="warn">DTM912 PENDING</td></tr>
-<tr><td>Falcon chart interpolation</td><td class="warn">NEXT PHASE</td></tr>
+<tr><td>Fuel CG calculation</td><td class="ok">DTM912 REV 13 LOADED</td></tr>
+<tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE</td></tr>
 </table>
 </div>
 </aside>
@@ -963,6 +971,65 @@ function drawTrace(zfwW,zfwCG,path,toW,toCG,ldW,ldCG){
  }
 }
 
+
+function syncTakeoffSection(){
+ const cfg=$("toConfig").value;
+ const d=FS_PERF.takeoff[cfg];
+ const a=autoTO();
+ const wk=(valueOrNull("perfTOW")||0)/1000;
+ const speedParts=[];
+ if(a.v1!=null)speedParts.push(`V1 ${a.v1.toFixed(1)}`);
+ if(a.vr!=null)speedParts.push(`VR=V2 ${a.vr.toFixed(1)}`);
+ if(a.vfr!=null)speedParts.push(`Vfr ${a.vfr.toFixed(1)}`);
+ if(a.v15vs!=null)speedParts.push(`1.5Vs ${a.v15vs.toFixed(1)}`);
+ if(a.bfl!=null)speedParts.push(`BFL ${Math.round(a.bfl).toLocaleString()} ft`);
+ $("toSpeeds").textContent=speedParts.length?speedParts.join(" • "):"—";
+
+ if(!missionData){
+   $("toStatus").textContent="LOAD MISSION";
+   $("toStatus").className="warn";
+   $("toLimit").textContent="Load mission airport and weather data first";
+   $("toConfigNote").textContent="Takeoff configuration changes will auto-refresh the available FlightSafety numbers once mission data is loaded.";
+   return a;
+ }
+
+ const pa=Number(missionData.departure.pressure_altitude_ft);
+ const paKeys=kN(d.tables), wtKeys=kN(d.vr);
+ const minPA=Math.min(...paKeys), maxPA=Math.max(...paKeys), minWT=Math.min(...wtKeys), maxWT=Math.max(...wtKeys);
+ const parts=[d.label];
+ if(Number.isFinite(pa))parts.push(`PA ${Math.round(pa).toLocaleString()} ft`);
+ if(Number.isFinite(wk)&&wk>0)parts.push(`WT ${wk.toFixed(1)}k lb`);
+
+ if(a.v1!=null || a.bfl!=null){
+   $("toStatus").textContent="AUTO UPDATED";
+   $("toStatus").className="ok";
+   $("toLimit").textContent=`AUTO TABLE • ${d.label} • FlightSafety P-2–P-5${a.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`;
+   const note = [`Using ${d.label}`];
+   if(Number.isFinite(pa)) note.push(`pressure altitude ${Math.round(pa).toLocaleString()} ft`);
+   if(Number.isFinite(wk)&&wk>0) note.push(`weight ${wk.toFixed(1)}k lb`);
+   note.push("configuration change applied");
+   $("toConfigNote").textContent=note.join(" • ");
+ }else if(a.vr!=null || a.vfr!=null || a.v15vs!=null){
+   $("toStatus").textContent="PARTIAL AUTO DATA";
+   $("toStatus").className="warn";
+   const limits=[];
+   if(Number.isFinite(pa) && (pa<minPA || pa>maxPA))limits.push(`PA outside ${minPA.toLocaleString()}–${maxPA.toLocaleString()} ft`);
+   if(Number.isFinite(wk) && (wk<minWT || wk>maxWT))limits.push(`weight outside ${minWT.toFixed(1)}–${maxWT.toFixed(1)}k lb`);
+   $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"V1/BFL not available for the selected cell"}`;
+   let note=`${d.label} selected.`;
+   if(limits.length)note += ` ${limits.join(' • ')}.`;
+   note += ' Weight-based VR=V2, Vfr and/or 1.5Vs may still be available.';
+   if(cfg==="SLATS") note += ' Note: 1.5Vs is the same published value as S+20 for the same weight, so that line may not change when you switch configurations.';
+   $("toConfigNote").textContent=note;
+ }else{
+   $("toStatus").textContent="SOURCE LOCKED";
+   $("toStatus").className="warn";
+   $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"No takeoff data available for the selected weight / PA / temperature"}`;
+   $("toConfigNote").textContent=`${d.label} selected, but the current mission point is outside the digitized FlightSafety table coverage.`;
+ }
+ return a;
+}
+
 function updateVSpeedCard(tow,landing){
  const toAuto=autoTO();
  const v1=toAuto.v1,vr=toAuto.vr,vfr=toAuto.vfr,v15vs=toAuto.v15vs;
@@ -984,10 +1051,10 @@ function updateVSpeedCard(tow,landing){
  $("vsVFS").textContent=v15vs==null?"—":v15vs.toFixed(1)+" kt";
  $("vsVREF").textContent=emerVref==null?"—":emerVref.toFixed(1)+" kt";
 
- $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":"FlightSafety P-2–P-5";
- $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
- $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
- $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
+ $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5`;
+ $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5 • weight based`;
+ $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5 • weight based`;
+ $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5 • weight based`;
  $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside S+48 VREF table":"FlightSafety P-18/P-19 • S+48 • weight based";
 
  const vals=[v1,vr,vfr,v15vs,emerVref];
@@ -1102,22 +1169,8 @@ function recalculate(){
 
  $("perfTOW").value=Math.round(tow);$("landWt").value=Math.round(landing);
  selectedRunwayChanged();
- if(missionData){
-   const toAuto=autoTO();
-   const ldAuto=autoLDG();
-   const speedParts=[];
-   if(toAuto.v1!=null)speedParts.push(`V1 ${toAuto.v1.toFixed(1)}`);
-   if(toAuto.vr!=null)speedParts.push(`VR=V2 ${toAuto.vr.toFixed(1)}`);
-   if(toAuto.vfr!=null)speedParts.push(`Vfr ${toAuto.vfr.toFixed(1)}`);
-   if(toAuto.v15vs!=null)speedParts.push(`1.5Vs ${toAuto.v15vs.toFixed(1)}`);
-   if(toAuto.bfl!=null)speedParts.push(`BFL ${Math.round(toAuto.bfl).toLocaleString()} ft`);
-   $("toSpeeds").textContent=speedParts.length?speedParts.join(" • "):"—";
-   $("toLimit").textContent=toAuto.v1!=null
-     ? `AUTO TABLE • ${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5${toAuto.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`
-     : (toAuto.msg||"V1/BFL source locked");
-   if(ldAuto.vref==null)$("landVref").value="";
-   if(ldAuto.lfl==null)$("landFieldLen").value="";
- }
+ syncTakeoffSection();
+ syncLandingSection();
  updateVSpeedCard(tow,landing);
  drawTrace(zfw,pct,burnPath,tow,takeoffPct,landing,landingPct);
 }
@@ -1218,10 +1271,84 @@ function autoLDG(){
  if(r)$("landFieldLen").value=Math.round(r.lfl);else $("landFieldLen").value="";
  return{ok:vref!=null||!!r,cfg,vref,speed:published,speedLabel:d?.speedLabel||"VREF",ld:r?r.ld:null,lfl:r?r.lfl:null,paBasis:r?r.paBasis:null,msg:reason}
 }
+
+function syncLandingSection(){
+ const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],a=autoLDG();
+ const wt=valueOrNull("landWt"),rwy=valueOrNull("landRwyLen"),climb=valueOrNull("landClimbWt");
+ const structural=maxLand;
+ const maxAllow=climb==null?structural:Math.min(structural,climb);
+ const limiting=climb!=null&&climb<structural?"Landing climb":"Structural landing";
+ const wtMargin=wt==null?null:maxAllow-wt;
+ const rwyMargin=(rwy==null||a.lfl==null)?null:rwy-a.lfl;
+
+ $("landMax").textContent=maxAllow.toLocaleString()+" lb";
+ $("landLimit").textContent=limiting+(climb==null?" • climb limit not entered":"");
+ $("landWtMargin").textContent=wtMargin==null?"—":`${Math.round(wtMargin).toLocaleString()} lb`;
+ $("landRwyMargin").textContent=rwyMargin==null?"—":`${Math.round(rwyMargin).toLocaleString()} ft`;
+
+ const parts=[];
+ if(a.vref!=null)parts.push(`VREF ${a.vref.toFixed(1)} kt`);
+ if(a.lfl!=null)parts.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
+ $("landDataSummary").textContent=parts.length?`${d.label} • ${parts.join(" • ")}`:"—";
+
+ if(!missionData){
+   $("landStatus").textContent="LOAD MISSION";$("landStatus").className="warn";
+   $("landConfigNote").textContent="Load mission airport and weather data to calculate destination landing performance.";
+   return a;
+ }
+ const hardFail=(wtMargin!=null&&wtMargin<0)||(rwyMargin!=null&&rwyMargin<0);
+ if(hardFail){
+   $("landStatus").textContent="NO-GO";$("landStatus").className="bad";
+ }else if(a.vref!=null&&a.lfl!=null&&climb!=null){
+   $("landStatus").textContent="GO";$("landStatus").className="ok";
+ }else if(a.vref!=null&&a.lfl!=null){
+   $("landStatus").textContent="TABLE DATA • CLIMB LIMIT NOT EVALUATED";$("landStatus").className="warn";
+ }else if(a.vref!=null){
+   $("landStatus").textContent="PARTIAL AUTO DATA";$("landStatus").className="warn";
+ }else{
+   $("landStatus").textContent="SOURCE LOCKED";$("landStatus").className="warn";
+ }
+ const note=[`${d.label} selected`];
+ if(a.vref!=null)note.push(`VREF ${a.vref.toFixed(1)} kt`);
+ if(a.lfl!=null)note.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
+ if(climb==null)note.push("landing climb limit not evaluated");
+ if(a.msg)note.push(a.msg);
+ $("landConfigNote").textContent=note.join(" • ");
+ return a;
+}
+
+async function evaluateTakeoff(){
+ const a=syncTakeoffSection();
+ const body={runway_length_ft:valueOrNull("perfRwyLen"),actual_takeoff_weight_lb:valueOrNull("perfTOW"),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),obstacle_clearance_verified:$("perfObs").value===""?null:$("perfObs").value==="true"};
+ try{
+   const r=await fetch(apiUrl("/api/performance/takeoff"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
+   if(j.error)throw new Error(j.error);
+   $("toMax").textContent=j.max_allowable_takeoff_weight_lb.toLocaleString()+" lb";
+   $("toWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
+   $("toRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
+   if(j.status==="NO-GO"){$("toStatus").textContent="NO-GO";$("toStatus").className="bad"}
+   else if(j.status==="GO"){$("toStatus").textContent="GO";$("toStatus").className="ok"}
+   else{$("toStatus").textContent="TABLE DATA • LIMITS INCOMPLETE";$("toStatus").className="warn"}
+ }catch(e){$("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";$("toLimit").textContent=String(e.message||e)}
+}
+
 async function evaluateLanding(){
- const a=autoLDG();if(!a.ok){$("landStatus").textContent="SOURCE LOCKED";$("landStatus").className="warn";return}
+ const a=syncLandingSection();
+ if(!a.ok){$("landStatus").textContent="SOURCE LOCKED";$("landStatus").className="warn";return}
  const body={runway_length_ft:valueOrNull("landRwyLen"),actual_landing_weight_lb:valueOrNull("landWt"),climb_limited_weight_lb:valueOrNull("landClimbWt"),landing_field_length_ft:valueOrNull("landFieldLen"),vref_kt:valueOrNull("landVref")};
- const r=await fetch(apiUrl("/api/performance/landing"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();$("landMax").textContent=j.max_allowable_landing_weight_lb.toLocaleString()+" lb";$("landStatus").textContent=j.status;$("landStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";$("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed.toFixed(1)} kt • LD ${Math.round(a.ld)} ft • LFL ${Math.round(a.lfl)} ft • FS P-18–P-21`;updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+ try{
+   const r=await fetch(apiUrl("/api/performance/landing"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
+   if(j.error)throw new Error(j.error);
+   $("landMax").textContent=j.max_allowable_landing_weight_lb.toLocaleString()+" lb";
+   $("landLimit").textContent=j.limiting_factor;
+   $("landWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
+   $("landRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
+   if(j.status==="NO-GO"){$("landStatus").textContent="NO-GO";$("landStatus").className="bad"}
+   else if(j.status==="GO"){$("landStatus").textContent="GO";$("landStatus").className="ok"}
+   else{$("landStatus").textContent="TABLE DATA • CLIMB LIMIT NOT EVALUATED";$("landStatus").className="warn"}
+   $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • FS P-18–P-21`;
+   updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+ }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
  try{const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
@@ -1234,11 +1361,12 @@ $("paxEditorType").addEventListener("change",e=>$("paxEditorWeight").value=paxDe
 $("applyPaxEditor").addEventListener("click",applyPaxEditor);
 $("closePaxEditor").addEventListener("click",closePaxEditor);
 $("continueResultsBtn").addEventListener("click",continueToResults);
-$("toConfig").addEventListener("change",()=>{autoTO();updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0)});
-$("landConfig").addEventListener("change",()=>{autoLDG();updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0)});
+$("toConfig").addEventListener("change",recalculate);
+$("landConfig").addEventListener("change",recalculate);
 $("totalBag").addEventListener("input",onTotalBagInput);
 ["bagComp0","bagComp1","bagComp2"].forEach(id=>$(id).addEventListener("input",onBaggageCompInput));
-["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref"].forEach(id=>$(id).addEventListener("input",recalculate));
+["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id).addEventListener("input",recalculate));
+$("perfObs").addEventListener("change",recalculate);
 
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
