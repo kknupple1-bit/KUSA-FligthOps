@@ -44,5 +44,53 @@
         "heading": 130
       }
     ]
+  },
+  "KROG": {
+    "airport": {
+      "ident": "KROG",
+      "name": "Rogers Executive - Carter Field",
+      "elevation_ft": 1359,
+      "source": "FAA published data effective 2026-08-06"
+    },
+    "runways": [
+      {
+        "runway_id": "02",
+        "length_ft": 6011,
+        "width_ft": 100,
+        "surface": "Asphalt/Grooved",
+        "heading": 19
+      },
+      {
+        "runway_id": "20",
+        "length_ft": 6011,
+        "width_ft": 100,
+        "surface": "Asphalt/Grooved",
+        "heading": 199
+      }
+    ]
+  },
+  "KHII": {
+    "airport": {
+      "ident": "KHII",
+      "name": "Lake Havasu City Airport",
+      "elevation_ft": 783,
+      "source": "FAA published data effective 2026-08-06"
+    },
+    "runways": [
+      {
+        "runway_id": "14",
+        "length_ft": 8000,
+        "width_ft": 100,
+        "surface": "Asphalt",
+        "heading": 149
+      },
+      {
+        "runway_id": "32",
+        "length_ft": 8000,
+        "width_ft": 100,
+        "surface": "Asphalt",
+        "heading": 329
+      }
+    ]
   }
 }
