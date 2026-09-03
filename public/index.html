@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KUSA FlightOps — N33AP Final Beta</title>
+<title>KUSA FlightOps — N33AP TOLD Beta</title>
 <style>
 :root{--bg:#071b33;--panel:#0d294a;--panel2:#12365f;--text:#edf5ff;--muted:#9db6cf;--ok:#55d18b;--warn:#ffca58;--bad:#ff6b6b;--line:#2a4b70}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
@@ -230,19 +230,55 @@ details summary{cursor:pointer;margin-top:8px}
   .seat-number{font-size:20px}
   .galley-fp{min-height:110px}
 }
+
+.app-tabs{display:flex;gap:8px;align-items:center}
+.app-tabs button{width:auto;padding:8px 18px;background:#0b2746}
+.app-tabs button.active{background:#245f96;border-color:#4f8cc5}
+#toldView{display:none}
+.told-card{max-width:1040px;margin:0 auto}
+.told-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;border-bottom:1px solid var(--line);padding-bottom:12px;margin-bottom:14px}
+.told-title{font-size:25px;font-weight:800;letter-spacing:.04em}
+.told-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.told-panel{background:#081d34;border:1px solid var(--line);border-radius:12px;padding:14px}
+.told-panel h3{margin:0 0 10px;font-size:17px}
+.told-row{display:grid;grid-template-columns:1.1fr 1fr;gap:8px;padding:6px 0;border-bottom:1px solid #234361}
+.told-row:last-child{border-bottom:0}
+.told-row span:first-child{color:var(--muted);font-size:12px}
+.told-row span:last-child{text-align:right;font-weight:700}
+.told-speeds{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.told-speed{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
+.told-speed b{display:block;font-size:21px;margin-top:4px}
+.fuel-confirm{margin-top:12px;border:2px solid var(--bad);background:#311b22;border-radius:10px;padding:12px;display:none}
+.fuel-confirm label{color:#ffd4d4;font-size:13px;display:flex;gap:9px;align-items:flex-start}
+.fuel-confirm input{width:auto;margin-top:2px}
+#landingFuelGuardStatus{font-weight:800}
+@media(max-width:850px){.told-grid{grid-template-columns:1fr}.told-speeds{grid-template-columns:repeat(2,1fr)}}
+@media print{
+ body{background:white;color:black}
+ header,#opsView,#buildBadge,.told-actions{display:none!important}
+ #toldView{display:block!important}
+ .card,.told-panel,.told-speed{background:white!important;color:black!important;border-color:#999!important}
+ .small,.told-row span:first-child{color:#444!important}
+}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.3</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.4</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
+<div class="app-tabs">
+<button id="opsTabBtn" class="active" type="button" onclick="showAppTab('ops')">FlightOps</button>
+<button id="toldTabBtn" type="button" onclick="showAppTab('told')">TOLD</button>
+</div>
 <div class="status warn">DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE</div>
 </header>
 <main>
+<div id="opsView">
 <div class="card">
 <h2>1. Mission Setup</h2>
 <div class="row">
@@ -253,8 +289,8 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
-<div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
+<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
+<div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
 <div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
 <div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="0" min="0" oninput="recalculate()"></div>
 </div>
@@ -502,6 +538,11 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="callout small" style="margin-top:12px">
 Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel moment is now calculated from the Falcon 50 DTM912 Revision 13, Section 2 loading schedule and interpolated only between published fuel points.
 </div>
+<div id="lowFuelConfirmBox" class="fuel-confirm">
+  <div style="font-weight:800;margin-bottom:8px">LOW PLANNED LANDING FUEL — CONFIRMATION REQUIRED</div>
+  <div class="small" style="color:#ffd4d4;margin-bottom:9px">Planned landing fuel is below 3,000 lb. Confirm that this is intentional before treating the mission fuel plan as accepted.</div>
+  <label><input id="lowFuelConfirm" type="checkbox" onchange="recalculate()">I confirm that I intend to plan a landing with less than 3,000 lb of fuel.</label>
+</div>
 </div>
 
 
@@ -677,6 +718,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Taxi</td><td id="sideTaxi">0 lb</td></tr>
 <tr><td>Landing Fuel</td><td id="sideLanding">0 lb</td></tr>
 <tr><td>Reserve</td><td id="sideReserve">0 lb</td></tr>
+<tr><td>Minimum Landing Fuel</td><td>3,000 lb</td></tr>
+<tr><td>Landing Fuel Gate</td><td id="landingFuelGuardStatus">—</td></tr>
 <tr><td>Status</td><td id="fuelStatusSide">—</td></tr>
 </table>
 </div>
@@ -698,6 +741,73 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 </aside>
 </div>
+
+</div>
+
+<div id="toldView">
+<div class="card told-card">
+<div class="told-head">
+  <div>
+    <div class="told-title">N33AP — TOLD CARD</div>
+    <div class="small" id="toldRoute">—</div>
+    <div class="small">Takeoff & Landing Data • values mirror active FlightOps calculations</div>
+  </div>
+  <div class="told-actions" style="display:flex;gap:8px">
+    <button type="button" onclick="updateToldCard()">Refresh</button>
+    <button type="button" onclick="window.print()">Print</button>
+  </div>
+</div>
+
+<div id="toldOverall" class="callout small" style="margin-bottom:14px">Load mission and calculate performance.</div>
+
+<div class="told-grid">
+  <div class="told-panel">
+    <h3>TAKEOFF</h3>
+    <div class="told-row"><span>Airport / Runway</span><span id="toldDepRwy">—</span></div>
+    <div class="told-row"><span>Runway / Condition</span><span id="toldDepSurface">—</span></div>
+    <div class="told-row"><span>Wind</span><span id="toldDepWind">—</span></div>
+    <div class="told-row"><span>OAT / Pressure Altitude</span><span id="toldDepWx">—</span></div>
+    <div class="told-row"><span>Takeoff Weight</span><span id="toldTOW">—</span></div>
+    <div class="told-row"><span>Takeoff CG</span><span id="toldTOCG">—</span></div>
+    <div class="told-row"><span>Configuration</span><span id="toldTOConfig">—</span></div>
+    <div class="told-row"><span>Balanced Field Length</span><span id="toldBFL">—</span></div>
+    <div class="told-row"><span>Max Allowable TOW</span><span id="toldMaxTOW">—</span></div>
+    <div class="told-row"><span>Runway Margin</span><span id="toldTORwyMargin">—</span></div>
+    <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
+    <div class="told-speeds">
+      <div class="told-speed"><span class="small">V1</span><b id="toldV1">—</b></div>
+      <div class="told-speed"><span class="small">VR=V2</span><b id="toldVR">—</b></div>
+      <div class="told-speed"><span class="small">Vfr</span><b id="toldVfr">—</b></div>
+      <div class="told-speed"><span class="small">1.5Vs</span><b id="told15Vs">—</b></div>
+      <div class="told-speed"><span class="small">Emer VREF</span><b id="toldEmerVref">—</b></div>
+    </div>
+  </div>
+
+  <div class="told-panel">
+    <h3>LANDING</h3>
+    <div class="told-row"><span>Airport / Runway</span><span id="toldDestRwy">—</span></div>
+    <div class="told-row"><span>Runway / Condition</span><span id="toldDestSurface">—</span></div>
+    <div class="told-row"><span>Wind</span><span id="toldDestWind">—</span></div>
+    <div class="told-row"><span>Pressure Altitude</span><span id="toldDestPA">—</span></div>
+    <div class="told-row"><span>Landing Weight</span><span id="toldLDW">—</span></div>
+    <div class="told-row"><span>Landing Fuel</span><span id="toldLandingFuel">—</span></div>
+    <div class="told-row"><span>Landing CG</span><span id="toldLDGCG">—</span></div>
+    <div class="told-row"><span>Configuration</span><span id="toldLDGConfig">—</span></div>
+    <div class="told-row"><span>VREF</span><span id="toldVref">—</span></div>
+    <div class="told-row"><span>Landing Field Length</span><span id="toldLFL">—</span></div>
+    <div class="told-row"><span>Max Allowable Landing Weight</span><span id="toldMaxLDW">—</span></div>
+    <div class="told-row"><span>Runway Margin</span><span id="toldLdgRwyMargin">—</span></div>
+    <div class="told-row"><span>Fuel Gate</span><span id="toldFuelGate">—</span></div>
+    <div class="told-row"><span>Status</span><span id="toldLDGStatus">—</span></div>
+  </div>
+</div>
+
+<div class="callout small" style="margin-top:14px">
+TOLD values are displayed from the active FlightOps calculation only. Source-locked or unevaluated items remain visibly unavailable; no extrapolation is performed.
+</div>
+</div>
+</div>
+
 </main>
 <script src="/config.js"></script>
 <script>
@@ -787,6 +897,73 @@ let editingPaxId=null;
 
 const $=id=>document.getElementById(id);
 const num=id=>+$((id)).value||0;
+let latestCalc=null;
+
+function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
+function showAppTab(tab){
+ const told=tab==="told";
+ $("opsView").style.display=told?"none":"block";
+ $("toldView").style.display=told?"block":"none";
+ $("opsTabBtn").classList.toggle("active",!told);
+ $("toldTabBtn").classList.toggle("active",told);
+ if(told)updateToldCard();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function textOf(id){const e=$(id);return e&&e.textContent.trim()?e.textContent.trim():"—"}
+function selectedRunwayObj(which){
+ if(!missionData)return null;
+ const dep=which==="dep",sel=$(dep?"depRunway":"destRunway");
+ const arr=dep?(missionData.departure.runways||[]):(missionData.destination.runways||[]);
+ return arr[+sel.value]||null;
+}
+function updateToldCard(){
+ const c=latestCalc||{};
+ const depCode=$("dep").value.toUpperCase().trim()||"—",destCode=$("dest").value.toUpperCase().trim()||"—";
+ const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
+ const dw=dr&&dr.wind_components||{},lw=lr&&lr.wind_components||{};
+ const temp=depTempC();
+ $("toldRoute").textContent=`${depCode} → ${destCode}`;
+ $("toldDepRwy").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
+ $("toldDepSurface").textContent=`${dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
+ $("toldDepWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
+ $("toldDepWx").textContent=`${temp==null?"—":temp+"°C"} / ${missionData&&Number.isFinite(Number(missionData.departure.pressure_altitude_ft))?Math.round(Number(missionData.departure.pressure_altitude_ft)).toLocaleString()+" ft":"—"}`;
+ $("toldTOW").textContent=Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—";
+ $("toldTOCG").textContent=Number.isFinite(c.takeoffPct)?`${c.takeoffPct.toFixed(2)}% MAC`:"—";
+ $("toldTOConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
+ $("toldBFL").textContent=$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED";
+ $("toldMaxTOW").textContent=textOf("toMax");
+ $("toldTORwyMargin").textContent=textOf("toRwyMargin");
+ $("toldTOStatus").textContent=textOf("toStatus");
+ $("toldV1").textContent=textOf("vsV1");
+ $("toldVR").textContent=textOf("vsVR");
+ $("toldVfr").textContent=textOf("vsVFT");
+ $("told15Vs").textContent=textOf("vsVFS");
+ $("toldEmerVref").textContent=textOf("vsVREF");
+
+ $("toldDestRwy").textContent=`${destCode} / ${lr?lr.runway_id:"—"}`;
+ $("toldDestSurface").textContent=`${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?$("landRunwayCondition").value:"DRY"}`;
+ $("toldDestWind").textContent=lr?`HW ${esc(lw.headwind_kt)} • TW ${esc(lw.tailwind_kt)} • XW ${esc(lw.crosswind_kt)} kt`:"—";
+ $("toldDestPA").textContent=missionData&&Number.isFinite(Number(missionData.destination.pressure_altitude_ft))?Math.round(Number(missionData.destination.pressure_altitude_ft)).toLocaleString()+" ft":"—";
+ $("toldLDW").textContent=Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—";
+ $("toldLandingFuel").textContent=Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—";
+ $("toldLDGCG").textContent=Number.isFinite(c.landingPct)?`${c.landingPct.toFixed(2)}% MAC`:"—";
+ $("toldLDGConfig").textContent=FS_PERF.landing[$("landConfig").value]?.label||"—";
+ $("toldVref").textContent=$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED";
+ $("toldLFL").textContent=$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"SOURCE LOCKED";
+ $("toldMaxLDW").textContent=textOf("landMax");
+ $("toldLdgRwyMargin").textContent=textOf("landRwyMargin");
+ $("toldFuelGate").textContent=textOf("landingFuelGuardStatus");
+ $("toldLDGStatus").textContent=textOf("landStatus");
+
+ const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
+ const confirmed=$("lowFuelConfirm")?.checked;
+ const issues=[];
+ if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
+ if(textOf("toStatus").includes("PENDING")||textOf("toStatus").includes("LOCKED"))issues.push("TAKEOFF LIMITS NOT FULLY EVALUATED");
+ if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
+ $("toldOverall").textContent=issues.length?issues.join(" • "):"TOLD DATA CURRENT — review all values before use.";
+ $("toldOverall").className=issues.length?"callout small warn":"callout small ok";
+}
 const esc=x=>x==null?"—":x;
 function pctMacFromArm(arm){return 25+arm/1.1177}
 function interp(p,w){if(w<=p[0][0])return p[0][1];if(w>=p[p.length-1][0])return p[p.length-1][1];for(let i=0;i<p.length-1;i++){let a=p[i],b=p[i+1];if(w>=a[0]&&w<=b[0])return a[1]+(b[1]-a[1])*(w-a[0])/(b[0]-a[0])}}
@@ -949,6 +1126,13 @@ function drawTrace(zfwW,zfwCG,path,toW,toCG,ldW,ldCG){
    x.fillText(ww.toLocaleString(),4,py(ww)+4);
    x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke();
  }
+ // Structural maximum takeoff weight reference
+ x.save();
+ x.strokeStyle="#ff6b6b";x.lineWidth=2;x.setLineDash([8,5]);
+ x.beginPath();x.moveTo(40,py(maxTO));x.lineTo(W-20,py(maxTO));x.stroke();
+ x.setLineDash([]);x.fillStyle="#ffb0b0";x.font="bold 11px Arial";
+ x.fillText(`MTOW ${maxTO.toLocaleString()} lb`,Math.max(45,W-160),py(maxTO)-6);
+ x.restore();
  for(let cg=10;cg<=35;cg+=5){
    x.fillText(String(cg),px(cg)-5,H-12);
    x.beginPath();x.moveTo(px(cg),18);x.lineTo(px(cg),H-30);x.stroke();
@@ -1172,6 +1356,9 @@ function recalculate(){
  const toFl=interp(fwd,tow),toAl=interp(aft,tow),ldFl=interp(fwd,landing),ldAl=interp(aft,landing);
  const cgPathOK=burnPath.length?burnPath.every(p=>p.pct>=interp(fwd,p.weight)&&p.pct<=interp(aft,p.weight)):false;
  const wbOK=seatMatch&&pct>=fl&&pct<=al&&takeoffPct>=toFl&&takeoffPct<=toAl&&landingPct>=ldFl&&landingPct<=ldAl&&cgPathOK&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
+ const lowLandingFuel=landingFuel<3000;
+ const lowLandingFuelConfirmed=!lowLandingFuel || !!$("lowFuelConfirm")?.checked;
+ latestCalc={zfw,ramp,tow,landing,landingFuel,reserve,pct,takeoffPct,landingPct,takeoffArm,landingArm,burnPath,wbOK,lowLandingFuel,lowLandingFuelConfirmed};
 
  $("paxRequestedDisplay").textContent=requested;
  $("paxSeatedDisplay").textContent=seatedCount;
@@ -1214,7 +1401,20 @@ function recalculate(){
  $("sideFOB").textContent=fob.toLocaleString()+" lb";$("sideMission").textContent=missionFuel.toLocaleString()+" lb";
  $("sideTaxi").textContent=taxi.toLocaleString()+" lb";$("sideLanding").textContent=landingFuel.toLocaleString()+" lb";
  $("sideReserve").textContent=reserve.toLocaleString()+" lb";
- const fs=$("fuelStatusSide");fs.textContent=fuelOK?"SUFFICIENT":"INSUFFICIENT";fs.className=fuelOK?"ok":"bad";
+ const lowBox=$("lowFuelConfirmBox"),lowGate=$("landingFuelGuardStatus");
+ if(lowLandingFuel){
+   lowBox.style.display="block";
+   lowGate.textContent=lowLandingFuelConfirmed?"CONFIRMED BELOW 3,000":"CONFIRM REQUIRED";
+   lowGate.className=lowLandingFuelConfirmed?"warn":"bad";
+ }else{
+   lowBox.style.display="none";
+   if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
+   lowGate.textContent="≥ 3,000 lb";
+   lowGate.className="ok";
+ }
+ const fs=$("fuelStatusSide");
+ fs.textContent=!fuelOK?"INSUFFICIENT":(!lowLandingFuelConfirmed?"CONFIRM LOW LANDING FUEL":"SUFFICIENT");
+ fs.className=!fuelOK||!lowLandingFuelConfirmed?"bad":"ok";
 
  const tb=$("autoLoadTable");tb.innerHTML="";
  loadRows.forEach(r=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${r.name}</td><td>${r.desc}</td><td>${r.arm.toFixed(2)} in</td><td>${Math.round(r.load).toLocaleString()} lb</td><td>${Math.round(r.moment).toLocaleString()}</td>`;tb.appendChild(tr)});
@@ -1226,6 +1426,7 @@ function recalculate(){
  syncLandingSection();
  updateVSpeedCard(tow,landing);
  drawTrace(zfw,pct,burnPath,tow,takeoffPct,landing,landingPct);
+ updateToldCard();
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
 function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
