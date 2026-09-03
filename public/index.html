@@ -95,15 +95,16 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
+
 .floorplan-cabin{
   position:relative;
-  width:min(540px,96%);
-  min-height:900px;
+  width:min(560px,96%);
+  min-height:980px;
   margin:0 auto;
-  padding:54px 46px 38px;
+  padding:54px 40px 34px;
   background:#071f3b;
   border:2px solid #3d6287;
-  border-radius:42% 42% 30px 30px / 92px 92px 30px 30px;
+  border-radius:42% 42% 32px 32px / 96px 96px 32px 32px;
   overflow:hidden;
 }
 .cabin-titlebar{
@@ -111,32 +112,46 @@ details summary{cursor:pointer;margin-top:8px}
   font-size:12px;letter-spacing:.15em;font-weight:800;color:var(--muted)
 }
 .nose-fp{
-  width:190px;margin:12px auto 12px;display:grid;grid-template-columns:1fr 1fr;
-  gap:18px;padding:16px 22px 18px;border-bottom:1px solid #31506f
+  width:205px;margin:12px auto 6px;display:grid;grid-template-columns:1fr 1fr;
+  gap:18px;padding:16px 22px 16px;border-bottom:1px solid #31506f
 }
 .cockpit-seat{
   min-height:58px;border:2px solid #42688e;border-radius:15px;background:#102f51;
   color:#b8cde2;display:flex;align-items:center;justify-content:center;text-align:center;
   font-size:10px;font-weight:800;line-height:1.15
 }
-.forward-service-fp{
-  position:relative;width:100%;height:116px;border-top:1px solid #31506f;
-  border-bottom:1px solid #31506f;margin-bottom:14px
+.jump-row-fp{
+  width:100%;display:grid;grid-template-columns:1fr 1fr;gap:98px;margin:0 auto 10px;
+}
+.blank-slot{
+  min-height:72px;border:1px dashed transparent;background:transparent
+}
+.jumpseat-inner{
+  min-height:72px;border:2px solid #42688e;border-radius:14px;background:#0d2947;color:var(--text);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;line-height:1.15
+}
+.jumpseat-title{font-size:12px;font-weight:800;letter-spacing:.08em}
+.jumpseat-sub{font-size:10px;color:var(--muted);margin-top:4px;text-align:center}
+.service-grid-fp{
+  display:grid;grid-template-columns:1fr 1fr;gap:98px;align-items:start;
+  width:100%;margin:0 auto 12px;padding:12px 0;border-top:1px solid #31506f;border-bottom:1px solid #31506f
+}
+.service-stack-left{
+  display:grid;grid-template-rows:auto auto;gap:10px;
 }
 .fixture{
   border:1px dashed #31506f;border-radius:10px;background:#0a223c;color:var(--muted);
-  font-size:10px;font-weight:700;text-align:center;line-height:1.2;padding:9px 6px
+  font-size:10px;font-weight:700;text-align:center;line-height:1.2;padding:10px 6px;
+  min-height:62px;display:flex;align-items:center;justify-content:center
 }
-.galley-fp{position:absolute;left:4px;top:18px;width:112px;height:72px;display:flex;align-items:center;justify-content:center}
-.entry-fp{position:absolute;right:4px;top:18px;width:104px;height:72px;display:flex;align-items:center;justify-content:center}
-.forward-cabinet-fp{position:absolute;left:50%;transform:translateX(-50%);top:28px;width:78px;height:55px;display:flex;align-items:center;justify-content:center}
+.galley-fp{min-height:134px}
 .cabin-aisle-fp{
-  position:absolute;left:50%;transform:translateX(-50%);top:300px;bottom:176px;width:64px;
+  position:absolute;left:50%;transform:translateX(-50%);top:352px;bottom:166px;width:64px;
   border-left:1px dashed #31506f;border-right:1px dashed #31506f;opacity:.78;z-index:0
 }
 .seat-row-fp{
   position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;
-  gap:104px;margin:0 auto 12px;width:100%
+  gap:98px;margin:0 auto 12px;width:100%
 }
 .seat-fp{min-width:0}
 .tap-seat{
@@ -149,32 +164,71 @@ details summary{cursor:pointer;margin-top:8px}
 .seat-number{font-size:23px;font-weight:800;line-height:1}
 .seat-name{font-size:10px;color:var(--muted);text-align:center}
 .seat-occupant{font-size:11px;font-weight:700;margin-top:3px;text-align:center}
-.aft-open-fp{
-  min-height:90px;border:1px dashed #31506f;border-radius:14px;background:#0a223c;color:var(--muted);
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;letter-spacing:.08em
-}
 .aft-service-fp{
-  position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:104px;width:100%;
+  position:relative;z-index:2;display:grid;grid-template-columns:1fr 1fr;gap:98px;width:100%;
   margin-top:4px;padding-top:14px;border-top:1px solid #31506f
 }
-.aft-service-fp .lav-fp{min-height:84px;display:flex;align-items:center;justify-content:center}
-.jumpseat-inner{
-  min-height:84px;border:2px solid #42688e;border-radius:14px;background:#0d2947;color:var(--text);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;line-height:1.15
-}
-.jumpseat-title{font-size:12px;font-weight:800;letter-spacing:.08em}
-.jumpseat-sub{font-size:10px;color:var(--muted);margin-top:4px;text-align:center}
 .tail-label-fp{margin-top:15px;text-align:center;font-size:10px;font-weight:800;letter-spacing:.18em;color:var(--muted)}
+.baggage-deck-fp{
+  margin-top:14px;
+  padding-top:14px;
+  border-top:1px solid #31506f;
+  position:relative;
+  z-index:2;
+}
+.baggage-title-fp{
+  text-align:center;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:.18em;
+  color:var(--muted);
+  margin-bottom:10px;
+}
+.baggage-grid-fp{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.bag-cell{
+  border:1px solid #31506f;
+  border-radius:12px;
+  background:#0a223c;
+  padding:10px;
+  text-align:center;
+}
+.bag-title{
+  font-size:12px;
+  font-weight:800;
+  color:var(--text);
+  letter-spacing:.06em;
+}
+.bag-limit{
+  font-size:10px;
+  color:var(--muted);
+  margin:4px 0 8px;
+}
+.bag-input{
+  width:100%;
+  text-align:center;
+}
+.bag-summary-fp{
+  margin-top:8px;
+  text-align:center;
+  font-size:11px;
+  color:var(--muted);
+}
+
 @media(max-width:700px){
   .floorplan-cabin{width:100%;min-height:0;padding:52px 18px 28px;border-radius:34px}
   .nose-fp{width:170px}
-  .seat-row-fp,.aft-service-fp{gap:38px}
+  .seat-row-fp,.aft-service-fp,.jump-row-fp,.service-grid-fp{gap:34px}
   .cabin-aisle-fp{width:30px}
 }
 @media(max-width:460px){
-  .seat-row-fp,.aft-service-fp{gap:22px}
+  .seat-row-fp,.aft-service-fp,.jump-row-fp,.service-grid-fp{gap:18px}
   .tap-seat{min-height:80px}
   .seat-number{font-size:20px}
+  .galley-fp{min-height:110px}
 }
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -182,7 +236,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.5.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.8</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -215,7 +269,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="row" style="margin-top:10px">
 <div><label>Captain Weight lb</label><input id="captWt" type="number" value="190" min="0" oninput="recalculate()"></div>
 <div><label>First Officer Weight lb</label><input id="foWt" type="number" value="190" min="0" oninput="recalculate()"></div>
-<div><label>Total Baggage lb</label><input id="totalBag" type="number" value="0" min="0" oninput="recalculate()"></div>
+<div><label>Total Baggage lb</label><input id="totalBag" type="number" value="0" min="0" oninput="onTotalBagInput()"></div>
 <div></div>
 </div>
 <div id="missionStatus" class="small" style="margin-top:10px">Ready.</div>
@@ -242,14 +296,26 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
   <div class="cabin-titlebar">N33AP CABIN LAYOUT</div>
 
   <div class="nose-fp">
-    <div class="cockpit-seat">FLIGHT<br>DECK</div>
-    <div class="cockpit-seat">FLIGHT<br>DECK</div>
+    <div class="cockpit-seat">FLIGHT DECK<br>LEFT</div>
+    <div class="cockpit-seat">FLIGHT DECK<br>RIGHT</div>
   </div>
 
-  <div class="forward-service-fp">
+  <div class="jump-row-fp">
+    <div class="blank-slot"></div>
+    <div class="jumpseat-fp">
+      <div class="jumpseat-inner">
+        <div class="jumpseat-title">JUMP SEAT</div>
+        <div class="jumpseat-sub">Aft of RH Flight Deck Seat</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="service-grid-fp">
+    <div class="service-stack-left">
+      <div class="fixture entry-fp">ENTRY<br>DOOR</div>
+      <div class="fixture closet-fp">CLOSET</div>
+    </div>
     <div class="fixture galley-fp">GALLEY</div>
-    <div class="fixture forward-cabinet-fp">CABINET</div>
-    <div class="fixture entry-fp">ENTRY<br>DOOR</div>
   </div>
 
   <div class="cabin-aisle-fp"></div>
@@ -265,28 +331,45 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
   </div>
 
   <div class="seat-row-fp">
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Single / LH</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Aft Lounge</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Row 3 LH</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Row 3 RH</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button></div>
   </div>
 
   <div class="seat-row-fp">
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Aft Lounge</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Aft Lounge</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button></div>
+    <div class="blank-slot"></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Former 8 Position</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button></div>
   </div>
 
   <div class="seat-row-fp">
     <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft LH</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button></div>
-    <div class="aft-open-fp">AFT CABIN</div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Across from Seat 9</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button></div>
   </div>
 
   <div class="aft-service-fp">
     <div class="fixture lav-fp">TOILET /<br>LAV</div>
-    <div class="jumpseat-fp">
-      <div class="jumpseat-inner">
-        <div class="jumpseat-title">JUMP SEAT</div>
-        <div class="jumpseat-sub">Crew / Observer</div>
+    <div class="blank-slot"></div>
+  </div>
+
+  <div class="baggage-deck-fp">
+    <div class="baggage-title-fp">BAGGAGE COMPARTMENTS</div>
+    <div class="baggage-grid-fp">
+      <div class="bag-cell">
+        <div class="bag-title">BAG I</div>
+        <div class="bag-limit">Arm 82.65 • Max 681 lb</div>
+        <input id="bagComp0" class="bag-input" type="number" min="0" max="681" value="0">
+      </div>
+      <div class="bag-cell">
+        <div class="bag-title">BAG II</div>
+        <div class="bag-limit">Arm 101.71 • Max 762 lb</div>
+        <input id="bagComp1" class="bag-input" type="number" min="0" max="762" value="0">
+      </div>
+      <div class="bag-cell">
+        <div class="bag-title">BAG III</div>
+        <div class="bag-limit">Arm 123.95 • Max 762 lb</div>
+        <input id="bagComp2" class="bag-input" type="number" min="0" max="762" value="0">
       </div>
     </div>
+    <div class="bag-summary-fp" id="bagStatusNote">Total loaded baggage 0 / 2,205 lb</div>
   </div>
 
   <div class="tail-label-fp">AFT</div>
@@ -417,7 +500,7 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="wx"><div class="small">Fuel Reserve</div><b id="fuelReserveCalc">0 lb</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusive <b>CG</b> is still locked until the approved DTM912 Section 2 variable fuel-moment schedule is validated.
+Fuel is fully included in ramp, takeoff and landing <b>weight</b>. The CG chart now shows a <b>projected takeoff-to-landing trace</b> using a temporary neutral fuel-arm model (<b>0.00 in</b>) until the approved DTM912 Section 2 variable fuel-moment schedule is validated.
 </div>
 </div>
 
@@ -450,8 +533,17 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 </div>
 
 <div class="card">
-<h2>Zero-Fuel CG Envelope</h2>
+<h2>CG Envelope — Takeoff to Landing</h2>
 <canvas id="cgChart"></canvas>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Takeoff CG</div><b id="cgTakeoff">—</b><div class="small" id="cgTakeoffArm">—</div></div>
+<div class="wx"><div class="small">Landing CG</div><b id="cgLanding">—</b><div class="small" id="cgLandingArm">—</div></div>
+<div class="wx"><div class="small">Trace Status</div><b id="cgTraceStatus" class="warn">ESTIMATED</b><div class="small" id="cgTraceNote">Fuel arm model pending</div></div>
+<div class="wx"><div class="small">Zero-Fuel CG</div><b id="cgZeroFuel">—</b><div class="small" id="cgZeroFuelArm">—</div></div>
+</div>
+<div class="callout small" style="margin-top:12px">
+The chart shows a <b>takeoff point</b>, a <b>fuel-burn trace</b>, and a <b>landing point</b>. Until the approved Falcon 50-4 variable fuel-moment schedule is validated, the trace uses a temporary neutral fuel-arm model of <b>0.00 in</b>. Development / not for flight use.
+</div>
 </div>
 
 <div class="card">
@@ -592,7 +684,7 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 const FLIGHTOPS_API_BASE=(window.FLIGHTOPS_API_BASE||"").replace(/\/$/,"");
 function apiUrl(path){return FLIGHTOPS_API_BASE+path}
 
-const emptyWeight=21479.30,emptyMoment=127185.96,maxZFW=25570,maxRamp=40780,maxTO=40780,maxLand=35715,maxFuel=15514;
+const emptyWeight=21479.30,emptyMoment=127185.96,maxZFW=25570,maxRamp=40780,maxTO=40780,maxLand=35715,maxFuel=15514,fuelArmApprox=0.00;
 const paxDefaults={male:180,female:150,child:70};
 const paxLabels={male:"Adult Male",female:"Adult Female",child:"Child"};
 const seats=[
@@ -772,17 +864,94 @@ function distributeBaggage(total){
  baggageStations.forEach(s=>{const load=Math.min(remaining,s.limit);out.push({...s,load});remaining-=load});
  return{stations:out,overflow:remaining};
 }
-function draw(w,cg){
- const c=$("cgChart");if(!c)return;
- const dpr=devicePixelRatio||1,W=c.clientWidth,H=300;c.width=W*dpr;c.height=H*dpr;
- const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
- const minW=18000,maxW=41000,minCG=10,maxCG=35,px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>H-35-(v-minW)/(maxW-minW)*(H-60);
- x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
- for(let ww=20000;ww<=40000;ww+=5000){x.fillText(ww.toLocaleString(),4,py(ww)+4);x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke()}
- x.strokeStyle="#ffca58";x.lineWidth=2;x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.strokeStyle="#55d18b";x.beginPath();aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.fillStyle="#edf5ff";x.beginPath();x.arc(px(cg),py(w),6,0,Math.PI*2);x.fill();
+function baggageLoadsFromUI(){
+ return baggageStations.map((s,i)=>{
+   const el=$("bagComp"+i);
+   const raw=Number(el&&el.value!==""?el.value:0);
+   const load=Math.max(0,Math.min(s.limit,Number.isFinite(raw)?raw:0));
+   if(el&&String(load)!==String(raw))el.value=load;
+   return load;
+ });
 }
+function syncTotalBagFromCompartments(){
+ const loads=baggageLoadsFromUI();
+ const total=loads.reduce((a,b)=>a+b,0);
+ $("totalBag").value=Math.round(total);
+ $("bagStatusNote").textContent=`Total loaded baggage ${Math.round(total).toLocaleString()} / 2,205 lb`;
+ return total;
+}
+function setBaggageFromTotal(total){
+ const dist=distributeBaggage(total);
+ dist.stations.forEach((s,i)=>{$("bagComp"+i).value=Math.round(s.load)});
+ syncTotalBagFromCompartments();
+ return dist;
+}
+function onTotalBagInput(){
+ setBaggageFromTotal(Math.max(0,num("totalBag")));
+ recalculate();
+}
+function onBaggageCompInput(){
+ syncTotalBagFromCompartments();
+ recalculate();
+}
+function drawTrace(zfwW,zfwCG,toW,toCG,ldW,ldCG){
+ const c=$("cgChart");if(!c)return;
+ const dpr=devicePixelRatio||1,W=c.clientWidth,H=320;c.width=W*dpr;c.height=H*dpr;
+ const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
+
+ const minW=18000,maxW=41000,minCG=10,maxCG=35;
+ const px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70);
+ const py=v=>H-35-(v-minW)/(maxW-minW)*(H-60);
+
+ x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
+ for(let ww=20000;ww<=40000;ww+=5000){
+   x.fillText(ww.toLocaleString(),4,py(ww)+4);
+   x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke();
+ }
+ for(let cg=10;cg<=35;cg+=5){
+   x.fillText(String(cg),px(cg)-5,H-12);
+   x.beginPath();x.moveTo(px(cg),18);x.lineTo(px(cg),H-30);x.stroke();
+ }
+ x.fillText("% MAC",W-58,H-12);
+
+ x.strokeStyle="#ffca58";x.lineWidth=2;x.beginPath();
+ fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));
+ x.stroke();
+
+ x.strokeStyle="#55d18b";x.beginPath();
+ aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));
+ x.stroke();
+
+ if(Number.isFinite(toW)&&Number.isFinite(toCG)&&Number.isFinite(ldW)&&Number.isFinite(ldCG)){
+   x.save();
+   x.setLineDash([8,6]);
+   x.strokeStyle="#8fd3ff";
+   x.lineWidth=3;
+   x.beginPath();
+   x.moveTo(px(toCG),py(toW));
+   x.lineTo(px(ldCG),py(ldW));
+   x.stroke();
+   x.restore();
+
+   x.fillStyle="#8fd3ff";
+   x.beginPath();x.arc(px(toCG),py(toW),6,0,Math.PI*2);x.fill();
+   x.fillStyle="#55d18b";
+   x.beginPath();x.arc(px(ldCG),py(ldW),6,0,Math.PI*2);x.fill();
+
+   x.fillStyle="#d6e7f8";
+   x.font="bold 11px Arial";
+   x.fillText("TO",px(toCG)+8,py(toW)-8);
+   x.fillText("LDG",px(ldCG)+8,py(ldW)-8);
+ }
+
+ if(Number.isFinite(zfwW)&&Number.isFinite(zfwCG)){
+   x.fillStyle="#edf5ff";
+   x.beginPath();x.arc(px(zfwCG),py(zfwW),4,0,Math.PI*2);x.fill();
+   x.font="10px Arial";
+   x.fillText("ZFW",px(zfwCG)+8,py(zfwW)+14);
+ }
+}
+
 function updateVSpeedCard(tow,landing){
  const toAuto=autoTO();
  const v1=toAuto.v1,vr=toAuto.vr,vfr=toAuto.vfr,v15vs=toAuto.v15vs;
@@ -828,7 +997,7 @@ function recalculate(){
  const requested=passengers.length;
  const seatedCount=seatAssignments.filter(Boolean).length;
  const unseated=requested-seatedCount;
- const capt=num("captWt"),fo=num("foWt"),crew=capt+fo,bag=Math.max(0,num("totalBag"));
+ const capt=num("captWt"),fo=num("foWt"),crew=capt+fo; const bagLoads=baggageLoadsFromUI(); const bag=bagLoads.reduce((a,b)=>a+b,0);
  let fob=Math.min(maxFuel,Math.max(0,num("fuel")));$("fuel").value=fob;
  let missionFuel=Math.min(maxFuel,Math.max(0,num("missionFuel")));$("missionFuel").value=missionFuel;
  const taxi=Math.max(0,num("taxiFuel"));
@@ -843,11 +1012,18 @@ function recalculate(){
    loadRows.push({name:`Seat ${s.n}`,desc:p?`PAX ${p.id} — ${paxLabels[p.type]}`:"Empty",arm:s.arm,load,moment:load*s.arm});
  });
 
- const bd=distributeBaggage(bag);
+ const bd={stations:baggageStations.map((s,i)=>({...s,load:bagLoads[i]})),overflow:0};
  bd.stations.forEach(s=>{w+=s.load;m+=s.load*s.arm;loadRows.push({name:s.name,desc:"Baggage",arm:s.arm,load:s.load,moment:s.load*s.arm})});
 
  const zfw=w,arm=m/w,pct=pctMacFromArm(arm),fl=interp(fwd,w),al=interp(aft,w);
  const ramp=zfw+fob,tow=ramp-taxi,landingFuel=Math.max(0,fob-missionFuel),landing=zfw+landingFuel,reserve=fob-missionFuel;
+ const takeoffFuel=Math.max(0,fob-taxi);
+ const takeoffMoment=m+(takeoffFuel*fuelArmApprox);
+ const landingMoment=m+(landingFuel*fuelArmApprox);
+ const takeoffArm=tow>0?takeoffMoment/tow:arm;
+ const landingArm=landing>0?landingMoment/landing:arm;
+ const takeoffPct=pctMacFromArm(takeoffArm);
+ const landingPct=pctMacFromArm(landingArm);
  const seatMatch=requested===seatedCount,fuelOK=reserve>=0;
  const wbOK=seatMatch&&pct>=fl&&pct<=al&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
 
@@ -860,7 +1036,7 @@ function recalculate(){
 
  $("crewCalc").textContent=crew.toLocaleString()+" lb";
  $("paxCalc").textContent=paxWeight.toLocaleString()+" lb";
- $("bagCalc").textContent=bag.toLocaleString()+" lb";
+ $("bagCalc").textContent=bag.toLocaleString()+" lb"; $("bagStatusNote").textContent=`Total loaded baggage ${Math.round(bag).toLocaleString()} / 2,205 lb`;
  $("fuelCalc").textContent=fob.toLocaleString()+" lb";
  $("missionFuelCalc").textContent=missionFuel.toLocaleString()+" lb";
  $("landingFuelCalc").textContent=landingFuel.toLocaleString()+" lb";
@@ -872,7 +1048,15 @@ function recalculate(){
  $("cgarm").textContent=arm.toFixed(2)+'"';
  $("cgmac").textContent=pct.toFixed(2)+"%";
  $("cgLimits").textContent=`${fl.toFixed(2)}–${al.toFixed(2)}%`;
-
+ $("cgZeroFuel").textContent=pct.toFixed(2)+"%";
+ $("cgZeroFuelArm").textContent=arm.toFixed(2)+'"';
+ $("cgTakeoff").textContent=takeoffPct.toFixed(2)+"%";
+ $("cgTakeoffArm").textContent=takeoffArm.toFixed(2)+'"';
+ $("cgLanding").textContent=landingPct.toFixed(2)+"%";
+ $("cgLandingArm").textContent=landingArm.toFixed(2)+'"';
+ $("cgTraceStatus").textContent="ESTIMATED TRACE";
+ $("cgTraceStatus").className="warn";
+ $("cgTraceNote").textContent=`Using fuel arm ${fuelArmApprox.toFixed(2)} in until validated fuel-moment data is loaded`;
  const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS");env.className=wbOK?"ok":"bad";
  $("limZFW").textContent=`${Math.round(zfw).toLocaleString()} / ${maxZFW.toLocaleString()} lb`;
  $("limRamp").textContent=`${Math.round(ramp).toLocaleString()} / ${maxRamp.toLocaleString()} lb`;
@@ -909,7 +1093,7 @@ function recalculate(){
    if(ldAuto.lfl==null)$("landFieldLen").value="";
  }
  updateVSpeedCard(tow,landing);
- draw(zfw,pct);
+ drawTrace(zfw,pct,tow,takeoffPct,landing,landingPct);
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
 function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
@@ -969,9 +1153,13 @@ async function loadMission(){
      $("altMetar").innerHTML="—";$("altTaf").innerHTML="—";$("altMetarRaw").textContent="—";$("altTafRaw").textContent="—";
    }
    fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
+   if((missionData.departure.runways||[]).length)$("depRunway").selectedIndex=0;
+   if((missionData.destination.runways||[]).length)$("destRunway").selectedIndex=0;
    const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
-   $("sumWX").textContent="LIVE";$("sumWX").className="ok";$("sumFAA").textContent=(missionData.departure.runways||[]).length?"LOADED":"NO RUNWAY DATA";$("sumFAA").className=(missionData.departure.runways||[]).length?"ok":"warn";
-   $("missionStatus").innerHTML='<span class="ok">Mission loaded.</span>';selectedRunwayChanged();recalculate();
+   const depCount=(missionData.departure.runways||[]).length,destCount=(missionData.destination.runways||[]).length;
+   $("sumWX").textContent="LIVE";$("sumWX").className="ok";$("sumFAA").textContent=depCount&&destCount?"LOCAL DB":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA");$("sumFAA").className=depCount&&destCount?"ok":"warn";
+   selectedRunwayChanged();recalculate();
+   $("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} • ${dest} ${destCount}. First available runway auto-selected.`:`<span class="warn">Mission weather loaded, but no runway data was found in the local runway database for ${dep} or ${dest}.</span>`;
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
 }
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
@@ -1022,8 +1210,11 @@ $("closePaxEditor").addEventListener("click",closePaxEditor);
 $("continueResultsBtn").addEventListener("click",continueToResults);
 $("toConfig").addEventListener("change",()=>{autoTO();updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0)});
 $("landConfig").addEventListener("change",()=>{autoLDG();updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0)});
-["captWt","foWt","totalBag","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref"].forEach(id=>$(id).addEventListener("input",recalculate));
+$("totalBag").addEventListener("input",onTotalBagInput);
+["bagComp0","bagComp1","bagComp2"].forEach(id=>$(id).addEventListener("input",onBaggageCompInput));
+["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref"].forEach(id=>$(id).addEventListener("input",recalculate));
 
+setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
 startupCheck();
 addEventListener("resize",recalculate);
