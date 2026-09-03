@@ -92,36 +92,34 @@ canvas{width:100%;height:300px;background:#06182c;border-radius:10px}
 details summary{cursor:pointer;margin-top:8px}
 @media(max-width:800px){.weather-decode-grid{grid-template-columns:1fr}}
 
+
 .floorplan-cabin{
   position:relative;
   max-width:1080px;
   margin:0 auto;
-  padding:56px 34px 40px;
-  min-height:420px;
-  background:#081d34;
+  min-height:520px;
+  padding:52px 24px 24px;
+  background:#071f3b;
   border:2px solid #3d6287;
-  border-radius:24px;
+  border-radius:26px;
   overflow:hidden;
-  display:grid;
-  grid-template-columns: 82px 150px 36px 150px 165px 150px 36px 150px 96px;
-  grid-template-rows: 34px 84px 84px 84px 84px;
-  gap:14px 10px;
-  align-items:center;
 }
 .cabin-titlebar{
-  position:absolute; top:10px; left:0; right:0; text-align:center;
-  font-size:12px; letter-spacing:.14em; font-weight:800; color:var(--muted);
+  position:absolute; top:12px; left:0; right:0; text-align:center;
+  font-size:12px; letter-spacing:.16em; font-weight:800; color:var(--muted);
 }
 .cabin-side-label{
-  position:absolute; top:36px; font-size:10px; letter-spacing:.15em; color:var(--muted); font-weight:700;
+  position:absolute; top:34px; font-size:11px; letter-spacing:.16em; color:#b8cde2; font-weight:700;
 }
 .left-side{ left:42px; }
 .right-side{ right:42px; }
 .floor-centerline{
   position:absolute; top:46px; bottom:24px; left:50%;
-  border-left:2px dashed #31506f; opacity:.75;
+  border-left:2px dashed #31506f; opacity:.8;
 }
 .zone{
+  position:absolute;
+  z-index:1;
   border:1px dashed #31506f;
   border-radius:12px;
   padding:10px 8px;
@@ -129,37 +127,45 @@ details summary{cursor:pointer;margin-top:8px}
   color:var(--muted);
   font-size:10px;
   font-weight:700;
-  letter-spacing:.08em;
+  letter-spacing:.09em;
   background:#0a223c;
+  line-height:1.15;
 }
-.closet-zone{ grid-column:1; grid-row:1 / span 1; align-self:start; }
-.galley-zone{ grid-column:1; grid-row:2 / span 2; }
-.exit-zone{ grid-column:5; grid-row:2; }
-.lav-zone{ grid-column:9; grid-row:4; }
-.airstair-zone{ grid-column:9; grid-row:5; }
-.slot{ position:relative; z-index:2; }
-.s2{ grid-column:2; grid-row:2; }
-.s1{ grid-column:8; grid-row:2; }
-.s4{ grid-column:2; grid-row:3; }
-.s3{ grid-column:8; grid-row:3; }
-.s5{ grid-column:2; grid-row:4; }
+.closet-zone{ left:34px; top:58px; width:84px; }
+.galley-zone{ left:34px; top:170px; width:92px; }
+.exit-zone{ left:468px; top:126px; width:168px; }
+.lav-zone{ right:22px; top:326px; width:92px; }
+.airstair-zone{ right:22px; top:410px; width:92px; }
+
+.slot{ position:absolute; z-index:2; width:152px; }
+.s2{ left:126px; top:96px; }
+.s4{ left:126px; top:194px; }
+.s5{ left:126px; top:292px; }
+.s9{ left:178px; top:390px; width:144px; }
+
+.s1{ right:58px; top:96px; }
+.s3{ right:58px; top:194px; }
+
 .lounge-block{
-  grid-column:6 / span 3; grid-row:4 / span 1;
+  position:absolute;
+  right:56px;
+  top:286px;
+  width:356px;
+  z-index:2;
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:8px;
-  position:relative;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
   border:1px solid #31506f;
-  border-radius:16px;
-  padding:24px 10px 10px;
+  border-radius:18px;
+  padding:34px 14px 14px;
   background:#0a223c;
 }
 .lounge-label{
-  position:absolute; top:7px; left:0; right:0;
-  text-align:center; font-size:10px; letter-spacing:.12em; color:var(--muted); font-weight:800;
+  position:absolute; top:9px; left:0; right:0;
+  text-align:center; font-size:10px; letter-spacing:.14em; color:var(--muted); font-weight:800;
 }
-.s6,.s7,.s8{ grid-column:auto; grid-row:auto; }
-.s9{ grid-column:2; grid-row:5; }
+.s6,.s7,.s8{ position:static; width:auto; }
+
 .tap-seat{
   min-height:82px;
   border:2px solid #42688e;
@@ -180,25 +186,19 @@ details summary{cursor:pointer;margin-top:8px}
 .seat-number{ font-size:22px; font-weight:800; line-height:1; }
 .seat-name{ font-size:11px; color:var(--muted); }
 .seat-occupant{ font-size:11px; font-weight:700; margin-top:3px; text-align:center; }
+
 @media(max-width:980px){
-  .floorplan-cabin{
-    grid-template-columns: repeat(2, 1fr);
-    grid-auto-rows:auto;
-    grid-template-rows:none;
-    min-height:unset;
-    padding:56px 18px 24px;
-  }
+  .floorplan-cabin{ min-height:unset; padding:56px 18px 24px; }
   .cabin-side-label,.floor-centerline{ display:none; }
-  .closet-zone,.galley-zone,.exit-zone,.lav-zone,.airstair-zone,
-  .s2,.s1,.s4,.s3,.s5,.s9,.lounge-block{
-    grid-column:auto !important; grid-row:auto !important;
-  }
-  .lounge-block{ grid-template-columns:repeat(3,1fr); }
+  .zone,.slot,.lounge-block{ position:static !important; width:auto; right:auto; left:auto; top:auto; }
+  .zone{ margin:8px 0; }
+  .slot{ margin:8px 0; }
+  .lounge-block{ display:grid; grid-template-columns:repeat(3,1fr); margin:8px 0; }
 }
 @media(max-width:640px){
-  .floorplan-cabin{ grid-template-columns:1fr; }
   .lounge-block{ grid-template-columns:1fr; }
 }
+
 
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -206,7 +206,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v2.9</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.0</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -261,11 +261,14 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
   <div class="cabin-side-label left-side">LEFT SIDE</div>
   <div class="cabin-side-label right-side">RIGHT SIDE</div>
 
-  <div class="zone galley-zone">GALLEY / ENTRY</div>
+  <div class="zone galley-zone">GALLEY /
+ENTRY</div>
   <div class="zone closet-zone">CLOSET</div>
   <div class="zone exit-zone">EMERGENCY EXIT</div>
   <div class="zone lav-zone">LAV</div>
-  <div class="zone airstair-zone">AIRSTAIR ACCESS / AFT AREA</div>
+  <div class="zone airstair-zone">AIRSTAIR /
+ACCESS /
+AFT AREA</div>
 
   <div class="floor-centerline"></div>
 
@@ -410,9 +413,9 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 <h2>V-Speed Card</h2>
 <div class="row">
 <div class="wx"><div class="small">V1</div><b id="vsV1">—</b><div class="small" id="vsV1src">Performance data required</div></div>
-<div class="wx"><div class="small">VR</div><b id="vsVR">—</b><div class="small" id="vsVRsrc">Performance data required</div></div>
-<div class="wx"><div class="small">VFT</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">Definition/data source required</div></div>
-<div class="wx"><div class="small">VFS</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">Definition/data source required</div></div>
+<div class="wx"><div class="small">VR=V2</div><b id="vsVR">—</b><div class="small" id="vsVRsrc">Performance data required</div></div>
+<div class="wx"><div class="small">Vfr</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">Definition/data source required</div></div>
+<div class="wx"><div class="small">1.5Vs</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">Definition/data source required</div></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF</div><b id="vsVREF">—</b><div class="small" id="vsVREFsrc">Landing chart data required</div></div>
@@ -421,7 +424,7 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 <div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-<b>Automatic working data:</b> V1 and VR=V2 are interpolated from the digitized FlightSafety takeoff tables; VREF is interpolated from the digitized landing tables when mission conditions are inside the published ranges. VFT and VFS remain source-locked pending an identified approved source. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Automatic working data:</b> V1 and VR=V2 are interpolated from the digitized FlightSafety takeoff tables; VREF is interpolated from the digitized landing tables when mission conditions are inside the published ranges. Card labels now match the FlightSafety convention with Vfr and 1.5Vs shown in place of the prior VFT and VFS labels. Vfr and 1.5Vs remain source-locked until their exact approved Falcon 50-4 source values are identified. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 </div>
 
