@@ -236,7 +236,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.3</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -557,14 +557,19 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="card">
 <h2>6. Performance Evaluation</h2>
 <div class="callout small">
-<b>Automatic performance tables:</b> FlightSafety International Falcon 50 Pilot Checklist Rev 8.4, P-2–P-5 and P-18–P-21. V1, VR=V2, BFL, VREF and landing field length are automatically interpolated only inside the digitized table ranges. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Automatic performance tables:</b> FlightSafety International Falcon 50 Pilot Checklist Rev 8.4, P-2–P-5 and P-18–P-21. V1, VR=V2, Vfr, 1.5Vs, BFL, VREF and landing field length are automatically interpolated only inside the digitized table ranges. <b>TABLE DATA READY</b> means the published table values were calculated; it does not mean obstacle, climb, or every operational limit has been independently cleared. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 
 <h3 style="font-size:14px">Takeoff</h3>
 <div class="row">
-<div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only</option></select></div>
+<div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only (V1/BFL source ≥ 4,000 ft PA)</option></select></div>
 </div>
 <div id="toConfigNote" class="small" style="margin-top:8px">Takeoff configuration changes will auto-refresh the available FlightSafety numbers.</div>
+<div class="row" style="margin-top:10px">
+<div><label>Takeoff Runway Condition</label><select id="toRunwayCondition"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
+<div class="wx"><div class="small">Weather Cross-Check</div><b id="toWxRunwayCheck">NO PRECIP FLAG</b><div class="small" id="toWxRunwayNote">Pilot selection controls performance.</div></div>
+<div></div><div></div>
+</div>
 <div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
 <div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
@@ -578,7 +583,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>2nd Segment Net Gradient %</label><input id="perfGrad" type="number" step=".1"></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Obstacle Clearance</label><select id="perfObs"><option value="">Not evaluated</option><option value="true">Verified</option><option value="false">Not cleared</option></select></div>
+<div><label>Obstacle Analysis</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Verified clear</option><option value="false">Not cleared</option></select></div>
 <div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
 <div class="wx"><div class="small">Max Allowable TOW</div><b id="toMax">—</b></div>
 <div class="wx"><div class="small">Takeoff Status</div><b id="toStatus">—</b></div>
@@ -595,6 +600,11 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>Landing Configuration</label><select id="landConfig"><option value="S48">Slats + Flaps 48°</option><option value="S20">Slats + Flaps 20°</option></select></div>
 </div>
 <div id="landConfigNote" class="small" style="margin-top:8px">Landing configuration changes will auto-refresh VREF and landing field length.</div>
+<div class="row" style="margin-top:10px">
+<div><label>Landing Runway Condition</label><select id="landRunwayCondition"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
+<div class="wx"><div class="small">Landing Surface</div><b id="landSurfaceStatus">DRY</b><div class="small" id="landSurfaceNote">Pilot-confirmed selection.</div></div>
+<div></div><div></div>
+</div>
 <div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="landRwyLen" type="number" readonly></div>
 <div><label>Actual Landing Weight lb</label><input id="landWt" type="number" readonly></div>
@@ -682,6 +692,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Fuel CG calculation</td><td class="ok">DTM912 REV 13 LOADED</td></tr>
 <tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE</td></tr>
+<tr><td>Dry runway performance</td><td class="ok">ACTIVE</td></tr>
+<tr><td>Wet runway selection</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr>
 </table>
 </div>
 </aside>
@@ -972,10 +984,43 @@ function drawTrace(zfwW,zfwCG,path,toW,toCG,ldW,ldCG){
 }
 
 
+
+function rawMetarText(point){
+ const m=point&&point.metar||{};
+ return String(firstVal(m,["raw","rawOb","raw_text","rawText"])||"").toUpperCase();
+}
+function precipitationReported(point){
+ const raw=rawMetarText(point);
+ return /(^|\s)([-+]?RA|[-+]?SN|[-+]?DZ|SHRA|SHSN|TSRA|FZRA|FZDZ)(\s|$)/.test(raw);
+}
+function updateRunwayConditionWarnings(){
+ const wetSel=$("toRunwayCondition").value==="WET";
+ const precip=missionData?precipitationReported(missionData.departure):false;
+ if(precip && !wetSel){
+   $("toWxRunwayCheck").textContent="PRECIP REPORTED • VERIFY DRY/WET";
+   $("toWxRunwayCheck").className="warn";
+   $("toWxRunwayNote").textContent="METAR precipitation does not automatically set runway condition; pilot confirmation required.";
+ }else if(precip && wetSel){
+   $("toWxRunwayCheck").textContent="PRECIP REPORTED • WET SELECTED";
+   $("toWxRunwayCheck").className="ok";
+   $("toWxRunwayNote").textContent="Pilot has confirmed WET selection. Wet-specific BFL/V1 remain source-locked until wet charts are digitized.";
+ }else{
+   $("toWxRunwayCheck").textContent=wetSel?"WET SELECTED":"NO PRECIP FLAG";
+   $("toWxRunwayCheck").className=wetSel?"warn":"ok";
+   $("toWxRunwayNote").textContent=wetSel?"WET is pilot-selected; do not infer dry from absence of precipitation.":"Pilot selection controls performance.";
+ }
+ const lwet=$("landRunwayCondition").value==="WET";
+ $("landSurfaceStatus").textContent=lwet?"WET":"DRY";
+ $("landSurfaceStatus").className=lwet?"warn":"ok";
+ $("landSurfaceNote").textContent=lwet?"Wet landing factor/method is not automatically applied until operator method is defined.":"Pilot-confirmed dry runway.";
+}
+
 function syncTakeoffSection(){
  const cfg=$("toConfig").value;
  const d=FS_PERF.takeoff[cfg];
  const a=autoTO();
+ updateRunwayConditionWarnings();
+ const runwayCondition=$("toRunwayCondition").value;
  const wk=(valueOrNull("perfTOW")||0)/1000;
  const speedParts=[];
  if(a.v1!=null)speedParts.push(`V1 ${a.v1.toFixed(1)}`);
@@ -983,7 +1028,7 @@ function syncTakeoffSection(){
  if(a.vfr!=null)speedParts.push(`Vfr ${a.vfr.toFixed(1)}`);
  if(a.v15vs!=null)speedParts.push(`1.5Vs ${a.v15vs.toFixed(1)}`);
  if(a.bfl!=null)speedParts.push(`BFL ${Math.round(a.bfl).toLocaleString()} ft`);
- $("toSpeeds").textContent=speedParts.length?speedParts.join(" • "):"—";
+ $("toSpeeds").textContent=speedParts.length?`${$("toRunwayCondition").value} • ${speedParts.join(" • ")}`:"—";
 
  if(!missionData){
    $("toStatus").textContent="LOAD MISSION";
@@ -1000,8 +1045,16 @@ function syncTakeoffSection(){
  if(Number.isFinite(pa))parts.push(`PA ${Math.round(pa).toLocaleString()} ft`);
  if(Number.isFinite(wk)&&wk>0)parts.push(`WT ${wk.toFixed(1)}k lb`);
 
- if(a.v1!=null || a.bfl!=null){
-   $("toStatus").textContent="AUTO UPDATED";
+ if(runwayCondition==="WET"){
+   $("toStatus").textContent="WET SELECTED • BFL/V1 SOURCE LOCKED";
+   $("toStatus").className="warn";
+   $("toLimit").textContent=`WET RUNWAY • ${d.label} • ${a.msg}`;
+   let note=`WET runway confirmed • ${d.label}. `;
+   note += cfg==="S20"?"Wet source: DTM813 5.46A.":"Wet source: DTM813 5.51A.";
+   note += " VR=V2, Vfr and 1.5Vs remain weight-based; wet BFL and wet V1 are deliberately blank until the wet curves are digitized and validated.";
+   $("toConfigNote").textContent=note;
+ }else if(a.v1!=null || a.bfl!=null){
+   $("toStatus").textContent="TABLE DATA READY";
    $("toStatus").className="ok";
    $("toLimit").textContent=`AUTO TABLE • ${d.label} • FlightSafety P-2–P-5${a.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`;
    const note = [`Using ${d.label}`];
@@ -1010,7 +1063,7 @@ function syncTakeoffSection(){
    note.push("configuration change applied");
    $("toConfigNote").textContent=note.join(" • ");
  }else if(a.vr!=null || a.vfr!=null || a.v15vs!=null){
-   $("toStatus").textContent="PARTIAL AUTO DATA";
+   $("toStatus").textContent="WEIGHT SPEEDS READY • V1/BFL OUT OF RANGE";
    $("toStatus").className="warn";
    const limits=[];
    if(Number.isFinite(pa) && (pa<minPA || pa>maxPA))limits.push(`PA outside ${minPA.toLocaleString()}–${maxPA.toLocaleString()} ft`);
@@ -1018,8 +1071,8 @@ function syncTakeoffSection(){
    $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"V1/BFL not available for the selected cell"}`;
    let note=`${d.label} selected.`;
    if(limits.length)note += ` ${limits.join(' • ')}.`;
-   note += ' Weight-based VR=V2, Vfr and/or 1.5Vs may still be available.';
-   if(cfg==="SLATS") note += ' Note: 1.5Vs is the same published value as S+20 for the same weight, so that line may not change when you switch configurations.';
+   note += ' VR=V2, Vfr and 1.5Vs are weight-based and refresh independently.';
+   if(cfg==="SLATS") note += ' The digitized Slats Only V1/BFL source begins at 4,000 ft PA, so below that altitude V1/BFL are intentionally not extrapolated. 1.5Vs is the same published value as S+20 at the same weight.';
    $("toConfigNote").textContent=note;
  }else{
    $("toStatus").textContent="SOURCE LOCKED";
@@ -1250,13 +1303,16 @@ function autoTO(){
  const vfr=d?interpScalarN(d.vfr,wk):null;
  const v15vs=d?interpScalarN(d.v15vs,wk):null;
  if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
+ const runwayCondition=$("toRunwayCondition")?$("toRunwayCondition").value:"DRY";
  let pa=Number(missionData.departure.pressure_altitude_ft),t=depTempC(),r=null,reason="";
- if(!Number.isFinite(pa))reason="Departure pressure altitude unavailable";else if(t==null)reason="Departure temperature unavailable";else if(d){
+ if(runwayCondition==="WET"){
+   reason=cfg==="S20"?"Wet runway selected — DTM813 5.46A wet BFL/V1 curves identified but not yet digitized/validated":"Wet runway selected — DTM813 5.51A wet BFL/V1 curves identified but not yet digitized/validated";
+ }else if(!Number.isFinite(pa))reason="Departure pressure altitude unavailable";else if(t==null)reason="Departure temperature unavailable";else if(d){
    let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
    r=fsTakeoff(cfg,lookupPA,t,wk);if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
  }
  if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
- return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
+ return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
 }
 function autoLDG(){
  if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
@@ -1273,6 +1329,8 @@ function autoLDG(){
 }
 
 function syncLandingSection(){
+ updateRunwayConditionWarnings();
+ const surface=$("landRunwayCondition").value;
  const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],a=autoLDG();
  const wt=valueOrNull("landWt"),rwy=valueOrNull("landRwyLen"),climb=valueOrNull("landClimbWt");
  const structural=maxLand;
@@ -1282,14 +1340,14 @@ function syncLandingSection(){
  const rwyMargin=(rwy==null||a.lfl==null)?null:rwy-a.lfl;
 
  $("landMax").textContent=maxAllow.toLocaleString()+" lb";
- $("landLimit").textContent=limiting+(climb==null?" • climb limit not entered":"");
+ $("landLimit").textContent=limiting+(climb==null?" • climb limit pending":"");
  $("landWtMargin").textContent=wtMargin==null?"—":`${Math.round(wtMargin).toLocaleString()} lb`;
  $("landRwyMargin").textContent=rwyMargin==null?"—":`${Math.round(rwyMargin).toLocaleString()} ft`;
 
  const parts=[];
  if(a.vref!=null)parts.push(`VREF ${a.vref.toFixed(1)} kt`);
  if(a.lfl!=null)parts.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
- $("landDataSummary").textContent=parts.length?`${d.label} • ${parts.join(" • ")}`:"—";
+ $("landDataSummary").textContent=parts.length?`${surface} • ${d.label} • ${parts.join(" • ")}`:"—";
 
  if(!missionData){
    $("landStatus").textContent="LOAD MISSION";$("landStatus").className="warn";
@@ -1297,12 +1355,15 @@ function syncLandingSection(){
    return a;
  }
  const hardFail=(wtMargin!=null&&wtMargin<0)||(rwyMargin!=null&&rwyMargin<0);
- if(hardFail){
+ if(surface==="WET"){
+   $("landStatus").textContent="WET SELECTED • FACTOR/METHOD PENDING";$("landStatus").className="warn";
+   $("landConfigNote").textContent="WET runway selected. Dry landing table values are displayed as source reference only; no wet factor is applied until the operator-specific wet landing method is defined.";
+ }else if(hardFail){
    $("landStatus").textContent="NO-GO";$("landStatus").className="bad";
  }else if(a.vref!=null&&a.lfl!=null&&climb!=null){
    $("landStatus").textContent="GO";$("landStatus").className="ok";
  }else if(a.vref!=null&&a.lfl!=null){
-   $("landStatus").textContent="TABLE DATA • CLIMB LIMIT NOT EVALUATED";$("landStatus").className="warn";
+   $("landStatus").textContent="TABLE DATA READY • CLIMB LIMIT PENDING";$("landStatus").className="warn";
  }else if(a.vref!=null){
    $("landStatus").textContent="PARTIAL AUTO DATA";$("landStatus").className="warn";
  }else{
@@ -1311,7 +1372,7 @@ function syncLandingSection(){
  const note=[`${d.label} selected`];
  if(a.vref!=null)note.push(`VREF ${a.vref.toFixed(1)} kt`);
  if(a.lfl!=null)note.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
- if(climb==null)note.push("landing climb limit not evaluated");
+ if(climb==null)note.push("landing climb limit pending");
  if(a.msg)note.push(a.msg);
  $("landConfigNote").textContent=note.join(" • ");
  return a;
@@ -1327,8 +1388,16 @@ async function evaluateTakeoff(){
    $("toWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
    $("toRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
    if(j.status==="NO-GO"){$("toStatus").textContent="NO-GO";$("toStatus").className="bad"}
-   else if(j.status==="GO"){$("toStatus").textContent="GO";$("toStatus").className="ok"}
-   else{$("toStatus").textContent="TABLE DATA • LIMITS INCOMPLETE";$("toStatus").className="warn"}
+   else if(j.status==="GO"){$("toStatus").textContent="GO • ALL ENTERED LIMITS PASS";$("toStatus").className="ok"}
+   else{
+     const pending=[];
+     if(valueOrNull("perfClimbWt")==null)pending.push("climb limit");
+     if(valueOrNull("perfFieldWt")==null)pending.push("field limit");
+     if($("perfObs").value==="")pending.push("obstacle analysis");
+     $("toStatus").textContent=pending.length?"TABLE DATA READY • OP LIMITS PENDING":"TABLE DATA READY";
+     $("toStatus").className="warn";
+     if(pending.length)$("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} table data calculated. Pending operational items: ${pending.join(", ")}.`;
+   }
  }catch(e){$("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";$("toLimit").textContent=String(e.message||e)}
 }
 
@@ -1345,7 +1414,7 @@ async function evaluateLanding(){
    $("landRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
    if(j.status==="NO-GO"){$("landStatus").textContent="NO-GO";$("landStatus").className="bad"}
    else if(j.status==="GO"){$("landStatus").textContent="GO";$("landStatus").className="ok"}
-   else{$("landStatus").textContent="TABLE DATA • CLIMB LIMIT NOT EVALUATED";$("landStatus").className="warn"}
+   else{$("landStatus").textContent="TABLE DATA READY • CLIMB LIMIT PENDING";$("landStatus").className="warn"}
    $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • FS P-18–P-21`;
    updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
@@ -1362,7 +1431,9 @@ $("applyPaxEditor").addEventListener("click",applyPaxEditor);
 $("closePaxEditor").addEventListener("click",closePaxEditor);
 $("continueResultsBtn").addEventListener("click",continueToResults);
 $("toConfig").addEventListener("change",recalculate);
+$("toRunwayCondition").addEventListener("change",recalculate);
 $("landConfig").addEventListener("change",recalculate);
+$("landRunwayCondition").addEventListener("change",recalculate);
 $("totalBag").addEventListener("input",onTotalBagInput);
 ["bagComp0","bagComp1","bagComp2"].forEach(id=>$(id).addEventListener("input",onBaggageCompInput));
 ["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id).addEventListener("input",recalculate));
