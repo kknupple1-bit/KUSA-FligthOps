@@ -63,7 +63,15 @@ function evalLanding(p){
 
 app.get("/api/health",(req,res)=>res.json({ok:true,build:"2.9.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length}));
 app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,build:"2.9.0",awc_metar:ok,awc_message:msg,runway_source:Object.keys(runwayDb).length>0,runway_airports_loaded:Object.keys(runwayDb).length});});
-app.get("/api/mission",async(req,res)=>{try{const dep=req.query.dep||"KBPT",dest=req.query.dest||"KDAL";const [departure,destination]=await Promise.all([airportBundle(dep),airportBundle(dest)]);res.json({departure,destination});}catch(e){res.status(502).json({error:String(e.message||e)});}});
+app.get("/api/mission",async(req,res)=>{try{
+ const dep=req.query.dep||"KBPT",dest=req.query.dest||"KDAL",alt=String(req.query.alt||"").toUpperCase().trim();
+ const jobs=[airportBundle(dep),airportBundle(dest)];
+ if(alt)jobs.push(airportBundle(alt));
+ const results=await Promise.all(jobs);
+ const payload={departure:results[0],destination:results[1]};
+ if(alt)payload.alternate=results[2];
+ res.json(payload);
+}catch(e){res.status(502).json({error:String(e.message||e)});}});
 app.post("/api/admin/ensure-nasr",(req,res)=>res.json({managed_centrally:true,runway_airports_loaded:Object.keys(runwayDb).length}));
 app.post("/api/admin/refresh-nasr",(req,res)=>res.json({managed_centrally:true,message:"Central NASR refresh module pending.",runway_airports_loaded:Object.keys(runwayDb).length}));
 app.post("/api/performance/takeoff",(req,res)=>{try{res.json(evalTakeoff(req.body||{}));}catch(e){res.status(400).json({error:String(e.message||e)});}});
