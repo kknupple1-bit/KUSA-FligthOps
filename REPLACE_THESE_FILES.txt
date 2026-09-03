@@ -1,0 +1,19 @@
+KUSA FlightOps v2.9 DIRECT REPLACEMENT
+
+Replace ONLY these files in the existing GitHub repository:
+
+/public/index.html
+/public/sw.js
+/server.js
+/package.json
+
+Keep these exact repository paths. Do not create another nested KUSA-FlightOps folder.
+
+After replacement:
+1. In GitHub, open /public/index.html and search for: FlightOps v2.9
+2. Commit changes to main.
+3. In GoDaddy, click Update Preview.
+4. Open the preview and confirm the lower-right badge reads FlightOps v2.9.
+
+If GitHub /public/index.html still contains the old raw METAR table or the phrase
+"Falcon performance chart outputs remain manual", then the old v2.1 file was not replaced.

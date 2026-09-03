@@ -82,12 +82,132 @@ canvas{width:100%;height:300px;background:#06182c;border-radius:10px}
 .section2-continue button{width:auto;min-width:240px;font-size:15px;font-weight:800;padding:12px 16px}
 @media(max-width:650px){.section2-continue{flex-direction:column;align-items:stretch}.section2-continue button{width:100%;min-width:0}}
 
+
+.weather-decode-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.decoded-weather{min-height:120px}
+.decoded-text{font-size:13px;line-height:1.55;margin-top:6px;white-space:normal}
+.decoded-line{padding:2px 0}
+.decoded-period{padding:7px 0;border-top:1px solid rgba(255,255,255,.10)}
+.decoded-period:first-child{border-top:0}
+details summary{cursor:pointer;margin-top:8px}
+@media(max-width:800px){.weather-decode-grid{grid-template-columns:1fr}}
+
+.floorplan-cabin{
+  position:relative;
+  max-width:1080px;
+  margin:0 auto;
+  padding:56px 34px 40px;
+  min-height:420px;
+  background:#081d34;
+  border:2px solid #3d6287;
+  border-radius:24px;
+  overflow:hidden;
+  display:grid;
+  grid-template-columns: 82px 150px 36px 150px 165px 150px 36px 150px 96px;
+  grid-template-rows: 34px 84px 84px 84px 84px;
+  gap:14px 10px;
+  align-items:center;
+}
+.cabin-titlebar{
+  position:absolute; top:10px; left:0; right:0; text-align:center;
+  font-size:12px; letter-spacing:.14em; font-weight:800; color:var(--muted);
+}
+.cabin-side-label{
+  position:absolute; top:36px; font-size:10px; letter-spacing:.15em; color:var(--muted); font-weight:700;
+}
+.left-side{ left:42px; }
+.right-side{ right:42px; }
+.floor-centerline{
+  position:absolute; top:46px; bottom:24px; left:50%;
+  border-left:2px dashed #31506f; opacity:.75;
+}
+.zone{
+  border:1px dashed #31506f;
+  border-radius:12px;
+  padding:10px 8px;
+  text-align:center;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.08em;
+  background:#0a223c;
+}
+.closet-zone{ grid-column:1; grid-row:1 / span 1; align-self:start; }
+.galley-zone{ grid-column:1; grid-row:2 / span 2; }
+.exit-zone{ grid-column:5; grid-row:2; }
+.lav-zone{ grid-column:9; grid-row:4; }
+.airstair-zone{ grid-column:9; grid-row:5; }
+.slot{ position:relative; z-index:2; }
+.s2{ grid-column:2; grid-row:2; }
+.s1{ grid-column:8; grid-row:2; }
+.s4{ grid-column:2; grid-row:3; }
+.s3{ grid-column:8; grid-row:3; }
+.s5{ grid-column:2; grid-row:4; }
+.lounge-block{
+  grid-column:6 / span 3; grid-row:4 / span 1;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:8px;
+  position:relative;
+  border:1px solid #31506f;
+  border-radius:16px;
+  padding:24px 10px 10px;
+  background:#0a223c;
+}
+.lounge-label{
+  position:absolute; top:7px; left:0; right:0;
+  text-align:center; font-size:10px; letter-spacing:.12em; color:var(--muted); font-weight:800;
+}
+.s6,.s7,.s8{ grid-column:auto; grid-row:auto; }
+.s9{ grid-column:2; grid-row:5; }
+.tap-seat{
+  min-height:82px;
+  border:2px solid #42688e;
+  border-radius:18px 18px 10px 10px;
+  background:#102f51;
+  color:var(--text);
+  padding:9px;
+  cursor:pointer;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  width:100%;
+}
+.tap-seat.occupied{ background:#113f48; border-color:var(--ok); }
+.tap-seat.unseated-target{ border-style:dashed; }
+.seat-number{ font-size:22px; font-weight:800; line-height:1; }
+.seat-name{ font-size:11px; color:var(--muted); }
+.seat-occupant{ font-size:11px; font-weight:700; margin-top:3px; text-align:center; }
+@media(max-width:980px){
+  .floorplan-cabin{
+    grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows:auto;
+    grid-template-rows:none;
+    min-height:unset;
+    padding:56px 18px 24px;
+  }
+  .cabin-side-label,.floor-centerline{ display:none; }
+  .closet-zone,.galley-zone,.exit-zone,.lav-zone,.airstair-zone,
+  .s2,.s1,.s4,.s3,.s5,.s9,.lounge-block{
+    grid-column:auto !important; grid-row:auto !important;
+  }
+  .lounge-block{ grid-template-columns:repeat(3,1fr); }
+}
+@media(max-width:640px){
+  .floorplan-cabin{ grid-template-columns:1fr; }
+  .lounge-block{ grid-template-columns:1fr; }
+}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v2.9</div>
+
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
 <div class="status warn">DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE</div>
@@ -135,37 +255,37 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
 <div class="small"><b>Passenger defaults:</b> Adult Male 180 lb • Adult Female 150 lb • Child 70 lb. Tap a passenger in the roster below to change type or actual weight.</div>
 </div>
 
-<div class="n33ap-cabin">
-<div class="cabin-nose">FLIGHT DECK</div>
-<div class="cabin-aisle"></div>
+<div class="n33ap-cabin floorplan-cabin">
+  <div class="cabin-titlebar">N33AP CABIN LAYOUT</div>
 
-<div class="cabin-row cabin-row-1">
-<button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Row 1 LH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button>
-<button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Row 1 RH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button>
-</div>
+  <div class="cabin-side-label left-side">LEFT SIDE</div>
+  <div class="cabin-side-label right-side">RIGHT SIDE</div>
 
-<div class="cabin-row cabin-row-2">
-<button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Row 2 LH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button>
-<button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Row 2 RH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button>
-</div>
+  <div class="zone galley-zone">GALLEY / ENTRY</div>
+  <div class="zone closet-zone">CLOSET</div>
+  <div class="zone exit-zone">EMERGENCY EXIT</div>
+  <div class="zone lav-zone">LAV</div>
+  <div class="zone airstair-zone">AIRSTAIR ACCESS / AFT AREA</div>
 
-<div class="cabin-row cabin-row-single">
-<button type="button" class="tap-seat single-seat-position" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Single Seat</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button>
-<div class="cabin-fixture">CABIN / AISLE</div>
-</div>
+  <div class="floor-centerline"></div>
 
-<div class="aft-lounge-box">
-<div class="aft-lounge-label">AFT LOUNGE</div>
-<div class="aft-lounge-grid">
-<button type="button" class="tap-seat lounge-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Lounge</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button>
-<button type="button" class="tap-seat lounge-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Lounge</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button>
-<button type="button" class="tap-seat lounge-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Aft Divan</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button>
-<button type="button" class="tap-seat lounge-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft Divan</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button>
-</div>
-</div>
+  <div class="seat slot s2"><button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Forward LH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button></div>
+  <div class="seat slot s1"><button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Forward RH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button></div>
 
-<div class="cabin-tail">AFT CABIN / BAGGAGE</div>
-</div>
+  <div class="seat slot s4"><button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Mid LH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button></div>
+  <div class="seat slot s3"><button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Mid RH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button></div>
+
+  <div class="seat slot s5"><button type="button" class="tap-seat" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Single LH</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button></div>
+
+  <div class="lounge-block">
+    <div class="lounge-label">AFT LOUNGE / DIVAN</div>
+    <div class="seat slot s6"><button type="button" class="tap-seat lounge-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Divan</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button></div>
+    <div class="seat slot s7"><button type="button" class="tap-seat lounge-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Divan</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button></div>
+    <div class="seat slot s8"><button type="button" class="tap-seat lounge-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Divan</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button></div>
+  </div>
+
+  <div class="seat slot s9"><button type="button" class="tap-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft LH</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button></div>
+</div></div>
 
 <div class="seat-assignment-footer">
 <div class="unseated-box">
@@ -216,7 +336,7 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <section>
 
 <div class="card">
-<h2>3. Mission Results</h2>
+<h2>3. Mission Results — Decoded Weather</h2>
 <div class="row">
 <div class="wx"><div class="small">Origin</div><b id="depTitle">KBPT</b><div id="depAirport" class="small"></div></div>
 <div class="wx"><div class="small">Departure Runway</div><b id="depRwySummary">—</b><div id="depWindSummary" class="small"></div></div>
@@ -229,13 +349,29 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="wx"><div class="small">Pressure Altitude</div><b id="destPA">—</b></div>
 <div class="wx"><div class="small">Density Altitude</div><b id="destDA">—</b></div>
 </div>
-<table style="margin-top:12px">
-<thead><tr><th></th><th>METAR</th><th>TAF</th></tr></thead>
-<tbody>
-<tr><td>Origin</td><td class="raw" id="depMetar">—</td><td class="raw" id="depTaf">—</td></tr>
-<tr><td>Destination</td><td class="raw" id="destMetar">—</td><td class="raw" id="destTaf">—</td></tr>
-</tbody>
-</table>
+<div class="small" id="weatherDecodeStatus" style="margin-top:12px">Decoded METAR/TAF will populate after Load / Refresh Mission.</div>
+<div class="weather-decode-grid" style="margin-top:14px">
+  <div class="wx decoded-weather">
+    <div class="small"><b>Origin — METAR (Decoded)</b></div>
+    <div id="depMetar" class="decoded-text">—</div>
+    <details><summary class="small">Raw METAR</summary><div class="raw small" id="depMetarRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather">
+    <div class="small"><b>Origin — TAF (Decoded)</b></div>
+    <div id="depTaf" class="decoded-text">—</div>
+    <details><summary class="small">Raw TAF</summary><div class="raw small" id="depTafRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather">
+    <div class="small"><b>Destination — METAR (Decoded)</b></div>
+    <div id="destMetar" class="decoded-text">—</div>
+    <details><summary class="small">Raw METAR</summary><div class="raw small" id="destMetarRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather">
+    <div class="small"><b>Destination — TAF (Decoded)</b></div>
+    <div id="destTaf" class="decoded-text">—</div>
+    <details><summary class="small">Raw TAF</summary><div class="raw small" id="destTafRaw">—</div></details>
+  </div>
+</div>
 </div>
 
 <div class="card">
@@ -285,7 +421,7 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 <div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-V1, VR and VREF are chart-derived performance speeds and will populate automatically when the validated Falcon 50-4 performance curves are loaded. VFT and VFS are included in the card but remain locked until their exact N33AP/Falcon 50-4 definitions and source tables are identified.
+<b>Automatic working data:</b> V1 and VR=V2 are interpolated from the digitized FlightSafety takeoff tables; VREF is interpolated from the digitized landing tables when mission conditions are inside the published ranges. VFT and VFS remain source-locked pending an identified approved source. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 </div>
 
@@ -313,20 +449,23 @@ V1, VR and VREF are chart-derived performance speeds and will populate automatic
 <div class="card">
 <h2>6. Performance Evaluation</h2>
 <div class="callout small">
-Selected runway lengths and calculated mission weights are automatic. Falcon performance chart outputs remain manual until the -4 chart data is digitized and validated.
+<b>Automatic performance tables:</b> FlightSafety International Falcon 50 Pilot Checklist Rev 8.4, P-2–P-5 and P-18–P-21. V1, VR=V2, BFL, VREF and landing field length are automatically interpolated only inside the digitized table ranges. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 
 <h3 style="font-size:14px">Takeoff</h3>
 <div class="row">
+<div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only</option></select></div>
+</div>
+<div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
 <div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
 <div><label>Climb-Limited Weight lb</label><input id="perfClimbWt" type="number"></div>
 <div><label>Field-Limited Weight lb</label><input id="perfFieldWt" type="number"></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Balanced Field Length ft</label><input id="perfBFL" type="number"></div>
-<div><label>V1 kt</label><input id="perfV1" type="number" step=".1"></div>
-<div><label>VR = V2 kt</label><input id="perfVR" type="number" step=".1"></div>
+<div><label>Balanced Field Length ft</label><input id="perfBFL" type="number" readonly></div>
+<div><label>V1 kt</label><input id="perfV1" type="number" step=".1" readonly></div>
+<div><label>VR = V2 kt</label><input id="perfVR" type="number" step=".1" readonly></div>
 <div><label>2nd Segment Net Gradient %</label><input id="perfGrad" type="number" step=".1"></div>
 </div>
 <div class="row" style="margin-top:10px">
@@ -344,13 +483,16 @@ Selected runway lengths and calculated mission weights are automatic. Falcon per
 
 <h3 style="font-size:14px;margin-top:18px">Landing</h3>
 <div class="row">
+<div><label>Landing Configuration</label><select id="landConfig"><option value="S48">Slats + Flaps 48°</option><option value="S20">Slats + Flaps 20°</option></select></div>
+</div>
+<div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="landRwyLen" type="number" readonly></div>
 <div><label>Actual Landing Weight lb</label><input id="landWt" type="number" readonly></div>
 <div><label>Climb-Limited Landing Weight lb</label><input id="landClimbWt" type="number"></div>
-<div><label>Landing Field Length ft</label><input id="landFieldLen" type="number"></div>
+<div><label>Landing Field Length ft</label><input id="landFieldLen" type="number" readonly></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>VREF kt</label><input id="landVref" type="number" step=".1"></div>
+<div><label>VREF kt</label><input id="landVref" type="number" step=".1" readonly></div>
 <div><label>Evaluate</label><button onclick="evaluateLanding()">Evaluate Landing</button></div>
 <div class="wx"><div class="small">Max Allowable Landing Weight</div><b id="landMax">—</b></div>
 <div class="wx"><div class="small">Landing Status</div><b id="landStatus">—</b></div>
@@ -455,6 +597,53 @@ const baggageStations=[
 ];
 const fwd=[[18959,14.0],[30618,14.0],[35715,19.2],[40300,22.99],[40780,23.3]];
 const aft=[[18959,32.0],[40300,32.0],[40780,29.57]];
+const FS_PERF={
+ takeoff:{
+  S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,36:119,38:122,40:126,40.7:127},tables:{
+   0:{24:{0:[91,2750],10:[91,2850],20:[91,2900],30:[91,3150],40:[91,3450]},26:{0:[91,2775],10:[91,2875],20:[91,2925],30:[91,3200],40:[91,3500]},28:{0:[91,2800],10:[91,2900],20:[91,2950],30:[91,3225],40:[91,3600]},30:{0:[91,2850],10:[91,2950],20:[91,3000],30:[92,3300],40:[95,3650]},32:{0:[96,3100],10:[96,3200],20:[96,3300],30:[98,3600],40:[101,4150]},34:{0:[101,3400],10:[101,3550],20:[101,3650],30:[103,4050],40:[106,4750]},36:{0:[106,3800],10:[106,3900],20:[106,4050],30:[108,4500],40:[111,5300]},38:{0:[111,4200],10:[111,4300],20:[111,4450],30:[112,5050],40:[115,6000]},40:{0:[115,4700],10:[115,4800],20:[115,4950],30:[117,5700],40:[118,6700]},40.7:{0:[116,4900],10:[116,5000],20:[116,5200],30:[118,6000],40:[120,7000]}},
+   2000:{24:{0:[91,2950],10:[91,2950],20:[91,3150],30:[91,3400],40:[91,3750]},26:{0:[91,3000],10:[91,3000],20:[91,3200],30:[91,3450],40:[91,3800]},28:{0:[91,3025],10:[91,3050],20:[91,3250],30:[91,3500],40:[92,3900]},30:{0:[91,3050],10:[91,3100],20:[92,3300],30:[95,3650],40:[97,4200]},32:{0:[96,3400],10:[96,3500],20:[98,3700],30:[100,4200],40:[103,4800]},34:{0:[101,3800],10:[101,3950],20:[103,4100],30:[105,4750],40:[108,5550]},36:{0:[106,4200],10:[106,4400],20:[108,4600],30:[110,5300],40:[113,6250]},38:{0:[111,4650],10:[111,5000],20:[112,5150],30:[115,6000],40:[118,7000]},40:{0:[115,5200],10:[115,5650],20:[116,5800],30:[119,6700]},40.7:{0:[116,5400],10:[116,5900],20:[117,6100],30:[120,7000]}},
+   4000:{24:{0:[91,3050],10:[91,3200],20:[91,3450],30:[91,3800],40:[91,4200]},26:{0:[91,3100],10:[91,3250],20:[91,3500],30:[91,3850],40:[91,4250]},28:{0:[91,3150],10:[91,3300],20:[91,3550],30:[92,3950],40:[94,4300]},30:{0:[91,3200],10:[92,3400],20:[94,3750],30:[97,4225],40:[100,4850]},32:{0:[96,3550],10:[97,3700],20:[100,4250],30:[102,4800],40:[106,5550]},34:{0:[101,4000],10:[102,4150],20:[105,4800],30:[108,5550],40:[111,6350]},36:{0:[106,4500],10:[107,4650],20:[110,5400],30:[113,6300]},38:{0:[111,5050],10:[112,5200],20:[115,6050],30:[117,7000]},40:{0:[115,5700],10:[116,5850],20:[119,6800]},40.7:{0:[116,6000],10:[117,6150],20:[120,7100]}},
+   6000:{24:{0:[91,3400],10:[91,3550],20:[91,3900],30:[91,4300],40:[91,4700]},26:{0:[91,3450],10:[91,3600],20:[91,3950],30:[91,4400],40:[91,4800]},28:{0:[91,3500],10:[91,3700],20:[92,4000],30:[94,4500],40:[97,4950]},30:{0:[92,3550],10:[94,3900],20:[96,4350],30:[99,5000],40:[102,5700]},32:{0:[97,4050],10:[99,4400],20:[102,4950],30:[105,5700],40:[108,6600]},34:{0:[102,4600],10:[104,5000],20:[107,5700],30:[110,6550]},36:{0:[107,5250],10:[109,5550],20:[112,6400],30:[115,7350]},38:{0:[112,5900],10:[114,6250],20:[117,7150]},40:{0:[116,6650],10:[118,6950]},40.7:{0:[117,6900],10:[120,7300]}}
+  }},
+  SLATS:{label:"Slats Only",vr:{24:107,26:111,28:115,30:119,32:123,34:127,36:131,38:134,40:138},tables:{
+   4000:{24:{0:[91,2900],10:[91,3100],20:[91,3400],30:[92,3800],40:[95,4150]},26:{0:[92,3000],10:[93,3200],20:[95,3550],30:[98,3950],40:[101,4450]},28:{0:[97,3350],10:[98,3550],20:[101,4000],30:[103,4450],40:[106,5050]},30:{0:[102,3700],10:[103,4000],20:[106,4500],30:[109,5050],40:[112,5800]},32:{0:[108,4150],10:[109,4500],20:[112,5100],30:[115,5800],40:[118,6700]},34:{0:[114,4650],10:[115,5100],20:[118,5750],30:[121,6650],40:[124,7600]},36:{0:[119,5200],10:[121,5700],20:[123,6450],30:[126,7500],40:[129,8650]},38:{0:[124,5750],10:[126,6350],20:[128,7250],30:[131,8350],40:[134,9750]},40:{0:[129,6400]}},
+   6000:{24:{0:[91,3200],10:[91,3500],20:[92,3800],30:[94,4100],40:[97,4500]},26:{0:[93,3300],10:[95,3650],20:[97,4050],30:[100,4450],40:[103,5100]},28:{0:[99,3700],10:[100,4100],20:[103,4500],30:[106,5100],40:[108,5850]},30:{0:[104,4150],10:[106,4600],20:[108,5150],30:[111,5850],40:[114,6700]},32:{0:[110,4750],10:[112,5250],20:[114,5850],30:[117,6700],40:[120,7700]},34:{0:[116,5400],10:[118,5950],20:[120,6700],30:[123,7650],40:[126,8800]},36:{0:[121,6100],10:[123,6700],20:[126,7550],30:[128,8600],40:[131,10000]},38:{0:[126,6950],10:[128,7450]}},
+   8000:{24:{0:[91,3750],10:[92,4000],20:[93,4300],30:[96,4650]},26:{0:[95,3900],10:[97,4250],20:[99,4700],30:[102,5350]},28:{0:[101,4400],10:[103,4800],20:[105,5450],30:[108,6200]},30:{0:[106,5000],10:[108,5500],20:[111,6250],30:[113,7100]},32:{0:[112,5750],10:[114,6300],20:[117,7200],30:[119,8200]},34:{0:[118,6500],10:[120,7200],20:[123,8150],30:[126,9350]},36:{0:[123,7350],10:[126,8100],20:[129,9250],30:[131,10700]}},
+   10000:{24:{0:[92,4200],10:[94,4500],20:[96,4950],30:[97,5400]},26:{0:[98,4550],10:[100,5100],20:[102,5700],30:[103,6300]},28:{0:[103,5250],10:[105,5850],20:[108,6450],30:[109,6200]},30:{0:[108,5000],10:[111,5500],20:[113,6650],30:[115,7350]},32:{0:[112,6000],10:[114,6750],20:[117,7650],30:[119,8450]},34:{0:[120,7850],10:[122,8900],20:[125,10250],30:[127,11200]},36:{0:[126,8850]}}
+  }}
+ },
+ landing:{
+  S48:{label:"Slats + Flaps 48°",speed:{24:104,25:106,27:110,29:114,31:118,33:121,35:125,35.7:126,37:128,38.8:131},tables:{
+   0:{24:[2100,3510],25:[2150,3590],27:[2275,3800],29:[2400,4010],31:[2550,4260],33:[2700,4510],35:[2850,4760],35.7:[2900,4850],37:[3025,5060],38.8:[3200,5350]},
+   2000:{24:[2175,3640],25:[2250,3760],27:[2375,3970],29:[2500,4180],31:[2675,4470],33:[2825,4720],35:[2975,4970],35.7:[3025,5060],37:[3150,5260],38.8:[3300,5520]},
+   4000:{24:[2250,3760],25:[2325,3890],27:[2475,4140],29:[2625,4390],31:[2775,4640],33:[2950,4930],35:[3100,5180],35.7:[3150,5260],37:[3275,5470],38.8:[3450,5690]},
+   6000:{24:[2375,3970],25:[2425,4050],27:[2575,4300],29:[2725,4550],31:[2900,4850],33:[3075,5140],35:[3250,5430],35.7:[3300,5520],37:[3425,5720],38.8:[3575,5970]},
+   8000:{24:[2575,4300],25:[2650,4430],27:[2800,4680],29:[2950,4930],31:[3125,5220],33:[3325,5560],35:[3500,5850],35.7:[3575,5970],37:[3700,6180],38.8:[3875,6480]},
+   10000:{24:[2775,4640],25:[2875,4810],27:[3025,5060],29:[3200,5350],31:[3400,5680],33:[3600,6020],35:[3800,6350],35.7:[3875,6480],37:[4025,6730],38.8:[4225,7060]}
+  }},
+  S20:{label:"Slats + Flaps 20°",speedLabel:"VREF+5",speed:{24:109,25:111,27:115,29:119,31:123,33:127,35:130,35.7:132,37:134,38.8:137},tables:{
+   0:{24:[2475,4150],25:[2550,4275],27:[2675,4475],29:[2800,4675],31:[2925,4900],33:[3075,5150],35:[3225,5400],35.7:[3275,5475],37:[3400,5675],38.8:[3525,5900]},
+   2000:{24:[2550,4275],25:[2625,4400],27:[2775,4650],29:[2900,4850],31:[3050,5100],33:[3200,5350],35:[3375,5650],35.7:[3425,5725],37:[3525,5900],38.8:[3700,6200]},
+   4000:{24:[2650,4425],25:[2750,4600],27:[2875,4800],29:[3025,5050],31:[3175,5300],33:[3350,5600],35:[3500,5850],35.7:[3575,5975],37:[3675,6150],38.8:[3825,6400]},
+   6000:{24:[2775,4650],25:[2850,4775],27:[3000,5025],29:[3150,5275],31:[3300,5525],33:[3475,5800],35:[3650,6100],35.7:[3700,6200],37:[3825,6400],38.8:[3975,6650]},
+   8000:{24:[3000,5025],25:[3075,5150],27:[3250,5425],29:[3425,5725],31:[3600,6025],33:[3775,6300],35:[3950,6600],35.7:[4025,6725],37:[4150,6950],38.8:[4325,7225]},
+   10000:{24:[3250,5425],25:[3325,5550],27:[3525,5900],29:[3700,6200],31:[3875,6475],33:[4075,6825],35:[4275,7150],35.7:[4350,7275],37:[4475,7475],38.8:[4675,7825]}
+  }}
+ }
+};
+function kN(o){return Object.keys(o).map(Number).sort((a,b)=>a-b)}
+function bracketN(a,x){if(x<a[0]||x>a[a.length-1])return null;for(let i=0;i<a.length;i++)if(x===a[i])return[a[i],a[i]];for(let i=0;i<a.length-1;i++)if(x>a[i]&&x<a[i+1])return[a[i],a[i+1]];return null}
+function lerpN(a,b,t){return a+(b-a)*t}
+function interpScalarN(map,x){const b=bracketN(kN(map),x);if(!b)return null;const[a,c]=b;if(a===c)return +map[a];return lerpN(+map[a],+map[c],(x-a)/(c-a))}
+function interpPairN(map,x){const b=bracketN(kN(map),x);if(!b)return null;const[a,c]=b;if(a===c)return map[a].map(Number);const t=(x-a)/(c-a);return[lerpN(+map[a][0],+map[c][0],t),lerpN(+map[a][1],+map[c][1],t)]}
+function fsTakeoff(cfg,pa,temp,wk){
+ const d=FS_PERF.takeoff[cfg],pb=d&&bracketN(kN(d.tables),pa);if(!pb)return null;
+ function atP(p){const wm=d.tables[p],wb=bracketN(kN(wm),wk);if(!wb)return null;
+  function atW(w){const tm=wm[w],tb=bracketN(kN(tm),temp);if(!tb)return null;const[a,b]=tb,A=tm[a],B=tm[b];if(a===b)return A.map(Number);const f=(temp-a)/(b-a);return[lerpN(+A[0],+B[0],f),lerpN(+A[1],+B[1],f)]}
+  const[a,b]=wb,A=atW(a),B=atW(b);if(!A||!B)return null;if(a===b)return A;const f=(wk-a)/(b-a);return[lerpN(A[0],B[0],f),lerpN(A[1],B[1],f)]}
+ const[a,b]=pb,A=atP(a),B=atP(b);if(!A||!B)return null;const P=a===b?A:[lerpN(A[0],B[0],(pa-a)/(b-a)),lerpN(A[1],B[1],(pa-a)/(b-a))],vr=interpScalarN(d.vr,wk);if(vr==null)return null;return{v1:P[0],bfl:P[1],vr}}
+function fsLanding(cfg,pa,wk){const d=FS_PERF.landing[cfg],pb=d&&bracketN(kN(d.tables),pa);if(!pb)return null;const[a,b]=pb,A=interpPairN(d.tables[a],wk),B=interpPairN(d.tables[b],wk);if(!A||!B)return null;const P=a===b?A:[lerpN(A[0],B[0],(pa-a)/(b-a)),lerpN(A[1],B[1],(pa-a)/(b-a))],s=interpScalarN(d.speed,wk);if(s==null)return null;return{speed:s,ld:P[0],lfl:P[1],speedLabel:d.speedLabel||"VREF"}}
+
 
 let missionData=null;
 let passengers=[];
@@ -579,12 +768,13 @@ function draw(w,cg){
  x.fillStyle="#edf5ff";x.beginPath();x.arc(px(cg),py(w),6,0,Math.PI*2);x.fill();
 }
 function updateVSpeedCard(tow,landing){
- $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";
- $("vsLDW").textContent=Math.round(landing).toLocaleString()+" lb";
+ $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";$("vsLDW").textContent=Math.round(landing).toLocaleString()+" lb";
  const v1=valueOrNull("perfV1"),vr=valueOrNull("perfVR"),vref=valueOrNull("landVref");
- $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";
- $("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";
- $("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
+ $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";$("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";$("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
+ $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":"FlightSafety P-2–P-5";
+ $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
+ $("vsVREFsrc").textContent=vref==null?"Landing weight outside published table":"FlightSafety P-18–P-21 • weight based";
+ const count=[v1,vr,vref].filter(v=>v!=null).length;$("vsStatus").textContent=count===3?"AUTO TABLE DATA":count>0?`PARTIAL AUTO DATA (${count}/3)`:"SOURCE LOCKED";$("vsStatus").className=count>0?"ok":"warn";
 }
 function recalculate(){
  const requested=passengers.length;
@@ -653,13 +843,45 @@ function recalculate(){
  if(bd.overflow>0){const tr=document.createElement("tr");tr.innerHTML=`<td class="bad"><b>BAGGAGE OVERFLOW</b></td><td>Over approved compartments</td><td>—</td><td class="bad">${Math.round(bd.overflow)} lb</td><td>—</td>`;tb.appendChild(tr)}
 
  $("perfTOW").value=Math.round(tow);$("landWt").value=Math.round(landing);
- updateVSpeedCard(tow,landing);draw(zfw,pct);selectedRunwayChanged();
+ selectedRunwayChanged();
+ if(missionData){
+   const toAuto=autoTO();
+   const ldAuto=autoLDG();
+   const speedParts=[];
+   if(toAuto.v1!=null)speedParts.push(`V1 ${toAuto.v1.toFixed(1)}`);
+   if(toAuto.vr!=null)speedParts.push(`VR=V2 ${toAuto.vr.toFixed(1)}`);
+   if(toAuto.bfl!=null)speedParts.push(`BFL ${Math.round(toAuto.bfl).toLocaleString()} ft`);
+   $("toSpeeds").textContent=speedParts.length?speedParts.join(" • "):"—";
+   $("toLimit").textContent=toAuto.v1!=null
+     ? `AUTO TABLE • ${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5${toAuto.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`
+     : (toAuto.msg||"V1/BFL source locked");
+   if(ldAuto.vref==null)$("landVref").value="";
+   if(ldAuto.lfl==null)$("landFieldLen").value="";
+ }
+ updateVSpeedCard(tow,landing);
+ draw(zfw,pct);
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
+function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
+function firstVal(o,ks){for(const k of ks){if(o&&o[k]!=null&&o[k]!=="")return o[k]}return null}
+function windTextObj(o){const dir=firstVal(o,["wind_dir","wdir","windDir","wind_direction"]);const spd=Number(firstVal(o,["wind_kt","wspd","windSpeed","wind_speed_kt"]));const gust=Number(firstVal(o,["wind_gust_kt","wgst","windGust","wind_gust"]));if(!Number.isFinite(spd)||spd===0)return"Wind calm";let d="variable";if(dir!=null&&String(dir).toUpperCase()!=="VRB"&&Number.isFinite(Number(dir)))d=`${String(Math.round(Number(dir))).padStart(3,"0")}°`;return`Wind ${d} at ${Math.round(spd)} kt${Number.isFinite(gust)&&gust>0?`, gusting ${Math.round(gust)} kt`:""}`}
+function visibilityText(v){if(v==null||v==="")return"Visibility not reported";const n=Number(v);return Number.isFinite(n)?`Visibility ${n} statute mile${n===1?"":"s"}`:`Visibility ${v}`}
+function cloudText(c){if(!Array.isArray(c)||!c.length)return"Clouds not reported";const n={SKC:"clear",CLR:"clear",FEW:"few",SCT:"scattered",BKN:"broken",OVC:"overcast",VV:"vertical visibility"};return c.map(x=>{const cov=firstVal(x,["cover","coverage","skyCover","amount"])||"";const base=firstVal(x,["base","base_ft_agl","baseFtAgl","altitude"]);const label=n[String(cov).toUpperCase()]||String(cov).toLowerCase();return base!=null?`${label} at ${Number(base).toLocaleString()} ft AGL`:label}).join(", ")}
+function formatMetarDecoded(m,altInHg){if(!m)return'<span class="warn">METAR unavailable</span>';const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);const cat=firstVal(m,["flight_category","fltCat","category"])||"METAR";const vis=firstVal(m,["visibility_sm","visib","visibility"]);const wx=firstVal(m,["wx","wxString","weather"]);const t=Number(firstVal(m,["temp_c","temp","temperature"]));const d=Number(firstVal(m,["dewpoint_c","dewp","dewpoint"]));const clouds=firstVal(m,["clouds","sky"])||[];const alt=altInHg??firstVal(m,["altimeter_inhg","altimeter"]);const lines=[];lines.push(`<div class="decoded-line"><b>${cat}</b> • observed ${fmtUtc(obs)}</div>`);lines.push(`<div class="decoded-line">${windTextObj(m)}</div>`);lines.push(`<div class="decoded-line">${visibilityText(vis)}</div>`);if(wx)lines.push(`<div class="decoded-line">Weather: ${wx}</div>`);lines.push(`<div class="decoded-line">${cloudText(clouds)}</div>`);if(Number.isFinite(t)||Number.isFinite(d))lines.push(`<div class="decoded-line">Temperature ${Number.isFinite(t)?t+"°C":"—"} • Dew point ${Number.isFinite(d)?d+"°C":"—"}</div>`);if(alt!=null&&Number.isFinite(Number(alt)))lines.push(`<div class="decoded-line">Altimeter ${Number(alt).toFixed(2)} inHg</div>`);return lines.join("")}
+function formatTafDecoded(t){if(!t)return'<span class="warn">TAF unavailable</span>';const vf=firstVal(t,["valid_from","validTimeFrom","fcstTimeFrom","startTime"]);const vt=firstVal(t,["valid_to","validTimeTo","fcstTimeTo","endTime"]);let out=`<div class="decoded-line"><b>Valid</b> ${fmtUtc(vf)} to ${fmtUtc(vt)}</div>`;const fc=firstVal(t,["forecast","forecasts","fcsts","periods"]);if(!Array.isArray(fc)||!fc.length)return out+'<div class="decoded-line">Forecast periods unavailable from decoded feed; raw TAF retained below.</div>';out+=fc.map(f=>{const from=firstVal(f,["timeFrom","validTimeFrom","valid_from","fcstTimeFrom","startTime"]);const to=firstVal(f,["timeTo","validTimeTo","valid_to","fcstTimeTo","endTime"]);const ch=firstVal(f,["changeIndicator","change_indicator","fcstChange","change"])||"Forecast";const vis=firstVal(f,["visib","visibility","visibility_sm"]);const wx=firstVal(f,["wxString","wx","weather"]);const clouds=firstVal(f,["clouds","sky"])||[];const bits=[windTextObj(f),visibilityText(vis)];if(wx)bits.push(`Weather: ${wx}`);bits.push(cloudText(clouds));return`<div class="decoded-period"><b>${ch}</b> • ${fmtUtc(from)} to ${fmtUtc(to)}<br>${bits.join(" • ")}</div>`}).join("");return out}
+
+
+
 function populatePoint(prefix,x){
  $(prefix+"Airport").textContent=`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
- $(prefix+"PA").textContent=esc(x.pressure_altitude_ft)+" ft";$(prefix+"DA").textContent=esc(x.density_altitude_ft)+" ft";
- $(prefix+"Metar").textContent=esc((x.metar||{}).raw);$(prefix+"Taf").textContent=esc((x.taf||{}).raw);
+ $(prefix+"PA").textContent=esc(x.pressure_altitude_ft)+" ft";
+ $(prefix+"DA").textContent=esc(x.density_altitude_ft)+" ft";
+ $(prefix+"Metar").innerHTML=formatMetarDecoded(x.metar,x.altimeter_inhg);
+ $(prefix+"Taf").innerHTML=formatTafDecoded(x.taf);
+ const mr=$(prefix+"MetarRaw"),tr=$(prefix+"TafRaw");
+ if(mr)mr.textContent=esc(firstVal(x.metar||{},["raw","rawOb","raw_text"])||"—");
+ if(tr)tr.textContent=esc(firstVal(x.taf||{},["raw","rawTAF","raw_text"])||"—");
+ const s=$("weatherDecodeStatus");if(s)s.innerHTML='<span class="ok">Decoded METAR/TAF loaded.</span> Raw reports remain available below.';
 }
 function fillRunwaySelect(id,runways){
  const sel=$(id);sel.innerHTML="";
@@ -671,11 +893,15 @@ function selectedRunwayChanged(){
  const depRw=(missionData.departure.runways||[])[+$("depRunway").value],destRw=(missionData.destination.runways||[])[+$("destRunway").value];
  if(depRw){$("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;const w=depRw.wind_components||{};$("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDepRwy").textContent=depRw.runway_id;$("perfRwyLen").value=depRw.length_ft||""}
  if(destRw){$("destRwySummary").textContent=`RWY ${destRw.runway_id} • ${esc(destRw.length_ft)} ft`;const w=destRw.wind_components||{};$("destWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDestRwy").textContent=destRw.runway_id;$("landRwyLen").value=destRw.length_ft||""}
+ if(valueOrNull("perfTOW")){
+   autoTO(); autoLDG();
+   updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+ }
 }
 async function loadMission(){
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim();$("dep").value=dep;$("dest").value=dest;$("missionStatus").textContent="Loading airport and weather data...";
  try{
-   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}`));if(!r.ok)throw new Error(await r.text());missionData=await r.json();
+   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
    $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;
    populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
    const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
@@ -684,47 +910,39 @@ async function loadMission(){
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
 }
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
-async function evaluateTakeoff(){
- const obs=$("perfObs").value,body={runway_length_ft:valueOrNull("perfRwyLen"),actual_takeoff_weight_lb:valueOrNull("perfTOW"),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),second_segment_net_gradient_pct:valueOrNull("perfGrad"),obstacle_clearance_verified:obs===""?null:(obs==="true")};
- const r=await fetch(apiUrl("/api/performance/takeoff"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
- $("toMax").textContent=j.max_allowable_takeoff_weight_lb.toLocaleString()+" lb";$("toStatus").textContent=j.status;$("toStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";$("toLimit").textContent=j.limiting_factor;$("toWtMargin").textContent=j.weight_margin_lb.toLocaleString()+" lb";$("toRwyMargin").textContent=j.runway_margin_ft==null?"—":j.runway_margin_ft.toLocaleString()+" ft";$("toSpeeds").textContent=`V1 ${j.v1_kt??"—"} / VR ${j.vr_v2_kt??"—"} kt`;updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+function depTempC(){if(!missionData)return null;const m=missionData.departure.metar||{};for(const v of [m.temp_c,m.temperature_c,m.temp,m.temperature]){if(v===null||v===undefined||v==="")continue;const n=Number(v);if(Number.isFinite(n))return n}return null}
+function autoTO(){
+ if(!missionData)return{ok:false,msg:"Load mission first",v1:null,vr:null,bfl:null};
+ const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],wk=(valueOrNull("perfTOW")||0)/1000;
+ const vr=d?interpScalarN(d.vr,wk):null;if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
+ let pa=Number(missionData.departure.pressure_altitude_ft),t=depTempC(),r=null,reason="";
+ if(!Number.isFinite(pa))reason="Departure pressure altitude unavailable";else if(t==null)reason="Departure temperature unavailable";else if(d){
+   let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
+   r=fsTakeoff(cfg,lookupPA,t,wk);if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
+ }
+ if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
+ return{ok:vr!=null||!!r,cfg,vr,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
+}
+function autoLDG(){
+ if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
+ const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],wk=(valueOrNull("landWt")||0)/1000;
+ const published=d?interpScalarN(d.speed,wk):null;const vref=published==null?null:(cfg==="S20"?published-5:published);
+ if(vref!=null)$("landVref").value=vref.toFixed(1);else $("landVref").value="";
+ let pa=Number(missionData.destination.pressure_altitude_ft),r=null,reason="";
+ if(!Number.isFinite(pa))reason="Destination pressure altitude unavailable";else if(d){
+   let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
+   r=fsLanding(cfg,lookupPA,wk);if(!r)reason="Landing distance outside digitized FlightSafety table range";else r.paBasis=paBasis
+ }
+ if(r)$("landFieldLen").value=Math.round(r.lfl);else $("landFieldLen").value="";
+ return{ok:vref!=null||!!r,cfg,vref,speed:published,speedLabel:d?.speedLabel||"VREF",ld:r?r.ld:null,lfl:r?r.lfl:null,paBasis:r?r.paBasis:null,msg:reason}
 }
 async function evaluateLanding(){
+ const a=autoLDG();if(!a.ok){$("landStatus").textContent="SOURCE LOCKED";$("landStatus").className="warn";return}
  const body={runway_length_ft:valueOrNull("landRwyLen"),actual_landing_weight_lb:valueOrNull("landWt"),climb_limited_weight_lb:valueOrNull("landClimbWt"),landing_field_length_ft:valueOrNull("landFieldLen"),vref_kt:valueOrNull("landVref")};
- const r=await fetch(apiUrl("/api/performance/landing"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();$("landMax").textContent=j.max_allowable_landing_weight_lb.toLocaleString()+" lb";$("landStatus").textContent=j.status;$("landStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+ const r=await fetch(apiUrl("/api/performance/landing"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();$("landMax").textContent=j.max_allowable_landing_weight_lb.toLocaleString()+" lb";$("landStatus").textContent=j.status;$("landStatus").className=j.status==="GO"?"ok":j.status==="NO-GO"?"bad":"warn";$("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed.toFixed(1)} kt • LD ${Math.round(a.ld)} ft • LFL ${Math.round(a.lfl)} ft • FS P-18–P-21`;updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
 }
-
-async function continueToResults(){
- const requested=passengers.length;
- const seated=seatAssignments.filter(Boolean).length;
-
- if(requested!==seated){
-   $("seatActionMessage").textContent=`Seat assignment incomplete: ${seated} seated / ${requested} entered.`;
-   $("seatMismatch").style.display="block";
-   $("seatCheck").textContent="MISMATCH";
-   $("seatCheck").className="bad";
-   $("seatMismatch").scrollIntoView({behavior:"smooth",block:"center"});
-   return;
- }
-
- const btn=$("continueResultsBtn");
- const old=btn.textContent;
- btn.disabled=true;
- btn.textContent="Refreshing Mission…";
-
- try{
-   await loadMission();
-   recalculate();
-   const target=$("missionResultsStart");
-   if(target) target.scrollIntoView({behavior:"smooth",block:"start"});
- }finally{
-   btn.disabled=false;
-   btn.textContent=old;
- }
-}
-
 async function startupCheck(){
- try{const r=await fetch(apiUrl("/api/diagnostics")),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
+ try{const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
 }
 
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
@@ -734,6 +952,8 @@ $("paxEditorType").addEventListener("change",e=>$("paxEditorWeight").value=paxDe
 $("applyPaxEditor").addEventListener("click",applyPaxEditor);
 $("closePaxEditor").addEventListener("click",closePaxEditor);
 $("continueResultsBtn").addEventListener("click",continueToResults);
+$("toConfig").addEventListener("change",()=>{autoTO();updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0)});
+$("landConfig").addEventListener("change",()=>{autoLDG();updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0)});
 ["captWt","foWt","totalBag","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref"].forEach(id=>$(id).addEventListener("input",recalculate));
 
 setPassengerCount();
@@ -742,7 +962,14 @@ addEventListener("resize",recalculate);
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => navigator.serviceWorker.register("/sw.js").catch(()=>{}));
+  window.addEventListener("load", async () => {
+    try {
+      const regs=await navigator.serviceWorker.getRegistrations();
+      for(const r of regs) await r.unregister();
+      const keys=await caches.keys();
+      for(const k of keys) await caches.delete(k);
+    } catch(e) {}
+  });
 }
 </script>
 </body></html>
