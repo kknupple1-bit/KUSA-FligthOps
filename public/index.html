@@ -145,7 +145,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.3</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.4</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -158,12 +158,14 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Origin</label><input id="dep" value="KBPT" maxlength="4"></div>
 <div><label>Destination</label><input id="dest" value="KDAL" maxlength="4"></div>
 <div><label>Alternate</label><input id="alt" value="" maxlength="4" placeholder="Optional"></div>
-<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
+<div></div>
 </div>
 
 <div class="row" style="margin-top:10px">
+<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
 <div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
-<div></div><div></div><div></div>
+<div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
+<div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="0" min="0" oninput="recalculate()"></div>
 </div>
 
 <div class="row" style="margin-top:10px">
@@ -177,7 +179,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Captain Weight lb</label><input id="captWt" type="number" value="190" min="0" oninput="recalculate()"></div>
 <div><label>First Officer Weight lb</label><input id="foWt" type="number" value="190" min="0" oninput="recalculate()"></div>
 <div><label>Total Baggage lb</label><input id="totalBag" type="number" value="0" min="0" oninput="recalculate()"></div>
-<div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
+<div></div>
 </div>
 <div id="missionStatus" class="small" style="margin-top:10px">Ready.</div>
 </div>
@@ -364,17 +366,17 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. Fuel-inclusiv
 <div class="row">
 <div class="wx"><div class="small">V1</div><b id="vsV1">—</b><div class="small" id="vsV1src">Performance data required</div></div>
 <div class="wx"><div class="small">VR=V2</div><b id="vsVR">—</b><div class="small" id="vsVRsrc">Performance data required</div></div>
-<div class="wx"><div class="small">Vfr</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">Definition/data source required</div></div>
-<div class="wx"><div class="small">1.5Vs</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">Definition/data source required</div></div>
+<div class="wx"><div class="small">Vfr</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">FlightSafety P-2–P-5 • weight based</div></div>
+<div class="wx"><div class="small">1.5Vs</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">FlightSafety P-2–P-5 • weight based</div></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF / Emer. Return</div><b id="vsVREF">—</b><div class="small" id="vsVREFsrc">Landing chart data required</div></div>
 <div class="wx"><div class="small">Takeoff Weight</div><b id="vsTOW">—</b></div>
-<div class="wx"><div class="small">Landing Weight</div><b id="vsLDW">—</b></div>
+<div class="wx"><div class="small">Emer. Return Weight</div><b id="vsLDW">—</b><div class="small" id="vsERWsrc">TOW less entered return burn</div></div>
 <div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-<b>Automatic working data:</b> V1 and VR=V2 are interpolated from the digitized FlightSafety takeoff tables; VREF is interpolated from the digitized landing tables when mission conditions are inside the published ranges. Card labels now match the FlightSafety convention with Vfr and 1.5Vs shown in place of the prior VFT and VFS labels. Vfr and 1.5Vs remain source-locked until their exact approved Falcon 50-4 source values are identified. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Automatic working data:</b> V1, VR=V2, Vfr and 1.5Vs are interpolated by takeoff weight from the digitized FlightSafety P-2–P-5 tables. VREF / Emer. Return uses the FlightSafety S+48 landing VREF table at the calculated immediate-return weight: takeoff weight minus the entered Emer. Return Fuel Burn. Taxi fuel is already removed in the takeoff-weight calculation. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 </div>
 
@@ -552,13 +554,13 @@ const fwd=[[18959,14.0],[30618,14.0],[35715,19.2],[40300,22.99],[40780,23.3]];
 const aft=[[18959,32.0],[40300,32.0],[40780,29.57]];
 const FS_PERF={
  takeoff:{
-  S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,36:119,38:122,40:126,40.7:127},tables:{
+  S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,36:119,38:122,40:126,40.7:127},vfr:{24:113,26:116,28:120,30:124,32:127,34:131,36:134,38:137,40:141,40.7:142},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192,40.7:195},tables:{
    0:{24:{0:[91,2750],10:[91,2850],20:[91,2900],30:[91,3150],40:[91,3450]},26:{0:[91,2775],10:[91,2875],20:[91,2925],30:[91,3200],40:[91,3500]},28:{0:[91,2800],10:[91,2900],20:[91,2950],30:[91,3225],40:[91,3600]},30:{0:[91,2850],10:[91,2950],20:[91,3000],30:[92,3300],40:[95,3650]},32:{0:[96,3100],10:[96,3200],20:[96,3300],30:[98,3600],40:[101,4150]},34:{0:[101,3400],10:[101,3550],20:[101,3650],30:[103,4050],40:[106,4750]},36:{0:[106,3800],10:[106,3900],20:[106,4050],30:[108,4500],40:[111,5300]},38:{0:[111,4200],10:[111,4300],20:[111,4450],30:[112,5050],40:[115,6000]},40:{0:[115,4700],10:[115,4800],20:[115,4950],30:[117,5700],40:[118,6700]},40.7:{0:[116,4900],10:[116,5000],20:[116,5200],30:[118,6000],40:[120,7000]}},
    2000:{24:{0:[91,2950],10:[91,2950],20:[91,3150],30:[91,3400],40:[91,3750]},26:{0:[91,3000],10:[91,3000],20:[91,3200],30:[91,3450],40:[91,3800]},28:{0:[91,3025],10:[91,3050],20:[91,3250],30:[91,3500],40:[92,3900]},30:{0:[91,3050],10:[91,3100],20:[92,3300],30:[95,3650],40:[97,4200]},32:{0:[96,3400],10:[96,3500],20:[98,3700],30:[100,4200],40:[103,4800]},34:{0:[101,3800],10:[101,3950],20:[103,4100],30:[105,4750],40:[108,5550]},36:{0:[106,4200],10:[106,4400],20:[108,4600],30:[110,5300],40:[113,6250]},38:{0:[111,4650],10:[111,5000],20:[112,5150],30:[115,6000],40:[118,7000]},40:{0:[115,5200],10:[115,5650],20:[116,5800],30:[119,6700]},40.7:{0:[116,5400],10:[116,5900],20:[117,6100],30:[120,7000]}},
    4000:{24:{0:[91,3050],10:[91,3200],20:[91,3450],30:[91,3800],40:[91,4200]},26:{0:[91,3100],10:[91,3250],20:[91,3500],30:[91,3850],40:[91,4250]},28:{0:[91,3150],10:[91,3300],20:[91,3550],30:[92,3950],40:[94,4300]},30:{0:[91,3200],10:[92,3400],20:[94,3750],30:[97,4225],40:[100,4850]},32:{0:[96,3550],10:[97,3700],20:[100,4250],30:[102,4800],40:[106,5550]},34:{0:[101,4000],10:[102,4150],20:[105,4800],30:[108,5550],40:[111,6350]},36:{0:[106,4500],10:[107,4650],20:[110,5400],30:[113,6300]},38:{0:[111,5050],10:[112,5200],20:[115,6050],30:[117,7000]},40:{0:[115,5700],10:[116,5850],20:[119,6800]},40.7:{0:[116,6000],10:[117,6150],20:[120,7100]}},
    6000:{24:{0:[91,3400],10:[91,3550],20:[91,3900],30:[91,4300],40:[91,4700]},26:{0:[91,3450],10:[91,3600],20:[91,3950],30:[91,4400],40:[91,4800]},28:{0:[91,3500],10:[91,3700],20:[92,4000],30:[94,4500],40:[97,4950]},30:{0:[92,3550],10:[94,3900],20:[96,4350],30:[99,5000],40:[102,5700]},32:{0:[97,4050],10:[99,4400],20:[102,4950],30:[105,5700],40:[108,6600]},34:{0:[102,4600],10:[104,5000],20:[107,5700],30:[110,6550]},36:{0:[107,5250],10:[109,5550],20:[112,6400],30:[115,7350]},38:{0:[112,5900],10:[114,6250],20:[117,7150]},40:{0:[116,6650],10:[118,6950]},40.7:{0:[117,6900],10:[120,7300]}}
   }},
-  SLATS:{label:"Slats Only",vr:{24:107,26:111,28:115,30:119,32:123,34:127,36:131,38:134,40:138},tables:{
+  SLATS:{label:"Slats Only",vr:{24:107,26:111,28:115,30:119,32:123,34:127,36:131,38:134,40:138},vfr:{24:132,26:136,28:140,30:144,32:148,34:152,36:156,38:159,40:163},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192},tables:{
    4000:{24:{0:[91,2900],10:[91,3100],20:[91,3400],30:[92,3800],40:[95,4150]},26:{0:[92,3000],10:[93,3200],20:[95,3550],30:[98,3950],40:[101,4450]},28:{0:[97,3350],10:[98,3550],20:[101,4000],30:[103,4450],40:[106,5050]},30:{0:[102,3700],10:[103,4000],20:[106,4500],30:[109,5050],40:[112,5800]},32:{0:[108,4150],10:[109,4500],20:[112,5100],30:[115,5800],40:[118,6700]},34:{0:[114,4650],10:[115,5100],20:[118,5750],30:[121,6650],40:[124,7600]},36:{0:[119,5200],10:[121,5700],20:[123,6450],30:[126,7500],40:[129,8650]},38:{0:[124,5750],10:[126,6350],20:[128,7250],30:[131,8350],40:[134,9750]},40:{0:[129,6400]}},
    6000:{24:{0:[91,3200],10:[91,3500],20:[92,3800],30:[94,4100],40:[97,4500]},26:{0:[93,3300],10:[95,3650],20:[97,4050],30:[100,4450],40:[103,5100]},28:{0:[99,3700],10:[100,4100],20:[103,4500],30:[106,5100],40:[108,5850]},30:{0:[104,4150],10:[106,4600],20:[108,5150],30:[111,5850],40:[114,6700]},32:{0:[110,4750],10:[112,5250],20:[114,5850],30:[117,6700],40:[120,7700]},34:{0:[116,5400],10:[118,5950],20:[120,6700],30:[123,7650],40:[126,8800]},36:{0:[121,6100],10:[123,6700],20:[126,7550],30:[128,8600],40:[131,10000]},38:{0:[126,6950],10:[128,7450]}},
    8000:{24:{0:[91,3750],10:[92,4000],20:[93,4300],30:[96,4650]},26:{0:[95,3900],10:[97,4250],20:[99,4700],30:[102,5350]},28:{0:[101,4400],10:[103,4800],20:[105,5450],30:[108,6200]},30:{0:[106,5000],10:[108,5500],20:[111,6250],30:[113,7100]},32:{0:[112,5750],10:[114,6300],20:[117,7200],30:[119,8200]},34:{0:[118,6500],10:[120,7200],20:[123,8150],30:[126,9350]},36:{0:[123,7350],10:[126,8100],20:[129,9250],30:[131,10700]}},
@@ -721,13 +723,45 @@ function draw(w,cg){
  x.fillStyle="#edf5ff";x.beginPath();x.arc(px(cg),py(w),6,0,Math.PI*2);x.fill();
 }
 function updateVSpeedCard(tow,landing){
- $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";$("vsLDW").textContent=Math.round(landing).toLocaleString()+" lb";
- const v1=valueOrNull("perfV1"),vr=valueOrNull("perfVR"),vref=valueOrNull("landVref");
- $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";$("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";$("vsVREF").textContent=vref==null?"—":vref.toFixed(1)+" kt";
+ const toAuto=autoTO();
+ const v1=toAuto.v1,vr=toAuto.vr,vfr=toAuto.vfr,v15vs=toAuto.v15vs;
+
+ const requestedBurn=Math.max(0,num("emerReturnBurn"));
+ const takeoffFuel=Math.max(0,Math.min(maxFuel,num("fuel"))-Math.max(0,num("taxiFuel")));
+ const appliedBurn=Math.min(requestedBurn,takeoffFuel);
+ const emerWt=Math.max(0,tow-appliedBurn);
+ const emerWk=emerWt/1000;
+ const emerVref=interpScalarN(FS_PERF.landing.S48.speed,emerWk);
+
+ $("vsTOW").textContent=Math.round(tow).toLocaleString()+" lb";
+ $("vsLDW").textContent=Math.round(emerWt).toLocaleString()+" lb";
+ $("vsERWsrc").textContent=`TOW less ${Math.round(appliedBurn).toLocaleString()} lb return burn${requestedBurn>takeoffFuel?" (limited to available takeoff fuel)":""}`;
+
+ $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";
+ $("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";
+ $("vsVFT").textContent=vfr==null?"—":vfr.toFixed(1)+" kt";
+ $("vsVFS").textContent=v15vs==null?"—":v15vs.toFixed(1)+" kt";
+ $("vsVREF").textContent=emerVref==null?"—":emerVref.toFixed(1)+" kt";
+
  $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":"FlightSafety P-2–P-5";
  $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
- $("vsVREFsrc").textContent=vref==null?"Landing weight outside published table":"FlightSafety P-18–P-21 • weight based";
- const count=[v1,vr,vref].filter(v=>v!=null).length;$("vsStatus").textContent=count===3?"AUTO TABLE DATA":count>0?`PARTIAL AUTO DATA (${count}/3)`:"SOURCE LOCKED";$("vsStatus").className=count>0?"ok":"warn";
+ $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
+ $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":"FlightSafety P-2–P-5 • weight based";
+ $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside S+48 VREF table":"FlightSafety P-18/P-19 • S+48 • weight based";
+
+ const vals=[v1,vr,vfr,v15vs,emerVref];
+ const count=vals.filter(v=>v!=null).length;
+ const overweight=emerWt>maxLand;
+ if(count===5){
+   $("vsStatus").textContent=overweight?"AUTO DATA • OVER MAX LDG WT":"AUTO TABLE DATA";
+   $("vsStatus").className=overweight?"warn":"ok";
+ }else if(count>0){
+   $("vsStatus").textContent=`PARTIAL AUTO DATA (${count}/5)`;
+   $("vsStatus").className="warn";
+ }else{
+   $("vsStatus").textContent="SOURCE LOCKED";
+   $("vsStatus").className="warn";
+ }
 }
 function recalculate(){
  const requested=passengers.length;
@@ -803,6 +837,8 @@ function recalculate(){
    const speedParts=[];
    if(toAuto.v1!=null)speedParts.push(`V1 ${toAuto.v1.toFixed(1)}`);
    if(toAuto.vr!=null)speedParts.push(`VR=V2 ${toAuto.vr.toFixed(1)}`);
+   if(toAuto.vfr!=null)speedParts.push(`Vfr ${toAuto.vfr.toFixed(1)}`);
+   if(toAuto.v15vs!=null)speedParts.push(`1.5Vs ${toAuto.v15vs.toFixed(1)}`);
    if(toAuto.bfl!=null)speedParts.push(`BFL ${Math.round(toAuto.bfl).toLocaleString()} ft`);
    $("toSpeeds").textContent=speedParts.length?speedParts.join(" • "):"—";
    $("toLimit").textContent=toAuto.v1!=null
@@ -882,14 +918,17 @@ function depTempC(){if(!missionData)return null;const m=missionData.departure.me
 function autoTO(){
  if(!missionData)return{ok:false,msg:"Load mission first",v1:null,vr:null,bfl:null};
  const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],wk=(valueOrNull("perfTOW")||0)/1000;
- const vr=d?interpScalarN(d.vr,wk):null;if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
+ const vr=d?interpScalarN(d.vr,wk):null;
+ const vfr=d?interpScalarN(d.vfr,wk):null;
+ const v15vs=d?interpScalarN(d.v15vs,wk):null;
+ if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
  let pa=Number(missionData.departure.pressure_altitude_ft),t=depTempC(),r=null,reason="";
  if(!Number.isFinite(pa))reason="Departure pressure altitude unavailable";else if(t==null)reason="Departure temperature unavailable";else if(d){
    let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
    r=fsTakeoff(cfg,lookupPA,t,wk);if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
  }
  if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
- return{ok:vr!=null||!!r,cfg,vr,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
+ return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
 }
 function autoLDG(){
  if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
