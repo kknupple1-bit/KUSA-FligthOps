@@ -236,7 +236,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.8</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.9</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -500,7 +500,7 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
 <div class="wx"><div class="small">Fuel Reserve</div><b id="fuelReserveCalc">0 lb</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-Fuel is fully included in ramp, takeoff and landing <b>weight</b>. The CG chart now shows a <b>projected takeoff-to-landing trace</b> using a temporary neutral fuel-arm model (<b>0.00 in</b>) until the approved DTM912 Section 2 variable fuel-moment schedule is validated.
+Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel moment is now calculated from the Falcon 50 DTM912 Revision 13, Section 2 loading schedule and interpolated only between published fuel points.
 </div>
 </div>
 
@@ -542,7 +542,7 @@ Fuel is fully included in ramp, takeoff and landing <b>weight</b>. The CG chart 
 <div class="wx"><div class="small">Zero-Fuel CG</div><b id="cgZeroFuel">—</b><div class="small" id="cgZeroFuelArm">—</div></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-The chart shows a <b>takeoff point</b>, a <b>fuel-burn trace</b>, and a <b>landing point</b>. Until the approved Falcon 50-4 variable fuel-moment schedule is validated, the trace uses a temporary neutral fuel-arm model of <b>0.00 in</b>. Development / not for flight use.
+The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fuel burns</b>, and the <b>landing CG point</b>. Fuel moment is interpolated from DTM912 Revision 13 Section 2 published loading data. Development / not for flight use until aircraft applicability and software validation are complete.
 </div>
 </div>
 
@@ -684,7 +684,14 @@ The chart shows a <b>takeoff point</b>, a <b>fuel-burn trace</b>, and a <b>landi
 const FLIGHTOPS_API_BASE=(window.FLIGHTOPS_API_BASE||"").replace(/\/$/,"");
 function apiUrl(path){return FLIGHTOPS_API_BASE+path}
 
-const emptyWeight=21479.30,emptyMoment=127185.96,maxZFW=25570,maxRamp=40780,maxTO=40780,maxLand=35715,maxFuel=15514,fuelArmApprox=0.00;
+const emptyWeight=21479.30,emptyMoment=127185.96,maxZFW=25570,maxRamp=40780,maxTO=40780,maxLand=35715,maxFuel=15514;
+const fuelMomentSchedule=[
+ [0,0],[500,24],[1000,49],[1500,77],[2000,87],[2500,73],[3000,62],[3500,53],
+ [4000,46],[4500,41],[5000,29],[5500,12],[6000,-5],[6500,-22],[7000,-40],[7500,-58],
+ [8000,-56],[8500,-55],[9000,-51],[9500,-49],[10000,-44],[10500,-23],[11000,-3],
+ [11500,12],[12000,30],[12500,42],[13000,48],[13500,70],[14000,94],[14500,118],
+ [15000,146],[15514,172]
+];
 const paxDefaults={male:180,female:150,child:70};
 const paxLabels={male:"Adult Male",female:"Adult Female",child:"Child"};
 const seats=[
@@ -780,6 +787,20 @@ function setPassengerCount(){
  renderSeating();
  recalculate();
 }
+function fuelMomentThousand(fuelLb){
+ const f=Math.max(0,Math.min(maxFuel,Number(fuelLb)||0));
+ for(let i=0;i<fuelMomentSchedule.length;i++){
+   const [w,m]=fuelMomentSchedule[i];
+   if(f===w)return m;
+   if(f<w){
+     const [w0,m0]=fuelMomentSchedule[i-1];
+     return m0+(m-m0)*(f-w0)/(w-w0);
+   }
+ }
+ return fuelMomentSchedule[fuelMomentSchedule.length-1][1];
+}
+function fuelMomentLbIn(fuelLb){return fuelMomentThousand(fuelLb)*1000}
+
 
 function getPassenger(id){return passengers.find(p=>p.id===id)||null}
 function getUnseatedPassengers(){
@@ -894,7 +915,7 @@ function onBaggageCompInput(){
  syncTotalBagFromCompartments();
  recalculate();
 }
-function drawTrace(zfwW,zfwCG,toW,toCG,ldW,ldCG){
+function drawTrace(zfwW,zfwCG,path,toW,toCG,ldW,ldCG){
  const c=$("cgChart");if(!c)return;
  const dpr=devicePixelRatio||1,W=c.clientWidth,H=320;c.width=W*dpr;c.height=H*dpr;
  const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
@@ -922,33 +943,23 @@ function drawTrace(zfwW,zfwCG,toW,toCG,ldW,ldCG){
  aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));
  x.stroke();
 
- if(Number.isFinite(toW)&&Number.isFinite(toCG)&&Number.isFinite(ldW)&&Number.isFinite(ldCG)){
-   x.save();
-   x.setLineDash([8,6]);
-   x.strokeStyle="#8fd3ff";
-   x.lineWidth=3;
-   x.beginPath();
-   x.moveTo(px(toCG),py(toW));
-   x.lineTo(px(ldCG),py(ldW));
+ if(Array.isArray(path)&&path.length>1){
+   x.strokeStyle="#8fd3ff";x.lineWidth=3;x.beginPath();
+   path.forEach((p,i)=>i?x.lineTo(px(p.pct),py(p.weight)):x.moveTo(px(p.pct),py(p.weight)));
    x.stroke();
-   x.restore();
-
-   x.fillStyle="#8fd3ff";
-   x.beginPath();x.arc(px(toCG),py(toW),6,0,Math.PI*2);x.fill();
-   x.fillStyle="#55d18b";
-   x.beginPath();x.arc(px(ldCG),py(ldW),6,0,Math.PI*2);x.fill();
-
-   x.fillStyle="#d6e7f8";
-   x.font="bold 11px Arial";
-   x.fillText("TO",px(toCG)+8,py(toW)-8);
-   x.fillText("LDG",px(ldCG)+8,py(ldW)-8);
  }
 
+ if(Number.isFinite(toW)&&Number.isFinite(toCG)){
+   x.fillStyle="#8fd3ff";x.beginPath();x.arc(px(toCG),py(toW),7,0,Math.PI*2);x.fill();
+   x.fillStyle="#d6e7f8";x.font="bold 11px Arial";x.fillText("TO",px(toCG)+9,py(toW)-8);
+ }
+ if(Number.isFinite(ldW)&&Number.isFinite(ldCG)){
+   x.fillStyle="#55d18b";x.beginPath();x.arc(px(ldCG),py(ldW),7,0,Math.PI*2);x.fill();
+   x.fillStyle="#d6e7f8";x.font="bold 11px Arial";x.fillText("LDG",px(ldCG)+9,py(ldW)-8);
+ }
  if(Number.isFinite(zfwW)&&Number.isFinite(zfwCG)){
-   x.fillStyle="#edf5ff";
-   x.beginPath();x.arc(px(zfwCG),py(zfwW),4,0,Math.PI*2);x.fill();
-   x.font="10px Arial";
-   x.fillText("ZFW",px(zfwCG)+8,py(zfwW)+14);
+   x.fillStyle="#edf5ff";x.beginPath();x.arc(px(zfwCG),py(zfwW),4,0,Math.PI*2);x.fill();
+   x.font="10px Arial";x.fillText("ZFW",px(zfwCG)+8,py(zfwW)+14);
  }
 }
 
@@ -1018,14 +1029,29 @@ function recalculate(){
  const zfw=w,arm=m/w,pct=pctMacFromArm(arm),fl=interp(fwd,w),al=interp(aft,w);
  const ramp=zfw+fob,tow=ramp-taxi,landingFuel=Math.max(0,fob-missionFuel),landing=zfw+landingFuel,reserve=fob-missionFuel;
  const takeoffFuel=Math.max(0,fob-taxi);
- const takeoffMoment=m+(takeoffFuel*fuelArmApprox);
- const landingMoment=m+(landingFuel*fuelArmApprox);
+ const takeoffMoment=m+fuelMomentLbIn(takeoffFuel);
+ const landingMoment=m+fuelMomentLbIn(landingFuel);
  const takeoffArm=tow>0?takeoffMoment/tow:arm;
  const landingArm=landing>0?landingMoment/landing:arm;
  const takeoffPct=pctMacFromArm(takeoffArm);
  const landingPct=pctMacFromArm(landingArm);
+
+ const burnPath=[];
+ const startFuel=takeoffFuel,endFuel=landingFuel;
+ if(startFuel>=endFuel){
+   const steps=Math.max(2,Math.ceil((startFuel-endFuel)/250));
+   for(let i=0;i<=steps;i++){
+     const fuel=startFuel-(startFuel-endFuel)*(i/steps);
+     const gross=zfw+fuel;
+     const moment=m+fuelMomentLbIn(fuel);
+     const a=gross>0?moment/gross:arm;
+     burnPath.push({fuel,weight:gross,pct:pctMacFromArm(a)});
+   }
+ }
  const seatMatch=requested===seatedCount,fuelOK=reserve>=0;
- const wbOK=seatMatch&&pct>=fl&&pct<=al&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
+ const toFl=interp(fwd,tow),toAl=interp(aft,tow),ldFl=interp(fwd,landing),ldAl=interp(aft,landing);
+ const cgPathOK=burnPath.length?burnPath.every(p=>p.pct>=interp(fwd,p.weight)&&p.pct<=interp(aft,p.weight)):false;
+ const wbOK=seatMatch&&pct>=fl&&pct<=al&&takeoffPct>=toFl&&takeoffPct<=toAl&&landingPct>=ldFl&&landingPct<=ldAl&&cgPathOK&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
 
  $("paxRequestedDisplay").textContent=requested;
  $("paxSeatedDisplay").textContent=seatedCount;
@@ -1054,9 +1080,9 @@ function recalculate(){
  $("cgTakeoffArm").textContent=takeoffArm.toFixed(2)+'"';
  $("cgLanding").textContent=landingPct.toFixed(2)+"%";
  $("cgLandingArm").textContent=landingArm.toFixed(2)+'"';
- $("cgTraceStatus").textContent="ESTIMATED TRACE";
- $("cgTraceStatus").className="warn";
- $("cgTraceNote").textContent=`Using fuel arm ${fuelArmApprox.toFixed(2)} in until validated fuel-moment data is loaded`;
+ $("cgTraceStatus").textContent="DTM912 FUEL MOMENT";
+ $("cgTraceStatus").className="ok";
+ $("cgTraceNote").textContent="Rev 13 • Section 2 • interpolated within published fuel points";
  const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS");env.className=wbOK?"ok":"bad";
  $("limZFW").textContent=`${Math.round(zfw).toLocaleString()} / ${maxZFW.toLocaleString()} lb`;
  $("limRamp").textContent=`${Math.round(ramp).toLocaleString()} / ${maxRamp.toLocaleString()} lb`;
@@ -1093,7 +1119,7 @@ function recalculate(){
    if(ldAuto.lfl==null)$("landFieldLen").value="";
  }
  updateVSpeedCard(tow,landing);
- drawTrace(zfw,pct,tow,takeoffPct,landing,landingPct);
+ drawTrace(zfw,pct,burnPath,tow,takeoffPct,landing,landingPct);
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
 function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
