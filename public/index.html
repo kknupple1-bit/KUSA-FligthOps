@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KUSA FlightOps — N33AP TOLD Beta</title>
+<title>KUSA FlightOps — N33AP Planning Beta</title>
 <style>
 :root{--bg:#071b33;--panel:#0d294a;--panel2:#12365f;--text:#edf5ff;--muted:#9db6cf;--ok:#55d18b;--warn:#ffca58;--bad:#ff6b6b;--line:#2a4b70}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
@@ -261,13 +261,29 @@ details summary{cursor:pointer;margin-top:8px}
  .small,.told-row span:first-child{color:#444!important}
 }
 
+
+.planning-box{border:1px solid #315a80;background:#071b31;border-radius:12px;padding:12px;margin-top:10px}
+.planning-box .row{margin-top:8px}
+.planning-result{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px}
+.planning-result b{display:block;font-size:20px;margin-top:3px}
+.manual-runway{display:none}
+
+
+.seat-type-select{margin-top:6px;width:100%;font-size:11px;padding:5px 4px;background:#06182c;color:#dbeeff;border:1px solid #3a6288;border-radius:6px}
+.seat-type-select:disabled{opacity:.35}
+.cabin-update-row{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin-top:12px}
+.fob-verify{display:flex;align-items:center;gap:8px;margin-top:7px;padding:8px;border:1px solid #365e84;border-radius:8px;background:#071a2f}
+.fob-verify input{width:auto}
+.fob-verify.ok{border-color:#2d8a5b;background:#08271c}
+.fob-verify.bad{border-color:#c95656;background:#311b22}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.4</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.6</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -289,7 +305,7 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
+<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()"><div id="fobVerifyBox" class="fob-verify bad"><input id="fobVerified" type="checkbox" onchange="recalculate()"><label for="fobVerified" style="margin:0">FOB VERIFIED</label></div><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
 <div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
 <div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
 <div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="0" min="0" oninput="recalculate()"></div>
@@ -314,7 +330,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="card">
 <h2>2. Passenger Seating — Tap to Move</h2>
 <div class="small" style="margin-bottom:12px">
-FlightOps preloads the number of passengers entered in Mission Setup beginning with Seat 1. Tap an occupied seat to move that passenger to the Unseated PAX pool. Tap an empty seat to place the next unseated passenger there.
+FlightOps preloads the entered passenger count beginning with Seat 1 and defaults each passenger to Adult Male. Select Male, Female, or Child directly at each occupied seat. Tap an occupied seat to move that passenger; tap an empty seat to place the next unseated passenger.
 </div>
 
 <div class="pax-check">
@@ -324,9 +340,7 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
 <div><span class="small">Seat Check</span><b id="seatCheck" class="ok">MATCH</b></div>
 </div>
 
-<div class="passenger-type-bar">
-<div class="small"><b>Passenger defaults:</b> Adult Male 180 lb • Adult Female 150 lb • Child 70 lb. Tap a passenger in the roster below to change type or actual weight.</div>
-</div>
+<div class="passenger-type-bar"><div class="small"><b>Passenger defaults:</b> Male 180 lb • Female 150 lb • Child 70 lb. Passenger type is selected directly on the cabin layout.</div></div>
 
 <div class="n33ap-cabin floorplan-cabin">
   <div class="cabin-titlebar">N33AP CABIN LAYOUT</div>
@@ -357,28 +371,28 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
   <div class="cabin-aisle-fp"></div>
 
   <div class="seat-row-fp">
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Row 1 LH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Row 1 RH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="0"><span class="seat-number">1</span><span class="seat-name">Row 1 LH</span><span class="seat-occupant" id="seatOccupant0">EMPTY</span></button><select class="seat-type-select" id="seatType0" data-seat-type-index="0" onchange="seatTypeChanged(0)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="1"><span class="seat-number">2</span><span class="seat-name">Row 1 RH</span><span class="seat-occupant" id="seatOccupant1">EMPTY</span></button><select class="seat-type-select" id="seatType1" data-seat-type-index="1" onchange="seatTypeChanged(1)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
   </div>
 
   <div class="seat-row-fp">
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Row 2 LH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Row 2 RH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="2"><span class="seat-number">3</span><span class="seat-name">Row 2 LH</span><span class="seat-occupant" id="seatOccupant2">EMPTY</span></button><select class="seat-type-select" id="seatType2" data-seat-type-index="2" onchange="seatTypeChanged(2)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="3"><span class="seat-number">4</span><span class="seat-name">Row 2 RH</span><span class="seat-occupant" id="seatOccupant3">EMPTY</span></button><select class="seat-type-select" id="seatType3" data-seat-type-index="3" onchange="seatTypeChanged(3)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
   </div>
 
   <div class="seat-row-fp">
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Row 3 LH</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Row 3 RH</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="4"><span class="seat-number">5</span><span class="seat-name">Row 3 LH</span><span class="seat-occupant" id="seatOccupant4">EMPTY</span></button><select class="seat-type-select" id="seatType4" data-seat-type-index="4" onchange="seatTypeChanged(4)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="5"><span class="seat-number">6</span><span class="seat-name">Row 3 RH</span><span class="seat-occupant" id="seatOccupant5">EMPTY</span></button><select class="seat-type-select" id="seatType5" data-seat-type-index="5" onchange="seatTypeChanged(5)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
   </div>
 
   <div class="seat-row-fp">
     <div class="blank-slot"></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Former 8 Position</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="6"><span class="seat-number">7</span><span class="seat-name">Former 8 Position</span><span class="seat-occupant" id="seatOccupant6">EMPTY</span></button><select class="seat-type-select" id="seatType6" data-seat-type-index="6" onchange="seatTypeChanged(6)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
   </div>
 
   <div class="seat-row-fp">
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft LH</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button></div>
-    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Across from Seat 9</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="8"><span class="seat-number">9</span><span class="seat-name">Aft LH</span><span class="seat-occupant" id="seatOccupant8">EMPTY</span></button><select class="seat-type-select" id="seatType8" data-seat-type-index="8" onchange="seatTypeChanged(8)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
+    <div class="seat-fp"><button type="button" class="tap-seat" data-seat-index="7"><span class="seat-number">8</span><span class="seat-name">Across from Seat 9</span><span class="seat-occupant" id="seatOccupant7">EMPTY</span></button><select class="seat-type-select" id="seatType7" data-seat-type-index="7" onchange="seatTypeChanged(7)"><option value="male">Male</option><option value="female">Female</option><option value="child">Child</option></select></div>
   </div>
 
   <div class="aft-service-fp">
@@ -422,39 +436,14 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
 </div>
 </div>
 
-<div id="paxRoster" class="pax-roster"></div>
-
-<div id="paxEditor" class="seat-editor" style="display:none">
-<div class="seat-editor-title">
-<div><b id="paxEditorName">Passenger</b><div class="small">Change passenger category or enter actual weight.</div></div>
-<button type="button" id="closePaxEditor">Close</button>
-</div>
-<div class="row">
-<div>
-<label>Passenger Type</label>
-<select id="paxEditorType">
-<option value="male">Adult Male — 180 lb</option>
-<option value="female">Adult Female — 150 lb</option>
-<option value="child">Child — 70 lb</option>
-</select>
-</div>
-<div><label>Actual Weight lb</label><input id="paxEditorWeight" type="number" min="1" value="180"></div>
-<div><label>Apply</label><button type="button" id="applyPaxEditor">Update Passenger</button></div>
-</div>
+<div class="cabin-update-row">
+  <div class="small">Passenger types and seating are reflected immediately in weight &amp; balance.</div>
+  <button type="button" id="applyPaxEditor">Update Passenger</button>
 </div>
 
 <div id="seatMismatch" class="callout small" style="display:none;margin-top:12px">
-PAX entered does not equal PAX seated. Weight & balance is flagged incomplete until all entered passengers are assigned to seats.
-</div>
-
-<div class="section2-continue">
-<div>
-  <div class="small">When seating is complete</div>
-  <b>Refresh airport/weather data and continue to calculated results.</b>
-</div>
-<button type="button" id="continueResultsBtn">Continue to Mission Results</button>
-</div>
-</div>
+PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplete until all entered passengers are assigned to seats.
+</div></div>
 
 <div class="grid" id="missionResultsStart">
 <section>
@@ -588,6 +577,23 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <div class="card">
+<h2>Airport / Runway Fallback</h2>
+<div class="small">If an airport is not yet present in the packaged runway database, enter the runway manually and continue performance planning. Manual runway data is used only for this session.</div>
+<div class="row" style="margin-top:10px">
+  <div><label>Use For</label><select id="manualRunwayTarget"><option value="DEP">Departure</option><option value="DEST">Destination</option></select></div>
+  <div><label>Runway ID</label><input id="manualRunwayId" value="" placeholder="e.g. 18"></div>
+  <div><label>Runway Length ft</label><input id="manualRunwayLength" type="number" min="1" placeholder="e.g. 6500"></div>
+  <div><label>Runway Heading ° True</label><input id="manualRunwayHeading" type="number" min="0" max="359" placeholder="e.g. 180"></div>
+</div>
+<div class="row" style="margin-top:10px">
+  <div><label>Runway Width ft</label><input id="manualRunwayWidth" type="number" min="1" value="100"></div>
+  <div><label>Surface</label><input id="manualRunwaySurface" value="Asphalt"></div>
+  <div><label>Apply</label><button type="button" onclick="applyManualRunway()">Use Manual Runway</button></div>
+  <div class="wx"><div class="small">Fallback Status</div><b id="manualRunwayStatus">READY</b><div class="small">Verify against current airport data.</div></div>
+</div>
+</div>
+
+<div class="card">
 <h2>5. Available Runways</h2>
 <table>
 <thead><tr><th>Airport</th><th>RWY</th><th>Heading</th><th>Length</th><th>Width</th><th>Surface</th><th>HW</th><th>TW</th><th>XW</th></tr></thead>
@@ -602,6 +608,30 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <h3 style="font-size:14px">Takeoff</h3>
+<div class="planning-box">
+  <div class="row">
+    <div><label>Performance Input Mode</label><select id="perfInputMode"><option value="LIVE">LIVE MISSION</option><option value="MANUAL">MANUAL / WHAT-IF</option></select></div>
+    <div class="wx"><div class="small">Planning Mode</div><b id="perfModeStatus">LIVE</b><div class="small" id="perfModeNote">Uses mission weather, selected runway, and calculated aircraft weight.</div></div>
+    <div></div><div></div>
+  </div>
+  <div id="manualPerfInputs" style="display:none">
+    <div class="row">
+      <div><label>Manual Pressure Altitude ft</label><input id="manualTOPA" type="number" value="0" step="100"></div>
+      <div><label>Manual Temperature °C</label><input id="manualTOTemp" type="number" value="20" step="1"></div>
+      <div><label>Manual Test Weight lb</label><input id="manualTOWeight" type="number" value="30000" min="18000" max="40780" step="100"></div>
+      <div><label>Manual Runway Length ft</label><input id="manualTORwyLen" type="number" value="6000" min="1" step="1"></div>
+    </div>
+    <div class="row">
+      <div class="planning-result"><div class="small">Max Weight at Entered Temp</div><b id="whatIfMaxWeight">—</b><div class="small" id="whatIfMaxWeightNote">Dry table coverage only.</div></div>
+      <div class="planning-result"><div class="small">Max Temp at Entered Weight</div><b id="whatIfMaxTemp">—</b><div class="small" id="whatIfMaxTempNote">Dry table coverage only.</div></div>
+      <div class="planning-result"><div class="small">Test Point BFL</div><b id="whatIfBFL">—</b><div class="small" id="whatIfBFLNote">Within digitized source range only.</div></div>
+      <div class="planning-result"><div class="small">Runway Margin</div><b id="whatIfMargin">—</b></div>
+    </div>
+    <div class="callout small" style="margin-top:10px">
+      Manual mode is for performance planning when weather is unavailable or when testing hotter/heavier scenarios. It does not alter the aircraft W&amp;B loading. No extrapolation outside the digitized performance tables.
+    </div>
+  </div>
+</div>
 <div class="row">
 <div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only (V1/BFL source ≥ 4,000 ft PA)</option></select></div>
 </div>
@@ -730,7 +760,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Runway selection</td><td class="ok">AUTO</td></tr>
-<tr><td>FAA airport backend</td><td class="ok">ACTIVE</td></tr>
+<tr><td>FAA/NASR runway data</td><td class="ok">PACKAGED + MANUAL FALLBACK</td></tr>
 <tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Fuel CG calculation</td><td class="ok">DTM912 REV 13 LOADED</td></tr>
@@ -768,6 +798,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Wind</span><span id="toldDepWind">—</span></div>
     <div class="told-row"><span>OAT / Pressure Altitude</span><span id="toldDepWx">—</span></div>
     <div class="told-row"><span>Takeoff Weight</span><span id="toldTOW">—</span></div>
+    <div class="told-row"><span>Fuel on Board</span><span id="toldFOBVerify">—</span></div>
     <div class="told-row"><span>Takeoff CG</span><span id="toldTOCG">—</span></div>
     <div class="told-row"><span>Configuration</span><span id="toldTOConfig">—</span></div>
     <div class="told-row"><span>Balanced Field Length</span><span id="toldBFL">—</span></div>
@@ -899,6 +930,7 @@ const $=id=>document.getElementById(id);
 const num=id=>+$((id)).value||0;
 let latestCalc=null;
 
+function resetFuelVerification(){if($("fobVerified"))$("fobVerified").checked=false;}
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function showAppTab(tab){
  const told=tab==="told";
@@ -921,14 +953,15 @@ function updateToldCard(){
  const depCode=$("dep").value.toUpperCase().trim()||"—",destCode=$("dest").value.toUpperCase().trim()||"—";
  const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
  const dw=dr&&dr.wind_components||{},lw=lr&&lr.wind_components||{};
- const temp=depTempC();
- $("toldRoute").textContent=`${depCode} → ${destCode}`;
+ const temp=perfIsManual()?perfTakeoffTemp():depTempC();
+ $("toldRoute").textContent=`${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
  $("toldDepRwy").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
- $("toldDepSurface").textContent=`${dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
+ $("toldDepSurface").textContent=`${perfIsManual()&&perfTakeoffRunwayLen()?Number(perfTakeoffRunwayLen()).toLocaleString()+" ft":(dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—")} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
  $("toldDepWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
- $("toldDepWx").textContent=`${temp==null?"—":temp+"°C"} / ${missionData&&Number.isFinite(Number(missionData.departure.pressure_altitude_ft))?Math.round(Number(missionData.departure.pressure_altitude_ft)).toLocaleString()+" ft":"—"}`;
- $("toldTOW").textContent=Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—";
- $("toldTOCG").textContent=Number.isFinite(c.takeoffPct)?`${c.takeoffPct.toFixed(2)}% MAC`:"—";
+ $("toldDepWx").textContent=`${temp==null?"—":temp+"°C"} / ${Number.isFinite(perfTakeoffPA())?Math.round(perfTakeoffPA()).toLocaleString()+" ft":"—"}`;
+ $("toldTOW").textContent=perfIsManual()&&Number.isFinite(perfTakeoffWeightLb())?Math.round(perfTakeoffWeightLb()).toLocaleString()+" lb":(Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—");
+ $("toldFOBVerify").textContent=`${Math.round(num("fuel")).toLocaleString()} lb • ${$("fobVerified")?.checked?"VERIFIED":"NOT VERIFIED"}`;
+ $("toldTOCG").textContent=perfIsManual()?"W&B CG UNCHANGED":(Number.isFinite(c.takeoffPct)?`${c.takeoffPct.toFixed(2)}% MAC`:"—");
  $("toldTOConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  $("toldBFL").textContent=$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED";
  $("toldMaxTOW").textContent=textOf("toMax");
@@ -958,6 +991,7 @@ function updateToldCard(){
  const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
  const confirmed=$("lowFuelConfirm")?.checked;
  const issues=[];
+ if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
  if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
  if(textOf("toStatus").includes("PENDING")||textOf("toStatus").includes("LOCKED"))issues.push("TAKEOFF LIMITS NOT FULLY EVALUATED");
  if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
@@ -980,7 +1014,6 @@ function setPassengerCount(){
  }
  seatAssignments=Array(9).fill(null);
  passengers.forEach((p,i)=>{seatAssignments[i]=p.id});
- closePaxEditor();
  renderSeating();
  recalculate();
 }
@@ -1025,6 +1058,23 @@ function seatTapped(index){
  recalculate();
 }
 
+function seatTypeChanged(index){
+ const pid=seatAssignments[index],p=pid?getPassenger(pid):null;if(!p)return;
+ const sel=$("seatType"+index);if(!sel)return;
+ p.type=sel.value;
+ p.weight=paxDefaults[p.type];
+ renderSeating();
+ recalculate();
+}
+function updatePassengerData(){
+ document.querySelectorAll(".seat-type-select[data-seat-type-index]").forEach(sel=>{
+   const i=+sel.dataset.seatTypeIndex,pid=seatAssignments[i],p=pid?getPassenger(pid):null;
+   if(p){p.type=sel.value;p.weight=paxDefaults[p.type]}
+ });
+ renderSeating();recalculate();
+ $("seatActionMessage").textContent="Passenger selections updated.";
+}
+
 function renderSeating(){
  const unseated=getUnseatedPassengers();
  document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>{
@@ -1035,6 +1085,8 @@ function renderSeating(){
    btn.classList.toggle("unseated-target",!p&&unseated.length>0);
    $("seatOccupant"+i).textContent=p?`PAX ${p.id} • ${paxLabels[p.type]} • ${p.weight} lb`:"EMPTY";
    btn.setAttribute("aria-label",p?`Seat ${i+1}, Passenger ${p.id}, tap to remove`:`Seat ${i+1}, empty, tap to place passenger`);
+   const sel=$("seatType"+i);
+   if(sel){sel.disabled=!p;if(p)sel.value=p.type;else sel.value="male"}
  });
 
  $("unseatedPool").innerHTML="";
@@ -1045,38 +1097,12 @@ function renderSeating(){
    unseated.forEach(p=>{
      const chip=document.createElement("span");
      chip.className="pax-chip";
-     chip.textContent=`PAX ${p.id} • ${p.weight} lb`;
+     chip.textContent=`PAX ${p.id} • ${paxLabels[p.type]} • ${p.weight} lb`;
      $("unseatedPool").appendChild(chip);
    });
  }
-
- $("paxRoster").innerHTML="";
- passengers.forEach(p=>{
-   const b=document.createElement("button");
-   b.type="button";
-   const si=seatForPax(p.id);
-   if(si<0)b.classList.add("unseated");
-   b.textContent=`PAX ${p.id} • ${paxLabels[p.type]} • ${p.weight} lb${si>=0?` • S${si+1}`:" • UNSEATED"}`;
-   b.addEventListener("click",()=>openPaxEditor(p.id));
-   $("paxRoster").appendChild(b);
- });
 }
 
-function openPaxEditor(id){
- const p=getPassenger(id);if(!p)return;
- editingPaxId=id;
- $("paxEditorName").textContent=`Passenger ${id}`;
- $("paxEditorType").value=p.type;
- $("paxEditorWeight").value=p.weight;
- $("paxEditor").style.display="block";
-}
-function closePaxEditor(){editingPaxId=null;$("paxEditor").style.display="none"}
-function applyPaxEditor(){
- const p=getPassenger(editingPaxId);if(!p)return;
- p.type=$("paxEditorType").value;
- p.weight=Math.max(1,+$("paxEditorWeight").value||paxDefaults[p.type]);
- renderSeating();recalculate();closePaxEditor();
-}
 function distributeBaggage(total){
  let remaining=Math.max(0,total),out=[];
  baggageStations.forEach(s=>{const load=Math.min(remaining,s.limit);out.push({...s,load});remaining-=load});
@@ -1205,7 +1231,7 @@ function syncTakeoffSection(){
  const a=autoTO();
  updateRunwayConditionWarnings();
  const runwayCondition=$("toRunwayCondition").value;
- const wk=(valueOrNull("perfTOW")||0)/1000;
+ const wk=(perfTakeoffWeightLb()||0)/1000;
  const speedParts=[];
  if(a.v1!=null)speedParts.push(`V1 ${a.v1.toFixed(1)}`);
  if(a.vr!=null)speedParts.push(`VR=V2 ${a.vr.toFixed(1)}`);
@@ -1214,7 +1240,7 @@ function syncTakeoffSection(){
  if(a.bfl!=null)speedParts.push(`BFL ${Math.round(a.bfl).toLocaleString()} ft`);
  $("toSpeeds").textContent=speedParts.length?`${$("toRunwayCondition").value} • ${speedParts.join(" • ")}`:"—";
 
- if(!missionData){
+ if(!missionData&&!perfIsManual()){
    $("toStatus").textContent="LOAD MISSION";
    $("toStatus").className="warn";
    $("toLimit").textContent="Load mission airport and weather data first";
@@ -1222,7 +1248,7 @@ function syncTakeoffSection(){
    return a;
  }
 
- const pa=Number(missionData.departure.pressure_altitude_ft);
+ const pa=perfTakeoffPA();
  const paKeys=kN(d.tables), wtKeys=kN(d.vr);
  const minPA=Math.min(...paKeys), maxPA=Math.max(...paKeys), minWT=Math.min(...wtKeys), maxWT=Math.max(...wtKeys);
  const parts=[d.label];
@@ -1262,7 +1288,7 @@ function syncTakeoffSection(){
    $("toStatus").textContent="SOURCE LOCKED";
    $("toStatus").className="warn";
    $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"No takeoff data available for the selected weight / PA / temperature"}`;
-   $("toConfigNote").textContent=`${d.label} selected, but the current mission point is outside the digitized FlightSafety table coverage.`;
+   $("toConfigNote").textContent=`${d.label} selected, but the current performance point is outside the digitized FlightSafety table coverage.`;
  }
  return a;
 }
@@ -1314,6 +1340,16 @@ function recalculate(){
  const unseated=requested-seatedCount;
  const capt=num("captWt"),fo=num("foWt"),crew=capt+fo; const bagLoads=baggageLoadsFromUI(); const bag=bagLoads.reduce((a,b)=>a+b,0);
  let fob=Math.min(maxFuel,Math.max(0,num("fuel")));$("fuel").value=fob;
+ const fobVerified=fob>0 && !!$("fobVerified")?.checked;
+ const fvb=$("fobVerifyBox"),fvn=$("fobVerifyNote");
+ if(fob<=0){
+   if($("fobVerified"))$("fobVerified").checked=false;
+   fvb.className="fob-verify bad";fvn.textContent="ENTER FUEL ON BOARD — verification required before mission readiness.";
+ }else if(fobVerified){
+   fvb.className="fob-verify ok";fvn.textContent=`Verified ${Math.round(fob).toLocaleString()} lb fuel on board.`;
+ }else{
+   fvb.className="fob-verify bad";fvn.textContent=`VERIFY ${Math.round(fob).toLocaleString()} lb fuel on board.`;
+ }
  let missionFuel=Math.min(maxFuel,Math.max(0,num("missionFuel")));$("missionFuel").value=missionFuel;
  const taxi=Math.max(0,num("taxiFuel"));
 
@@ -1355,7 +1391,8 @@ function recalculate(){
  const seatMatch=requested===seatedCount,fuelOK=reserve>=0;
  const toFl=interp(fwd,tow),toAl=interp(aft,tow),ldFl=interp(fwd,landing),ldAl=interp(aft,landing);
  const cgPathOK=burnPath.length?burnPath.every(p=>p.pct>=interp(fwd,p.weight)&&p.pct<=interp(aft,p.weight)):false;
- const wbOK=seatMatch&&pct>=fl&&pct<=al&&takeoffPct>=toFl&&takeoffPct<=toAl&&landingPct>=ldFl&&landingPct<=ldAl&&cgPathOK&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
+ const wbMathOK=seatMatch&&pct>=fl&&pct<=al&&takeoffPct>=toFl&&takeoffPct<=toAl&&landingPct>=ldFl&&landingPct<=ldAl&&cgPathOK&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
+ const wbOK=wbMathOK&&fobVerified;
  const lowLandingFuel=landingFuel<3000;
  const lowLandingFuelConfirmed=!lowLandingFuel || !!$("lowFuelConfirm")?.checked;
  latestCalc={zfw,ramp,tow,landing,landingFuel,reserve,pct,takeoffPct,landingPct,takeoffArm,landingArm,burnPath,wbOK,lowLandingFuel,lowLandingFuelConfirmed};
@@ -1390,7 +1427,7 @@ function recalculate(){
  $("cgTraceStatus").textContent="DTM912 FUEL MOMENT";
  $("cgTraceStatus").className="ok";
  $("cgTraceNote").textContent="Rev 13 • Section 2 • interpolated within published fuel points";
- const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS");env.className=wbOK?"ok":"bad";
+ const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!fobVerified?"VERIFY FOB":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS"));env.className=wbOK?"ok":"bad";
  $("limZFW").textContent=`${Math.round(zfw).toLocaleString()} / ${maxZFW.toLocaleString()} lb`;
  $("limRamp").textContent=`${Math.round(ramp).toLocaleString()} / ${maxRamp.toLocaleString()} lb`;
  $("limTO").textContent=`${Math.round(tow).toLocaleString()} / ${maxTO.toLocaleString()} lb`;
@@ -1420,7 +1457,7 @@ function recalculate(){
  loadRows.forEach(r=>{const tr=document.createElement("tr");tr.innerHTML=`<td>${r.name}</td><td>${r.desc}</td><td>${r.arm.toFixed(2)} in</td><td>${Math.round(r.load).toLocaleString()} lb</td><td>${Math.round(r.moment).toLocaleString()}</td>`;tb.appendChild(tr)});
  if(bd.overflow>0){const tr=document.createElement("tr");tr.innerHTML=`<td class="bad"><b>BAGGAGE OVERFLOW</b></td><td>Over approved compartments</td><td>—</td><td class="bad">${Math.round(bd.overflow)} lb</td><td>—</td>`;tb.appendChild(tr)}
 
- $("perfTOW").value=Math.round(tow);$("landWt").value=Math.round(landing);
+ if(!perfIsManual())$("perfTOW").value=Math.round(tow);$("landWt").value=Math.round(landing);
  selectedRunwayChanged();
  syncTakeoffSection();
  syncLandingSection();
@@ -1458,11 +1495,11 @@ function fillRunwaySelect(id,runways){
 function selectedRunwayChanged(){
  if(!missionData)return;
  const depRw=(missionData.departure.runways||[])[+$("depRunway").value],destRw=(missionData.destination.runways||[])[+$("destRunway").value];
- if(depRw){$("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;const w=depRw.wind_components||{};$("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDepRwy").textContent=depRw.runway_id;$("perfRwyLen").value=depRw.length_ft||""}
+ if(depRw){$("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;const w=depRw.wind_components||{};$("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDepRwy").textContent=depRw.runway_id;if(!perfIsManual())$("perfRwyLen").value=depRw.length_ft||""}
  if(destRw){$("destRwySummary").textContent=`RWY ${destRw.runway_id} • ${esc(destRw.length_ft)} ft`;const w=destRw.wind_components||{};$("destWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDestRwy").textContent=destRw.runway_id;$("landRwyLen").value=destRw.length_ft||""}
  if(valueOrNull("perfTOW")){
    autoTO(); autoLDG();
-   updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+   updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
  }
 }
 async function loadMission(){
@@ -1496,24 +1533,148 @@ async function loadMission(){
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
 }
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
+
+function perfIsManual(){return $("perfInputMode") && $("perfInputMode").value==="MANUAL"}
+function perfTakeoffPA(){
+ if(perfIsManual())return valueOrNull("manualTOPA");
+ return missionData?Number(missionData.departure.pressure_altitude_ft):null;
+}
+function perfTakeoffTemp(){
+ if(perfIsManual())return valueOrNull("manualTOTemp");
+ return depTempC();
+}
+function perfTakeoffWeightLb(){
+ return perfIsManual()?valueOrNull("manualTOWeight"):valueOrNull("perfTOW");
+}
+function perfTakeoffRunwayLen(){
+ return perfIsManual()?valueOrNull("manualTORwyLen"):valueOrNull("perfRwyLen");
+}
+function perfLandingPA(){
+ return missionData?Number(missionData.destination.pressure_altitude_ft):null;
+}
+function setPerformanceInputMode(){
+ const manual=perfIsManual();
+ $("manualPerfInputs").style.display=manual?"block":"none";
+ $("perfModeStatus").textContent=manual?"MANUAL / WHAT-IF":"LIVE";
+ $("perfModeStatus").className=manual?"warn":"ok";
+ $("perfModeNote").textContent=manual
+  ?"Uses manually entered PA, temperature, test weight and runway length. W&B is unchanged."
+  :"Uses mission weather, selected runway, and calculated aircraft weight.";
+ if(manual){
+   $("perfTOW").value=valueOrNull("manualTOWeight")||"";
+   $("perfRwyLen").value=valueOrNull("manualTORwyLen")||"";
+ }else{
+   if(latestCalc&&Number.isFinite(latestCalc.tow))$("perfTOW").value=Math.round(latestCalc.tow);
+   selectedRunwayChanged();
+ }
+ syncTakeoffSection();
+ updateWhatIfPlanner();
+ updateToldCard();
+}
+function takeoffAt(cfg,pa,temp,weightLb){
+ const d=FS_PERF.takeoff[cfg];
+ if(!d||!Number.isFinite(pa)||!Number.isFinite(temp)||!Number.isFinite(weightLb))return null;
+ let lookupPA=pa;
+ const minPA=Math.min(...kN(d.tables));
+ if(pa<minPA&&minPA===0&&pa>=-1000)lookupPA=0;
+ return fsTakeoff(cfg,lookupPA,temp,weightLb/1000);
+}
+function solveMaxWeightForRunway(cfg,pa,temp,rwy){
+ if($("toRunwayCondition").value!=="DRY")return null;
+ const d=FS_PERF.takeoff[cfg], weights=kN(d.vr).map(x=>x*1000);
+ const lo=Math.max(weights[0],18000),hi=Math.min(weights[weights.length-1],maxTO);
+ let best=null;
+ for(let w=lo;w<=hi;w+=50){
+   const r=takeoffAt(cfg,pa,temp,w);
+   if(r&&r.bfl<=rwy)best=w;
+ }
+ return best;
+}
+function solveMaxTempForRunway(cfg,pa,weight,rwy){
+ if($("toRunwayCondition").value!=="DRY")return null;
+ const d=FS_PERF.takeoff[cfg];
+ if(!d)return null;
+ const temps=new Set();
+ Object.values(d.tables).forEach(wm=>Object.values(wm).forEach(tm=>Object.keys(tm).forEach(t=>temps.add(Number(t)))));
+ const ts=[...temps].sort((a,b)=>a-b);
+ if(!ts.length)return null;
+ let best=null;
+ for(let t=ts[0];t<=ts[ts.length-1];t+=0.5){
+   const r=takeoffAt(cfg,pa,t,weight);
+   if(r&&r.bfl<=rwy)best=t;
+ }
+ return best;
+}
+function updateWhatIfPlanner(){
+ if(!$("whatIfMaxWeight"))return;
+ if(!perfIsManual()){
+   $("whatIfMaxWeight").textContent="—";$("whatIfMaxTemp").textContent="—";$("whatIfBFL").textContent="—";$("whatIfMargin").textContent="—";
+   return;
+ }
+ const cfg=$("toConfig").value,pa=valueOrNull("manualTOPA"),temp=valueOrNull("manualTOTemp"),wt=valueOrNull("manualTOWeight"),rwy=valueOrNull("manualTORwyLen");
+ if($("toRunwayCondition").value==="WET"){
+   $("whatIfMaxWeight").textContent="SOURCE LOCKED";
+   $("whatIfMaxTemp").textContent="SOURCE LOCKED";
+   $("whatIfBFL").textContent="SOURCE LOCKED";
+   $("whatIfMargin").textContent="—";
+   $("whatIfMaxWeightNote").textContent="Wet curves not yet digitized.";
+   $("whatIfMaxTempNote").textContent="Wet curves not yet digitized.";
+   return;
+ }
+ const r=takeoffAt(cfg,pa,temp,wt);
+ const mw=solveMaxWeightForRunway(cfg,pa,temp,rwy);
+ const mt=solveMaxTempForRunway(cfg,pa,wt,rwy);
+ $("whatIfBFL").textContent=r?`${Math.round(r.bfl).toLocaleString()} ft`:"SOURCE LOCKED";
+ $("whatIfMargin").textContent=r&&Number.isFinite(rwy)?`${Math.round(rwy-r.bfl).toLocaleString()} ft`:"—";
+ $("whatIfMaxWeight").textContent=mw==null?"SOURCE LOCKED":`${Math.round(mw).toLocaleString()} lb`;
+ $("whatIfMaxTemp").textContent=mt==null?"SOURCE LOCKED":`${mt.toFixed(1)} °C`;
+ $("whatIfMaxWeightNote").textContent="Field-length result only; climb/obstacle limits may be more restrictive.";
+ $("whatIfMaxTempNote").textContent="Field-length result only; climb/obstacle limits may be more restrictive.";
+}
+function applyManualRunway(){
+ const target=$("manualRunwayTarget").value;
+ const id=$("manualRunwayId").value.trim()||"MANUAL";
+ const len=valueOrNull("manualRunwayLength"),hdg=valueOrNull("manualRunwayHeading"),width=valueOrNull("manualRunwayWidth"),surface=$("manualRunwaySurface").value.trim()||"Unknown";
+ if(!len||hdg==null){$("manualRunwayStatus").textContent="LENGTH + HEADING REQUIRED";$("manualRunwayStatus").className="bad";return}
+ if(!missionData)missionData={departure:{icao:$("dep").value.toUpperCase().trim(),runways:[],metar:null,taf:null},destination:{icao:$("dest").value.toUpperCase().trim(),runways:[],metar:null,taf:null}};
+ const point=target==="DEP"?missionData.departure:missionData.destination;
+ const windObj=point.metar||{};
+ const dir=Number(firstVal(windObj,["wind_dir","wdir","windDir","wind_direction"])),spd=Number(firstVal(windObj,["wind_kt","wspd","windSpeed","wind_speed_kt"]));
+ let head=null,cross=null,tail=null;
+ if(Number.isFinite(dir)&&Number.isFinite(spd)){
+   const rad=(dir-hdg)*Math.PI/180;
+   const h=spd*Math.cos(rad),x=Math.abs(spd*Math.sin(rad));
+   head=Math.max(0,h).toFixed(1);tail=Math.max(0,-h).toFixed(1);cross=x.toFixed(1);
+ }
+ const rw={runway_id:id,length_ft:len,width_ft:width||null,surface,heading:hdg,manual:true,wind_components:{headwind_kt:head,tailwind_kt:tail,crosswind_kt:cross}};
+ point.runways=[rw];
+ fillRunwaySelect(target==="DEP"?"depRunway":"destRunway",point.runways);
+ const sel=$(target==="DEP"?"depRunway":"destRunway");sel.selectedIndex=0;
+ $("manualRunwayStatus").textContent="MANUAL RUNWAY ACTIVE";$("manualRunwayStatus").className="warn";
+ selectedRunwayChanged();recalculate();
+}
+
 function depTempC(){if(!missionData)return null;const m=missionData.departure.metar||{};for(const v of [m.temp_c,m.temperature_c,m.temp,m.temperature]){if(v===null||v===undefined||v==="")continue;const n=Number(v);if(Number.isFinite(n))return n}return null}
 function autoTO(){
- if(!missionData)return{ok:false,msg:"Load mission first",v1:null,vr:null,bfl:null};
- const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],wk=(valueOrNull("perfTOW")||0)/1000;
+ const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],weightLb=perfTakeoffWeightLb(),wk=(weightLb||0)/1000;
  const vr=d?interpScalarN(d.vr,wk):null;
  const vfr=d?interpScalarN(d.vfr,wk):null;
  const v15vs=d?interpScalarN(d.v15vs,wk):null;
  if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
  const runwayCondition=$("toRunwayCondition")?$("toRunwayCondition").value:"DRY";
- let pa=Number(missionData.departure.pressure_altitude_ft),t=depTempC(),r=null,reason="";
+ let pa=perfTakeoffPA(),t=perfTakeoffTemp(),r=null,reason="";
  if(runwayCondition==="WET"){
    reason=cfg==="S20"?"Wet runway selected — DTM813 5.46A wet BFL/V1 curves identified but not yet digitized/validated":"Wet runway selected — DTM813 5.51A wet BFL/V1 curves identified but not yet digitized/validated";
- }else if(!Number.isFinite(pa))reason="Departure pressure altitude unavailable";else if(t==null)reason="Departure temperature unavailable";else if(d){
-   let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
-   r=fsTakeoff(cfg,lookupPA,t,wk);if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
+ }else if(!Number.isFinite(pa))reason=perfIsManual()?"Enter manual pressure altitude":"Departure pressure altitude unavailable";
+ else if(t==null||!Number.isFinite(t))reason=perfIsManual()?"Enter manual temperature":"Departure temperature unavailable";
+ else if(d){
+   let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));
+   if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
+   r=fsTakeoff(cfg,lookupPA,t,wk);
+   if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
  }
  if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
- return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason}
+ return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason,pa,temp:t,weightLb}
 }
 function autoLDG(){
  if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
@@ -1581,7 +1742,7 @@ function syncLandingSection(){
 
 async function evaluateTakeoff(){
  const a=syncTakeoffSection();
- const body={runway_length_ft:valueOrNull("perfRwyLen"),actual_takeoff_weight_lb:valueOrNull("perfTOW"),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),obstacle_clearance_verified:$("perfObs").value===""?null:$("perfObs").value==="true"};
+ const body={runway_length_ft:perfTakeoffRunwayLen(),actual_takeoff_weight_lb:perfTakeoffWeightLb(),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),obstacle_clearance_verified:$("perfObs").value===""?null:$("perfObs").value==="true"};
  try{
    const r=await fetch(apiUrl("/api/performance/takeoff"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
    if(j.error)throw new Error(j.error);
@@ -1617,7 +1778,7 @@ async function evaluateLanding(){
    else if(j.status==="GO"){$("landStatus").textContent="GO";$("landStatus").className="ok"}
    else{$("landStatus").textContent="TABLE DATA READY • CLIMB LIMIT PENDING";$("landStatus").className="warn"}
    $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • FS P-18–P-21`;
-   updateVSpeedCard(valueOrNull("perfTOW")||0,valueOrNull("landWt")||0);
+   updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
@@ -1627,12 +1788,17 @@ async function startupCheck(){
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
 $("paxRequested").addEventListener("change",setPassengerCount);
 $("paxRequested").addEventListener("blur",setPassengerCount);
-$("paxEditorType").addEventListener("change",e=>$("paxEditorWeight").value=paxDefaults[e.target.value]);
-$("applyPaxEditor").addEventListener("click",applyPaxEditor);
-$("closePaxEditor").addEventListener("click",closePaxEditor);
-$("continueResultsBtn").addEventListener("click",continueToResults);
+$("applyPaxEditor").addEventListener("click",updatePassengerData);
+$("perfInputMode").addEventListener("change",setPerformanceInputMode);
+["manualTOPA","manualTOTemp","manualTOWeight","manualTORwyLen"].forEach(id=>$(id).addEventListener("input",()=>{
+ if(perfIsManual()){
+   $("perfTOW").value=valueOrNull("manualTOWeight")||"";
+   $("perfRwyLen").value=valueOrNull("manualTORwyLen")||"";
+ }
+ syncTakeoffSection();updateWhatIfPlanner();updateToldCard()
+}));
 $("toConfig").addEventListener("change",recalculate);
-$("toRunwayCondition").addEventListener("change",recalculate);
+$("toRunwayCondition").addEventListener("change",()=>{recalculate();updateWhatIfPlanner()});
 $("landConfig").addEventListener("change",recalculate);
 $("landRunwayCondition").addEventListener("change",recalculate);
 $("totalBag").addEventListener("input",onTotalBagInput);
@@ -1642,6 +1808,7 @@ $("perfObs").addEventListener("change",recalculate);
 
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
+setPerformanceInputMode();
 startupCheck();
 addEventListener("resize",recalculate);
 </script>
