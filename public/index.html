@@ -112,6 +112,10 @@ details summary{cursor:pointer;margin-top:8px}
 .closet-fp{left:34px;top:74px;width:94px;height:60px}
 .entry-fp{left:34px;top:250px;width:94px;height:62px}
 .cabinet-fp{left:135px;top:155px;width:90px;height:62px}
+.jumpseat-fp{position:absolute;z-index:2;left:146px;top:238px;width:96px}
+.jumpseat-inner{min-height:72px;border:2px solid #42688e;border-radius:14px;background:#0d2947;color:var(--text);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 6px;line-height:1.15}
+.jumpseat-title{font-size:12px;font-weight:800;letter-spacing:.08em}
+.jumpseat-sub{font-size:10px;color:var(--muted);margin-top:4px;text-align:center}
 .lav-fp{right:22px;top:236px;width:82px;height:90px}
 .exit-fp{right:22px;top:92px;width:82px;height:58px}
 .seat-fp{position:absolute;z-index:2;width:128px}
@@ -128,7 +132,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:1050px){
   .floorplan-cabin{height:auto;min-height:0;padding:54px 18px 20px;display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
   .front-label,.aft-label-fp,.aisle-fp{display:none}
-  .fixture,.seat-fp,.divan-fp{position:static!important;width:auto!important;height:auto!important;left:auto!important;right:auto!important;top:auto!important}
+  .fixture,.seat-fp,.divan-fp,.jumpseat-fp{position:static!important;width:auto!important;height:auto!important;left:auto!important;right:auto!important;top:auto!important}
   .fixture{min-height:50px}.divan-fp{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr);padding-top:28px}
 }
 @media(max-width:640px){.floorplan-cabin{grid-template-columns:1fr}.divan-fp{grid-column:auto;grid-template-columns:1fr}}
@@ -141,7 +145,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v3.3</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -153,8 +157,13 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="row">
 <div><label>Origin</label><input id="dep" value="KBPT" maxlength="4"></div>
 <div><label>Destination</label><input id="dest" value="KDAL" maxlength="4"></div>
+<div><label>Alternate</label><input id="alt" value="" maxlength="4" placeholder="Optional"></div>
 <div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
+</div>
+
+<div class="row" style="margin-top:10px">
 <div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="recalculate()"></div>
+<div></div><div></div><div></div>
 </div>
 
 <div class="row" style="margin-top:10px">
@@ -191,13 +200,14 @@ FlightOps preloads the number of passengers entered in Mission Setup beginning w
 </div>
 
 <div class="n33ap-cabin floorplan-cabin">
-  <div class="cabin-titlebar">N33AP CABIN — FLOOR PLAN ORIENTATION</div>
+  <div class="cabin-titlebar">N33AP CABIN — FLOOR PLAN</div>
   <div class="front-label">FORWARD / ENTRY</div>
   <div class="aft-label-fp">AFT / LAV</div>
 
-  <div class="fixture closet-fp">CLOSET</div>
+  <div class="fixture closet-fp">GALLEY</div>
   <div class="fixture entry-fp">MAIN ENTRY<br>DOOR</div>
   <div class="fixture cabinet-fp">REAR CENTER<br>CABINET</div>
+  <div class="jumpseat-fp"><div class="jumpseat-inner"><div class="jumpseat-title">JUMP SEAT</div><div class="jumpseat-sub">Crew / Observer</div></div></div>
   <div class="fixture lav-fp">LAV</div>
   <div class="fixture exit-fp">EMERGENCY<br>HATCH</div>
 
@@ -302,6 +312,17 @@ PAX entered does not equal PAX seated. Weight & balance is flagged incomplete un
     <div class="small"><b>Destination — TAF (Decoded)</b></div>
     <div id="destTaf" class="decoded-text">—</div>
     <details><summary class="small">Raw TAF</summary><div class="raw small" id="destTafRaw">—</div></details>
+  </div>
+
+  <div class="wx decoded-weather" id="altMetarPanel" style="display:none">
+    <div class="small"><b>Alternate — METAR (Decoded)</b> • <span id="altTitle">—</span></div>
+    <div id="altMetar" class="decoded-text">—</div>
+    <details><summary class="small">Raw METAR</summary><div class="raw small" id="altMetarRaw">—</div></details>
+  </div>
+  <div class="wx decoded-weather" id="altTafPanel" style="display:none">
+    <div class="small"><b>Alternate — TAF (Decoded)</b> • <span id="altTitle2">—</span></div>
+    <div id="altTaf" class="decoded-text">—</div>
+    <details><summary class="small">Raw TAF</summary><div class="raw small" id="altTafRaw">—</div></details>
   </div>
 </div>
 </div>
@@ -831,11 +852,26 @@ function selectedRunwayChanged(){
  }
 }
 async function loadMission(){
- const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim();$("dep").value=dep;$("dest").value=dest;$("missionStatus").textContent="Loading airport and weather data...";
+ const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim(),alt=$("alt").value.toUpperCase().trim();
+ $("dep").value=dep;$("dest").value=dest;$("alt").value=alt;$("missionStatus").textContent="Loading airport and weather data...";
  try{
-   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
+   const altQuery=alt?`&alt=${encodeURIComponent(alt)}`:"";
+   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}${altQuery}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
    $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;
-   populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
+   populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);
+   if(alt&&missionData.alternate){
+     $("altMetarPanel").style.display="block";$("altTafPanel").style.display="block";
+     $("altTitle").textContent=alt;$("altTitle2").textContent=alt;
+     $("altMetar").innerHTML=formatMetarDecoded(missionData.alternate.metar,missionData.alternate.altimeter_inhg);
+     $("altTaf").innerHTML=formatTafDecoded(missionData.alternate.taf);
+     $("altMetarRaw").textContent=esc(firstVal(missionData.alternate.metar||{},["raw","rawOb","raw_text"])||"—");
+     $("altTafRaw").textContent=esc(firstVal(missionData.alternate.taf||{},["raw","rawTAF","raw_text"])||"—");
+   }else{
+     $("altMetarPanel").style.display="none";$("altTafPanel").style.display="none";
+     $("altTitle").textContent="—";$("altTitle2").textContent="—";
+     $("altMetar").innerHTML="—";$("altTaf").innerHTML="—";$("altMetarRaw").textContent="—";$("altTafRaw").textContent="—";
+   }
+   fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
    const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
    $("sumWX").textContent="LIVE";$("sumWX").className="ok";$("sumFAA").textContent=(missionData.departure.runways||[]).length?"LOADED":"NO RUNWAY DATA";$("sumFAA").className=(missionData.departure.runways||[]).length?"ok":"warn";
    $("missionStatus").innerHTML='<span class="ok">Mission loaded.</span>';selectedRunwayChanged();recalculate();
