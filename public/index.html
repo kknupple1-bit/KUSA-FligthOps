@@ -283,7 +283,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.6</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.7.1</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -305,7 +305,7 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()"><div id="fobVerifyBox" class="fob-verify bad"><input id="fobVerified" type="checkbox" onchange="recalculate()"><label for="fobVerified" style="margin:0">FOB VERIFIED</label></div><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
+<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()"><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
 <div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
 <div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
 <div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="0" min="0" oninput="recalculate()"></div>
@@ -316,6 +316,16 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Departure Runway</label><select id="depRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
 <div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
 <div><label>Load Airport / Weather Data</label><button onclick="loadMission()">Load / Refresh Mission</button></div>
+<div>
+  <label>Fuel Verification</label>
+  <div class="wx" style="min-height:58px;display:flex;align-items:center;gap:10px">
+    <input id="fobVerified" type="checkbox" style="width:auto;transform:scale(1.25)" onchange="recalculate()">
+    <div>
+      <b id="fobVerifyLabel">FOB NOT VERIFIED</b>
+      <div class="small">Verify the entered Fuel on Board after confirming the mission inputs.</div>
+    </div>
+  </div>
+</div>
 </div>
 
 <div class="row" style="margin-top:10px">
@@ -436,11 +446,8 @@ FlightOps preloads the entered passenger count beginning with Seat 1 and default
 </div>
 </div>
 
-<div class="cabin-update-row">
-  <div class="small">Passenger types and seating are reflected immediately in weight &amp; balance.</div>
-  <button type="button" id="applyPaxEditor">Update Passenger</button>
-</div>
 
+<div class="small" style="margin-top:10px">Passenger type and seat changes update weight &amp; balance immediately — no additional update button is required.</div>
 <div id="seatMismatch" class="callout small" style="display:none;margin-top:12px">
 PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplete until all entered passengers are assigned to seats.
 </div></div>
@@ -726,6 +733,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Fuel on Board</td><td id="sumFuel">0 lb</td></tr>
 <tr><td>Mission Fuel</td><td id="sumMissionFuel">0 lb</td></tr>
 <tr><td>FAA airport data</td><td id="sumFAA" class="warn">NOT LOADED</td></tr>
+<tr><td>Runway Data Source</td><td id="sumRunwaySource">—</td></tr>
 <tr><td>Live METAR/TAF</td><td id="sumWX" class="warn">NOT LOADED</td></tr>
 </table>
 </div>
@@ -760,7 +768,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Runway selection</td><td class="ok">AUTO</td></tr>
-<tr><td>FAA/NASR runway data</td><td class="ok">PACKAGED + MANUAL FALLBACK</td></tr>
+<tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr>
 <tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr>
 <tr><td>Fuel CG calculation</td><td class="ok">DTM912 REV 13 LOADED</td></tr>
@@ -931,6 +939,14 @@ const num=id=>+$((id)).value||0;
 let latestCalc=null;
 
 function resetFuelVerification(){if($("fobVerified"))$("fobVerified").checked=false;}
+function updateFOBVerifyLabel(){
+ const e=$("fobVerifyLabel"),cb=$("fobVerified");
+ if(!e||!cb)return;
+ const fob=Math.max(0,num("fuel"));
+ if(fob<=0){e.textContent="ENTER FOB FIRST";e.className="bad";}
+ else if(cb.checked){e.textContent="FOB VERIFIED";e.className="ok";}
+ else{e.textContent="FOB NOT VERIFIED";e.className="warn";}
+}
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function showAppTab(tab){
  const told=tab==="told";
@@ -1427,7 +1443,7 @@ function recalculate(){
  $("cgTraceStatus").textContent="DTM912 FUEL MOMENT";
  $("cgTraceStatus").className="ok";
  $("cgTraceNote").textContent="Rev 13 • Section 2 • interpolated within published fuel points";
- const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!fobVerified?"VERIFY FOB":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS"));env.className=wbOK?"ok":"bad";
+ const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!fobVerified?"VERIFY FOB — DELIBERATE CHECK":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS"));env.className=wbOK?"ok":"bad";
  $("limZFW").textContent=`${Math.round(zfw).toLocaleString()} / ${maxZFW.toLocaleString()} lb`;
  $("limRamp").textContent=`${Math.round(ramp).toLocaleString()} / ${maxRamp.toLocaleString()} lb`;
  $("limTO").textContent=`${Math.round(tow).toLocaleString()} / ${maxTO.toLocaleString()} lb`;
@@ -1463,6 +1479,7 @@ function recalculate(){
  syncLandingSection();
  updateVSpeedCard(tow,landing);
  drawTrace(zfw,pct,burnPath,tow,takeoffPct,landing,landingPct);
+ updateFOBVerifyLabel();
  updateToldCard();
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
@@ -1527,9 +1544,14 @@ async function loadMission(){
    if((missionData.destination.runways||[]).length)$("destRunway").selectedIndex=0;
    const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
    const depCount=(missionData.departure.runways||[]).length,destCount=(missionData.destination.runways||[]).length;
-   $("sumWX").textContent="LIVE";$("sumWX").className="ok";$("sumFAA").textContent=depCount&&destCount?"LOCAL DB":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA");$("sumFAA").className=depCount&&destCount?"ok":"warn";
+   const depSrc=missionData.departure.runway_source||"none",destSrc=missionData.destination.runway_source||"none";
+   const liveUsed=[depSrc,destSrc].includes("faa_nasr_live");
+   const sourceLabel=liveUsed?"FAA NASR LIVE":(depCount&&destCount?"PACKAGED CACHE":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA"));
+   $("sumWX").textContent=(missionData.departure.metar||missionData.destination.metar)?"LIVE":"NO REPORT";$("sumWX").className=(missionData.departure.metar||missionData.destination.metar)?"ok":"warn";
+   $("sumFAA").textContent=depCount&&destCount?"LOADED":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA");$("sumFAA").className=depCount&&destCount?"ok":"warn";
+   $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
    selectedRunwayChanged();recalculate();
-   $("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} • ${dest} ${destCount}. First available runway auto-selected.`:`<span class="warn">Mission weather loaded, but no runway data was found in the local runway database for ${dep} or ${dest}.</span>`;
+   $("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
 }
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
