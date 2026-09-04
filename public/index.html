@@ -277,13 +277,32 @@ details summary{cursor:pointer;margin-top:8px}
 .fob-verify.ok{border-color:#2d8a5b;background:#08271c}
 .fob-verify.bad{border-color:#c95656;background:#311b22}
 
+
+.told-prep{background:#071b31;border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px}
+.told-prep-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.told-prep-box{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px}
+.told-prep-box .small{display:block}
+.told-prep-box b{display:block;font-size:18px;margin-top:4px}
+.told-load-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin-top:14px}
+.told-seat-summary{font-size:13px;line-height:1.55}
+.told-statusline{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.told-pill{border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:700}
+@media(max-width:850px){.told-prep-grid{grid-template-columns:1fr 1fr}.told-load-grid{grid-template-columns:1fr}}
+@media print{
+ .told-prep,.told-prep-box{background:white!important;color:black!important;border-color:#999!important}
+ .told-card{max-width:none!important}
+ .told-title{font-size:20px!important}
+ .told-row{padding:4px 0!important}
+ .told-panel,.told-prep{break-inside:avoid}
+}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.7.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.8</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -788,7 +807,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   <div>
     <div class="told-title">N33AP — TOLD CARD</div>
     <div class="small" id="toldRoute">—</div>
-    <div class="small">Takeoff & Landing Data • values mirror active FlightOps calculations</div>
+    <div class="small">Aircraft Preparation • Weight & Balance • Takeoff & Landing Data</div>
   </div>
   <div class="told-actions" style="display:flex;gap:8px">
     <button type="button" onclick="updateToldCard()">Refresh</button>
@@ -797,6 +816,54 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <div id="toldOverall" class="callout small" style="margin-bottom:14px">Load mission and calculate performance.</div>
+
+<div class="told-prep">
+  <h3 style="margin:0 0 10px">AIRCRAFT PREP / LOAD SUMMARY</h3>
+  <div class="told-prep-grid">
+    <div class="told-prep-box"><span class="small">Aircraft</span><b>N33AP</b><span class="small">Falcon 50-4</span></div>
+    <div class="told-prep-box"><span class="small">Route</span><b id="toldPrepRoute">—</b><span class="small" id="toldPrepAlternate">Alternate —</span></div>
+    <div class="told-prep-box"><span class="small">Passengers</span><b id="toldPrepPax">—</b><span class="small" id="toldPrepPaxBreakdown">—</span></div>
+    <div class="told-prep-box"><span class="small">Baggage</span><b id="toldPrepBagTotal">—</b><span class="small" id="toldPrepBagSplit">—</span></div>
+  </div>
+
+  <div class="told-load-grid">
+    <div class="told-panel">
+      <h3>Cabin / Crew</h3>
+      <div class="told-row"><span>Captain</span><span id="toldCaptain">—</span></div>
+      <div class="told-row"><span>First Officer</span><span id="toldFO">—</span></div>
+      <div class="told-row"><span>Passenger Seating</span><span id="toldSeatSummary" class="told-seat-summary">—</span></div>
+      <div class="told-row"><span>Seat Check</span><span id="toldSeatCheck">—</span></div>
+    </div>
+
+    <div class="told-panel">
+      <h3>Fuel Plan</h3>
+      <div class="told-row"><span>Fuel on Board</span><span id="toldPrepFOB">—</span></div>
+      <div class="told-row"><span>FOB Verification</span><span id="toldPrepFOBStatus">—</span></div>
+      <div class="told-row"><span>Taxi Fuel</span><span id="toldPrepTaxi">—</span></div>
+      <div class="told-row"><span>Mission Fuel</span><span id="toldPrepMissionFuel">—</span></div>
+      <div class="told-row"><span>Planned Landing Fuel</span><span id="toldPrepLandingFuel">—</span></div>
+      <div class="told-row"><span>Landing Fuel Gate</span><span id="toldPrepFuelGate">—</span></div>
+    </div>
+
+    <div class="told-panel">
+      <h3>Weight / CG</h3>
+      <div class="told-row"><span>Zero Fuel Weight</span><span id="toldPrepZFW">—</span></div>
+      <div class="told-row"><span>Ramp Weight</span><span id="toldPrepRamp">—</span></div>
+      <div class="told-row"><span>Takeoff Weight</span><span id="toldPrepTOW">—</span></div>
+      <div class="told-row"><span>Landing Weight</span><span id="toldPrepLDW">—</span></div>
+      <div class="told-row"><span>Takeoff CG</span><span id="toldPrepTOCG">—</span></div>
+      <div class="told-row"><span>Landing CG</span><span id="toldPrepLDGCG">—</span></div>
+    </div>
+  </div>
+
+  <div class="told-statusline">
+    <span class="told-pill" id="toldPrepWB">W&B —</span>
+    <span class="told-pill" id="toldPrepFuel">FUEL —</span>
+    <span class="told-pill" id="toldPrepRunways">RUNWAYS —</span>
+    <span class="told-pill" id="toldPrepGenerated">UPDATED —</span>
+  </div>
+</div>
+
 
 <div class="told-grid">
   <div class="told-panel">
@@ -842,7 +909,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <div class="callout small" style="margin-top:14px">
-TOLD values are displayed from the active FlightOps calculation only. Source-locked or unevaluated items remain visibly unavailable; no extrapolation is performed.
+Aircraft-prep and TOLD values mirror the active FlightOps calculation. Verify the loading, FOB, runway selection and source status before use. Source-locked or unevaluated performance remains visibly unavailable; no extrapolation is performed.
 </div>
 </div>
 </div>
@@ -971,6 +1038,56 @@ function updateToldCard(){
  const dw=dr&&dr.wind_components||{},lw=lr&&lr.wind_components||{};
  const temp=perfIsManual()?perfTakeoffTemp():depTempC();
  $("toldRoute").textContent=`${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
+ const altCode=$("alt").value.toUpperCase().trim();
+ const bagLoads=baggageLoadsFromUI();
+ const bagTotal=bagLoads.reduce((a,b)=>a+b,0);
+ const seated=seatAssignments.filter(Boolean).length;
+ const counts={male:0,female:0,child:0};
+ const seatText=[];
+ seatAssignments.forEach((pid,i)=>{
+   if(!pid)return;
+   const p=getPassenger(pid);
+   if(!p)return;
+   counts[p.type]=(counts[p.type]||0)+1;
+   const short=p.type==="male"?"M":p.type==="female"?"F":"C";
+   seatText.push(`${seats[i].n}:${short}`);
+ });
+ const fob=Math.max(0,num("fuel")),taxi=Math.max(0,num("taxiFuel")),missionFuel=Math.max(0,num("missionFuel"));
+ const fobVerified=!!$("fobVerified")?.checked && fob>0;
+ const seatMatch=passengers.length===seated;
+ const runwayReady=!!dr&&!!lr;
+
+ $("toldPrepRoute").textContent=`${depCode} → ${destCode}`;
+ $("toldPrepAlternate").textContent=`Alternate ${altCode||"—"}`;
+ $("toldPrepPax").textContent=`${seated} seated`;
+ $("toldPrepPaxBreakdown").textContent=`M ${counts.male||0} • F ${counts.female||0} • C ${counts.child||0}`;
+ $("toldPrepBagTotal").textContent=`${Math.round(bagTotal).toLocaleString()} lb`;
+ $("toldPrepBagSplit").textContent=`I ${Math.round(bagLoads[0]||0)} • II ${Math.round(bagLoads[1]||0)} • III ${Math.round(bagLoads[2]||0)} lb`;
+ $("toldCaptain").textContent=`${Math.round(num("captWt")).toLocaleString()} lb`;
+ $("toldFO").textContent=`${Math.round(num("foWt")).toLocaleString()} lb`;
+ $("toldSeatSummary").textContent=seatText.length?seatText.join(" • "):"No passengers";
+ $("toldSeatCheck").textContent=seatMatch?"MATCH":"MISMATCH";
+ $("toldPrepFOB").textContent=`${Math.round(fob).toLocaleString()} lb`;
+ $("toldPrepFOBStatus").textContent=fobVerified?"VERIFIED":"NOT VERIFIED";
+ $("toldPrepTaxi").textContent=`${Math.round(taxi).toLocaleString()} lb`;
+ $("toldPrepMissionFuel").textContent=`${Math.round(missionFuel).toLocaleString()} lb`;
+ $("toldPrepLandingFuel").textContent=Number.isFinite(c.landingFuel)?`${Math.round(c.landingFuel).toLocaleString()} lb`:"—";
+ $("toldPrepFuelGate").textContent=textOf("landingFuelGuardStatus");
+ $("toldPrepZFW").textContent=Number.isFinite(c.zfw)?`${Math.round(c.zfw).toLocaleString()} lb`:"—";
+ $("toldPrepRamp").textContent=Number.isFinite(c.ramp)?`${Math.round(c.ramp).toLocaleString()} lb`:"—";
+ $("toldPrepTOW").textContent=Number.isFinite(c.tow)?`${Math.round(c.tow).toLocaleString()} lb`:"—";
+ $("toldPrepLDW").textContent=Number.isFinite(c.landing)?`${Math.round(c.landing).toLocaleString()} lb`:"—";
+ $("toldPrepTOCG").textContent=Number.isFinite(c.takeoffPct)?`${c.takeoffPct.toFixed(2)}% MAC`:"—";
+ $("toldPrepLDGCG").textContent=Number.isFinite(c.landingPct)?`${c.landingPct.toFixed(2)}% MAC`:"—";
+ $("toldPrepWB").textContent=`W&B ${c.wbOK?"READY":"CHECK"}`;
+ $("toldPrepWB").className=`told-pill ${c.wbOK?"ok":"bad"}`;
+ const fuelReady=fobVerified && (!c.lowLandingFuel || c.lowLandingFuelConfirmed);
+ $("toldPrepFuel").textContent=`FUEL ${fuelReady?"VERIFIED":"CHECK"}`;
+ $("toldPrepFuel").className=`told-pill ${fuelReady?"ok":"bad"}`;
+ $("toldPrepRunways").textContent=`RUNWAYS ${runwayReady?"LOADED":"CHECK"}`;
+ $("toldPrepRunways").className=`told-pill ${runwayReady?"ok":"warn"}`;
+ $("toldPrepGenerated").textContent=`UPDATED ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
+
  $("toldDepRwy").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
  $("toldDepSurface").textContent=`${perfIsManual()&&perfTakeoffRunwayLen()?Number(perfTakeoffRunwayLen()).toLocaleString()+" ft":(dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—")} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
  $("toldDepWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
@@ -1007,11 +1124,13 @@ function updateToldCard(){
  const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
  const confirmed=$("lowFuelConfirm")?.checked;
  const issues=[];
+ if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push("PASSENGER SEATING CHECK REQUIRED");
+ if(!dr||!lr)issues.push("RUNWAY SELECTION REQUIRED");
  if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
  if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
  if(textOf("toStatus").includes("PENDING")||textOf("toStatus").includes("LOCKED"))issues.push("TAKEOFF LIMITS NOT FULLY EVALUATED");
  if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
- $("toldOverall").textContent=issues.length?issues.join(" • "):"TOLD DATA CURRENT — review all values before use.";
+ $("toldOverall").textContent=issues.length?issues.join(" • "):"AIRCRAFT PREP / TOLD SUMMARY CURRENT — review all values before use.";
  $("toldOverall").className=issues.length?"callout small warn":"callout small ok";
 }
 const esc=x=>x==null?"—":x;
@@ -1357,14 +1476,14 @@ function recalculate(){
  const capt=num("captWt"),fo=num("foWt"),crew=capt+fo; const bagLoads=baggageLoadsFromUI(); const bag=bagLoads.reduce((a,b)=>a+b,0);
  let fob=Math.min(maxFuel,Math.max(0,num("fuel")));$("fuel").value=fob;
  const fobVerified=fob>0 && !!$("fobVerified")?.checked;
- const fvb=$("fobVerifyBox"),fvn=$("fobVerifyNote");
+ const fvn=$("fobVerifyNote");
  if(fob<=0){
    if($("fobVerified"))$("fobVerified").checked=false;
-   fvb.className="fob-verify bad";fvn.textContent="ENTER FUEL ON BOARD — verification required before mission readiness.";
+   if(fvn)fvn.textContent="ENTER FUEL ON BOARD — verification required before mission readiness.";
  }else if(fobVerified){
-   fvb.className="fob-verify ok";fvn.textContent=`Verified ${Math.round(fob).toLocaleString()} lb fuel on board.`;
+   if(fvn)fvn.textContent=`Verified ${Math.round(fob).toLocaleString()} lb fuel on board.`;
  }else{
-   fvb.className="fob-verify bad";fvn.textContent=`VERIFY ${Math.round(fob).toLocaleString()} lb fuel on board.`;
+   if(fvn)fvn.textContent=`VERIFY ${Math.round(fob).toLocaleString()} lb fuel on board.`;
  }
  let missionFuel=Math.min(maxFuel,Math.max(0,num("missionFuel")));$("missionFuel").value=missionFuel;
  const taxi=Math.max(0,num("taxiFuel"));
