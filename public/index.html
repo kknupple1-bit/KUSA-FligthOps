@@ -296,13 +296,23 @@ details summary{cursor:pointer;margin-top:8px}
  .told-panel,.told-prep{break-inside:avoid}
 }
 
+
+.whatif-gate{border:2px solid var(--line);border-radius:12px;padding:12px;text-align:center;background:#06182c}
+.whatif-gate b{display:block;font-size:24px;margin-top:4px}
+.whatif-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:10px}
+.whatif-cell{background:#071b31;border:1px solid var(--line);border-radius:10px;padding:10px}
+.whatif-cell .small{display:block}
+.whatif-cell b{display:block;font-size:18px;margin-top:4px}
+.whatif-controls{border:1px solid #315a80;background:#071b31;border-radius:12px;padding:12px;margin:10px 0 12px}
+@media(max-width:850px){.whatif-grid{grid-template-columns:1fr 1fr}}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.8</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.9</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -634,11 +644,68 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <h3 style="font-size:14px">Takeoff</h3>
-<div class="planning-box">
+
+<div class="whatif-controls">
   <div class="row">
-    <div><label>Performance Input Mode</label><select id="perfInputMode"><option value="LIVE">LIVE MISSION</option><option value="MANUAL">MANUAL / WHAT-IF</option></select></div>
-    <div class="wx"><div class="small">Planning Mode</div><b id="perfModeStatus">LIVE</b><div class="small" id="perfModeNote">Uses mission weather, selected runway, and calculated aircraft weight.</div></div>
-    <div></div><div></div>
+    <div>
+      <label>Performance Mode</label>
+      <select id="perfInputMode">
+        <option value="LIVE">LIVE MISSION</option>
+        <option value="MANUAL">WHAT-IF / HYPOTHETICAL</option>
+      </select>
+    </div>
+    <div class="wx">
+      <div class="small">Section 6 Mode</div>
+      <b id="perfModeStatus">LIVE</b>
+      <div class="small" id="perfModeNote">Uses current mission weather and calculated aircraft weight.</div>
+    </div>
+    <div>
+      <label>Hypothetical OAT °C</label>
+      <input id="manualTOTemp" type="number" value="20" step="1">
+    </div>
+    <div>
+      <label>Hypothetical Aircraft Weight lb</label>
+      <input id="manualTOWeight" type="number" value="30000" min="18000" max="40780" step="100">
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label>Pressure Altitude ft</label>
+      <input id="manualTOPA" type="number" value="0" step="100">
+    </div>
+    <div>
+      <label>Runway Length ft</label>
+      <input id="manualTORwyLen" type="number" value="6000" min="1" step="1">
+    </div>
+    <div class="whatif-gate" id="whatIfGateBox">
+      <span class="small">WHAT-IF GO / NO-GO GATE</span>
+      <b id="whatIfGate">LIVE MODE</b>
+      <span class="small" id="whatIfGateNote">Select WHAT-IF to test a hypothetical point.</span>
+    </div>
+    <div class="whatif-cell">
+      <span class="small">Controlling Runway Margin</span>
+      <b id="whatIfMargin">—</b>
+      <span class="small">Runway length minus calculated BFL.</span>
+    </div>
+  </div>
+
+  <div class="whatif-grid">
+    <div class="whatif-cell"><span class="small">Hypothetical BFL</span><b id="whatIfBFL">—</b><span class="small" id="whatIfBFLNote">Published table range only.</span></div>
+    <div class="whatif-cell"><span class="small">V1</span><b id="whatIfV1">—</b><span class="small">Hypothetical point.</span></div>
+    <div class="whatif-cell"><span class="small">VR = V2</span><b id="whatIfVR">—</b><span class="small">Weight-based schedule.</span></div>
+    <div class="whatif-cell"><span class="small">Vfr / 1.5Vs</span><b id="whatIfVF">—</b><span class="small">Weight-based schedule.</span></div>
+    <div class="whatif-cell"><span class="small">Max Weight at Entered OAT</span><b id="whatIfMaxWeight">—</b><span class="small" id="whatIfMaxWeightNote">Field-length limit only unless other limits are evaluated.</span></div>
+    <div class="whatif-cell"><span class="small">Max OAT at Entered Weight</span><b id="whatIfMaxTemp">—</b><span class="small" id="whatIfMaxTempNote">Field-length limit only unless other limits are evaluated.</span></div>
+    <div class="whatif-cell"><span class="small">Structural MTOW Check</span><b id="whatIfStructural">—</b><span class="small">40,780 lb structural maximum.</span></div>
+    <div class="whatif-cell"><span class="small">Operational Limits</span><b id="whatIfOps">—</b><span class="small">Climb / brake / obstacle status.</span></div>
+  </div>
+
+  <div class="callout small" style="margin-top:10px">
+    WHAT-IF mode changes only the performance test point. It does not alter the actual aircraft W&amp;B load. No extrapolation outside the digitized source tables. A green GO is shown only when all currently implemented gates pass; missing climb/brake/obstacle data produces NOT FULLY EVALUATED rather than a false GO.
+  </div>
+</div>
+<div></div><div></div>
   </div>
   <div id="manualPerfInputs" style="display:none">
     <div class="row">
@@ -1695,12 +1762,11 @@ function perfLandingPA(){
 }
 function setPerformanceInputMode(){
  const manual=perfIsManual();
- $("manualPerfInputs").style.display=manual?"block":"none";
- $("perfModeStatus").textContent=manual?"MANUAL / WHAT-IF":"LIVE";
+  $("perfModeStatus").textContent=manual?"MANUAL / WHAT-IF":"LIVE";
  $("perfModeStatus").className=manual?"warn":"ok";
  $("perfModeNote").textContent=manual
-  ?"Uses manually entered PA, temperature, test weight and runway length. W&B is unchanged."
-  :"Uses mission weather, selected runway, and calculated aircraft weight.";
+  ?"Edit OAT and aircraft weight directly below to test a hypothetical takeoff point. Actual W&B is unchanged."
+  :"Uses current mission weather, selected runway, and calculated aircraft weight.";
  if(manual){
    $("perfTOW").value=valueOrNull("manualTOWeight")||"";
    $("perfRwyLen").value=valueOrNull("manualTORwyLen")||"";
@@ -1708,6 +1774,7 @@ function setPerformanceInputMode(){
    if(latestCalc&&Number.isFinite(latestCalc.tow))$("perfTOW").value=Math.round(latestCalc.tow);
    selectedRunwayChanged();
  }
+ ["manualTOPA","manualTOTemp","manualTOWeight","manualTORwyLen"].forEach(id=>$(id).disabled=!manual);
  syncTakeoffSection();
  updateWhatIfPlanner();
  updateToldCard();
@@ -1747,30 +1814,85 @@ function solveMaxTempForRunway(cfg,pa,weight,rwy){
  return best;
 }
 function updateWhatIfPlanner(){
- if(!$("whatIfMaxWeight"))return;
- if(!perfIsManual()){
-   $("whatIfMaxWeight").textContent="—";$("whatIfMaxTemp").textContent="—";$("whatIfBFL").textContent="—";$("whatIfMargin").textContent="—";
+ if(!$("whatIfGate"))return;
+ const manual=perfIsManual();
+ if(!manual){
+   $("whatIfGate").textContent="LIVE MODE";
+   $("whatIfGateNote").textContent="Select WHAT-IF / HYPOTHETICAL to test temperature and weight.";
+   $("whatIfGateBox").className="whatif-gate";
+   ["whatIfMaxWeight","whatIfMaxTemp","whatIfBFL","whatIfMargin","whatIfV1","whatIfVR","whatIfVF","whatIfStructural","whatIfOps"].forEach(id=>$(id).textContent="—");
    return;
  }
- const cfg=$("toConfig").value,pa=valueOrNull("manualTOPA"),temp=valueOrNull("manualTOTemp"),wt=valueOrNull("manualTOWeight"),rwy=valueOrNull("manualTORwyLen");
+ const cfg=$("toConfig").value;
+ const pa=valueOrNull("manualTOPA"),temp=valueOrNull("manualTOTemp"),wt=valueOrNull("manualTOWeight"),rwy=valueOrNull("manualTORwyLen");
+ const structuralOK=Number.isFinite(wt)&&wt<=maxTO;
+ $("whatIfStructural").textContent=structuralOK?"PASS":"NO-GO";
+ $("whatIfStructural").className=structuralOK?"ok":"bad";
+
  if($("toRunwayCondition").value==="WET"){
    $("whatIfMaxWeight").textContent="SOURCE LOCKED";
    $("whatIfMaxTemp").textContent="SOURCE LOCKED";
    $("whatIfBFL").textContent="SOURCE LOCKED";
    $("whatIfMargin").textContent="—";
-   $("whatIfMaxWeightNote").textContent="Wet curves not yet digitized.";
-   $("whatIfMaxTempNote").textContent="Wet curves not yet digitized.";
+   $("whatIfV1").textContent="SOURCE LOCKED";
+   const d=FS_PERF.takeoff[cfg],wk=(wt||0)/1000;
+   const vr=d?interpScalarN(d.vr,wk):null,vfr=d?interpScalarN(d.vfr,wk):null,v15=d?interpScalarN(d.v15vs,wk):null;
+   $("whatIfVR").textContent=vr==null?"—":`${vr.toFixed(1)} kt`;
+   $("whatIfVF").textContent=`${vfr==null?"—":vfr.toFixed(1)+" kt"} / ${v15==null?"—":v15.toFixed(1)+" kt"}`;
+   $("whatIfOps").textContent="WET DATA PENDING";
+   $("whatIfOps").className="warn";
+   $("whatIfGate").textContent="NOT FULLY EVALUATED";
+   $("whatIfGateNote").textContent="Wet BFL/V1 curves are source-locked pending aircraft-specific applicability validation.";
+   $("whatIfGateBox").className="whatif-gate warn";
    return;
  }
+
  const r=takeoffAt(cfg,pa,temp,wt);
  const mw=solveMaxWeightForRunway(cfg,pa,temp,rwy);
  const mt=solveMaxTempForRunway(cfg,pa,wt,rwy);
+ const d=FS_PERF.takeoff[cfg],wk=(wt||0)/1000;
+ const vr=d?interpScalarN(d.vr,wk):null,vfr=d?interpScalarN(d.vfr,wk):null,v15=d?interpScalarN(d.v15vs,wk):null;
+
  $("whatIfBFL").textContent=r?`${Math.round(r.bfl).toLocaleString()} ft`:"SOURCE LOCKED";
+ $("whatIfV1").textContent=r?`${r.v1.toFixed(1)} kt`:"SOURCE LOCKED";
+ $("whatIfVR").textContent=vr==null?"—":`${vr.toFixed(1)} kt`;
+ $("whatIfVF").textContent=`${vfr==null?"—":vfr.toFixed(1)+" kt"} / ${v15==null?"—":v15.toFixed(1)+" kt"}`;
  $("whatIfMargin").textContent=r&&Number.isFinite(rwy)?`${Math.round(rwy-r.bfl).toLocaleString()} ft`:"—";
  $("whatIfMaxWeight").textContent=mw==null?"SOURCE LOCKED":`${Math.round(mw).toLocaleString()} lb`;
  $("whatIfMaxTemp").textContent=mt==null?"SOURCE LOCKED":`${mt.toFixed(1)} °C`;
- $("whatIfMaxWeightNote").textContent="Field-length result only; climb/obstacle limits may be more restrictive.";
- $("whatIfMaxTempNote").textContent="Field-length result only; climb/obstacle limits may be more restrictive.";
+
+ const fieldOK=!!r&&Number.isFinite(rwy)&&r.bfl<=rwy;
+ const sourceOK=!!r;
+ const climb=valueOrNull("perfClimbWt");
+ const climbKnown=Number.isFinite(climb);
+ const climbOK=!climbKnown||wt<=climb;
+ const brakePending=cfg==="SLATS"; // explicit until VMBE schedule digitized
+ const obstaclePending=true;       // explicit until obstacle analysis integrated
+
+ let opsText=[];
+ if(climbKnown)opsText.push(climbOK?"CLIMB PASS":"CLIMB NO-GO"); else opsText.push("CLIMB PENDING");
+ if(brakePending)opsText.push("BRAKE PENDING");
+ if(obstaclePending)opsText.push("OBSTACLE NOT CHECKED");
+ $("whatIfOps").textContent=opsText.join(" • ");
+ $("whatIfOps").className=(climbKnown&&!climbOK)?"bad":"warn";
+
+ let gate, note, cls;
+ if(!structuralOK){
+   gate="NO-GO"; note="Hypothetical weight exceeds structural MTOW."; cls="bad";
+ }else if(!sourceOK){
+   gate="NOT FULLY EVALUATED"; note="Hypothetical point is outside published/digitized table coverage — no extrapolation."; cls="warn";
+ }else if(!fieldOK){
+   gate="NO-GO"; note=`Calculated BFL exceeds available runway by ${Math.abs(Math.round(rwy-r.bfl)).toLocaleString()} ft.`; cls="bad";
+ }else if(climbKnown&&!climbOK){
+   gate="NO-GO"; note="Hypothetical weight exceeds climb-limited takeoff weight."; cls="bad";
+ }else if(!climbKnown||brakePending||obstaclePending){
+   gate="NOT FULLY EVALUATED"; note="Field length passes, but one or more operational limits are still pending/not checked."; cls="warn";
+ }else{
+   gate="GO"; note="All implemented performance gates pass for this hypothetical point."; cls="ok";
+ }
+ $("whatIfGate").textContent=gate;
+ $("whatIfGateNote").textContent=note;
+ $("whatIfGateBox").className=`whatif-gate ${cls}`;
 }
 function applyManualRunway(){
  const target=$("manualRunwayTarget").value;
