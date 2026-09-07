@@ -241,3 +241,22 @@ v4.8 CHANGES
 - Existing Takeoff and Landing TOLD sections remain below the aircraft-prep summary.
 - Print view remains a TOLD-focused one-page/compact output where browser page sizing permits.
 - Fixed stale fobVerifyBox JavaScript reference left after moving the FOB verification control.
+
+
+v4.8.1 HOTFIX
+- Added npm "dev" script: node server.js.
+- Kept npm "start" script: node server.js.
+- Fixes GoDaddy/Airo preview startup error: Missing script: "dev".
+- No performance, W&B, runway, weather, or TOLD logic changed from v4.8.
+
+
+v4.9 CHANGES
+- Reworked Section 6 WHAT-IF mode so hypothetical OAT and aircraft weight are edited directly inside the takeoff performance section.
+- Added hypothetical pressure altitude and runway length inputs in the same block.
+- Added immediate hypothetical outputs: BFL, V1, VR=V2, Vfr, 1.5Vs, runway margin, max weight at entered OAT, and max OAT at entered weight.
+- Added explicit GO / NO-GO / NOT FULLY EVALUATED gate.
+- NO-GO occurs for structural MTOW exceedance, field-length exceedance, or known climb-limit exceedance.
+- NOT FULLY EVALUATED occurs when source-table coverage is unavailable or climb/brake/obstacle limits are still pending/not checked.
+- WHAT-IF mode never changes actual aircraft W&B loading.
+- No extrapolation outside digitized source tables.
+- Wet WHAT-IF remains source locked pending aircraft-specific wet-data validation.
