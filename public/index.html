@@ -332,13 +332,22 @@ details summary{cursor:pointer;margin-top:8px}
 .complete-callout{border:2px solid #315a80;background:#071b31;border-radius:12px;padding:12px;margin-top:12px}
 @media(max-width:850px){.home-actions,.aircraft-select-card{grid-template-columns:1fr}}
 
+
+.whatif-process-row{grid-template-columns:1fr 1fr 1fr 1fr}
+#processWhatIfBtn{font-weight:800;letter-spacing:.02em}
+#processWhatIfBtn.dirty{background:#725916;border-color:#b8902e}
+#processWhatIfBtn.ready{background:#245f96}
+.whatif-dirty-note{color:#ffd36a!important;font-weight:700}
+@media(max-width:1100px){.whatif-process-row{grid-template-columns:1fr 1fr}}
+@media(max-width:650px){.whatif-process-row{grid-template-columns:1fr}}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.0</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.0.1</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -752,7 +761,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     </div>
   </div>
 
-  <div class="row">
+  <div class="row whatif-process-row">
     <div>
       <label>Pressure Altitude ft</label>
       <input id="manualTOPA" type="number" value="0" step="100">
@@ -760,6 +769,11 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div>
       <label>Runway Length ft</label>
       <input id="manualTORwyLen" type="number" value="6000" min="1" step="1">
+    </div>
+    <div>
+      <label>Process Hypothetical Point</label>
+      <button id="processWhatIfBtn" type="button" onclick="processWhatIf()">PROCESS WHAT-IF</button>
+      <div class="small" id="whatIfProcessStatus">Select WHAT-IF mode, enter the test point, then process.</div>
     </div>
     <div class="whatif-gate" id="whatIfGateBox">
       <span class="small">WHAT-IF GO / NO-GO GATE</span>
@@ -785,30 +799,12 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
 
   <div class="callout small" style="margin-top:10px">
-    WHAT-IF mode changes only the performance test point. It does not alter the actual aircraft W&amp;B load. No extrapolation outside the digitized source tables. A green GO is shown only when all currently implemented gates pass; missing climb/brake/obstacle data produces NOT FULLY EVALUATED rather than a false GO.
+    WHAT-IF mode changes only the performance test point. It does not alter the actual aircraft W&amp;B load. After changing OAT, weight, pressure altitude, runway length, configuration or runway condition, press PROCESS WHAT-IF to create a new result. No extrapolation outside the digitized source tables. A green GO is shown only when all currently implemented gates pass; missing climb/brake/obstacle data produces NOT FULLY EVALUATED rather than a false GO.
   </div>
 </div>
 <div></div><div></div>
   </div>
-  <div id="manualPerfInputs" style="display:none">
-    <div class="row">
-      <div><label>Manual Pressure Altitude ft</label><input id="manualTOPA" type="number" value="0" step="100"></div>
-      <div><label>Manual Temperature °C</label><input id="manualTOTemp" type="number" value="20" step="1"></div>
-      <div><label>Manual Test Weight lb</label><input id="manualTOWeight" type="number" value="30000" min="18000" max="40780" step="100"></div>
-      <div><label>Manual Runway Length ft</label><input id="manualTORwyLen" type="number" value="6000" min="1" step="1"></div>
-    </div>
-    <div class="row">
-      <div class="planning-result"><div class="small">Max Weight at Entered Temp</div><b id="whatIfMaxWeight">—</b><div class="small" id="whatIfMaxWeightNote">Dry table coverage only.</div></div>
-      <div class="planning-result"><div class="small">Max Temp at Entered Weight</div><b id="whatIfMaxTemp">—</b><div class="small" id="whatIfMaxTempNote">Dry table coverage only.</div></div>
-      <div class="planning-result"><div class="small">Test Point BFL</div><b id="whatIfBFL">—</b><div class="small" id="whatIfBFLNote">Within digitized source range only.</div></div>
-      <div class="planning-result"><div class="small">Runway Margin</div><b id="whatIfMargin">—</b></div>
-    </div>
-    <div class="callout small" style="margin-top:10px">
-      Manual mode is for performance planning when weather is unavailable or when testing hotter/heavier scenarios. It does not alter the aircraft W&amp;B loading. No extrapolation outside the digitized performance tables.
-    </div>
-  </div>
-</div>
-<div class="row">
+  <div class="row">
 <div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only (V1/BFL source ≥ 4,000 ft PA)</option></select></div>
 </div>
 <div id="toConfigNote" class="small" style="margin-top:8px">Takeoff configuration changes will auto-refresh the available FlightSafety numbers.</div>
@@ -2007,6 +2003,39 @@ async function loadMission(){
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
 
 function perfIsManual(){return $("perfInputMode") && $("perfInputMode").value==="MANUAL"}
+let whatIfDirty=true;
+function markWhatIfDirty(){
+ if(!perfIsManual())return;
+ whatIfDirty=true;
+ const b=$("processWhatIfBtn"),s=$("whatIfProcessStatus");
+ if(b){b.classList.add("dirty");b.classList.remove("ready");}
+ if(s){s.textContent="INPUTS CHANGED — PROCESS WHAT-IF REQUIRED";s.className="small whatif-dirty-note";}
+ const g=$("whatIfGate"),n=$("whatIfGateNote"),box=$("whatIfGateBox");
+ if(g)g.textContent="PROCESS REQUIRED";
+ if(n)n.textContent="Hypothetical inputs changed. Process the point before using the result.";
+ if(box)box.className="whatif-gate warn";
+}
+function processWhatIf(){
+ if(!perfIsManual()){
+   alert("Select WHAT-IF / HYPOTHETICAL mode first.");
+   return;
+ }
+ const pa=valueOrNull("manualTOPA"),temp=valueOrNull("manualTOTemp"),wt=valueOrNull("manualTOWeight"),rwy=valueOrNull("manualTORwyLen");
+ if(!Number.isFinite(pa)||!Number.isFinite(temp)||!Number.isFinite(wt)||!Number.isFinite(rwy)||rwy<=0){
+   alert("Enter pressure altitude, OAT, aircraft weight and runway length before processing.");
+   return;
+ }
+ $("perfTOW").value=Math.round(wt);
+ $("perfRwyLen").value=Math.round(rwy);
+ syncTakeoffSection();
+ updateWhatIfPlanner(true);
+ updateToldCard();
+ whatIfDirty=false;
+ const b=$("processWhatIfBtn"),s=$("whatIfProcessStatus");
+ if(b){b.classList.remove("dirty");b.classList.add("ready");}
+ if(s){s.textContent=`PROCESSED ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;s.className="small ok";}
+}
+
 function perfTakeoffPA(){
  if(perfIsManual())return valueOrNull("manualTOPA");
  return missionData?Number(missionData.departure.pressure_altitude_ft):null;
@@ -2034,6 +2063,7 @@ function setPerformanceInputMode(){
  if(manual){
    $("perfTOW").value=valueOrNull("manualTOWeight")||"";
    $("perfRwyLen").value=valueOrNull("manualTORwyLen")||"";
+   markWhatIfDirty();
  }else{
    if(latestCalc&&Number.isFinite(latestCalc.tow))$("perfTOW").value=Math.round(latestCalc.tow);
    selectedRunwayChanged();
@@ -2077,7 +2107,7 @@ function solveMaxTempForRunway(cfg,pa,weight,rwy){
  }
  return best;
 }
-function updateWhatIfPlanner(){
+function updateWhatIfPlanner(force=false){
  if(!$("whatIfGate"))return;
  const manual=perfIsManual();
  if(!manual){
@@ -2085,6 +2115,12 @@ function updateWhatIfPlanner(){
    $("whatIfGateNote").textContent="Select WHAT-IF / HYPOTHETICAL to test temperature and weight.";
    $("whatIfGateBox").className="whatif-gate";
    ["whatIfMaxWeight","whatIfMaxTemp","whatIfBFL","whatIfMargin","whatIfV1","whatIfVR","whatIfVF","whatIfStructural","whatIfOps"].forEach(id=>$(id).textContent="—");
+   return;
+ }
+ if(whatIfDirty && !force){
+   $("whatIfGate").textContent="PROCESS REQUIRED";
+   $("whatIfGateNote").textContent="Enter or revise the hypothetical point, then press PROCESS WHAT-IF.";
+   $("whatIfGateBox").className="whatif-gate warn";
    return;
  }
  const cfg=$("toConfig").value;
@@ -2321,11 +2357,11 @@ $("perfInputMode").addEventListener("change",setPerformanceInputMode);
  if(perfIsManual()){
    $("perfTOW").value=valueOrNull("manualTOWeight")||"";
    $("perfRwyLen").value=valueOrNull("manualTORwyLen")||"";
+   markWhatIfDirty();
  }
- syncTakeoffSection();updateWhatIfPlanner();updateToldCard()
 }));
-$("toConfig").addEventListener("change",recalculate);
-$("toRunwayCondition").addEventListener("change",()=>{recalculate();updateWhatIfPlanner()});
+$("toConfig").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate()});
+$("toRunwayCondition").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();updateWhatIfPlanner()});
 $("landConfig").addEventListener("change",recalculate);
 $("landRunwayCondition").addEventListener("change",recalculate);
 $("totalBag").addEventListener("input",onTotalBagInput);
