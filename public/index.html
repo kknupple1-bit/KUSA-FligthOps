@@ -306,29 +306,112 @@ details summary{cursor:pointer;margin-top:8px}
 .whatif-controls{border:1px solid #315a80;background:#071b31;border-radius:12px;padding:12px;margin:10px 0 12px}
 @media(max-width:850px){.whatif-grid{grid-template-columns:1fr 1fr}}
 
+
+.platform-tabs{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.platform-tabs button{width:auto;padding:8px 16px;background:#0b2746}
+.platform-tabs button.active{background:#245f96;border-color:#4f8cc5}
+#homeView,#archiveView{display:none}
+.home-shell{max-width:1050px;margin:0 auto}
+.newtrip-card{background:#081d34;border:1px solid var(--line);border-radius:14px;padding:18px}
+.newtrip-title{font-size:28px;font-weight:800;margin-bottom:4px}
+.newtrip-sub{color:var(--muted);margin-bottom:18px}
+.home-actions{display:grid;grid-template-columns:1.2fr 1fr;gap:14px}
+.home-panel{background:#071b31;border:1px solid var(--line);border-radius:12px;padding:14px}
+.archive-list{display:grid;gap:12px}
+.archive-item{background:#081d34;border:1px solid var(--line);border-radius:12px;padding:14px}
+.archive-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.archive-route{font-size:19px;font-weight:800}
+.archive-meta{color:var(--muted);font-size:12px}
+.archive-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.archive-actions button{width:auto}
+.mission-actionbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 14px}
+.mission-actionbar button{width:auto}
+.beta-banner{border:1px solid #6a5b28;background:#2f2a16;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:12px}
+.aircraft-select-card{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.aircraft-coming{opacity:.62}
+.complete-callout{border:2px solid #315a80;background:#071b31;border-radius:12px;padding:12px;margin-top:12px}
+@media(max-width:850px){.home-actions,.aircraft-select-card{grid-template-columns:1fr}}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v4.9</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.0</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
-<div class="app-tabs">
-<button id="opsTabBtn" class="active" type="button" onclick="showAppTab('ops')">FlightOps</button>
-<button id="toldTabBtn" type="button" onclick="showAppTab('told')">TOLD</button>
+<div class="platform-tabs">
+<button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">New Trip</button>
+<button id="opsTabBtn" type="button" onclick="showPlatformView('ops')">Mission</button>
+<button id="toldTabBtn" type="button" onclick="showPlatformView('told')">TOLD</button>
+<button id="archiveTabBtn" type="button" onclick="showPlatformView('archive')">Archive</button>
 </div>
 <div class="status warn">DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE</div>
 </header>
 <main>
+<div id="homeView">
+  <div class="home-shell">
+    <div class="beta-banner"><b>BETA PHASE</b> — DEVELOPMENT / VALIDATION ONLY. NOT APPROVED FOR FLIGHT USE.</div>
+    <div class="newtrip-card">
+      <div class="newtrip-title">New Trip</div>
+      <div class="newtrip-sub">Start with a clean mission. No airport pair is loaded automatically.</div>
+
+      <div class="aircraft-select-card">
+        <div class="home-panel">
+          <label>Aircraft</label>
+          <select id="homeAircraft">
+            <option value="N33AP">N33AP — Falcon 50-4</option>
+            <option disabled>Falcon 900B — coming later</option>
+            <option disabled>Citation CJ3 — coming later</option>
+            <option disabled>Challenger 300/301 — coming later</option>
+          </select>
+          <div class="small" style="margin-top:8px">Current validated development dataset: N33AP only.</div>
+        </div>
+        <div class="home-panel">
+          <div class="small">Workflow</div>
+          <b>New Trip → Mission → TOLD → Complete → Archive</b>
+          <div class="small" style="margin-top:8px">Only completed missions are saved to Archive.</div>
+        </div>
+      </div>
+
+      <div class="home-actions" style="margin-top:14px">
+        <div class="home-panel">
+          <h3 style="margin-top:0">Start New Mission</h3>
+          <div class="row">
+            <div><label>Departure ICAO</label><input id="homeDep" maxlength="4" placeholder="e.g. KROG"></div>
+            <div><label>Destination ICAO</label><input id="homeDest" maxlength="4" placeholder="e.g. KHII"></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div><label>Alternate ICAO</label><input id="homeAlt" maxlength="4" placeholder="optional"></div>
+            <div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
+          </div>
+          <button type="button" style="margin-top:12px" onclick="startNewTrip()">Start New Trip</button>
+        </div>
+
+        <div class="home-panel">
+          <h3 style="margin-top:0">Beta Test Notes</h3>
+          <div class="small">Use real routes and realistic loading scenarios, but independently verify every result against approved aircraft data. Report anything confusing, missing, or inconsistent.</div>
+          <div style="margin-top:12px"><b id="homeArchiveCount">0</b> completed missions in local Archive.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="opsView">
+<div class="mission-actionbar">
+  <button type="button" onclick="showPlatformView('home')">← New Trip</button>
+  <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
+  <button type="button" onclick="completeMission()">Complete Mission</button>
+</div>
+
 <div class="card">
 <h2>1. Mission Setup</h2>
 <div class="row">
-<div><label>Origin</label><input id="dep" value="KBPT" maxlength="4"></div>
-<div><label>Destination</label><input id="dest" value="KDAL" maxlength="4"></div>
+<div><label>Origin</label><input id="dep" value="" maxlength="4"></div>
+<div><label>Destination</label><input id="dest" value="" maxlength="4"></div>
 <div><label>Alternate</label><input id="alt" value="" maxlength="4" placeholder="Optional"></div>
 <div></div>
 </div>
@@ -876,9 +959,12 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="small" id="toldRoute">—</div>
     <div class="small">Aircraft Preparation • Weight & Balance • Takeoff & Landing Data</div>
   </div>
-  <div class="told-actions" style="display:flex;gap:8px">
+  <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap">
     <button type="button" onclick="updateToldCard()">Refresh</button>
+    <button type="button" onclick="shareCurrentMission()">Share</button>
+    <button type="button" onclick="emailCurrentMission()">Email</button>
     <button type="button" onclick="window.print()">Print</button>
+    <button type="button" onclick="completeMission()">Complete Mission</button>
   </div>
 </div>
 
@@ -979,6 +1065,20 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 Aircraft-prep and TOLD values mirror the active FlightOps calculation. Verify the loading, FOB, runway selection and source status before use. Source-locked or unevaluated performance remains visibly unavailable; no extrapolation is performed.
 </div>
 </div>
+</div>
+
+
+<div id="archiveView">
+  <div class="card" style="max-width:1050px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+      <div>
+        <h2 style="margin-bottom:4px">Completed Mission Archive</h2>
+        <div class="small">Completed missions only. Stored locally in this browser during beta.</div>
+      </div>
+      <button type="button" style="width:auto" onclick="renderArchive()">Refresh</button>
+    </div>
+    <div id="archiveList" class="archive-list" style="margin-top:14px"></div>
+  </div>
 </div>
 
 </main>
@@ -1082,15 +1182,179 @@ function updateFOBVerifyLabel(){
  else{e.textContent="FOB NOT VERIFIED";e.className="warn";}
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
-function showAppTab(tab){
- const told=tab==="told";
- $("opsView").style.display=told?"none":"block";
- $("toldView").style.display=told?"block":"none";
- $("opsTabBtn").classList.toggle("active",!told);
- $("toldTabBtn").classList.toggle("active",told);
- if(told)updateToldCard();
+function showPlatformView(view){
+ const ids=["home","ops","told","archive"];
+ ids.forEach(v=>{
+   const el=$(v+"View"); if(el)el.style.display=(v===view)?"block":"none";
+   const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===view);
+ });
+ if(view==="told")updateToldCard();
+ if(view==="archive")renderArchive();
+ if(view==="home")updateHomeArchiveCount();
  window.scrollTo({top:0,behavior:"smooth"});
 }
+function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
+
+
+function cleanICAO(v){return String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4)}
+function newMissionId(){return "M-"+Date.now().toString(36).toUpperCase()}
+function getMissionArchive(){
+ try{return JSON.parse(localStorage.getItem("kusaFlightOpsArchive")||"[]")}catch{return[]}
+}
+function saveMissionArchive(arr){localStorage.setItem("kusaFlightOpsArchive",JSON.stringify(arr));updateHomeArchiveCount()}
+function updateHomeArchiveCount(){
+ const e=$("homeArchiveCount");if(e)e.textContent=getMissionArchive().length;
+}
+function resetMissionForNewTrip(){
+ // Mission-identifying fields
+ $("dep").value="";$("dest").value="";$("alt").value="";
+ // Fuel confirmation is never carried into a new mission
+ if($("fobVerified"))$("fobVerified").checked=false;
+ if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
+ missionData=null;
+ // Clear runway selectors and mission-derived summary/performance fields
+ ["depRunway","destRunway"].forEach(id=>{const e=$(id);if(e)e.innerHTML='<option value="">Load mission first</option>'});
+ ["perfRwyLen","landRwyLen","perfV1","perfVR","perfBFL","landVref","landFieldLen"].forEach(id=>{const e=$(id);if(e)e.value=""});
+ ["sumDepRwy","sumDestRwy","toStatus","landStatus"].forEach(id=>{const e=$(id);if(e)e.textContent="—"});
+ updateFOBVerifyLabel();
+}
+function startNewTrip(){
+ const dep=cleanICAO($("homeDep").value),dest=cleanICAO($("homeDest").value),alt=cleanICAO($("homeAlt").value);
+ if(!dep||!dest){
+   alert("Enter departure and destination ICAO identifiers.");
+   return;
+ }
+ resetMissionForNewTrip();
+ $("dep").value=dep;$("dest").value=dest;$("alt").value=alt;
+ window.currentMissionMeta={
+   id:newMissionId(),
+   aircraft:$("homeAircraft").value||"N33AP",
+   note:$("homeTripNote").value.trim(),
+   started_at:new Date().toISOString(),
+   completed:false
+ };
+ showPlatformView("ops");
+ loadMission();
+}
+function currentMissionSummaryText(){
+ updateToldCard();
+ const c=latestCalc||{};
+ const dep=cleanICAO($("dep").value)||"—",dest=cleanICAO($("dest").value)||"—",alt=cleanICAO($("alt").value)||"—";
+ const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
+ const lines=[
+   "KUSA FlightOps — N33AP",
+   `${dep} → ${dest}${alt!=="—"?" | ALT "+alt:""}`,
+   "",
+   `TOW: ${Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—"} | TO CG: ${Number.isFinite(c.takeoffPct)?c.takeoffPct.toFixed(2)+"% MAC":"—"}`,
+   `LDW: ${Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—"} | LDG CG: ${Number.isFinite(c.landingPct)?c.landingPct.toFixed(2)+"% MAC":"—"}`,
+   `FOB: ${Math.round(num("fuel")).toLocaleString()} lb | FOB Verified: ${$("fobVerified")?.checked?"YES":"NO"}`,
+   `DEP RWY: ${dr?dr.runway_id:"—"} | ${$("toRunwayCondition")?.value||"—"}`,
+   `V1 ${textOf("vsV1")} | VR=V2 ${textOf("vsVR")} | Vfr ${textOf("vsVFT")} | 1.5Vs ${textOf("vsVFS")}`,
+   `BFL: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"—"} | TO Status: ${textOf("toStatus")}`,
+   `DEST RWY: ${lr?lr.runway_id:"—"} | ${$("landRunwayCondition")?.value||"—"}`,
+   `VREF: ${$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"—"} | LFL: ${$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"—"}`,
+   `Landing Fuel: ${Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—"} | Fuel Gate: ${textOf("landingFuelGuardStatus")}`,
+   "",
+   "DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE"
+ ];
+ return lines.join("\n");
+}
+async function shareCurrentMission(){
+ const text=currentMissionSummaryText();
+ const title=`KUSA FlightOps ${cleanICAO($("dep").value)}-${cleanICAO($("dest").value)}`;
+ try{
+   if(navigator.share){await navigator.share({title,text});return}
+   await navigator.clipboard.writeText(text);
+   alert("Mission summary copied to clipboard.");
+ }catch(e){
+   if(e&&e.name!=="AbortError")alert("Unable to share automatically. Use Email or Print.");
+ }
+}
+function emailCurrentMission(){
+ const subject=encodeURIComponent(`KUSA FlightOps ${cleanICAO($("dep").value)}-${cleanICAO($("dest").value)}`);
+ const body=encodeURIComponent(currentMissionSummaryText());
+ window.location.href=`mailto:?subject=${subject}&body=${body}`;
+}
+function buildArchiveRecord(){
+ const c=latestCalc||{};
+ const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
+ return {
+   id:(window.currentMissionMeta&&window.currentMissionMeta.id)||newMissionId(),
+   aircraft:"N33AP",
+   note:(window.currentMissionMeta&&window.currentMissionMeta.note)||"",
+   started_at:(window.currentMissionMeta&&window.currentMissionMeta.started_at)||null,
+   completed_at:new Date().toISOString(),
+   dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
+   dep_runway:dr?dr.runway_id:null,dest_runway:lr?lr.runway_id:null,
+   takeoff_condition:$("toRunwayCondition")?.value||null,landing_condition:$("landRunwayCondition")?.value||null,
+   fob_lb:Math.round(num("fuel")),fob_verified:!!$("fobVerified")?.checked,
+   zfw_lb:Number.isFinite(c.zfw)?Math.round(c.zfw):null,
+   ramp_lb:Number.isFinite(c.ramp)?Math.round(c.ramp):null,
+   tow_lb:Number.isFinite(c.tow)?Math.round(c.tow):null,
+   ldw_lb:Number.isFinite(c.landing)?Math.round(c.landing):null,
+   landing_fuel_lb:Number.isFinite(c.landingFuel)?Math.round(c.landingFuel):null,
+   takeoff_cg:Number.isFinite(c.takeoffPct)?Number(c.takeoffPct.toFixed(2)):null,
+   landing_cg:Number.isFinite(c.landingPct)?Number(c.landingPct.toFixed(2)):null,
+   to_status:textOf("toStatus"),ldg_status:textOf("landStatus"),
+   summary:currentMissionSummaryText()
+ };
+}
+function completeMission(){
+ const dep=cleanICAO($("dep").value),dest=cleanICAO($("dest").value);
+ if(!dep||!dest){alert("Start a mission before completing it.");return}
+ const problems=[];
+ if(!$("fobVerified")?.checked)problems.push("FOB is not verified");
+ if(latestCalc?.lowLandingFuel&&!latestCalc?.lowLandingFuelConfirmed)problems.push("landing fuel below 3,000 lb is not confirmed");
+ if(problems.length){
+   const ok=confirm("Mission has unresolved safety confirmations:\n\n• "+problems.join("\n• ")+"\n\nComplete and archive anyway?");
+   if(!ok)return;
+ }
+ const rec=buildArchiveRecord();
+ const arr=getMissionArchive();
+ const ix=arr.findIndex(x=>x.id===rec.id);
+ if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
+ saveMissionArchive(arr.slice(0,100));
+ if(window.currentMissionMeta)window.currentMissionMeta.completed=true;
+ alert("Mission completed and saved to Archive.");
+ showPlatformView("archive");
+}
+function renderArchive(){
+ const list=$("archiveList");if(!list)return;
+ const arr=getMissionArchive();
+ if(!arr.length){list.innerHTML='<div class="callout small">No completed missions yet.</div>';return}
+ list.innerHTML=arr.map((m,i)=>{
+   const dt=m.completed_at?new Date(m.completed_at).toLocaleString():"—";
+   return `<div class="archive-item">
+     <div class="archive-head">
+       <div><div class="archive-route">${m.dep||"—"} → ${m.dest||"—"}</div>
+       <div class="archive-meta">${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div></div>
+       <div class="status ${String(m.to_status).includes("NO-GO")||String(m.ldg_status).includes("NO-GO")?"bad":"warn"}">${esc(m.to_status||"—")}</div>
+     </div>
+     <div class="small" style="margin-top:8px">TOW ${m.tow_lb==null?"—":Number(m.tow_lb).toLocaleString()+" lb"} • LDW ${m.ldw_lb==null?"—":Number(m.ldw_lb).toLocaleString()+" lb"} • Landing fuel ${m.landing_fuel_lb==null?"—":Number(m.landing_fuel_lb).toLocaleString()+" lb"}</div>
+     <div class="archive-actions">
+       <button type="button" onclick="shareArchiveMission(${i})">Share</button>
+       <button type="button" onclick="emailArchiveMission(${i})">Email</button>
+       <button type="button" onclick="viewArchiveMission(${i})">View Summary</button>
+     </div>
+   </div>`
+ }).join("");
+}
+async function shareArchiveMission(i){
+ const m=getMissionArchive()[i];if(!m)return;
+ try{
+   if(navigator.share){await navigator.share({title:`KUSA FlightOps ${m.dep}-${m.dest}`,text:m.summary});return}
+   await navigator.clipboard.writeText(m.summary);alert("Completed mission summary copied to clipboard.");
+ }catch(e){}
+}
+function emailArchiveMission(i){
+ const m=getMissionArchive()[i];if(!m)return;
+ location.href=`mailto:?subject=${encodeURIComponent("KUSA FlightOps "+m.dep+"-"+m.dest)}&body=${encodeURIComponent(m.summary)}`;
+}
+function viewArchiveMission(i){
+ const m=getMissionArchive()[i];if(!m)return;
+ alert(m.summary);
+}
+
 function textOf(id){const e=$(id);return e&&e.textContent.trim()?e.textContent.trim():"—"}
 function selectedRunwayObj(which){
  if(!missionData)return null;
@@ -2073,6 +2337,8 @@ setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
 setPerformanceInputMode();
 startupCheck();
+showPlatformView("home");
+updateHomeArchiveCount();
 addEventListener("resize",recalculate);
 </script>
 <script>
