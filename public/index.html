@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.21.4</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.21.5</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -942,7 +942,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>2nd Segment Gross Gradient % — AUTO</label><input id="perfGrad" type="number" step=".1" readonly></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Obstacle Analysis</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Verified clear</option><option value="false">Not cleared</option></select></div>
+<div><label>Manual Obstacle Verification</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Manually verified clear</option><option value="false">Not cleared</option></select></div>
 <div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
 <div class="wx"><div class="small">Source-Evaluated Max TOW</div><b id="toMax">—</b><div class="small">Structural MTOW 40,780 lb</div></div>
 <div class="wx"><div class="small">Takeoff Status</div><b id="toStatus">—</b></div>
@@ -2196,7 +2196,9 @@ function updateToldCard(){
  if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push("PASSENGER SEATING CHECK REQUIRED");
  if(!dr||!lr)issues.push("RUNWAY SELECTION REQUIRED");
  if(currentNotams.status!=="CHECKED")issues.push("NOTAM VERIFICATION REQUIRED");
- issues.push("OBSTACLE ANALYSIS NOT IMPLEMENTED");
+ issues.push($("perfObs")?.value==="true"
+   ?"MANUAL OBSTACLE CLEARANCE VERIFIED • AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED"
+   :"AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED");
  if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
  if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
  if(textOf("toStatus").includes("PENDING")||textOf("toStatus").includes("LOCKED"))issues.push("TAKEOFF LIMITS NOT FULLY EVALUATED");
@@ -2447,7 +2449,14 @@ function qrhCellGradient(cfg,ai,pa,temp,weightLb){
    const tb=bracketN(temps,temp);
    if(!tb)return null;
    const [ta,tb2]=tb;
-   const A=Number(tm[String(ta)]),B=Number(tm[String(tb2)]);
+   // QRH JSON temperature keys are stored as strings such as "30.0".
+   // Numeric interpolation converts them to 30, so direct tm[String(30)] would
+   // miss the published key. Resolve keys numerically to preserve source data.
+   const valAtTemp=(t)=>{
+     const k=Object.keys(tm).find(key=>Number(key)===Number(t));
+     return k==null?null:Number(tm[k]);
+   };
+   const A=valAtTemp(ta),B=valAtTemp(tb2);
    if(!Number.isFinite(A)||!Number.isFinite(B))return null;
    if(ta===tb2)return A;
    return lerpN(A,B,(temp-ta)/(tb2-ta));
@@ -2582,7 +2591,8 @@ function syncTakeoffSection(){
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
  if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(climb.pass===false)pending.push("CLIMB FAIL");
- if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
+ pending.push("AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED");
+ if($("perfObs").value==="false")pending.push("MANUAL OBSTACLE CHECK NOT CLEARED");
 
  if(climb.pass===false){
    $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
@@ -3741,7 +3751,9 @@ async function evaluateTakeoff(){
 
    if(climb.pass===false){
      $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
-     $("toLimit").textContent=`QRH REF GCLB2 ${climb.gradient.toFixed(2)}% < ${QRH_CLIMB_MIN_GROSS.toFixed(1)}% minimum`;
+     $("toLimit").textContent=Number.isFinite(climb.gradient)
+       ?`QRH REF GCLB2 ${climb.gradient.toFixed(2)}% < ${QRH_CLIMB_MIN_GROSS.toFixed(1)}% minimum`
+       :"AFMS SECOND-SEGMENT CLIMB LIMIT FAIL";
      return;
    }
    if(j.status==="NO-GO"){
@@ -3752,12 +3764,14 @@ async function evaluateTakeoff(){
    const pending=[];
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
    if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
-   if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
+   pending.push("AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED");
+   if($("perfObs").value==="false")pending.push("MANUAL OBSTACLE CHECK NOT CLEARED");
 
    if(j.status==="GO"&&!pending.length){
      $("toStatus").textContent=climb.noLimitation?"GO • FIELD PASS / CLIMB NOT LIMITING / OBSTACLE PASS":"GO • FIELD / CLIMB / OBSTACLE PASS";
      $("toStatus").className="ok";
-     $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • QRH REF GCLB2 ${climb.gradient.toFixed(2)}% • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • obstacle verified clear.`;
+     const gradText=Number.isFinite(climb.gradient)?`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`:`QRH GRADIENT REFERENCE UNAVAILABLE`;
+     $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • ${gradText} • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • manual obstacle verification recorded; automated obstacle analysis not implemented.`;
    }else{
      $("toStatus").textContent=pending.length?`PENDING • ${pending.join(" • ")}`:"TABLE DATA READY";
      $("toStatus").className="warn";
