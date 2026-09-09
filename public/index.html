@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.6</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.7</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -393,7 +393,7 @@ details summary{cursor:pointer;margin-top:8px}
 </header>
 <div class="beta-banner">INTERNAL BETA — DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE</div>
 <main>
-<div id="homeView">
+<div id="homeView" style="display:block">
   <div class="home-shell">
     <div class="newtrip-card">
       <div class="newtrip-title">FlightOps Menu</div>
@@ -433,7 +433,7 @@ details summary{cursor:pointer;margin-top:8px}
   </div>
 </div>
 
-<div id="newtripView">
+<div id="newtripView" style="display:none">
   <div class="home-shell">
     <div class="newtrip-card">
       <div class="newtrip-title">New Trip</div>
@@ -497,7 +497,7 @@ details summary{cursor:pointer;margin-top:8px}
   </div>
 </div>
 
-<div id="opsView">
+<div id="opsView" style="display:none">
 <div class="mission-actionbar">
   <button type="button" onclick="showPlatformView('home')">← Menu</button>
   <button type="button" onclick="completeMission()">Complete & Archive Flight Plan</button>
@@ -1158,7 +1158,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 
 </div>
 
-<div id="toldView">
+<div id="toldView" style="display:none">
 <div class="card told-card">
 <div class="told-head">
   <div>
@@ -1297,7 +1297,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 
 
-<div id="archiveView">
+<div id="archiveView" style="display:none">
   <div class="card" style="max-width:1050px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
       <div>
@@ -4173,7 +4173,7 @@ async function evaluateLanding(){
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- const expected="5.22.6",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ const expected="5.22.7",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
  try{
    const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
    const buildOk=String(j.build||"")===expected;
