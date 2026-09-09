@@ -1,0 +1,7 @@
+KUSA FlightOps v5.22.6
+
+Mission navigation cleanup
+- Removes duplicate New Trip and Open TOLD buttons from the Mission page action row.
+- Top navigation remains the single path for New Trip / Mission / TOLD / Flight Plans.
+- Mission page action row now keeps only Menu, Complete & Archive Flight Plan, and draft-save status.
+- Carries forward v5.22.5 menu landing and automatic draft persistence.

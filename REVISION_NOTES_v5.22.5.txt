@@ -1,0 +1,13 @@
+KUSA FlightOps - Performance + W&B v5.22.5
+
+- Startup now lands on a dedicated Menu page, not Mission/TOLD/New Trip.
+- Menu provides New Trip, Draft Flight Plans, Completed Flight Plans, and startup data status.
+- New Trip is a separate clean entry screen.
+- Active incomplete missions auto-save as local browser/device Drafts.
+- Draft save is debounced on mission input/change and also attempted before page unload.
+- Flight Plans now contains Drafts plus Completed/Archived plans.
+- Resume Draft restores mission state for continued work.
+- Complete & Archive converts the active draft to a completed record and removes the draft.
+- Added visible Draft saved timestamp in Mission action bar.
+- Title remains KUSA FlightOps - Performance + W&B.
+- Development / validation only; not approved for flight use.
