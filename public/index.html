@@ -370,7 +370,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.4</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.6</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -418,7 +418,6 @@ details summary{cursor:pointer;margin-top:8px}
           </div>
           <div class="row" style="margin-top:10px">
             <div><label>Alternate ICAO</label><input id="homeAlt" maxlength="4" placeholder="optional"></div>
-            <div><label>Flight Plan / Leg Name</label><input id="homePlanName" placeholder="e.g. Leg 1 — BPT to DAL"></div>
 <div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
           </div>
 
@@ -426,17 +425,15 @@ details summary{cursor:pointer;margin-top:8px}
             <h3>Fuel Plan</h3>
             <div class="row">
               <div class="fuel-big">
-                <label>Fuel on Board (FOB) lb</label>
-                <input id="homeFOB" type="number" min="0" max="15514" step="50" placeholder="Enter FOB">
+                <label>FOB lb</label>
+                <input id="homeFOB" type="number" min="0" max="15514" step="50" value="0000" onfocus="selectFuelEntry(this)" onclick="selectFuelEntry(this)">
               </div>
               <div class="fuel-big">
-                <label>Mission Required Fuel lb</label>
-                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" placeholder="Enter Fuel">
+                <label>Mission Fuel lb</label>
+                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" value="0000" onfocus="selectFuelEntry(this)" onclick="selectFuelEntry(this)">
               </div>
             </div>
-            <div class="newtrip-fuel-note">
-              Enter the planned fuel quantities here. FOB entry does not count as verification; the pilot must still complete the separate FOB verification check in Mission Setup.
-            </div>
+            <div class="newtrip-fuel-note">Enter FOB and mission fuel. Tap a 0000 field to replace the value.</div>
           </div>
 
           <button type="button" style="margin-top:12px" onclick="startNewTrip()">Start New Trip</button>
@@ -861,7 +858,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
 <div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
 <div><label>Climb-Limited Weight lb</label><input id="perfClimbWt" type="number"></div>
-<div><label>Field-Limited Weight lb</label><input id="perfFieldWt" type="number"></div>
+<div><label>Field-Limited Weight lb — AUTO</label><input id="perfFieldWt" type="number" readonly></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Balanced Field Length ft</label><input id="perfBFL" type="number" readonly></div>
@@ -1295,6 +1292,12 @@ function resetMissionForNewTrip(){
  ["sumDepRwy","sumDestRwy","toStatus","landStatus"].forEach(id=>{const e=$(id);if(e)e.textContent="—"});
  updateFOBVerifyLabel();
 }
+
+function selectFuelEntry(el){
+ if(!el)return;
+ requestAnimationFrame(()=>{try{el.select()}catch(e){}});
+}
+
 function startNewTrip(){
  const dep=cleanICAO($("homeDep").value),dest=cleanICAO($("homeDest").value),alt=cleanICAO($("homeAlt").value);
  const fob=Number($("homeFOB").value);
@@ -1324,8 +1327,7 @@ function startNewTrip(){
  window.currentMissionMeta={
    id:newMissionId(),
    aircraft:$("homeAircraft").value||"N33AP",
-   plan_name:$("homePlanName")?.value?.trim()||`${dep}-${dest}`,
-   note:$("homeTripNote").value.trim(),
+note:$("homeTripNote").value.trim(),
    initial_fob_lb:Math.round(fob),
    planned_mission_fuel_lb:Math.round(missionFuel),
    started_at:new Date().toISOString(),
@@ -1450,8 +1452,7 @@ function captureCurrentPlanState(){
  return{
    dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
    aircraft:$("homeAircraft")?.value||"N33AP",
-   plan_name:(window.currentMissionMeta&&window.currentMissionMeta.plan_name)||$("homePlanName")?.value?.trim()||"",
-   note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNote")?.value?.trim()||"",
+note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNote")?.value?.trim()||"",
    captain_weight_lb:num("captWt"),fo_weight_lb:num("foWt"),
    fob_lb:num("fuel"),mission_fuel_lb:num("missionFuel"),taxi_fuel_lb:num("taxiFuel"),
    emer_return_fuel_burn_lb:num("emerReturnBurn"),
@@ -1491,9 +1492,7 @@ async function restoreArchivedFlightPlan(record,index){
  $("dep").value=s.dep||record.dep||"";
  $("dest").value=s.dest||record.dest||"";
  $("alt").value=s.alt||record.alt||"";
-
- if($("homePlanName"))$("homePlanName").value=s.plan_name||record.plan_name||"";
- if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
+if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
 
  if(Number.isFinite(Number(s.captain_weight_lb)))$("captWt").value=s.captain_weight_lb;
  if(Number.isFinite(Number(s.fo_weight_lb)))$("foWt").value=s.fo_weight_lb;
@@ -1529,8 +1528,7 @@ async function restoreArchivedFlightPlan(record,index){
  window.currentMissionMeta={
    id:record.id||newMissionId(),
    aircraft:s.aircraft||record.aircraft||"N33AP",
-   plan_name:s.plan_name||record.plan_name||`${record.dep||""}-${record.dest||""}`,
-   note:s.note||record.note||"",
+note:s.note||record.note||"",
    started_at:new Date().toISOString(),
    completed:false,
    reopened_from_archive:true,
@@ -1554,8 +1552,7 @@ function buildArchiveRecord(){
  return{
    id:(window.currentMissionMeta&&window.currentMissionMeta.id)||newMissionId(),
    aircraft:"N33AP",
-   plan_name:(window.currentMissionMeta&&window.currentMissionMeta.plan_name)||state.plan_name||`${state.dep}-${state.dest}`,
-   note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||"",
+note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||"",
    started_at:(window.currentMissionMeta&&window.currentMissionMeta.started_at)||null,
    completed_at:new Date().toISOString(),
    dep:state.dep,dest:state.dest,alt:state.alt,
@@ -1601,11 +1598,10 @@ function renderArchive(){
  if(!arr.length){list.innerHTML='<div class="callout small">No completed flight plans yet.</div>';return}
  list.innerHTML=arr.map((m,i)=>{
    const dt=m.completed_at?new Date(m.completed_at).toLocaleString():"—";
-   const planName=m.plan_name||m.state?.plan_name||`${m.dep||"—"} → ${m.dest||"—"}`;
-   return `<div class="archive-item">
+return `<div class="archive-item">
      <div class="archive-head">
        <div>
-         <div class="archive-route">${esc(planName)} <span class="archive-legtag">${m.dep||"—"} → ${m.dest||"—"}</span></div>
+         <div class="archive-route">${m.dep||"—"} → ${m.dest||"—"}</div>
          <div class="archive-meta">${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div>
        </div>
        <div class="status ${String(m.to_status).includes("NO-GO")||String(m.ldg_status).includes("NO-GO")?"bad":"warn"}">${esc(m.to_status||"—")}</div>
@@ -1634,9 +1630,7 @@ function duplicateArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];if(!m)return;
  const copy=JSON.parse(JSON.stringify(m));
  copy.id=newMissionId();
- copy.plan_name=(m.plan_name||m.state?.plan_name||`${m.dep}-${m.dest}`)+" — Copy";
- if(copy.state)copy.state.plan_name=copy.plan_name;
- copy.completed_at=new Date().toISOString();
+copy.completed_at=new Date().toISOString();
  arr.unshift(copy);
  saveMissionArchive(arr.slice(0,100));
  renderArchive();
@@ -2001,10 +1995,29 @@ function updateRunwayConditionWarnings(){
  $("landSurfaceNote").textContent=lwet?"Wet landing factor/method is not automatically applied until operator method is defined.":"Pilot-confirmed dry runway.";
 }
 
+
+function autoFieldLimitedWeight(){
+ const cfg=$("toConfig").value;
+ const runwayCondition=$("toRunwayCondition")?.value||"DRY";
+ const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),rwy=perfTakeoffRunwayLen();
+ if(runwayCondition!=="DRY"||!Number.isFinite(pa)||!Number.isFinite(temp)||!Number.isFinite(rwy)||rwy<=0){
+   $("perfFieldWt").value="";
+   return null;
+ }
+ const w=solveMaxWeightForRunway(cfg,pa,temp,rwy);
+ if(Number.isFinite(w)){
+   $("perfFieldWt").value=Math.round(w);
+   return Math.round(w);
+ }
+ $("perfFieldWt").value="";
+ return null;
+}
+
 function syncTakeoffSection(){
  const cfg=$("toConfig").value;
  const d=FS_PERF.takeoff[cfg];
  const a=autoTO();
+ const autoFieldWt=autoFieldLimitedWeight();
  updateRunwayConditionWarnings();
  const runwayCondition=$("toRunwayCondition").value;
  const wk=(perfTakeoffWeightLb()||0)/1000;
@@ -2040,13 +2053,19 @@ function syncTakeoffSection(){
    note += " VR=V2, Vfr and 1.5Vs remain weight-based; wet BFL and wet V1 are deliberately blank until the wet curves are digitized and validated.";
    $("toConfigNote").textContent=note;
  }else if(a.v1!=null || a.bfl!=null){
-   $("toStatus").textContent="TABLE DATA READY";
-   $("toStatus").className="ok";
+   if(Number.isFinite(autoFieldWt)&&valueOrNull("perfClimbWt")==null){
+     $("toStatus").textContent="FIELD LIMIT READY • CLIMB LIMIT PENDING";
+     $("toStatus").className="warn";
+   }else{
+     $("toStatus").textContent="TABLE DATA READY";
+     $("toStatus").className="ok";
+   }
    $("toLimit").textContent=`AUTO TABLE • ${d.label} • FlightSafety P-2–P-5${a.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`;
    const note = [`Using ${d.label}`];
    if(Number.isFinite(pa)) note.push(`pressure altitude ${Math.round(pa).toLocaleString()} ft`);
    if(Number.isFinite(wk)&&wk>0) note.push(`weight ${wk.toFixed(1)}k lb`);
    note.push("configuration change applied");
+   if(Number.isFinite(autoFieldWt))note.push(`field limit auto ${Math.round(autoFieldWt).toLocaleString()} lb`);
    $("toConfigNote").textContent=note.join(" • ");
  }else if(a.vr!=null || a.vfr!=null || a.v15vs!=null){
    $("toStatus").textContent="WEIGHT SPEEDS READY • V1/BFL OUT OF RANGE";
@@ -2728,25 +2747,60 @@ function syncLandingSection(){
 
 async function evaluateTakeoff(){
  const a=syncTakeoffSection();
- const body={runway_length_ft:perfTakeoffRunwayLen(),actual_takeoff_weight_lb:perfTakeoffWeightLb(),climb_limited_weight_lb:valueOrNull("perfClimbWt"),field_limited_weight_lb:valueOrNull("perfFieldWt"),balanced_field_length_ft:valueOrNull("perfBFL"),v1_kt:valueOrNull("perfV1"),vr_v2_kt:valueOrNull("perfVR"),obstacle_clearance_verified:$("perfObs").value===""?null:$("perfObs").value==="true"};
+ const fieldWt=autoFieldLimitedWeight();
+ const body={
+   runway_length_ft:perfTakeoffRunwayLen(),
+   actual_takeoff_weight_lb:perfTakeoffWeightLb(),
+   climb_limited_weight_lb:valueOrNull("perfClimbWt"),
+   field_limited_weight_lb:Number.isFinite(fieldWt)?fieldWt:valueOrNull("perfFieldWt"),
+   balanced_field_length_ft:valueOrNull("perfBFL"),
+   v1_kt:valueOrNull("perfV1"),
+   vr_v2_kt:valueOrNull("perfVR"),
+   obstacle_clearance_verified:$("perfObs").value===""?null:$("perfObs").value==="true"
+ };
  try{
-   const r=await fetch(apiUrl("/api/performance/takeoff"),{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)}),j=await r.json();
+   const r=await fetch(apiUrl("/api/performance/takeoff"),{
+     method:"POST",
+     headers:{"Content-Type":"application/json"},
+     body:JSON.stringify(body)
+   });
+   const j=await r.json();
    if(j.error)throw new Error(j.error);
+
    $("toMax").textContent=j.max_allowable_takeoff_weight_lb.toLocaleString()+" lb";
    $("toWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
    $("toRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
-   if(j.status==="NO-GO"){$("toStatus").textContent="NO-GO";$("toStatus").className="bad"}
-   else if(j.status==="GO"){$("toStatus").textContent="GO • ALL ENTERED LIMITS PASS";$("toStatus").className="ok"}
-   else{
-     const pending=[];
-     if(valueOrNull("perfClimbWt")==null)pending.push("climb limit");
-     if(valueOrNull("perfFieldWt")==null)pending.push("field limit");
-     if($("perfObs").value==="")pending.push("obstacle analysis");
-     $("toStatus").textContent=pending.length?"TABLE DATA READY • OP LIMITS PENDING":"TABLE DATA READY";
-     $("toStatus").className="warn";
-     if(pending.length)$("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} table data calculated. Pending operational items: ${pending.join(", ")}.`;
+
+   if(j.status==="NO-GO"){
+     $("toStatus").textContent="NO-GO";
+     $("toStatus").className="bad";
+     return;
    }
- }catch(e){$("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";$("toLimit").textContent=String(e.message||e)}
+
+   const pending=[];
+   if(valueOrNull("perfClimbWt")==null)pending.push("CLIMB LIMIT");
+   if(valueOrNull("perfFieldWt")==null)pending.push("FIELD LIMIT");
+   if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
+
+   if(j.status==="GO"&&!pending.length){
+     $("toStatus").textContent="GO • ALL IMPLEMENTED LIMITS PASS";
+     $("toStatus").className="ok";
+   }else if(pending.length===1&&pending[0]==="CLIMB LIMIT"){
+     $("toStatus").textContent="FIELD LIMIT PASS • CLIMB LIMIT PENDING";
+     $("toStatus").className="warn";
+     $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} table and field-limit data calculated. Obstacle analysis satisfied. Applicable climb-limit chart still requires source integration.`;
+   }else{
+     $("toStatus").textContent=pending.length?`PENDING • ${pending.join(" • ")}`:"TABLE DATA READY";
+     $("toStatus").className="warn";
+     if(pending.length){
+       $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} table data calculated. Remaining item${pending.length>1?"s":""}: ${pending.join(", ")}.`;
+     }
+   }
+ }catch(e){
+   $("toStatus").textContent="EVALUATION ERROR";
+   $("toStatus").className="bad";
+   $("toLimit").textContent=String(e.message||e);
+ }
 }
 
 async function evaluateLanding(){
