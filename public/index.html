@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.21.2</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.21.4</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -944,7 +944,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="row" style="margin-top:10px">
 <div><label>Obstacle Analysis</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Verified clear</option><option value="false">Not cleared</option></select></div>
 <div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
-<div class="wx"><div class="small">Max Allowable TOW</div><b id="toMax">—</b></div>
+<div class="wx"><div class="small">Source-Evaluated Max TOW</div><b id="toMax">—</b><div class="small">Structural MTOW 40,780 lb</div></div>
 <div class="wx"><div class="small">Takeoff Status</div><b id="toStatus">—</b></div>
 </div>
 <table style="margin-top:10px">
@@ -1172,7 +1172,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Configuration</span><span id="toldTOConfig">—</span></div>
     <div class="told-row"><span>Balanced Field Length</span><span id="toldBFL">—</span></div>
     <div class="told-row">
-      <span>40°C Max Allowable TOW</span>
+      <span>40°C Source-Evaluated TOW</span>
       <span id="toldHotMaxTow">—</span>
     </div>
     <div class="told-row">
@@ -1183,7 +1183,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <span>40°C / MAX TOW Runway Margin</span>
       <span id="toldHotMaxMargin">—</span>
     </div>
-    <div class="told-row"><span>Max Allowable TOW</span><span id="toldMaxTOW">—</span></div>
+    <div class="told-row"><span>Structural MTOW</span><span id="toldStructuralMTOW">40,780 lb</span></div>
+    <div class="told-row"><span>Source-Evaluated Max TOW</span><span id="toldMaxTOW">—</span></div>
     <div class="told-row"><span>Runway Margin</span><span id="toldTORwyMargin">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
     <div class="told-speeds">
@@ -1219,7 +1220,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <div class="callout small" style="margin-top:14px">
-Aircraft-prep and TOLD values mirror the active FlightOps calculation. Verify the loading, FOB, runway selection and source status before use. Source-locked or unevaluated performance remains visibly unavailable; no extrapolation is performed.
+Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structural MTOW is 40,780 lb; a lower source-evaluated maximum reflects the current digitized performance-source boundary or an actual performance limit, as labeled. Verify loading, FOB, runway selection and source status before use. Source-locked or unevaluated performance remains visibly unavailable; no extrapolation is performed.
 </div>
 </div>
 </div>
@@ -1332,14 +1333,30 @@ const AFMS_REVC_TO_CLIMB={
 };
 const AFMS_REVC_TO_CLIMB_SOURCE={S20:'FTA-PA-001019 Rev C §5-18 (page Rev A; unchanged by Rev C)',SLATS:'FTA-PA-001019 Rev C §5-27 (page Rev A; unchanged by Rev C)'};
 
-function afmsRevCContourWeight(line,tempC){
+function afmsRevCContourWeight(line,tempC,maxStruct=40780){
   if(!line||!Number.isFinite(tempC))return null;
   const tc=AFMS_REVC_CHART_CAL.temp,wc=AFMS_REVC_CHART_CAL.weight;
   const y=(tempC-tc.b)/tc.m;
   const x=(y-line.b)/line.m;
-  // Hard source-segment guard: do not extend the fitted contour beyond the portion
-  // actually captured from the published chart scan.
-  if(!Number.isFinite(x)||x<line.xmin||x>line.xmax)return null;
+  if(!Number.isFinite(x))return null;
+
+  // Do not extrapolate a contour beyond the source-drawn segment. There is one
+  // useful source-bounded exception: if the selected temperature lies on the
+  // cooler side of the captured right endpoint AND that published endpoint is
+  // already above structural MTOW, the chart has already established that climb
+  // is not limiting before the structural limit is reached. In that region we
+  // return structural MTOW, not an extrapolated climb weight.
+  if(x>line.xmax){
+    const endX=line.xmax;
+    const endW=wc.m*endX+wc.b;
+    const endY=line.m*endX+line.b;
+    const endTemp=tc.m*endY+tc.b;
+    if(Number.isFinite(endW)&&Number.isFinite(endTemp)&&endW>=maxStruct&&tempC<=endTemp){
+      return maxStruct;
+    }
+    return null;
+  }
+  if(x<line.xmin)return null;
   const w=wc.m*x+wc.b;
   return Number.isFinite(w)?w:null;
 }
@@ -1351,25 +1368,24 @@ function afmsRevCTakeoffClimbLimit(cfg,ai,pa,tempC){
   const minPA=lines[0].pa,maxPA=lines[lines.length-1].pa;
   if(pa>maxPA){out.coverageLimited=true;out.basis=`PA ${Math.round(pa)} ft above digitized ${maxPA} ft contour`;return out;}
   if(pa<minPA){
-    // For small below-sea-level pressure altitudes, use the published 0-ft chart boundary
-    // as a conservative source floor. This does not extrapolate beyond the source chart.
-    if(minPA===0 && pa>=-1000){
-      let w=afmsRevCContourWeight(lines[0],tempC);
-      if(Number.isFinite(w)){
-        w=Math.floor(w/100)*100;
-        out.limit=Math.min(maxStruct,w);
-        out.noLimitation=w>=maxStruct;
-        out.basis=`PA ${Math.round(pa)} ft below chart floor; published 0-ft boundary used conservatively; no extrapolation`;
-        return out;
-      }
+    // Below the first drawn pressure-altitude contour, do not calculate an
+    // extrapolated climb limit. We may only declare structural MTOW governing
+    // when the first published contour itself is already beyond structural MTOW
+    // at the selected temperature (source-bounded, conservative conclusion).
+    const firstW=afmsRevCContourWeight(lines[0],tempC,maxStruct);
+    if(Number.isFinite(firstW)&&firstW>=maxStruct){
+      out.limit=maxStruct;
+      out.noLimitation=true;
+      out.basis=`PA ${Math.round(pa)} ft below first drawn ${minPA.toLocaleString()}-ft contour; first published contour already exceeds structural MTOW at selected OAT; structural MTOW governs`;
+      return out;
     }
-    out.coverageLimited=true;out.basis=`PA below first digitized ${minPA} ft contour; no extrapolation`;return out;
+    out.coverageLimited=true;out.basis=`PA ${Math.round(pa)} ft below first drawn ${minPA.toLocaleString()}-ft contour and structural-govern region not established by source; no extrapolation`;return out;
   }
   let lo=null,hi=null;
   for(let i=0;i<lines.length-1;i++)if(pa>=lines[i].pa&&pa<=lines[i+1].pa){lo=lines[i];hi=lines[i+1];break;}
   if(!lo&&pa===maxPA){lo=hi=lines[lines.length-1];}
   if(!lo){out.coverageLimited=true;return out;}
-  const w1=afmsRevCContourWeight(lo,tempC),w2=afmsRevCContourWeight(hi,tempC);
+  const w1=afmsRevCContourWeight(lo,tempC,maxStruct),w2=afmsRevCContourWeight(hi,tempC,maxStruct);
   if(!Number.isFinite(w1)||!Number.isFinite(w2)){out.coverageLimited=true;out.basis='Point falls outside source-drawn contour segment; no extrapolation';return out;}
   const frac=lo.pa===hi.pa?0:(pa-lo.pa)/(hi.pa-lo.pa);
   let w=w1+(w2-w1)*frac;
@@ -1592,8 +1608,8 @@ function currentMissionSummaryText(){
    `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
    `Emergency Return VREF: ${textOf("vsVREF")}`,
    `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
-   `40°C / MAX TOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
-   `Max Allowable TOW: ${textOf("toMax")}`,
+   `40°C / SOURCE-EVALUATED TOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
+   `Structural MTOW: 40,780 lb | Source-Evaluated Max TOW: ${textOf("toMax")}`,
    `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
    `Obstacle Analysis: ${$("obstacleStatus")?$("obstacleStatus").value||textOf("obstacleStatus"):"Pending / not checked"}`,
@@ -2144,6 +2160,7 @@ function updateToldCard(){
      ?`${Math.round(hotMax.margin).toLocaleString()} ft`
      :"—";
  }
+ if($("toldStructuralMTOW"))$("toldStructuralMTOW").textContent="40,780 lb";
  $("toldMaxTOW").textContent=textOf("toMax");
  $("toldTORwyMargin").textContent=textOf("toRwyMargin");
  $("toldTOStatus").textContent=textOf("toStatus");
@@ -2489,6 +2506,24 @@ function autoClimbAssessment(){
  return result;
 }
 
+function takeoffFieldSourceCeilingLb(cfg,pa,temp){
+ const d=FS_PERF.takeoff[cfg];
+ if(!d||![pa,temp].every(Number.isFinite))return null;
+ let lookupPA=pa;
+ const pas=kN(d.tables),minPA=Math.min(...pas);
+ if(pa<minPA&&minPA===0&&pa>=-1000)lookupPA=0;
+ const pb=bracketN(pas,lookupPA);
+ if(!pb)return null;
+ function maxSupportedAtPA(p){
+   const wm=d.tables[p];
+   const supported=kN(wm).filter(w=>bracketN(kN(wm[w]),temp));
+   return supported.length?Math.max(...supported)*1000:null;
+ }
+ const vals=pb.map(maxSupportedAtPA);
+ if(vals.some(v=>!Number.isFinite(v)))return null;
+ return Math.min(maxTO,...vals);
+}
+
 function autoFieldLimitedWeight(){
  const cfg=$("toConfig").value;
  const runwayCondition=$("toRunwayCondition")?.value||"DRY";
@@ -2545,7 +2580,7 @@ function syncTakeoffSection(){
 
  const pending=[];
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
- if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE");
+ if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(climb.pass===false)pending.push("CLIMB FAIL");
  if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
@@ -2558,14 +2593,23 @@ function syncTakeoffSection(){
  }
 
  const limits=[`AUTO TABLE • ${d.label}`];
- if(Number.isFinite(autoFieldWt))limits.push(`Field ${Math.round(autoFieldWt).toLocaleString()} lb`);
+ if(Number.isFinite(autoFieldWt)){
+   const srcCeil=takeoffFieldSourceCeilingLb(cfg,perfTakeoffPA(),perfTakeoffTemp());
+   const fieldIsSourceCeiling=Number.isFinite(srcCeil)&&Math.abs(autoFieldWt-srcCeil)<75;
+   limits.push(`${fieldIsSourceCeiling?"Field source evaluated through":"Field limit"} ${Math.round(autoFieldWt).toLocaleString()} lb`);
+ }
  if(Number.isFinite(climb.limit))limits.push(`Climb ${Math.round(climb.limit).toLocaleString()} lb`);
  $("toLimit").textContent=limits.join(" • ");
 
  const notes=[`Using ${d.label}`];
  if(Number.isFinite(perfTakeoffPA()))notes.push(`PA ${Math.round(perfTakeoffPA()).toLocaleString()} ft`);
  if(Number.isFinite(wk)&&wk>0)notes.push(`WT ${wk.toFixed(1)}k lb`);
- if(Number.isFinite(autoFieldWt))notes.push(`field limit auto ${Math.round(autoFieldWt).toLocaleString()} lb`);
+ if(Number.isFinite(autoFieldWt)){
+   const srcCeil=takeoffFieldSourceCeilingLb(cfg,perfTakeoffPA(),perfTakeoffTemp());
+   notes.push(Number.isFinite(srcCeil)&&Math.abs(autoFieldWt-srcCeil)<75
+     ?`field source evaluated through ${Math.round(autoFieldWt).toLocaleString()} lb; structural MTOW 40,780 lb`
+     :`field limit auto ${Math.round(autoFieldWt).toLocaleString()} lb`);
+ }
  if(Number.isFinite(climb.gradient))notes.push(`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`);
  if(Number.isFinite(climb.limit))notes.push(`AFMS climb source active`);
  notes.push(`A/I ${climb.ai}`);
@@ -3171,7 +3215,7 @@ function updateWhatIfPlanner(force=false){
  const obstaclePending=true;       // explicit until obstacle analysis integrated
 
  let opsText=[];
- if(climbKnown)opsText.push(climbOK?"AFMS CLIMB PASS":"AFMS CLIMB NO-GO"); else opsText.push("AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE");
+ if(climbKnown)opsText.push(climbOK?"AFMS CLIMB PASS":"AFMS CLIMB NO-GO"); else opsText.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(brakePending)opsText.push("BRAKE PENDING");
  if(obstaclePending)opsText.push("OBSTACLE NOT CHECKED");
  $("whatIfOps").textContent=opsText.join(" • ");
@@ -3529,7 +3573,7 @@ async function checkNotamConnection(){
    const j=await r.json();
    if(j.configured&&j.authenticated){
      const env=String(j.environment||"STAGING").toUpperCase();
-     if(e){e.textContent=`FAA NMS ${env} AUTHENTICATED`;e.className="small ok";}
+     if(e){e.textContent="AUTHENTICATED";e.className="small ok";}
      return true;
    }
    if(j.configured&&!j.authenticated){
@@ -3647,7 +3691,7 @@ function syncLandingSection(){
  }else if(a.vref!=null&&a.lfl!=null&&climb!=null){
    $("landStatus").textContent="GO";$("landStatus").className="ok";
  }else if(a.vref!=null&&a.lfl!=null){
-   $("landStatus").textContent="FIELD DATA READY • AFMS LANDING CLIMB NOT DIGITIZED";$("landStatus").className="warn";
+   $("landStatus").textContent="PENDING • AFMS LANDING CLIMB DATA";$("landStatus").className="warn";
  }else if(a.vref!=null){
    $("landStatus").textContent="PARTIAL AUTO DATA";$("landStatus").className="warn";
  }else{
@@ -3656,7 +3700,7 @@ function syncLandingSection(){
  const note=[`${d.label} selected`];
  if(a.vref!=null)note.push(`VREF ${a.vref.toFixed(1)} kt`);
  if(a.lfl!=null)note.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
- if(climb==null)note.push("landing climb data source Rev C");
+ if(climb==null)note.push("AFMS landing climb data pending");
  if(a.msg)note.push(a.msg);
  $("landConfigNote").textContent=note.join(" • ");
  return a;
@@ -3668,11 +3712,14 @@ function syncLandingSection(){
 async function evaluateTakeoff(){
  const a=syncTakeoffSection();
  const fieldWt=autoFieldLimitedWeight(),climb=autoClimbAssessment();
+ const sourceCeiling=takeoffFieldSourceCeilingLb(a.cfg,perfTakeoffPA(),perfTakeoffTemp());
+ const fieldBasis=Number.isFinite(fieldWt)&&Number.isFinite(sourceCeiling)&&Math.abs(fieldWt-sourceCeiling)<75?"SOURCE_CEILING":"FIELD_LENGTH";
  const body={
    runway_length_ft:perfTakeoffRunwayLen(),
    actual_takeoff_weight_lb:perfTakeoffWeightLb(),
    climb_limited_weight_lb:Number.isFinite(climb.limit)?climb.limit:null,
    field_limited_weight_lb:Number.isFinite(fieldWt)?fieldWt:null,
+   field_limit_basis:fieldBasis,
    balanced_field_length_ft:valueOrNull("perfBFL"),
    v1_kt:valueOrNull("perfV1"),
    vr_v2_kt:valueOrNull("perfVR"),
@@ -3685,9 +3732,12 @@ async function evaluateTakeoff(){
    const j=await r.json();
    if(j.error)throw new Error(j.error);
 
-   $("toMax").textContent=j.max_allowable_takeoff_weight_lb.toLocaleString()+" lb";
+   $("toMax").textContent=(j.source_evaluated_max_takeoff_weight_lb??j.max_allowable_takeoff_weight_lb).toLocaleString()+" lb";
+   $("toMax").title=`Structural MTOW ${Number(j.structural_mtow_lb||40780).toLocaleString()} lb • ${j.limiting_factor?.[0]||"source-evaluated limit"}`;
    $("toWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
    $("toRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
+   if(j.limiting_factor?.[0]==="Field source coverage")
+     $("toLimit").textContent=`FIELD SOURCE EVALUATED THROUGH ${j.max_allowable_takeoff_weight_lb.toLocaleString()} lb • STRUCTURAL MTOW 40,780 lb`;
 
    if(climb.pass===false){
      $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
@@ -3701,7 +3751,7 @@ async function evaluateTakeoff(){
 
    const pending=[];
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
-   if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE");
+   if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
    if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
    if(j.status==="GO"&&!pending.length){
@@ -3731,7 +3781,7 @@ async function evaluateLanding(){
    $("landRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
    if(j.status==="NO-GO"){$("landStatus").textContent="NO-GO";$("landStatus").className="bad"}
    else if(j.status==="GO"){$("landStatus").textContent="GO";$("landStatus").className="ok"}
-   else{$("landStatus").textContent="FIELD DATA READY • AFMS LANDING CLIMB NOT DIGITIZED";$("landStatus").className="warn"}
+   else{$("landStatus").textContent="PENDING • AFMS LANDING CLIMB DATA";$("landStatus").className="warn"}
    $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • FS P-18–P-21`;
    updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
