@@ -313,3 +313,24 @@ v5.1 CONSOLIDATED BETA BASELINE
 - Renamed Complete Mission actions to Complete & Archive Mission.
 - Added archive instructions explaining that only completed missions appear and beta archive is local to the browser/device.
 - Explicit archive render after save.
+
+
+v5.1.1
+- Emergency Return Fuel Burn default changed to 500 lb.
+- Field remains user-editable.
+- No other W&B, performance, runway, TOLD, archive, or mission workflow logic changed.
+
+
+v5.2 DESTINATION RUNWAY / NOTAM + TOLD TIMESTAMP
+- Added Destination Runway / NOTAM Assessment.
+- Weather and NOTAMs are handled as separate sources.
+- Added published runway length vs usable runway length.
+- Landing Field Length Required is compared against usable runway length.
+- CLOSED selected runway -> NO-GO.
+- LFL greater than usable runway -> NO-GO.
+- If live NOTAM API is not configured, app explicitly requires manual NOTAM verification.
+- Added manual usable-length/status/note override as a beta fallback.
+- Added /api/notams endpoint using NOTAM_API_URL and NOTAM_API_KEY environment variables.
+- Added NOTAM and runway availability information to TOLD and comprehensive email.
+- Added generated date/time stamp to TOLD card.
+- Carries forward v5.1.1 500-lb emergency return fuel default.

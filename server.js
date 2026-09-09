@@ -159,6 +159,27 @@ function evalLanding(p){
 
 app.get("/api/health",(req,res)=>res.json({ok:true,build:"4.7.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length}));
 app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,build:"4.7.0",awc_metar:ok,awc_message:msg,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true});});
+
+app.get("/api/notams",async(req,res)=>{
+  const icao=String(req.query.icao||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
+  if(!icao)return res.status(400).json({ok:false,source:"NONE",message:"ICAO required"});
+  if(!NOTAM_API_URL||!NOTAM_API_KEY){
+    return res.status(503).json({ok:false,source:"NONE",configured:false,message:"Live NOTAM API not configured. Manual NOTAM verification required."});
+  }
+  try{
+    const url=new URL(NOTAM_API_URL);url.searchParams.set("icao",icao);
+    const r=await fetch(url,{headers:{"Accept":"application/json","Authorization":`Bearer ${NOTAM_API_KEY}`,"x-api-key":NOTAM_API_KEY}});
+    const txt=await r.text();
+    if(!r.ok)return res.status(502).json({ok:false,source:"FAA NOTAM",message:`NOTAM service HTTP ${r.status}`});
+    let data;try{data=JSON.parse(txt)}catch{data={raw:txt}}
+    const arr=Array.isArray(data)?data:Array.isArray(data.items)?data.items:Array.isArray(data.notams)?data.notams:Array.isArray(data.results)?data.results:[];
+    const items=arr.map(x=>typeof x==="string"?{raw:x}:{raw:x.raw||x.text||x.message||x.notamText||x.traditionalMessage||x.description||JSON.stringify(x)});
+    res.json({ok:true,source:"FAA NOTAM",icao,items});
+  }catch(e){
+    res.status(502).json({ok:false,source:"FAA NOTAM",message:"NOTAM service request failed"});
+  }
+});
+
 app.get("/api/mission",async(req,res)=>{try{
  const dep=req.query.dep||"KBPT",dest=req.query.dest||"KDAL",alt=String(req.query.alt||"").toUpperCase().trim();
  const jobs=[airportBundle(dep),airportBundle(dest)];
