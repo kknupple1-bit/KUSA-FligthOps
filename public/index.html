@@ -364,13 +364,21 @@ details summary{cursor:pointer;margin-top:8px}
 
 .archive-legtag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 7px;font-size:11px;margin-left:6px}
 .archive-actions button.primary-open{background:#173a5c}
+
+.archive-bulkbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+.archive-bulkbar button{width:auto}
+.archive-select{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.archive-select input[type="checkbox"]{width:18px;height:18px}
+.archive-delete{background:#7a2323}
+.archive-delete:hover{filter:brightness(1.1)}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.7</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.11</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -1098,6 +1106,14 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Takeoff CG</span><span id="toldTOCG">—</span></div>
     <div class="told-row"><span>Configuration</span><span id="toldTOConfig">—</span></div>
     <div class="told-row"><span>Balanced Field Length</span><span id="toldBFL">—</span></div>
+    <div class="told-row">
+      <span>40°C / MTOW Quick Reference BFL</span>
+      <span id="toldHotMaxBFL">—</span>
+    </div>
+    <div class="told-row">
+      <span>40°C / MTOW Runway Margin</span>
+      <span id="toldHotMaxMargin">—</span>
+    </div>
     <div class="told-row"><span>Max Allowable TOW</span><span id="toldMaxTOW">—</span></div>
     <div class="told-row"><span>Runway Margin</span><span id="toldTORwyMargin">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
@@ -1151,6 +1167,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Verify th
     </div>
     <div class="callout small" style="margin-top:10px">
 A flight plan appears here after <b>Complete &amp; Archive Flight Plan</b> is selected. Build and retain multiple legs, then reopen any leg to review or revise it. During beta, flight plans are stored locally in this browser/device.
+</div>
+
+<div class="archive-bulkbar">
+  <button type="button" onclick="selectAllFlightPlans()">Select All</button>
+  <button type="button" onclick="clearFlightPlanSelection()">Clear Selection</button>
+  <button type="button" class="archive-delete" onclick="deleteSelectedFlightPlans()">Delete Selected</button>
+  <span class="small" id="archiveSelectionCount">0 selected</span>
 </div>
 <div id="archiveList" class="archive-list" style="margin-top:14px"></div>
   </div>
@@ -1403,6 +1426,7 @@ function currentMissionSummaryText(){
    `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
    `Emergency Return VREF: ${textOf("vsVREF")}`,
    `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
+   `40°C / MTOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
    `Max Allowable TOW: ${textOf("toMax")}`,
    `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
@@ -1484,8 +1508,12 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNot
 
 function selectArchivedRunway(selectId,runwayId){
  const sel=$(selectId);if(!sel||!runwayId)return;
- const options=[...sel.options];
- const ix=options.findIndex(o=>String(o.textContent||"").trim().startsWith(String(runwayId)) || String(o.dataset?.runway||"")===String(runwayId));
+ const target=String(runwayId).trim().toUpperCase();
+ const opts=[...sel.options];
+ const ix=opts.findIndex(o=>{
+   const val=String(o.value||"").split("|")[1]||"";
+   return val.toUpperCase()===target || String(o.textContent||"").trim().toUpperCase().startsWith(target+" ");
+ });
  if(ix>=0)sel.selectedIndex=ix;
 }
 
@@ -1597,13 +1625,81 @@ function completeMission(){
  alert("Flight plan saved to Archive on this device/browser.");
  showPlatformView("archive");
 }
+
+let selectedArchiveFlightPlanIds=new Set();
+
+function updateArchiveSelectionCount(){
+ const e=$("archiveSelectionCount");
+ if(e)e.textContent=`${selectedArchiveFlightPlanIds.size} selected`;
+}
+
+function toggleArchiveFlightPlanSelection(id,checked){
+ if(checked)selectedArchiveFlightPlanIds.add(id);
+ else selectedArchiveFlightPlanIds.delete(id);
+ updateArchiveSelectionCount();
+}
+
+function selectAllFlightPlans(){
+ selectedArchiveFlightPlanIds=new Set(getMissionArchive().map(m=>m.id));
+ renderArchive();
+ updateArchiveSelectionCount();
+}
+
+function clearFlightPlanSelection(){
+ selectedArchiveFlightPlanIds.clear();
+ renderArchive();
+ updateArchiveSelectionCount();
+}
+
+function deleteArchiveFlightPlan(i){
+ const arr=getMissionArchive(),m=arr[i];
+ if(!m)return;
+ const route=`${m.dep||"—"} → ${m.dest||"—"}`;
+ if(!confirm(`Delete saved flight plan ${route}? This cannot be undone.`))return;
+ selectedArchiveFlightPlanIds.delete(m.id);
+ arr.splice(i,1);
+ saveMissionArchive(arr);
+ renderArchive();
+ updateArchiveSelectionCount();
+}
+
+function deleteSelectedFlightPlans(){
+ if(!selectedArchiveFlightPlanIds.size){
+   alert("Select one or more flight plans to delete.");
+   return;
+ }
+ const count=selectedArchiveFlightPlanIds.size;
+ if(!confirm(`Delete ${count} selected flight plan${count===1?"":"s"}? This cannot be undone.`))return;
+ const remaining=getMissionArchive().filter(m=>!selectedArchiveFlightPlanIds.has(m.id));
+ saveMissionArchive(remaining);
+ selectedArchiveFlightPlanIds.clear();
+ renderArchive();
+ updateArchiveSelectionCount();
+}
+
+
 function renderArchive(){
  const list=$("archiveList");if(!list)return;
  const arr=getMissionArchive();
- if(!arr.length){list.innerHTML='<div class="callout small">No completed flight plans yet.</div>';return}
+
+ // Remove selections for records that no longer exist.
+ const ids=new Set(arr.map(m=>m.id));
+ selectedArchiveFlightPlanIds=new Set([...selectedArchiveFlightPlanIds].filter(id=>ids.has(id)));
+
+ if(!arr.length){
+   list.innerHTML='<div class="callout small">No completed flight plans yet.</div>';
+   updateArchiveSelectionCount();
+   return;
+ }
+
  list.innerHTML=arr.map((m,i)=>{
    const dt=m.completed_at?new Date(m.completed_at).toLocaleString():"—";
-return `<div class="archive-item">
+   const checked=selectedArchiveFlightPlanIds.has(m.id)?"checked":"";
+   return `<div class="archive-item">
+     <div class="archive-select">
+       <input type="checkbox" ${checked} onchange="toggleArchiveFlightPlanSelection('${m.id}',this.checked)">
+       <span class="small">Select for bulk action</span>
+     </div>
      <div class="archive-head">
        <div>
          <div class="archive-route">${m.dep||"—"} → ${m.dest||"—"}</div>
@@ -1623,9 +1719,11 @@ return `<div class="archive-item">
        <button type="button" onclick="shareArchiveMission(${i})">Share</button>
        <button type="button" onclick="emailArchiveMission(${i})">Email</button>
        <button type="button" onclick="viewArchiveMission(${i})">View TOLD</button>
+       <button type="button" class="archive-delete" onclick="deleteArchiveFlightPlan(${i})">Delete</button>
      </div>
    </div>`
  }).join("");
+ updateArchiveSelectionCount();
 }
 async function openArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];if(!m)return;
@@ -1660,9 +1758,66 @@ function textOf(id){const e=$(id);return e&&e.textContent.trim()?e.textContent.t
 function selectedRunwayObj(which){
  if(!missionData)return null;
  const dep=which==="dep",sel=$(dep?"depRunway":"destRunway");
- const arr=dep?(missionData.departure.runways||[]):(missionData.destination.runways||[]);
- return arr[+sel.value]||null;
+ const point=dep?missionData.departure:missionData.destination;
+ const arr=point.runways||[];
+ const raw=String(sel?.value||"");
+ if(!raw)return null;
+ const [idxTxt,end]=raw.split("|");
+ const base=arr[Number(idxTxt)];
+ if(!base)return null;
+ const activeEnd=end||String(base.runway_id||"");
+ const heading=runwayEndHeading(activeEnd) ?? Number(base.heading);
+ return{
+   ...base,
+   paired_runway_id:String(base.runway_id||""),
+   runway_id:activeEnd,
+   heading,
+   wind_components:runwayWindComponents(point,heading)
+ };
 }
+
+function hotMaxTakeoffReference(){
+ const cfg=$("toConfig")?.value||"S20";
+ const ai=$("toAntiIce")?.value||"OFF";
+ const runwayCondition=$("toRunwayCondition")?.value||"DRY";
+ const pa=perfTakeoffPA();
+ const runwayLen=perfTakeoffRunwayLen();
+ const mtow=40780;
+ const oat=40;
+ const out={
+   cfg,ai,runwayCondition,pa,runwayLen,weight:mtow,oat,
+   bfl:null,margin:null,v1:null,vr:null,status:"SOURCE LOCKED",note:""
+ };
+
+ if(runwayCondition!=="DRY"){
+   out.status="SOURCE LOCKED";
+   out.note="Wet-runway 40°C/MTOW reference is not available from the validated source set.";
+   return out;
+ }
+ if(!Number.isFinite(pa)||!Number.isFinite(runwayLen)){
+   out.status="NOT AVAILABLE";
+   out.note="Departure pressure altitude or runway length is unavailable.";
+   return out;
+ }
+
+ // Use the same digitized takeoff table engine as the active mission,
+ // but force only OAT=40°C and weight=40,780 lb.
+ const r=takeoffAt(cfg,pa,oat,mtow);
+ if(!r||!Number.isFinite(r.bfl)){
+   out.status="SOURCE LOCKED";
+   out.note="40°C / 40,780 lb point is outside published/digitized BFL coverage — no extrapolation.";
+   return out;
+ }
+
+ out.bfl=r.bfl;
+ out.v1=Number.isFinite(r.v1)?r.v1:null;
+ out.vr=Number.isFinite(r.vr)?r.vr:null;
+ out.margin=runwayLen-r.bfl;
+ out.status=out.margin>=0?"PASS":"NO-GO";
+ out.note=`Same selected departure runway / PA / ${FS_PERF.takeoff[cfg]?.label||cfg} / A/I ${ai}`;
+ return out;
+}
+
 function updateToldCard(){
  const c=latestCalc||{};
  const depCode=$("dep").value.toUpperCase().trim()||"—",destCode=$("dest").value.toUpperCase().trim()||"—";
@@ -1730,6 +1885,17 @@ function updateToldCard(){
  $("toldTOCG").textContent=perfIsManual()?"W&B CG UNCHANGED":(Number.isFinite(c.takeoffPct)?`${c.takeoffPct.toFixed(2)}% MAC`:"—");
  $("toldTOConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  $("toldBFL").textContent=$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED";
+ const hotMax=hotMaxTakeoffReference();
+ if($("toldHotMaxBFL")){
+   $("toldHotMaxBFL").textContent=Number.isFinite(hotMax.bfl)
+     ?`${Math.round(hotMax.bfl).toLocaleString()} ft • ${hotMax.status}`
+     :hotMax.status;
+ }
+ if($("toldHotMaxMargin")){
+   $("toldHotMaxMargin").textContent=Number.isFinite(hotMax.margin)
+     ?`${Math.round(hotMax.margin).toLocaleString()} ft`
+     :"—";
+ }
  $("toldMaxTOW").textContent=textOf("toMax");
  $("toldTORwyMargin").textContent=textOf("toRwyMargin");
  $("toldTOStatus").textContent=textOf("toStatus");
@@ -2030,20 +2196,29 @@ function qrhCellGradient(cfg,ai,pa,temp,weightLb){
 function qrhGradientAt(cfg,ai,pa,temp,weightLb){
  const ptab=QRH_CLIMB_GCLB2?.[cfg]?.[ai];
  if(!ptab||![pa,temp,weightLb].every(Number.isFinite))return null;
- const pb=bracketN(kN(ptab),pa);
+
+ // QRH takeoff climb tables begin at 0 ft PA. For actual PA below sea level,
+ // use the 0-ft table conservatively rather than extrapolating below the chart.
+ const paUsed=pa<0?0:pa;
+ const pas=kN(ptab);
+ if(paUsed>Math.max(...pas))return null;
+
+ const pb=bracketN(pas,paUsed);
  if(!pb)return null;
  const [pa1,pa2]=pb;
  const A=qrhCellGradient(cfg,ai,pa1,temp,weightLb);
  const B=qrhCellGradient(cfg,ai,pa2,temp,weightLb);
  if(!Number.isFinite(A)||!Number.isFinite(B))return null;
  if(pa1===pa2)return A;
- return lerpN(A,B,(pa-pa1)/(pa2-pa1));
+ return lerpN(A,B,(paUsed-pa1)/(pa2-pa1));
 }
 
 function autoClimbAssessment(){
  const cfg=$("toConfig").value,ai=$("toAntiIce")?.value||"OFF";
  const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),actual=perfTakeoffWeightLb();
- const result={cfg,ai,pa,temp,actual,gradient:null,limit:null,pass:null,coverageLimited:false,msg:""};
+ const paUsed=Number.isFinite(pa)&&pa<0?0:pa;
+ const result={cfg,ai,pa,temp,paUsed,actual,gradient:null,limit:null,pass:null,noLimitation:false,coverageLimited:false,msg:""};
+
  if(![pa,temp,actual].every(Number.isFinite)||actual<=0){
    $("perfGrad").value="";$("perfClimbWt").value="";
    result.msg="Mission pressure altitude, OAT and takeoff weight required.";
@@ -2058,34 +2233,74 @@ function autoClimbAssessment(){
  const g=qrhGradientAt(cfg,ai,pa,temp,actual);
  if(!Number.isFinite(g)){
    $("perfGrad").value="";$("perfClimbWt").value="";
-   result.msg="Selected PA/OAT/weight is outside the published QRH GCLB2 interpolation coverage — no extrapolation.";
+   result.msg="Selected OAT/weight/PA is outside published QRH GCLB2 coverage — no extrapolation.";
    return result;
  }
+
  result.gradient=g;
  result.pass=g>=QRH_CLIMB_MIN_GROSS;
  $("perfGrad").value=g.toFixed(2);
 
- // Determine the highest weight supported by the published QRH grid that still meets 2.7%.
- let best=null,lastValid=null,seenGap=false;
- for(let w=25000;w<=40750;w+=50){
-   const gw=qrhGradientAt(cfg,ai,pa,temp,w);
-   if(!Number.isFinite(gw)){if(lastValid!=null)seenGap=true;continue}
-   lastValid=w;
-   if(gw>=QRH_CLIMB_MIN_GROSS)best=w;
+ // If the structural MTOW itself satisfies the QRH climb criterion, climb is not limiting.
+ const gMax=qrhGradientAt(cfg,ai,pa,temp,40780);
+ if(Number.isFinite(gMax)&&gMax>=QRH_CLIMB_MIN_GROSS){
+   result.limit=40780;
+   result.noLimitation=true;
+   $("perfClimbWt").value=40780;
+   result.msg=`${QRH_CLIMB_SOURCE} • ${cfg==="S20"?"S+F 20°":"SLATS"} • A/I ${ai} • GCLB2 ${g.toFixed(2)}% • climb not limiting through 40,780 lb`;
+   if(pa<0)result.msg+=` • PA ${Math.round(pa)} ft evaluated conservatively at 0-ft table`;
+   return result;
  }
- const g40780=qrhGradientAt(cfg,ai,pa,temp,40780);
- if(Number.isFinite(g40780)){
-   lastValid=40780;
-   if(g40780>=QRH_CLIMB_MIN_GROSS)best=40780;
- }
- if(Number.isFinite(best)){
-   result.limit=best;
-   result.coverageLimited=best===lastValid && best<40780 && seenGap;
-   $("perfClimbWt").value=Math.round(best);
- }else{
+
+ // Solve highest weight within published QRH coverage that meets the climb criterion.
+ let lo=25000,hi=40780;
+ let gLo=qrhGradientAt(cfg,ai,pa,temp,lo);
+ if(!Number.isFinite(gLo)){
    $("perfClimbWt").value="";
+   result.msg="QRH climb table does not provide a valid lower-weight boundary for this condition.";
+   return result;
  }
- result.msg=`${QRH_CLIMB_SOURCE} • ${cfg==="S20"?"S+F 20°":"SLATS"} • A/I ${ai} • GCLB2 ${g.toFixed(2)}%`;
+ if(gLo<QRH_CLIMB_MIN_GROSS){
+   result.limit=lo;
+   result.pass=false;
+   $("perfClimbWt").value=lo;
+   result.msg=`QRH climb requirement is not met even at ${lo.toLocaleString()} lb within current table coverage.`;
+   return result;
+ }
+
+ // Binary-search the climb threshold. If upper cells disappear before 40,780,
+ // first find the highest published weight with valid data.
+ let validHi=null;
+ for(let w=40780;w>=25000;w-=10){
+   const gw=qrhGradientAt(cfg,ai,pa,temp,w);
+   if(Number.isFinite(gw)){validHi=w;break}
+ }
+ if(validHi==null){
+   $("perfClimbWt").value="";
+   result.msg="No valid QRH climb-weight range found.";
+   return result;
+ }
+ hi=validHi;
+ const gHi=qrhGradientAt(cfg,ai,pa,temp,hi);
+
+ if(Number.isFinite(gHi)&&gHi>=QRH_CLIMB_MIN_GROSS){
+   result.limit=hi;
+   result.coverageLimited=hi<40780;
+   $("perfClimbWt").value=Math.round(hi);
+ }else{
+   for(let n=0;n<30;n++){
+     const mid=(lo+hi)/2;
+     const gm=qrhGradientAt(cfg,ai,pa,temp,mid);
+     if(!Number.isFinite(gm)){hi=mid;continue}
+     if(gm>=QRH_CLIMB_MIN_GROSS)lo=mid;else hi=mid;
+   }
+   result.limit=Math.floor(lo);
+   $("perfClimbWt").value=Math.floor(lo);
+ }
+
+ result.msg=`${QRH_CLIMB_SOURCE} • ${cfg==="S20"?"S+F 20°":"SLATS"} • A/I ${ai} • GCLB2 ${g.toFixed(2)}% • climb limit ${Math.round(result.limit).toLocaleString()} lb`;
+ if(result.coverageLimited)result.msg+=" • published table coverage cap";
+ if(pa<0)result.msg+=` • PA ${Math.round(pa)} ft evaluated conservatively at 0-ft table`;
  return result;
 }
 
@@ -2145,7 +2360,7 @@ function syncTakeoffSection(){
 
  const pending=[];
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
- if(!Number.isFinite(climb.gradient))pending.push("CLIMB DATA");
+ if(!Number.isFinite(climb.gradient)||!Number.isFinite(climb.limit))pending.push("CLIMB DATA OUT OF SOURCE RANGE");
  if(climb.pass===false)pending.push("CLIMB FAIL");
  if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
@@ -2154,7 +2369,7 @@ function syncTakeoffSection(){
  }else if(pending.length){
    $("toStatus").textContent=`PENDING • ${pending.join(" • ")}`;$("toStatus").className="warn";
  }else{
-   $("toStatus").textContent="TABLE DATA READY • CLIMB PASS";$("toStatus").className="ok";
+   $("toStatus").textContent=climb.noLimitation?"TABLE DATA READY • CLIMB NOT LIMITING":"TABLE DATA READY • CLIMB PASS";$("toStatus").className="ok";
  }
 
  const limits=[`AUTO TABLE • ${d.label}`];
@@ -2169,7 +2384,7 @@ function syncTakeoffSection(){
  if(Number.isFinite(climb.gradient))notes.push(`QRH GCLB2 ${climb.gradient.toFixed(2)}%`);
  if(Number.isFinite(climb.limit))notes.push(`QRH climb limit ${Math.round(climb.limit).toLocaleString()} lb${climb.coverageLimited?" (published coverage cap)":""}`);
  notes.push(`A/I ${climb.ai}`);
- notes.push("Falcon 50B QRH climb source — Dash-4 applicability remains a validation item");
+ notes.push("Base Falcon 50 QRH climb source used per Dash-4 supplement architecture; AFMS FTA-PA-001019 final cross-check remains required");
  $("toConfigNote").textContent=notes.join(" • ");
  return a;
 }
@@ -2369,21 +2584,107 @@ function populatePoint(prefix,x){
  if(tr)tr.textContent=esc(firstVal(x.taf||{},["raw","rawTAF","raw_text"])||"—");
  const s=$("weatherDecodeStatus");if(s)s.innerHTML='<span class="ok">Decoded METAR/TAF loaded.</span> Raw reports remain available below.';
 }
+
+function runwayEndHeading(id){
+ const m=String(id||"").trim().toUpperCase().match(/^(\d{1,2})/);
+ if(!m)return null;
+ let h=Number(m[1])*10;
+ if(h===360)h=0;
+ return h;
+}
+function runwayWindComponents(point,heading){
+ const wx=point?.metar||{};
+ const dirRaw=firstVal(wx,["wind_dir","wdir","windDir","wind_direction"]);
+ const spd=Number(firstVal(wx,["wind_kt","wspd","windSpeed","wind_speed_kt"]));
+ const dir=Number(dirRaw);
+ if(!Number.isFinite(dir)||!Number.isFinite(spd)||!Number.isFinite(heading)){
+   return{headwind_kt:null,tailwind_kt:null,crosswind_kt:null};
+ }
+ const rad=(dir-heading)*Math.PI/180;
+ const h=spd*Math.cos(rad),x=Math.abs(spd*Math.sin(rad));
+ return{
+   headwind_kt:Number(Math.max(0,h).toFixed(1)),
+   tailwind_kt:Number(Math.max(0,-h).toFixed(1)),
+   crosswind_kt:Number(x.toFixed(1))
+ };
+}
+function directionalRunwayOptions(runways,point){
+ const out=[];
+ (runways||[]).forEach((rw,i)=>{
+   const raw=String(rw.runway_id||"").trim().toUpperCase();
+   const ends=raw.includes("/")?raw.split("/").map(x=>x.trim()).filter(Boolean):[raw];
+   ends.forEach((end,j)=>{
+     let heading=runwayEndHeading(end);
+     if(!Number.isFinite(heading)){
+       const base=Number(rw.heading);
+       if(Number.isFinite(base))heading=j===0?base:(base+180)%360;
+     }
+     const wc=runwayWindComponents(point,heading);
+     out.push({
+       source_index:i,
+       runway_end:end||raw,
+       heading,
+       runway:{...rw,runway_id:end||raw,heading,wind_components:wc,paired_runway_id:raw}
+     });
+   });
+ });
+ return out;
+}
+function autoSelectBestRunwayEnd(selectId,point){
+ const sel=$(selectId);if(!sel||!sel.options.length)return;
+ let best=0,bestScore=-1e9;
+ [...sel.options].forEach((opt,i)=>{
+   const [src,end]=String(opt.value).split("|");
+   const rw=(point?.runways||[])[Number(src)];
+   if(!rw)return;
+   const heading=runwayEndHeading(end);
+   const wc=runwayWindComponents(point,heading);
+   // Favor headwind, penalize tailwind heavily, then crosswind.
+   const score=(Number(wc.headwind_kt)||0)*10-(Number(wc.tailwind_kt)||0)*30-(Number(wc.crosswind_kt)||0);
+   if(score>bestScore){bestScore=score;best=i}
+ });
+ sel.selectedIndex=best;
+}
+
 function fillRunwaySelect(id,runways){
  const sel=$(id);sel.innerHTML="";
  if(!runways||!runways.length){sel.innerHTML='<option value="">No runway data</option>';return}
- runways.forEach((rw,i)=>{const opt=document.createElement("option");opt.value=i;const wc=rw.wind_components||{},wind=wc.headwind_kt!=null?` • HW ${wc.headwind_kt} / TW ${wc.tailwind_kt} / XW ${wc.crosswind_kt}`:"";opt.textContent=`${rw.runway_id} • ${esc(rw.length_ft)} ft${wind}`;sel.appendChild(opt)});
+ const which=id==="depRunway"?"dep":"dest";
+ const point=which==="dep"?missionData?.departure:missionData?.destination;
+ const dirs=directionalRunwayOptions(runways,point);
+ dirs.forEach(x=>{
+   const opt=document.createElement("option");
+   opt.value=`${x.source_index}|${x.runway_end}`;
+   const wc=x.runway.wind_components||{};
+   const wind=wc.headwind_kt!=null?` • HW ${wc.headwind_kt} / TW ${wc.tailwind_kt} / XW ${wc.crosswind_kt}`:"";
+   opt.textContent=`${x.runway_end} • ${esc(x.runway.length_ft)} ft${wind}`;
+   sel.appendChild(opt);
+ });
 }
 function selectedRunwayChanged(){
  currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
  if(!missionData)return;
- const depRw=(missionData.departure.runways||[])[+$("depRunway").value],destRw=(missionData.destination.runways||[])[+$("destRunway").value];
- if(depRw){$("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;const w=depRw.wind_components||{};$("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDepRwy").textContent=depRw.runway_id;if(!perfIsManual())$("perfRwyLen").value=depRw.length_ft||""}
- if(destRw){$("destRwySummary").textContent=`RWY ${destRw.runway_id} • ${esc(destRw.length_ft)} ft`;const w=destRw.wind_components||{};$("destWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;$("sumDestRwy").textContent=destRw.runway_id;$("landRwyLen").value=destRw.length_ft||""}
+ const depRw=selectedRunwayObj("dep"),destRw=selectedRunwayObj("dest");
+ if(depRw){
+   $("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;
+   const w=depRw.wind_components||{};
+   $("depWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;
+   $("sumDepRwy").textContent=depRw.runway_id;
+   if(!perfIsManual())$("perfRwyLen").value=depRw.length_ft||"";
+ }
+ if(destRw){
+   $("destRwySummary").textContent=`RWY ${destRw.runway_id} • ${esc(destRw.length_ft)} ft`;
+   const w=destRw.wind_components||{};
+   $("destWindSummary").textContent=`HW ${esc(w.headwind_kt)} • TW ${esc(w.tailwind_kt)} • XW ${esc(w.crosswind_kt)} kt`;
+   $("sumDestRwy").textContent=destRw.runway_id;
+   $("landRwyLen").value=destRw.length_ft||"";
+ }
  if(valueOrNull("perfTOW")){
-   autoTO(); autoLDG();
+   autoTO();autoLDG();
    updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
  }
+ updateLandingRunwayAssessment();
+ updateToldCard();
 }
 async function loadMission(){
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim(),alt=$("alt").value.toUpperCase().trim();
@@ -2406,9 +2707,16 @@ async function loadMission(){
      $("altMetar").innerHTML="—";$("altTaf").innerHTML="—";$("altMetarRaw").textContent="—";$("altTafRaw").textContent="—";
    }
    fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
-   if((missionData.departure.runways||[]).length)$("depRunway").selectedIndex=0;
-   if((missionData.destination.runways||[]).length)$("destRunway").selectedIndex=0;
-   const tb=$("runways");tb.innerHTML="";for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]])for(const rw of (x.runways||[])){const wc=rw.wind_components||{},tr=document.createElement("tr");tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)} ft</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;tb.appendChild(tr)}
+   if((missionData.departure.runways||[]).length)autoSelectBestRunwayEnd("depRunway",missionData.departure);
+   if((missionData.destination.runways||[]).length)autoSelectBestRunwayEnd("destRunway",missionData.destination);
+   const tb=$("runways");tb.innerHTML="";
+   for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]]){
+     for(const d of directionalRunwayOptions(x.runways||[],x)){
+       const rw=d.runway,wc=rw.wind_components||{},tr=document.createElement("tr");
+       tr.innerHTML=`<td>${code}</td><td>${esc(rw.runway_id)}</td><td>${esc(rw.heading)}°</td><td>${esc(rw.length_ft)} ft</td><td>${esc(rw.width_ft)}</td><td>${esc(rw.surface)}</td><td>${esc(wc.headwind_kt)}</td><td>${esc(wc.tailwind_kt)}</td><td>${esc(wc.crosswind_kt)}</td>`;
+       tb.appendChild(tr);
+     }
+   }
    const depCount=(missionData.departure.runways||[]).length,destCount=(missionData.destination.runways||[]).length;
    const depSrc=missionData.departure.runway_source||"none",destSrc=missionData.destination.runway_source||"none";
    const liveUsed=[depSrc,destSrc].includes("faa_nasr_live");
@@ -2871,7 +3179,7 @@ async function evaluateTakeoff(){
    if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
    if(j.status==="GO"&&!pending.length){
-     $("toStatus").textContent="GO • FIELD / CLIMB / OBSTACLE PASS";
+     $("toStatus").textContent=climb.noLimitation?"GO • FIELD PASS / CLIMB NOT LIMITING / OBSTACLE PASS":"GO • FIELD / CLIMB / OBSTACLE PASS";
      $("toStatus").className="ok";
      $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • QRH GCLB2 ${climb.gradient.toFixed(2)}% • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • obstacle verified clear.`;
    }else{
