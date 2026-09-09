@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.11</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.16</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -434,11 +434,11 @@ details summary{cursor:pointer;margin-top:8px}
             <div class="row">
               <div class="fuel-big">
                 <label>FOB lb</label>
-                <input id="homeFOB" type="number" min="0" max="15514" step="50" value="0000" onfocus="selectFuelEntry(this)" onclick="selectFuelEntry(this)">
+                <input id="homeFOB" type="number" min="0" max="15514" step="50" value="0000" onfocus="selectFuelEntry(this)" onclick="selectFuelEntry(this)" inputmode="decimal" enterkeyhint="done">
               </div>
               <div class="fuel-big">
                 <label>Mission Fuel lb</label>
-                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" value="0000" onfocus="selectFuelEntry(this)" onclick="selectFuelEntry(this)">
+                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" value="0000" onfocus="selectFuelEntry(this)" onclick="selectFuelEntry(this)" inputmode="decimal" enterkeyhint="done">
               </div>
             </div>
             <div class="newtrip-fuel-note">Enter FOB and mission fuel. Tap a 0000 field to replace the value.</div>
@@ -474,14 +474,14 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()"><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
-<div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
-<div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
-<div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="500" min="0" oninput="recalculate()"></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" inputmode="decimal" enterkeyhint="done"><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
+<div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()" inputmode="decimal" enterkeyhint="done"></div>
+<div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()" inputmode="decimal" enterkeyhint="done"></div>
+<div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="500" min="0" oninput="recalculate()" inputmode="decimal" enterkeyhint="done"></div>
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Number of Passengers</label><input id="paxRequested" type="number" value="0" min="0" max="9"></div>
+<div><label>Number of Passengers</label><input id="paxRequested" type="number" value="0" min="0" max="9" inputmode="numeric" enterkeyhint="done" step="1"></div>
 <div><label>Departure Runway</label><select id="depRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
 <div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
 <div><label>Load Airport / Weather Data</label><button onclick="loadMission()">Load / Refresh Mission</button></div>
@@ -498,9 +498,9 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Captain Weight lb</label><input id="captWt" type="number" value="190" min="0" oninput="recalculate()"></div>
-<div><label>First Officer Weight lb</label><input id="foWt" type="number" value="190" min="0" oninput="recalculate()"></div>
-<div><label>Total Baggage lb</label><input id="totalBag" type="number" value="0" min="0" oninput="onTotalBagInput()"></div>
+<div><label>Captain Weight lb</label><input id="captWt" type="number" value="190" min="0" oninput="recalculate()" inputmode="decimal" enterkeyhint="done"></div>
+<div><label>First Officer Weight lb</label><input id="foWt" type="number" value="190" min="0" oninput="recalculate()" inputmode="decimal" enterkeyhint="done"></div>
+<div><label>Total Baggage lb</label><input id="totalBag" type="number" value="0" min="0" oninput="onTotalBagInput()" inputmode="decimal" enterkeyhint="done"></div>
 <div></div>
 </div>
 <div id="missionStatus" class="small" style="margin-top:10px">Ready.</div>
@@ -585,17 +585,17 @@ FlightOps preloads the entered passenger count beginning with Seat 1 and default
       <div class="bag-cell">
         <div class="bag-title">BAG I</div>
         <div class="bag-limit">Arm 82.65 • Max 681 lb</div>
-        <input id="bagComp0" class="bag-input" type="number" min="0" max="681" value="0">
+        <input id="bagComp0" class="bag-input" type="number" min="0" max="681" value="0" inputmode="decimal" enterkeyhint="done">
       </div>
       <div class="bag-cell">
         <div class="bag-title">BAG II</div>
         <div class="bag-limit">Arm 101.71 • Max 762 lb</div>
-        <input id="bagComp1" class="bag-input" type="number" min="0" max="762" value="0">
+        <input id="bagComp1" class="bag-input" type="number" min="0" max="762" value="0" inputmode="decimal" enterkeyhint="done">
       </div>
       <div class="bag-cell">
         <div class="bag-title">BAG III</div>
         <div class="bag-limit">Arm 123.95 • Max 762 lb</div>
-        <input id="bagComp2" class="bag-input" type="number" min="0" max="762" value="0">
+        <input id="bagComp2" class="bag-input" type="number" min="0" max="762" value="0" inputmode="decimal" enterkeyhint="done">
       </div>
     </div>
     <div class="bag-summary-fp" id="bagStatusNote">Total loaded baggage 0 / 2,205 lb</div>
@@ -754,21 +754,83 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 
 <div class="card">
 <h2>Airport / Runway Fallback</h2>
-<div class="small">If an airport is not yet present in the packaged runway database, enter the runway manually and continue performance planning. Manual runway data is used only for this session.</div>
+<div class="small">Select a runway from the loaded airport data and process the current mission conditions. If runway data is unavailable, choose MANUAL ENTRY and enter the runway values. The fallback gate is green only when the implemented field-length check passes; missing source data is treated as red NOT EVALUATED.</div>
+
 <div class="row" style="margin-top:10px">
-  <div><label>Use For</label><select id="manualRunwayTarget"><option value="DEP">Departure</option><option value="DEST">Destination</option></select></div>
-  <div><label>Runway ID</label><input id="manualRunwayId" value="" placeholder="e.g. 18"></div>
-  <div><label>Runway Length ft</label><input id="manualRunwayLength" type="number" min="1" placeholder="e.g. 6500"></div>
-  <div><label>Runway Heading ° True</label><input id="manualRunwayHeading" type="number" min="0" max="359" placeholder="e.g. 180"></div>
-</div>
-<div class="row" style="margin-top:10px">
-  <div><label>Runway Width ft</label><input id="manualRunwayWidth" type="number" min="1" value="100"></div>
-  <div><label>Surface</label><input id="manualRunwaySurface" value="Asphalt"></div>
-  <div><label>Apply</label><button type="button" onclick="applyManualRunway()">Use Manual Runway</button></div>
-  <div class="wx"><div class="small">Fallback Status</div><b id="manualRunwayStatus">READY</b><div class="small">Verify against current airport data.</div></div>
-</div>
+  <div>
+    <label>Use For</label>
+    <select id="manualRunwayTarget" onchange="populateFallbackRunwayOptions()">
+      <option value="DEP">Departure</option>
+      <option value="DEST">Destination</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Runway Option</label>
+    <select id="fallbackRunwaySelect" onchange="fallbackRunwaySelectionChanged()">
+      <option value="">Load mission airport data first</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Runway ID</label>
+    <input id="manualRunwayId" value="" placeholder="e.g. 18">
+  </div>
+
+  <div>
+    <label>Runway Length ft</label>
+    <input id="manualRunwayLength" type="number" min="1" placeholder="e.g. 6500" inputmode="decimal" enterkeyhint="done">
+  </div>
 </div>
 
+<div class="row" style="margin-top:10px">
+  <div>
+    <label>Runway Heading °</label>
+    <input id="manualRunwayHeading" type="number" min="0" max="359" placeholder="e.g. 180" inputmode="decimal" enterkeyhint="done">
+  </div>
+
+  <div>
+    <label>Runway Width ft</label>
+    <input id="manualRunwayWidth" type="number" min="1" value="100" inputmode="decimal" enterkeyhint="done">
+  </div>
+
+  <div>
+    <label>Surface</label>
+    <input id="manualRunwaySurface" value="Asphalt">
+  </div>
+
+  <div>
+    <label>Process</label>
+    <button type="button" onclick="processFallbackRunway()">PROCESS RUNWAY / WEATHER</button>
+  </div>
+</div>
+
+<div class="row" style="margin-top:10px">
+  <div class="wx">
+    <div class="small">Wind Components</div>
+    <b id="fallbackWind">—</b>
+    <div class="small" id="fallbackWindNote">Select a runway and process.</div>
+  </div>
+
+  <div class="wx">
+    <div class="small">Weather / PA / OAT</div>
+    <b id="fallbackWeather">—</b>
+    <div class="small" id="fallbackWeatherNote">Current mission weather.</div>
+  </div>
+
+  <div class="wx">
+    <div class="small">Field Requirement</div>
+    <b id="fallbackFieldRequirement">—</b>
+    <div class="small" id="fallbackFieldMargin">—</div>
+  </div>
+
+  <div class="wx" id="manualRunwayStatusBox">
+    <div class="small">Fallback Status</div>
+    <b id="manualRunwayStatus">NOT EVALUATED</b>
+    <div class="small" id="manualRunwayStatusNote">Select a runway and process current conditions.</div>
+  </div>
+</div>
+</div>
 <div class="card">
 <h2>5. Available Runways</h2>
 <table>
@@ -801,22 +863,22 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     </div>
     <div>
       <label>Hypothetical OAT °C</label>
-      <input id="manualTOTemp" type="number" value="20" step="1">
+      <input id="manualTOTemp" type="number" value="20" step="1" inputmode="decimal" enterkeyhint="done">
     </div>
     <div>
       <label>Hypothetical Aircraft Weight lb</label>
-      <input id="manualTOWeight" type="number" value="30000" min="18000" max="40780" step="100">
+      <input id="manualTOWeight" type="number" value="30000" min="18000" max="40780" step="100" inputmode="decimal" enterkeyhint="done">
     </div>
   </div>
 
   <div class="row whatif-process-row">
     <div>
       <label>Pressure Altitude ft</label>
-      <input id="manualTOPA" type="number" value="0" step="100">
+      <input id="manualTOPA" type="number" value="0" step="100" inputmode="decimal" enterkeyhint="done">
     </div>
     <div>
       <label>Runway Length ft</label>
-      <input id="manualTORwyLen" type="number" value="6000" min="1" step="1">
+      <input id="manualTORwyLen" type="number" value="6000" min="1" step="1" inputmode="decimal" enterkeyhint="done">
     </div>
     <div>
       <label>Process Hypothetical Point</label>
@@ -909,13 +971,13 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <button type="button" style="width:auto" onclick="refreshNotams()">Refresh NOTAMs</button>
   </div>
   <div class="notam-grid" style="margin-top:10px">
-    <div class="notam-box"><span class="small">NOTAM Status</span><b id="notamStatus">NOT CHECKED</b><span class="small" id="notamSource">—</span></div>
+    <div class="notam-box"><span class="small">NOTAM Status</span><b id="notamStatus">NOT CHECKED</b><span class="small" id="notamSource">—</span><span class="small" id="notamConnectionState">NMS connection not checked.</span></div>
     <div class="notam-box"><span class="small">Selected Runway</span><b id="notamRunway">—</b><span class="small" id="notamRunwayState">—</span></div>
     <div class="notam-box"><span class="small">Published Length</span><b id="publishedLda">—</b><span class="small">From runway database.</span></div>
     <div class="notam-box"><span class="small">Usable Length</span><b id="usableLda">—</b><span class="small">After NOTAM/manual restriction.</span></div>
   </div>
   <div class="row" style="margin-top:10px">
-    <div><label>Manual Usable Runway Length ft</label><input id="manualUsableLda" type="number" min="1" placeholder="Optional override"></div>
+    <div><label>Manual Usable Runway Length ft</label><input id="manualUsableLda" type="number" min="1" placeholder="Optional override" inputmode="decimal" enterkeyhint="done"></div>
     <div><label>Manual Runway Status</label><select id="manualRunwayStatusOverride"><option value="">Use NOTAM / published status</option><option value="OPEN">OPEN</option><option value="CLOSED">CLOSED</option><option value="RESTRICTED">RESTRICTED</option></select></div>
     <div><label>Manual Restriction Note</label><input id="manualNotamNote" placeholder="e.g. RWY 14 usable 6200 ft"></div>
     <div class="runway-gate" id="landingRunwayGateBox"><span class="small">LANDING RUNWAY GATE</span><b id="landingRunwayGate">NOT EVALUATED</b><span class="small" id="landingRunwayGateNote">Load destination runway and NOTAM status.</span></div>
@@ -927,7 +989,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>Published Runway Length ft</label><input id="landRwyLen" type="number" readonly></div>
 <div><label>Usable Runway Length ft</label><input id="landUsableLen" type="number" readonly></div>
 <div><label>Actual Landing Weight lb</label><input id="landWt" type="number" readonly></div>
-<div><label>Climb-Limited Landing Weight lb</label><input id="landClimbWt" type="number"></div>
+<div><label>Climb-Limited Landing Weight lb</label><input id="landClimbWt" type="number" inputmode="decimal" enterkeyhint="done"></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Landing Field Length Required ft</label><input id="landFieldLen" type="number" readonly></div>
@@ -1107,11 +1169,15 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Configuration</span><span id="toldTOConfig">—</span></div>
     <div class="told-row"><span>Balanced Field Length</span><span id="toldBFL">—</span></div>
     <div class="told-row">
-      <span>40°C / MTOW Quick Reference BFL</span>
+      <span>40°C Max Allowable TOW</span>
+      <span id="toldHotMaxTow">—</span>
+    </div>
+    <div class="told-row">
+      <span>40°C / MAX TOW Quick Reference BFL</span>
       <span id="toldHotMaxBFL">—</span>
     </div>
     <div class="told-row">
-      <span>40°C / MTOW Runway Margin</span>
+      <span>40°C / MAX TOW Runway Margin</span>
       <span id="toldHotMaxMargin">—</span>
     </div>
     <div class="told-row"><span>Max Allowable TOW</span><span id="toldMaxTOW">—</span></div>
@@ -1319,6 +1385,7 @@ function resetMissionForNewTrip(){
  ["perfRwyLen","landRwyLen","perfV1","perfVR","perfBFL","landVref","landFieldLen"].forEach(id=>{const e=$(id);if(e)e.value=""});
  ["sumDepRwy","sumDestRwy","toStatus","landStatus"].forEach(id=>{const e=$(id);if(e)e.textContent="—"});
  updateFOBVerifyLabel();
+ if($("fallbackRunwaySelect"))populateFallbackRunwayOptions();
 }
 
 function selectFuelEntry(el){
@@ -1426,7 +1493,7 @@ function currentMissionSummaryText(){
    `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
    `Emergency Return VREF: ${textOf("vsVREF")}`,
    `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
-   `40°C / MTOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
+   `40°C / MAX TOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
    `Max Allowable TOW: ${textOf("toMax")}`,
    `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
@@ -1782,39 +1849,116 @@ function hotMaxTakeoffReference(){
  const runwayCondition=$("toRunwayCondition")?.value||"DRY";
  const pa=perfTakeoffPA();
  const runwayLen=perfTakeoffRunwayLen();
- const mtow=40780;
+ const structuralMtow=40780;
  const oat=40;
  const out={
-   cfg,ai,runwayCondition,pa,runwayLen,weight:mtow,oat,
-   bfl:null,margin:null,v1:null,vr:null,status:"SOURCE LOCKED",note:""
+   cfg,ai,runwayCondition,pa,runwayLen,oat,
+   structuralMtow,maxTow:null,bfl:null,margin:null,
+   status:"NOT EVALUATED",limiting:"",note:""
  };
 
  if(runwayCondition!=="DRY"){
    out.status="SOURCE LOCKED";
-   out.note="Wet-runway 40°C/MTOW reference is not available from the validated source set.";
+   out.note="Wet-runway 40°C reference is not available from the validated source set.";
    return out;
  }
- if(!Number.isFinite(pa)||!Number.isFinite(runwayLen)){
+ if(!Number.isFinite(pa)||!Number.isFinite(runwayLen)||runwayLen<=0){
    out.status="NOT AVAILABLE";
    out.note="Departure pressure altitude or runway length is unavailable.";
    return out;
  }
 
- // Use the same digitized takeoff table engine as the active mission,
- // but force only OAT=40°C and weight=40,780 lb.
- const r=takeoffAt(cfg,pa,oat,mtow);
- if(!r||!Number.isFinite(r.bfl)){
+ // Find highest weight inside the published/digitized source grid whose
+ // BFL is <= the selected runway. No extrapolation.
+ const d=FS_PERF.takeoff[cfg];
+ if(!d){
    out.status="SOURCE LOCKED";
-   out.note="40°C / 40,780 lb point is outside published/digitized BFL coverage — no extrapolation.";
+   out.note="Takeoff source table unavailable.";
    return out;
  }
 
- out.bfl=r.bfl;
- out.v1=Number.isFinite(r.v1)?r.v1:null;
- out.vr=Number.isFinite(r.vr)?r.vr:null;
- out.margin=runwayLen-r.bfl;
- out.status=out.margin>=0?"PASS":"NO-GO";
- out.note=`Same selected departure runway / PA / ${FS_PERF.takeoff[cfg]?.label||cfg} / A/I ${ai}`;
+ let lookupPA=pa;
+ const minPA=Math.min(...kN(d.tables));
+ if(pa<minPA&&minPA===0&&pa>=-1000)lookupPA=0;
+
+ const paBracket=bracketN(kN(d.tables),lookupPA);
+ if(!paBracket){
+   out.status="SOURCE LOCKED";
+   out.note="40°C pressure altitude is outside published/digitized source coverage.";
+   return out;
+ }
+
+ // Determine the highest source-supported weight at 40°C for both PA rows.
+ function supportedWeightAtPA(p){
+   const wm=d.tables[p];
+   const weights=kN(wm).filter(w=>{
+     const tm=wm[w];
+     return !!bracketN(kN(tm),oat);
+   });
+   return weights.length?Math.max(...weights):null;
+ }
+ const [pa1,pa2]=paBracket;
+ const maxW1=supportedWeightAtPA(pa1), maxW2=supportedWeightAtPA(pa2);
+ const sourceMaxK=Math.min(
+   Number.isFinite(maxW1)?maxW1:Infinity,
+   Number.isFinite(maxW2)?maxW2:Infinity
+ );
+ if(!Number.isFinite(sourceMaxK)){
+   out.status="SOURCE LOCKED";
+   out.note="No 40°C BFL source coverage exists at the selected pressure altitude.";
+   return out;
+ }
+
+ const sourceMaxLb=Math.min(structuralMtow,sourceMaxK*1000);
+
+ // Check the highest source-supported weight first.
+ const top=takeoffAt(cfg,pa,oat,sourceMaxLb);
+ if(!top||!Number.isFinite(top.bfl)){
+   out.status="SOURCE LOCKED";
+   out.note="40°C maximum-weight source point cannot be evaluated without extrapolation.";
+   return out;
+ }
+
+ if(top.bfl<=runwayLen){
+   out.maxTow=sourceMaxLb;
+   out.bfl=top.bfl;
+   out.margin=runwayLen-top.bfl;
+   out.status="PASS";
+   out.limiting=sourceMaxLb>=structuralMtow?"STRUCTURAL MTOW":"SOURCE-COVERAGE MAX";
+   out.note=`40°C • ${out.limiting} • same selected runway / PA / ${FS_PERF.takeoff[cfg]?.label||cfg}`;
+   return out;
+ }
+
+ // Solve field-limited maximum within valid source coverage.
+ const minSourceK=Math.max(...paBracket.map(p=>Math.min(...kN(d.tables[p]))));
+ let lo=minSourceK*1000, hi=sourceMaxLb;
+ const loR=takeoffAt(cfg,pa,oat,lo);
+ if(!loR||!Number.isFinite(loR.bfl)||loR.bfl>runwayLen){
+   out.status="NO-GO";
+   out.note="Runway is shorter than the 40°C BFL even at the lowest source-supported weight.";
+   return out;
+ }
+
+ for(let n=0;n<35;n++){
+   const mid=(lo+hi)/2;
+   const r=takeoffAt(cfg,pa,oat,mid);
+   if(!r||!Number.isFinite(r.bfl)){hi=mid;continue}
+   if(r.bfl<=runwayLen)lo=mid; else hi=mid;
+ }
+ const solved=Math.floor(lo);
+ const rr=takeoffAt(cfg,pa,oat,solved);
+ if(!rr||!Number.isFinite(rr.bfl)){
+   out.status="SOURCE LOCKED";
+   out.note="40°C field-limit solver could not resolve a published-source point.";
+   return out;
+ }
+
+ out.maxTow=solved;
+ out.bfl=rr.bfl;
+ out.margin=runwayLen-rr.bfl;
+ out.status="PASS";
+ out.limiting="FIELD LIMITED";
+ out.note=`40°C • FIELD LIMITED • same selected runway / PA / ${FS_PERF.takeoff[cfg]?.label||cfg}`;
  return out;
 }
 
@@ -1886,6 +2030,11 @@ function updateToldCard(){
  $("toldTOConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  $("toldBFL").textContent=$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED";
  const hotMax=hotMaxTakeoffReference();
+ if($("toldHotMaxTow")){
+   $("toldHotMaxTow").textContent=Number.isFinite(hotMax.maxTow)
+     ?`${Math.round(hotMax.maxTow).toLocaleString()} lb • ${hotMax.limiting||hotMax.status}`
+     :hotMax.status;
+ }
  if($("toldHotMaxBFL")){
    $("toldHotMaxBFL").textContent=Number.isFinite(hotMax.bfl)
      ?`${Math.round(hotMax.bfl).toLocaleString()} ft • ${hotMax.status}`
@@ -2724,10 +2873,86 @@ async function loadMission(){
    $("sumWX").textContent=(missionData.departure.metar||missionData.destination.metar)?"LIVE":"NO REPORT";$("sumWX").className=(missionData.departure.metar||missionData.destination.metar)?"ok":"warn";
    $("sumFAA").textContent=depCount&&destCount?"LOADED":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA");$("sumFAA").className=depCount&&destCount?"ok":"warn";
    $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
-   selectedRunwayChanged();recalculate();
+   selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();
+   setTimeout(()=>{refreshNotams().catch(()=>{});},150);
    $("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
 }
+
+function enableFastNumericEntry(){
+ const numericInputs=[...document.querySelectorAll('input[type="number"]')];
+ numericInputs.forEach(el=>{
+   if(el.readOnly||el.disabled)return;
+   // iOS/iPadOS/Android: request the numeric keypad while preserving decimal support.
+   el.setAttribute("inputmode","decimal");
+   el.setAttribute("enterkeyhint","done");
+
+   // A single tap/click/focus selects the current value so the next keystroke
+   // replaces it rather than appending or requiring manual deletion.
+   const selectAll=()=>{
+     requestAnimationFrame(()=>{
+       try{el.select()}catch(e){}
+       try{
+         if(typeof el.setSelectionRange==="function"){
+           el.setSelectionRange(0,String(el.value||"").length);
+         }
+       }catch(e){}
+     });
+   };
+
+   if(!el.dataset.fastNumericEntry){
+     el.addEventListener("focus",selectAll);
+     el.addEventListener("click",selectAll);
+     el.addEventListener("touchend",selectAll,{passive:true});
+     el.dataset.fastNumericEntry="1";
+   }
+ });
+
+ // Some operational numeric fields were historically rendered without type=number.
+ // Explicitly convert known editable weight/fuel/distance fields to numeric entry.
+ const knownNumericIds=[
+   "paxRequested","captWeight","foWeight","homeFOB","homeMissionFuel","taxiFuel","emerReturnBurn",
+   "bagComp0","bagComp1","bagComp2","manualUsableLda",
+   "perfManualPA","perfManualTemp","perfManualWt","perfManualRwyLen"
+ ];
+ knownNumericIds.forEach(id=>{
+   const el=$(id);
+   if(!el||el.readOnly||el.disabled)return;
+   el.setAttribute("type","number");
+   el.setAttribute("inputmode","decimal");
+   el.setAttribute("enterkeyhint","done");
+   if(!el.dataset.fastNumericEntry){
+     const selectAll=()=>requestAnimationFrame(()=>{try{el.select()}catch(e){}});
+     el.addEventListener("focus",selectAll);
+     el.addEventListener("click",selectAll);
+     el.addEventListener("touchend",selectAll,{passive:true});
+     el.dataset.fastNumericEntry="1";
+   }
+ });
+}
+
+document.addEventListener("DOMContentLoaded",enableFastNumericEntry);
+document.addEventListener("DOMContentLoaded",()=>{checkNotamConnection().catch(()=>{});});
+
+document.addEventListener("DOMContentLoaded",()=>{
+ const pax=$("paxRequested");
+ if(pax){
+   pax.setAttribute("inputmode","numeric");
+   pax.setAttribute("enterkeyhint","done");
+   pax.setAttribute("step","1");
+   const replaceReady=()=>{
+     requestAnimationFrame(()=>{
+       try{pax.focus({preventScroll:true})}catch(e){}
+       try{pax.select()}catch(e){}
+     });
+   };
+   pax.addEventListener("focus",replaceReady);
+   pax.addEventListener("click",replaceReady);
+   pax.addEventListener("touchend",replaceReady,{passive:true});
+ }
+});
+
+
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
 
 function perfIsManual(){return $("perfInputMode") && $("perfInputMode").value==="MANUAL"}
@@ -2934,28 +3159,257 @@ function updateWhatIfPlanner(force=false){
  $("whatIfGateNote").textContent=note;
  $("whatIfGateBox").className=`whatif-gate ${cls}`;
 }
-function applyManualRunway(){
- const target=$("manualRunwayTarget").value;
- const id=$("manualRunwayId").value.trim()||"MANUAL";
- const len=valueOrNull("manualRunwayLength"),hdg=valueOrNull("manualRunwayHeading"),width=valueOrNull("manualRunwayWidth"),surface=$("manualRunwaySurface").value.trim()||"Unknown";
- if(!len||hdg==null){$("manualRunwayStatus").textContent="LENGTH + HEADING REQUIRED";$("manualRunwayStatus").className="bad";return}
- if(!missionData)missionData={departure:{icao:$("dep").value.toUpperCase().trim(),runways:[],metar:null,taf:null},destination:{icao:$("dest").value.toUpperCase().trim(),runways:[],metar:null,taf:null}};
- const point=target==="DEP"?missionData.departure:missionData.destination;
- const windObj=point.metar||{};
- const dir=Number(firstVal(windObj,["wind_dir","wdir","windDir","wind_direction"])),spd=Number(firstVal(windObj,["wind_kt","wspd","windSpeed","wind_speed_kt"]));
- let head=null,cross=null,tail=null;
- if(Number.isFinite(dir)&&Number.isFinite(spd)){
-   const rad=(dir-hdg)*Math.PI/180;
-   const h=spd*Math.cos(rad),x=Math.abs(spd*Math.sin(rad));
-   head=Math.max(0,h).toFixed(1);tail=Math.max(0,-h).toFixed(1);cross=x.toFixed(1);
- }
- const rw={runway_id:id,length_ft:len,width_ft:width||null,surface,heading:hdg,manual:true,wind_components:{headwind_kt:head,tailwind_kt:tail,crosswind_kt:cross}};
- point.runways=[rw];
- fillRunwaySelect(target==="DEP"?"depRunway":"destRunway",point.runways);
- const sel=$(target==="DEP"?"depRunway":"destRunway");sel.selectedIndex=0;
- $("manualRunwayStatus").textContent="MANUAL RUNWAY ACTIVE";$("manualRunwayStatus").className="warn";
- selectedRunwayChanged();recalculate();
+
+function fallbackPoint(){
+ if(!missionData)return null;
+ return $("manualRunwayTarget").value==="DEP"?missionData.departure:missionData.destination;
 }
+
+function populateFallbackRunwayOptions(){
+ const sel=$("fallbackRunwaySelect");
+ if(!sel)return;
+ sel.innerHTML="";
+ const point=fallbackPoint();
+
+ if(point && Array.isArray(point.runways) && point.runways.length){
+   const dirs=directionalRunwayOptions(point.runways,point);
+   dirs.forEach(x=>{
+     const opt=document.createElement("option");
+     opt.value=`${x.source_index}|${x.runway_end}`;
+     const wc=x.runway.wind_components||{};
+     const wind=wc.headwind_kt!=null
+       ?` • HW ${wc.headwind_kt} / TW ${wc.tailwind_kt} / XW ${wc.crosswind_kt}`
+       :"";
+     opt.textContent=`RWY ${x.runway_end} • ${Number(x.runway.length_ft||0).toLocaleString()} ft${wind}`;
+     sel.appendChild(opt);
+   });
+   const manual=document.createElement("option");
+   manual.value="MANUAL";
+   manual.textContent="MANUAL ENTRY";
+   sel.appendChild(manual);
+
+   // Preselect the runway currently active in the mission if possible.
+   const which=$("manualRunwayTarget").value==="DEP"?"dep":"dest";
+   const active=selectedRunwayObj(which);
+   if(active){
+     const ix=[...sel.options].findIndex(o=>{
+       const e=String(o.value||"").split("|")[1]||"";
+       return e.toUpperCase()===String(active.runway_id||"").toUpperCase();
+     });
+     if(ix>=0)sel.selectedIndex=ix;
+   }
+   fallbackRunwaySelectionChanged();
+   return;
+ }
+
+ const opt=document.createElement("option");
+ opt.value="MANUAL";
+ opt.textContent="MANUAL ENTRY — NO AIRPORT RUNWAY DATA";
+ sel.appendChild(opt);
+ fallbackRunwaySelectionChanged();
+}
+
+function fallbackSelectedRunway(){
+ const point=fallbackPoint(),sel=$("fallbackRunwaySelect");
+ if(!point||!sel||sel.value==="MANUAL"||!sel.value)return null;
+ const [idxTxt,end]=String(sel.value).split("|");
+ const base=(point.runways||[])[Number(idxTxt)];
+ if(!base)return null;
+ const heading=runwayEndHeading(end) ?? Number(base.heading);
+ return{
+   ...base,
+   runway_id:end||String(base.runway_id||""),
+   paired_runway_id:String(base.runway_id||""),
+   heading,
+   wind_components:runwayWindComponents(point,heading)
+ };
+}
+
+function fallbackRunwaySelectionChanged(){
+ const rw=fallbackSelectedRunway();
+ const manualMode=$("fallbackRunwaySelect")?.value==="MANUAL";
+
+ if(rw){
+   $("manualRunwayId").value=rw.runway_id||"";
+   $("manualRunwayLength").value=Number.isFinite(Number(rw.length_ft))?Number(rw.length_ft):"";
+   $("manualRunwayHeading").value=Number.isFinite(Number(rw.heading))?Math.round(Number(rw.heading)):"";
+   $("manualRunwayWidth").value=Number.isFinite(Number(rw.width_ft))?Number(rw.width_ft):100;
+   $("manualRunwaySurface").value=rw.surface||"Unknown";
+ }
+ ["manualRunwayId","manualRunwayLength","manualRunwayHeading","manualRunwayWidth","manualRunwaySurface"].forEach(id=>{
+   const e=$(id); if(e)e.readOnly=!manualMode;
+ });
+
+ const box=$("manualRunwayStatusBox");
+ $("manualRunwayStatus").textContent="NOT EVALUATED";
+ $("manualRunwayStatus").className="bad";
+ if(box)box.className="wx";
+ $("manualRunwayStatusNote").textContent="Press PROCESS RUNWAY / WEATHER.";
+ $("fallbackWind").textContent="—";
+ $("fallbackWeather").textContent="—";
+ $("fallbackFieldRequirement").textContent="—";
+ $("fallbackFieldMargin").textContent="—";
+}
+
+function buildManualFallbackRunway(){
+ const id=$("manualRunwayId").value.trim().toUpperCase()||"MANUAL";
+ const len=valueOrNull("manualRunwayLength");
+ const hdg=valueOrNull("manualRunwayHeading");
+ const width=valueOrNull("manualRunwayWidth");
+ const surface=$("manualRunwaySurface").value.trim()||"Unknown";
+ if(!Number.isFinite(len)||len<=0||!Number.isFinite(hdg)){
+   return null;
+ }
+ const point=fallbackPoint();
+ return{
+   runway_id:id,
+   length_ft:len,
+   width_ft:width||null,
+   surface,
+   heading:hdg,
+   manual:true,
+   wind_components:runwayWindComponents(point,hdg)
+ };
+}
+
+function fallbackSetStatus(status,note){
+ const b=$("manualRunwayStatus"),box=$("manualRunwayStatusBox");
+ if(!b)return;
+ b.textContent=status;
+ b.className=status==="GO"?"ok":"bad";
+ if(box)box.className=status==="GO"?"wx ok":"wx bad";
+ $("manualRunwayStatusNote").textContent=note||"";
+}
+
+function processFallbackRunway(){
+ const target=$("manualRunwayTarget").value;
+ const point=fallbackPoint();
+ if(!point){
+   fallbackSetStatus("NO-GO / NOT EVALUATED","Mission airport/weather data are not loaded.");
+   return;
+ }
+
+ let rw=fallbackSelectedRunway();
+ if(!rw)rw=buildManualFallbackRunway();
+ if(!rw){
+   fallbackSetStatus("NO-GO / NOT EVALUATED","Runway ID, length and heading are required.");
+   return;
+ }
+
+ const wc=rw.wind_components||runwayWindComponents(point,Number(rw.heading));
+ const hw=Number(wc.headwind_kt),tw=Number(wc.tailwind_kt),xw=Number(wc.crosswind_kt);
+ $("fallbackWind").textContent=
+   `HW ${Number.isFinite(hw)?hw.toFixed(1):"—"} • TW ${Number.isFinite(tw)?tw.toFixed(1):"—"} • XW ${Number.isFinite(xw)?xw.toFixed(1):"—"} kt`;
+
+ const metar=point.metar||{};
+ const oat=Number(firstVal(metar,["temp_c","temperature_c","temp","temperature"]));
+ const pa=Number(point.pressure_altitude_ft);
+ $("fallbackWeather").textContent=
+   `${Number.isFinite(oat)?oat.toFixed(1)+"°C":"OAT —"} • ${Number.isFinite(pa)?Math.round(pa).toLocaleString()+" ft PA":"PA —"}`;
+
+ const weatherLoaded=!!point.metar;
+ $("fallbackWindNote").textContent=weatherLoaded
+   ?`Calculated for RWY ${rw.runway_id} from current loaded METAR wind.`
+   :"No current METAR loaded; wind evaluation unavailable.";
+
+ // Apply selected fallback runway to the active mission runway selector so the
+ // rest of FlightOps and TOLD use the same runway end.
+ if($("fallbackRunwaySelect")?.value==="MANUAL"){
+   point.runways=[rw];
+   fillRunwaySelect(target==="DEP"?"depRunway":"destRunway",point.runways);
+   const mainSel=$(target==="DEP"?"depRunway":"destRunway");
+   if(mainSel)mainSel.selectedIndex=0;
+ }else{
+   const mainSel=$(target==="DEP"?"depRunway":"destRunway");
+   if(mainSel){
+     const activeEnd=rw.runway_id;
+     const ix=[...mainSel.options].findIndex(o=>{
+       const end=String(o.value||"").split("|")[1]||"";
+       return end.toUpperCase()===String(activeEnd).toUpperCase();
+     });
+     if(ix>=0)mainSel.selectedIndex=ix;
+   }
+ }
+ selectedRunwayChanged();
+
+ // Departure fallback: current actual takeoff point and BFL.
+ if(target==="DEP"){
+   const wt=perfTakeoffWeightLb();
+   const cfg=$("toConfig")?.value||"S20";
+   const condition=$("toRunwayCondition")?.value||"DRY";
+   if(condition!=="DRY"){
+     $("fallbackFieldRequirement").textContent="WET SOURCE LOCKED";
+     $("fallbackFieldMargin").textContent="No validated wet BFL method loaded.";
+     fallbackSetStatus("NO-GO / NOT EVALUATED","Wet-runway takeoff performance is not validated in the current source set.");
+     return;
+   }
+   if(!weatherLoaded||!Number.isFinite(oat)||!Number.isFinite(pa)||!Number.isFinite(wt)||wt<=0){
+     $("fallbackFieldRequirement").textContent="DATA REQUIRED";
+     $("fallbackFieldMargin").textContent="Weather / PA / TOW incomplete.";
+     fallbackSetStatus("NO-GO / NOT EVALUATED","Current weather, pressure altitude and takeoff weight are required.");
+     return;
+   }
+
+   const r=takeoffAt(cfg,pa,oat,wt);
+   if(!r||!Number.isFinite(r.bfl)){
+     $("fallbackFieldRequirement").textContent="SOURCE LOCKED";
+     $("fallbackFieldMargin").textContent="Selected point outside digitized BFL coverage.";
+     fallbackSetStatus("NO-GO / NOT EVALUATED","No extrapolation permitted for the selected runway/weather/weight point.");
+     return;
+   }
+
+   const margin=Number(rw.length_ft)-r.bfl;
+   $("fallbackFieldRequirement").textContent=`BFL ${Math.round(r.bfl).toLocaleString()} ft`;
+   $("fallbackFieldMargin").textContent=`Runway margin ${Math.round(margin).toLocaleString()} ft`;
+
+   if(margin<0){
+     fallbackSetStatus("NO-GO",`BFL exceeds RWY ${rw.runway_id} available length by ${Math.abs(Math.round(margin)).toLocaleString()} ft.`);
+     return;
+   }
+
+   // No invented crosswind/tailwind limit: wind components are displayed, but
+   // only published/implemented performance gates determine GO.
+   fallbackSetStatus("GO",`RWY ${rw.runway_id} field-length check passes for current loaded conditions. Review displayed wind components and all remaining operational gates.`);
+   return;
+ }
+
+ // Destination fallback: current landing field length against selected runway.
+ const land=autoLDG();
+ const condition=$("landRunwayCondition")?.value||"DRY";
+ if(condition!=="DRY"){
+   $("fallbackFieldRequirement").textContent="WET SOURCE LOCKED";
+   $("fallbackFieldMargin").textContent="No validated wet landing method loaded.";
+   fallbackSetStatus("NO-GO / NOT EVALUATED","Wet-runway landing performance is not validated in the current source set.");
+   return;
+ }
+ if(!weatherLoaded||!Number.isFinite(pa)){
+   $("fallbackFieldRequirement").textContent="DATA REQUIRED";
+   $("fallbackFieldMargin").textContent="Destination weather / PA incomplete.";
+   fallbackSetStatus("NO-GO / NOT EVALUATED","Current destination weather and pressure altitude are required.");
+   return;
+ }
+ if(!land||!Number.isFinite(land.lfl)){
+   $("fallbackFieldRequirement").textContent="SOURCE LOCKED";
+   $("fallbackFieldMargin").textContent="Landing field length unavailable.";
+   fallbackSetStatus("NO-GO / NOT EVALUATED","Landing performance is outside the current digitized source coverage.");
+   return;
+ }
+
+ const margin=Number(rw.length_ft)-land.lfl;
+ $("fallbackFieldRequirement").textContent=`LFL ${Math.round(land.lfl).toLocaleString()} ft`;
+ $("fallbackFieldMargin").textContent=`Runway margin ${Math.round(margin).toLocaleString()} ft`;
+
+ if(margin<0){
+   fallbackSetStatus("NO-GO",`LFL exceeds RWY ${rw.runway_id} available length by ${Math.abs(Math.round(margin)).toLocaleString()} ft.`);
+   return;
+ }
+
+ fallbackSetStatus("GO",`RWY ${rw.runway_id} landing field-length check passes for current loaded conditions. Review displayed wind components and NOTAM/runway availability separately.`);
+}
+
+// Backward-compatible handler for any older markup/bookmarks.
+function applyManualRunway(){processFallbackRunway();}
+
 
 
 function selectedLandingRunway(){return selectedRunwayObj("dest")}
@@ -3015,12 +3469,37 @@ function updateLandingRunwayAssessment(){
  else if(!Number.isFinite(lfl)){gate.textContent="NOT FULLY EVALUATED";note.textContent="Landing field length required is not available.";box.className="runway-gate warn";}
  else if(lfl>a.usable){gate.textContent="NO-GO";note.textContent=`LFL exceeds usable runway by ${Math.round(lfl-a.usable).toLocaleString()} ft.`;box.className="runway-gate bad";}
  else{
-   gate.textContent="RUNWAY LENGTH PASS";
-   note.textContent=`Margin ${Math.round(a.usable-lfl).toLocaleString()} ft • ${a.state}${currentNotams.status!=="CHECKED"?" • NOTAM verification pending":""}`;
-   box.className=currentNotams.status==="CHECKED"?"runway-gate ok":"runway-gate warn";
+   const margin=Math.round(a.usable-lfl).toLocaleString();
+   if(currentNotams.status==="CHECKED"){
+     gate.textContent="PASS";
+     note.textContent=`Runway length + NOTAM check pass • Margin ${margin} ft • ${a.state}`;
+     box.className="runway-gate ok";
+   }else{
+     gate.textContent="NOTAM NOT VERIFIED";
+     note.textContent=`Runway length passes by ${margin} ft, but live NOTAM verification is incomplete.`;
+     box.className="runway-gate warn";
+   }
  }
 }
+async function checkNotamConnection(){
+ const e=$("notamConnectionState");
+ try{
+   const r=await fetch("/api/notams/config",{cache:"no-store"});
+   const j=await r.json();
+   if(j.configured){
+     if(e){e.textContent="FAA NMS API CONNECTED";e.className="small ok";}
+     return true;
+   }
+   if(e){e.textContent="FAA NMS API NOT CONFIGURED";e.className="small warn";}
+   return false;
+ }catch(err){
+   if(e){e.textContent="FAA NMS API CONNECTION ERROR";e.className="small bad";}
+   return false;
+ }
+}
+
 async function refreshNotams(){
+ await checkNotamConnection();
  const dest=cleanICAO($("dest").value),r=selectedLandingRunway();
  if(!dest){alert("Enter/load a destination first.");return}
  $("notamStatus").textContent="CHECKING…";$("notamStatus").className="warn";$("notamList").textContent="Requesting current NOTAM data…";
@@ -3028,12 +3507,12 @@ async function refreshNotams(){
    const res=await fetch(`/api/notams?icao=${encodeURIComponent(dest)}`),j=await res.json();
    if(!res.ok||!j.ok){
      currentNotams={status:"UNAVAILABLE",source:j.source||"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};
-     $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent=j.message||"Live NOTAM service not configured.";
+     $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent=j.message||"FAA NMS NOTAM API access is not configured on this server.";if($("notamConnectionState")){$("notamConnectionState").textContent=j.configured===false?"FAA NMS API NOT CONFIGURED":"FAA NMS API UNAVAILABLE";$("notamConnectionState").className="small warn";}
      $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();updateToldCard();return;
    }
    const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);
-   currentNotams={status:"CHECKED",source:j.source||"FAA NOTAM",items,runway_state:parsed.state,usable_length_ft:parsed.usable,checked_at:new Date().toISOString()};
-   $("notamStatus").textContent="CHECKED";$("notamStatus").className="ok";$("notamSource").textContent=currentNotams.source;
+   currentNotams={status:"CHECKED",source:j.source||"FAA NOTAM API",items,runway_state:parsed.state,usable_length_ft:parsed.usable,checked_at:j.checked_at||new Date().toISOString()};
+   $("notamStatus").textContent="CHECKED";$("notamStatus").className="ok";$("notamSource").textContent=currentNotams.source;if($("notamConnectionState")){$("notamConnectionState").textContent="FAA NMS API CONNECTED";$("notamConnectionState").className="small ok";}
    $("notamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
    updateLandingRunwayAssessment();updateToldCard();
  }catch(e){
