@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.0</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.1</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -621,11 +621,35 @@ FlightOps preloads the entered passenger count beginning with Seat 1 and default
 PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplete until all entered passengers are assigned to seats.
 </div></div>
 
+<div class="card" id="manualWeatherCard">
+<h2>3. Weather Source / Manual Weather</h2>
+<div class="callout small"><b>Weather source control:</b> LIVE uses the loaded METAR. MANUAL uses pilot-entered values for performance and wind components. If no report is available, select MANUAL and enter OAT, pressure altitude, and wind as applicable. Manual weather is visibly identified on the TOLD. Runway condition remains a separate pilot selection.</div>
+<div class="row" style="margin-top:10px">
+  <div><label>Station</label><select id="manualWxTarget" onchange="loadManualWeatherForm()"><option value="dep">Departure</option><option value="dest">Destination</option></select></div>
+  <div><label>Weather Source</label><select id="manualWxMode" onchange="manualWeatherModeChanged()"><option value="LIVE">LIVE / REPORTED</option><option value="MANUAL">MANUAL / PILOT ENTRY</option></select></div>
+  <div class="wx"><div class="small">Departure Weather</div><b id="depWxSourceBadge">UNAVAILABLE</b><div class="small" id="depWxSourceTime">—</div></div>
+  <div class="wx"><div class="small">Destination Weather</div><b id="destWxSourceBadge">UNAVAILABLE</b><div class="small" id="destWxSourceTime">—</div></div>
+</div>
+<div class="row" style="margin-top:10px">
+  <div><label>OAT °C</label><input id="manualWxOAT" type="number" step="0.1" inputmode="decimal" placeholder="Required"></div>
+  <div><label>Pressure Altitude ft</label><input id="manualWxPA" type="number" step="1" inputmode="decimal" placeholder="Required or derive from altimeter"></div>
+  <div><label>Altimeter inHg</label><input id="manualWxAlt" type="number" step="0.01" inputmode="decimal" placeholder="Optional"></div>
+  <div><label>Wind Direction °</label><input id="manualWxDir" type="number" min="0" max="360" step="1" inputmode="decimal" placeholder="Optional"></div>
+</div>
+<div class="row" style="margin-top:10px">
+  <div><label>Wind Speed kt</label><input id="manualWxSpeed" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional"></div>
+  <div><label>Wind Gust kt</label><input id="manualWxGust" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional"></div>
+  <div><label>Manual Weather Note</label><input id="manualWxNote" placeholder="Optional source / remarks"></div>
+  <div><label>Apply</label><button type="button" onclick="applyManualWeather()">APPLY MANUAL WEATHER</button></div>
+</div>
+<div class="small" id="manualWxStatus" style="margin-top:10px">Live weather remains active until manual weather is applied.</div>
+</div>
+
 <div class="grid" id="missionResultsStart">
 <section>
 
 <div class="card">
-<h2>3. Mission Results — Decoded Weather</h2>
+<h2>4. Mission Results — Decoded Weather</h2>
 <div class="row">
 <div class="wx"><div class="small">Origin</div><b id="depTitle">KBPT</b><div id="depAirport" class="small"></div></div>
 <div class="wx"><div class="small">Departure Runway</div><b id="depRwySummary">—</b><div id="depWindSummary" class="small"></div></div>
@@ -675,7 +699,7 @@ PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplet
 </div>
 
 <div class="card">
-<h2>4. Calculated Weight & Balance</h2>
+<h2>5. Calculated Weight & Balance</h2>
 <div class="row">
 <div class="wx"><div class="small">Basic Empty Weight</div><b>21,479 lb</b></div>
 <div class="wx"><div class="small">Crew</div><b id="crewCalc">380 lb</b></div>
@@ -832,7 +856,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 </div>
 <div class="card">
-<h2>5. Available Runways</h2>
+<h2>6. Available Runways</h2>
 <table>
 <thead><tr><th>Airport</th><th>RWY</th><th>Heading</th><th>Length</th><th>Width</th><th>Surface</th><th>HW</th><th>TW</th><th>XW</th></tr></thead>
 <tbody id="runways"></tbody>
@@ -840,7 +864,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 
 <div class="card">
-<h2>6. Performance Evaluation</h2>
+<h2>7. Performance Evaluation</h2>
 <div class="callout small">
 <b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. FlightSafety/QRH values are reference-only unless cross-checked to the applicable AFMS chart. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
@@ -944,7 +968,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="row" style="margin-top:10px">
 <div><label>Manual Obstacle Verification</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Manually verified clear</option><option value="false">Not cleared</option></select></div>
 <div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
-<div class="wx"><div class="small">Source-Evaluated Max TOW</div><b id="toMax">—</b><div class="small">Structural MTOW 40,780 lb</div></div>
+<div class="wx"><div class="small">Digitized Field-Source Ceiling</div><b id="toMax">—</b><div class="small">Structural MTOW 40,780 lb</div></div>
 <div class="wx"><div class="small">Takeoff Status</div><b id="toStatus">—</b></div>
 </div>
 <table style="margin-top:10px">
@@ -976,7 +1000,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <button type="button" style="width:auto" onclick="refreshNotams()">Refresh NOTAMs</button>
   </div>
   <div class="notam-grid" style="margin-top:10px">
-    <div class="notam-box"><span class="small">NOTAM Status</span><b id="notamStatus">NOT CHECKED</b><span class="small" id="notamSource">—</span><span class="small" id="notamConnectionState">NMS connection not checked.</span></div>
+    <div class="notam-box"><span class="small">NOTAM Status</span><b id="notamStatus">NOT CHECKED</b><span class="small" id="notamSource">—</span><span class="small" aria-hidden="true"> • </span><span class="small" id="notamConnectionState">NMS connection not checked.</span></div>
     <div class="notam-box"><span class="small">Selected Runway</span><b id="notamRunway">—</b><span class="small" id="notamRunwayState">—</span></div>
     <div class="notam-box"><span class="small">Published Length</span><b id="publishedLda">—</b><span class="small">From runway database.</span></div>
     <div class="notam-box"><span class="small">Usable Length</span><b id="usableLda">—</b><span class="small">After NOTAM/manual restriction.</span></div>
@@ -1168,13 +1192,14 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Runway / Condition</span><span id="toldDepSurface">—</span></div>
     <div class="told-row"><span>Wind</span><span id="toldDepWind">—</span></div>
     <div class="told-row"><span>OAT / Pressure Altitude</span><span id="toldDepWx">—</span></div>
+    <div class="told-row"><span>Weather Source</span><span id="toldDepWxSource">—</span></div>
     <div class="told-row"><span>Takeoff Weight</span><span id="toldTOW">—</span></div>
     <div class="told-row"><span>Fuel on Board</span><span id="toldFOBVerify">—</span></div>
     <div class="told-row"><span>Takeoff CG</span><span id="toldTOCG">—</span></div>
     <div class="told-row"><span>Configuration</span><span id="toldTOConfig">—</span></div>
     <div class="told-row"><span>Balanced Field Length</span><span id="toldBFL">—</span></div>
     <div class="told-row">
-      <span>40°C / Source-Evaluated TOW</span>
+      <span>40°C Runway-Derived TOW</span>
       <span id="toldHotMaxTow">—</span>
     </div>
     <div class="told-row">
@@ -1186,8 +1211,10 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <span id="toldHotMaxMargin">—</span>
     </div>
     <div class="told-row"><span>Structural MTOW</span><span id="toldStructuralMTOW">40,780 lb</span></div>
-    <div class="told-row"><span>Source-Evaluated Max TOW</span><span id="toldMaxTOW">—</span></div>
+    <div class="told-row"><span>Digitized Field-Source Ceiling</span><span id="toldMaxTOW">—</span></div>
     <div class="told-row"><span>Runway Margin</span><span id="toldTORwyMargin">—</span></div>
+    <div class="told-row"><span>Climb-Limited TOW</span><span id="toldClimbTOW">—</span></div>
+    <div class="told-row"><span>OEI 2nd Segment Gross Gradient</span><span id="toldSecondSegment">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
     <div class="told-speeds">
       <div class="told-speed"><span class="small">V1</span><b id="toldV1">—</b></div>
@@ -1204,6 +1231,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Runway / Condition</span><span id="toldDestSurface">—</span></div>
     <div class="told-row"><span>Wind</span><span id="toldDestWind">—</span></div>
     <div class="told-row"><span>Pressure Altitude</span><span id="toldDestPA">—</span></div>
+    <div class="told-row"><span>Weather Source</span><span id="toldDestWxSource">—</span></div>
     <div class="told-row"><span>Landing Weight</span><span id="toldLDW">—</span></div>
     <div class="told-row"><span>Landing Fuel</span><span id="toldLandingFuel">—</span></div>
     <div class="told-row"><span>Landing CG</span><span id="toldLDGCG">—</span></div>
@@ -1542,6 +1570,53 @@ const $=id=>document.getElementById(id);
 const num=id=>+$((id)).value||0;
 let latestCalc=null;
 let currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+let manualWeather={
+ dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null},
+ dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null}
+};
+function wxPoint(which){return missionData?(which==="dep"?missionData.departure:missionData.destination):null}
+function weatherSourceState(which){
+ const st=manualWeather[which],p=wxPoint(which);
+ if(st?.applied&&st.mode==="MANUAL")return{mode:"MANUAL",time:st.entered_at,note:st.note||"Pilot-entered weather"};
+ const m=p?.metar; const obs=firstVal(m||{},["obs_time","reportTime","obsTime","time"]);
+ if(m)return{mode:"LIVE",time:obs||null,note:"Reported METAR"};
+ return{mode:"UNAVAILABLE",time:null,note:"No weather report loaded"};
+}
+function formatWeatherSource(which){const w=weatherSourceState(which);if(w.mode==="MANUAL")return`MANUAL • ${w.time?new Date(w.time).toLocaleString():"pilot entry"}`;if(w.mode==="LIVE")return`LIVE${w.time?" • "+fmtUtc(w.time):""}`;return"UNAVAILABLE"}
+function updateWeatherSourceBadges(){
+ [["dep","depWxSourceBadge","depWxSourceTime"],["dest","destWxSourceBadge","destWxSourceTime"]].forEach(([which,bid,tid])=>{const w=weatherSourceState(which),b=$(bid),t=$(tid);if(!b)return;b.textContent=w.mode;b.className=w.mode==="LIVE"?"ok":w.mode==="MANUAL"?"warn":"bad";if(t)t.textContent=w.mode==="MANUAL"?(w.time?new Date(w.time).toLocaleString():"Pilot entry"):(w.mode==="LIVE"?(w.time?fmtUtc(w.time):"Reported weather"):(w.note||"No report"));});
+}
+function loadManualWeatherForm(){
+ const which=$("manualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
+ if($("manualWxMode"))$("manualWxMode").value=st?.applied?"MANUAL":"LIVE";
+ const m=p?.metar||{};
+ const val=(id,v)=>{const e=$(id);if(e)e.value=(v===null||v===undefined||v==="")?"":v};
+ val("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));
+ val("manualWxPA",p?.pressure_altitude_ft); val("manualWxAlt",p?.altimeter_inhg);
+ val("manualWxDir",firstVal(m,["wind_dir","wdir","windDir","wind_direction"])); val("manualWxSpeed",firstVal(m,["wind_kt","wspd","windSpeed","wind_speed_kt"])); val("manualWxGust",firstVal(m,["wind_gust_kt","wgst"]));
+ val("manualWxNote",st?.note||""); manualWeatherModeChanged(); updateWeatherSourceBadges();
+}
+function manualWeatherModeChanged(){
+ const mode=$("manualWxMode")?.value||"LIVE",ids=["manualWxOAT","manualWxPA","manualWxAlt","manualWxDir","manualWxSpeed","manualWxGust","manualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
+ const s=$("manualWxStatus");if(s)s.textContent=mode==="MANUAL"?"Enter pilot-observed/known weather and press APPLY MANUAL WEATHER.":"LIVE / reported weather selected. Apply is not required.";
+}
+function applyManualWeather(){
+ const which=$("manualWxTarget")?.value||"dep",mode=$("manualWxMode")?.value||"LIVE";
+ if(!missionData){const dep=cleanICAO($("dep").value),dest=cleanICAO($("dest").value);if(!dep||!dest){alert("Enter departure and destination identifiers first.");return}missionData={departure:{icao:dep,airport:{ident:dep},runways:[],metar:null,taf:null},destination:{icao:dest,airport:{ident:dest},runways:[],metar:null,taf:null},alternate:null};}
+ const p=wxPoint(which),st=manualWeather[which]; if(!p)return;
+ if(!st.live){st.live={metar:p.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p.pressure_altitude_ft??null,density_altitude_ft:p.density_altitude_ft??null,altimeter_inhg:p.altimeter_inhg??null};}
+ if(mode==="LIVE"){const L=st.live||{};p.metar=L.metar||null;p.pressure_altitude_ft=L.pressure_altitude_ft??null;p.density_altitude_ft=L.density_altitude_ft??null;p.altimeter_inhg=L.altimeter_inhg??null;st.mode="LIVE";st.applied=false;st.entered_at=null;st.note="";}
+ else{
+   const oat=valueOrNull("manualWxOAT"),alt=valueOrNull("manualWxAlt"),dir=valueOrNull("manualWxDir"),spd=valueOrNull("manualWxSpeed"),gust=valueOrNull("manualWxGust");let pa=valueOrNull("manualWxPA");
+   const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation); if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;
+   if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}
+   const now=new Date().toISOString();p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:Number.isFinite(dir)?dir:null,wind_kt:Number.isFinite(spd)?spd:null,wind_gust_kt:Number.isFinite(gust)?gust:null,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=Number.isFinite(alt)?alt:null;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("manualWxNote")?.value||"").trim();
+ }
+ populatePoint(which,p);selectedRunwayChanged();if(valueOrNull("perfTOW")){syncTakeoffSection();syncLandingSection()}updateWeatherSourceBadges();updateToldCard();
+ const ws=$("weatherDecodeStatus");if(ws)ws.innerHTML=weatherSourceState(which).mode==="MANUAL"?'<span class="warn">MANUAL WEATHER ACTIVE — pilot-entered values control performance for this station.</span>':'<span class="ok">LIVE / reported weather restored where available.</span>';
+ const ms=$("manualWxStatus");if(ms)ms.textContent=weatherSourceState(which).mode==="MANUAL"?`MANUAL WEATHER APPLIED ${new Date(manualWeather[which].entered_at).toLocaleString()}`:"LIVE weather restored.";
+}
+
 
 function resetFuelVerification(){if($("fobVerified"))$("fobVerified").checked=false;}
 function updateFOBVerifyLabel(){
@@ -1583,6 +1658,8 @@ function resetMissionForNewTrip(){
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
  missionData=null;
+ manualWeather={dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null}};
+ updateWeatherSourceBadges();
  // Clear runway selectors and mission-derived summary/performance fields
  ["depRunway","destRunway"].forEach(id=>{const e=$(id);if(e)e.innerHTML='<option value="">Load mission first</option>'});
  ["perfRwyLen","landRwyLen","perfV1","perfVR","perfBFL","landVref","landFieldLen"].forEach(id=>{const e=$(id);if(e)e.value=""});
@@ -1692,12 +1769,15 @@ function currentMissionSummaryText(){
    `Runway: ${dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—"} | Condition: ${$("toRunwayCondition")?.value||"—"}`,
    `Wind: HW ${dw.headwind_kt??"—"} / TW ${dw.tailwind_kt??"—"} / XW ${dw.crosswind_kt??"—"} kt`,
    `OAT: ${Number.isFinite(depTemp)?depTemp+"°C":"—"} | Pressure Altitude: ${Number.isFinite(depPA)?Math.round(depPA).toLocaleString()+" ft":"—"}`,
+   `Weather Source: ${formatWeatherSource("dep")}`,
    `Configuration: ${toConfig}`,
    `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
    `Emergency Return VREF: ${textOf("vsVREF")}`,
    `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
    `40°C / SOURCE-EVALUATED TOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
-   `Structural MTOW: 40,780 lb | Source-Evaluated Max TOW: ${textOf("toMax")}`,
+   `Structural MTOW: 40,780 lb | Digitized Field-Source Ceiling: ${textOf("toMax")}`,
+   `Climb-Limited TOW: ${$("toClimbWt")?.value?Number($("toClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
+   `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
    `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
    `Obstacle Analysis: ${$("obstacleStatus")?$("obstacleStatus").value||textOf("obstacleStatus"):"Pending / not checked"}`,
@@ -1707,6 +1787,7 @@ function currentMissionSummaryText(){
    `Runway: ${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} | Condition: ${$("landRunwayCondition")?.value||"—"}`,
    `Wind: HW ${lw.headwind_kt??"—"} / TW ${lw.tailwind_kt??"—"} / XW ${lw.crosswind_kt??"—"} kt`,
    `Pressure Altitude: ${destPA==null?"—":destPA.toLocaleString()+" ft"}`,
+   `Weather Source: ${formatWeatherSource("dest")}`,
    `Configuration: ${landConfig}`,
    `VREF: ${$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED"}`,
    `Landing Field Length Required: ${$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
@@ -2229,6 +2310,7 @@ function updateToldCard(){
  $("toldDepSurface").textContent=`${perfIsManual()&&perfTakeoffRunwayLen()?Number(perfTakeoffRunwayLen()).toLocaleString()+" ft":(dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—")} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
  $("toldDepWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
  $("toldDepWx").textContent=`${temp==null?"—":temp+"°C"} / ${Number.isFinite(perfTakeoffPA())?Math.round(perfTakeoffPA()).toLocaleString()+" ft":"—"}`;
+ if($("toldDepWxSource"))$("toldDepWxSource").textContent=formatWeatherSource("dep");
  $("toldTOW").textContent=perfIsManual()&&Number.isFinite(perfTakeoffWeightLb())?Math.round(perfTakeoffWeightLb()).toLocaleString()+" lb":(Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—");
  $("toldFOBVerify").textContent=`${Math.round(num("fuel")).toLocaleString()} lb • ${$("fobVerified")?.checked?"VERIFIED":"NOT VERIFIED"}`;
  $("toldTOCG").textContent=perfIsManual()?"W&B CG UNCHANGED":(Number.isFinite(c.takeoffPct)?`${c.takeoffPct.toFixed(2)}% MAC`:"—");
@@ -2253,6 +2335,8 @@ function updateToldCard(){
  if($("toldStructuralMTOW"))$("toldStructuralMTOW").textContent="40,780 lb";
  $("toldMaxTOW").textContent=textOf("toMax");
  $("toldTORwyMargin").textContent=textOf("toRwyMargin");
+ if($("toldClimbTOW"))$("toldClimbTOW").textContent=$("toClimbWt")?.value?Number($("toClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED";
+ if($("toldSecondSegment")){const g=valueOrNull("perfGrad");$("toldSecondSegment").textContent=Number.isFinite(g)?`${g.toFixed(2)}% • OEI • QRH REFERENCE`:"SOURCE LOCKED";}
  $("toldTOStatus").textContent=textOf("toStatus");
  $("toldV1").textContent=textOf("vsV1");
  $("toldVR").textContent=textOf("vsVR");
@@ -2264,6 +2348,7 @@ function updateToldCard(){
  $("toldDestSurface").textContent=`${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?$("landRunwayCondition").value:"DRY"}`;
  $("toldDestWind").textContent=lr?`HW ${esc(lw.headwind_kt)} • TW ${esc(lw.tailwind_kt)} • XW ${esc(lw.crosswind_kt)} kt`:"—";
  $("toldDestPA").textContent=missionData&&Number.isFinite(Number(missionData.destination.pressure_altitude_ft))?Math.round(Number(missionData.destination.pressure_altitude_ft)).toLocaleString()+" ft":"—";
+ if($("toldDestWxSource"))$("toldDestWxSource").textContent=formatWeatherSource("dest");
  $("toldLDW").textContent=Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—";
  $("toldLandingFuel").textContent=Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—";
  $("toldLDGCG").textContent=Number.isFinite(c.landingPct)?`${c.landingPct.toFixed(2)}% MAC`:"—";
@@ -3020,6 +3105,7 @@ async function loadMission(){
  try{
    const altQuery=alt?`&alt=${encodeURIComponent(alt)}`:"";
    const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}${altQuery}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
+   manualWeather={dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null}};
    $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;$("depWxIdent").textContent=dep;$("depWxIdent2").textContent=dep;$("destWxIdent").textContent=dest;$("destWxIdent2").textContent=dest;
    populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);
    if(alt&&missionData.alternate){
@@ -3052,7 +3138,7 @@ async function loadMission(){
    $("sumWX").textContent=(missionData.departure.metar||missionData.destination.metar)?"LIVE":"NO REPORT";$("sumWX").className=(missionData.departure.metar||missionData.destination.metar)?"ok":"warn";
    $("sumFAA").textContent=depCount&&destCount?"LOADED":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA");$("sumFAA").className=depCount&&destCount?"ok":"warn";
    $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
-   selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();
+   selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();updateWeatherSourceBadges();loadManualWeatherForm();
    setTimeout(()=>{refreshNotams().catch(()=>{});},150);
    $("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
  }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
