@@ -1,0 +1,27 @@
+KUSA FLIGHTOPS v5.20 - FAA NMS STAGING SETUP
+
+1. In GoDaddy/Airo app settings, add SERVER-SIDE environment variables:
+   NMS_CLIENT_ID      = KEY from the encrypted FAA spreadsheet
+   NMS_CLIENT_SECRET  = SECRET from the encrypted FAA spreadsheet
+
+2. Optional variables are already defaulted in server.js:
+   NMS_AUTH_URL=https://api-staging.cgifederal-aim.com/v1/auth/token
+   NMS_BASE_URL=https://api-staging.cgifederal-aim.com/nmsapi/v1
+   NMS_RESPONSE_FORMAT=GEOJSON
+   NMS_ENVIRONMENT=STAGING
+
+3. Save/redeploy the Node application.
+
+4. Verify:
+   /api/notams/config
+   Expected: configured=true and authenticated=true
+
+5. Test airport NOTAM retrieval:
+   /api/notams?icao=KBPT
+   Expected: ok=true, source=FAA NMS STAGING, and items array.
+
+SECURITY
+- Do not put KEY, SECRET, bearer token, or spreadsheet password into GitHub.
+- Do not put them in public/index.html or public/config.js.
+- FlightOps obtains and caches the 30-minute bearer token on the Node server.
+- HTTP 401 triggers one forced token renewal/retry.

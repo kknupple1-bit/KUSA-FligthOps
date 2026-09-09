@@ -527,3 +527,35 @@ V5.19 AFMS REV C SOURCE CONTROL
 - No performance values were altered solely because of the revision-letter change.
 - Existing bounded interpolation/no-extrapolation safeguards remain in force.
 - DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
+
+============================================================
+V5.20 - FAA NMS OAUTH2 STAGING INTEGRATION
+============================================================
+FlightOps v5.20 replaces the prior x-api-key NOTAM placeholder with the FAA/CGI
+NMS OAuth2 client-credentials workflow supplied during KUSA onboarding.
+
+GoDaddy SERVER-SIDE environment variables (DO NOT put these in public files):
+  NMS_CLIENT_ID=<KEY from FAA encrypted credential spreadsheet>
+  NMS_CLIENT_SECRET=<SECRET from FAA encrypted credential spreadsheet>
+
+Optional; staging defaults are already built in:
+  NMS_AUTH_URL=https://api-staging.cgifederal-aim.com/v1/auth/token
+  NMS_BASE_URL=https://api-staging.cgifederal-aim.com/nmsapi/v1
+  NMS_RESPONSE_FORMAT=GEOJSON
+  NMS_ENVIRONMENT=STAGING
+
+Security rules:
+- Never commit the FAA KEY/SECRET to GitHub.
+- Never place credentials in public/index.html, public/config.js, or browser code.
+- server.js requests and caches a bearer token, renewing it before expiration.
+- If NMS returns HTTP 401, server.js forces one token renewal and retries once.
+- Browser receives only normalized NOTAM data, never credentials or bearer tokens.
+
+NMS request used by FlightOps:
+  GET /nmsapi/v1/notams?location=<ICAO>
+  Authorization: Bearer <server-side token>
+  nmsResponseFormat: GEOJSON
+
+Local verification after environment variables are configured:
+  /api/notams/config     -> configured:true, authenticated:true
+  /api/notams?icao=KBPT -> live normalized NMS NOTAM items
