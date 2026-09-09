@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.20</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.21</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -842,10 +842,10 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="card">
 <h2>6. Performance Evaluation</h2>
 <div class="callout small">
-<b>Performance source control:</b> FTA-PA-001019 Rev C (FAA-approved September 30, 2009) is the <b>controlling Dash-4 AFMS</b>. Revision C changes only the revision log and Section 6 noise page; Section 5 performance remains unchanged from the previously digitized performance pages. DTM813/DTM912 remain controlling where not superseded. Existing FlightSafety/QRH digitized values remain development/reference data only unless specifically cross-checked to the applicable AFMS chart. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. FlightSafety/QRH values are reference-only unless cross-checked to the applicable AFMS chart. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 <div class="callout small" style="margin-top:8px">
-<b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT CONTROLLING REVISION • FAA Approved 09/30/2009. Rev C affects log page iii and Section 6 noise page 6-1 only; Section 5 performance is unchanged. Takeoff climb-limit charts 5-18 (S+Flaps 20°) and 5-27 (Slats) remain digitized for bounded interpolation only; no extrapolation.
+<b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT. Takeoff climb-limit charts §5-18 (S+Flaps 20°) and §5-27 (Slats) are active for bounded interpolation/source-boundary use only; no extrapolation.
 </div>
 
 <h3 style="font-size:14px">Takeoff</h3>
@@ -1351,10 +1351,18 @@ function afmsRevCTakeoffClimbLimit(cfg,ai,pa,tempC){
   const minPA=lines[0].pa,maxPA=lines[lines.length-1].pa;
   if(pa>maxPA){out.coverageLimited=true;out.basis=`PA ${Math.round(pa)} ft above digitized ${maxPA} ft contour`;return out;}
   if(pa<minPA){
-    // Conservative substitution is allowed only when the lowest available contour is
-    // already non-limiting versus structural MTOW; otherwise the source does not resolve the point.
-    const w=afmsRevCContourWeight(lines[0],tempC);
-    if(Number.isFinite(w)&&w>=maxStruct){out.limit=maxStruct;out.noLimitation=true;out.basis=`PA below ${minPA} ft; lowest published contour already >= structural MTOW`;return out;}
+    // For small below-sea-level pressure altitudes, use the published 0-ft chart boundary
+    // as a conservative source floor. This does not extrapolate beyond the source chart.
+    if(minPA===0 && pa>=-1000){
+      let w=afmsRevCContourWeight(lines[0],tempC);
+      if(Number.isFinite(w)){
+        w=Math.floor(w/100)*100;
+        out.limit=Math.min(maxStruct,w);
+        out.noLimitation=w>=maxStruct;
+        out.basis=`PA ${Math.round(pa)} ft below chart floor; published 0-ft boundary used conservatively; no extrapolation`;
+        return out;
+      }
+    }
     out.coverageLimited=true;out.basis=`PA below first digitized ${minPA} ft contour; no extrapolation`;return out;
   }
   let lo=null,hi=null;
@@ -2474,9 +2482,9 @@ function autoClimbAssessment(){
  if(Number.isFinite(g)){result.gradient=g;$("perfGrad").value=g.toFixed(2);}else $("perfGrad").value="";
  const ref=Number.isFinite(g)?` • QRH REF GCLB2 ${g.toFixed(2)}%`:"";
  if(Number.isFinite(af.limit)){
-   result.msg=`AFMS REV C ACTIVE • ${af.source} • ${cfg==="S20"?"S+F 20°":"SLATS"} • A/I ${ai} • CLIMB LIMIT ${Math.round(af.limit).toLocaleString()} lb${af.noLimitation?" (STRUCTURAL MTOW GOVERNS)":""} • ${af.basis}${ref}`;
+   result.msg=`AFMS CLIMB ACTIVE • ${af.source} • ${cfg==="S20"?"S+F 20°":"SLATS"} • A/I ${ai} • CLIMB LIMIT ${Math.round(af.limit).toLocaleString()} lb${af.noLimitation?" (STRUCTURAL MTOW GOVERNS)":""} • ${af.basis}${ref}`;
  }else{
-   result.msg=`AFMS REV C SOURCE LOCKED AT THIS POINT • ${af.source} • ${af.basis||"outside bounded digitized chart coverage"} • NO EXTRAPOLATION${ref}`;
+   result.msg=`AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE • ${af.source} • ${af.basis||"outside bounded digitized chart coverage"} • NO EXTRAPOLATION${ref}`;
  }
  return result;
 }
@@ -2516,7 +2524,7 @@ function syncTakeoffSection(){
  if(!missionData&&!perfIsManual()){
    $("toStatus").textContent="LOAD MISSION";$("toStatus").className="warn";
    $("toLimit").textContent="Load mission airport and weather data first";
-   $("toConfigNote").textContent="Load mission data to calculate field data; Dash-4 climb data source: FTA-PA-001019 Rev C.";
+   $("toConfigNote").textContent="Load mission data to calculate field data; current AFMS climb source is active.";
    return a;
  }
 
@@ -2537,7 +2545,7 @@ function syncTakeoffSection(){
 
  const pending=[];
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
- if(!Number.isFinite(climb.limit))pending.push("AFMS REV C CLIMB SOURCE LOCKED");
+ if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE");
  if(climb.pass===false)pending.push("CLIMB FAIL");
  if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
@@ -2559,9 +2567,9 @@ function syncTakeoffSection(){
  if(Number.isFinite(wk)&&wk>0)notes.push(`WT ${wk.toFixed(1)}k lb`);
  if(Number.isFinite(autoFieldWt))notes.push(`field limit auto ${Math.round(autoFieldWt).toLocaleString()} lb`);
  if(Number.isFinite(climb.gradient))notes.push(`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`);
- if(Number.isFinite(climb.limit))notes.push(`AFMS climb data source Rev C`);
+ if(Number.isFinite(climb.limit))notes.push(`AFMS climb source active`);
  notes.push(`A/I ${climb.ai}`);
- notes.push("FTA-PA-001019 Rev C is controlling Dash-4 AFMS; Rev C does not change Section 5 performance; digitized §5-18/§5-27 climb limit controls; QRH gradient remains reference only");
+ notes.push("FTA-PA-001019 Rev C is current; digitized §5-18/§5-27 climb limits control; QRH gradient is reference only");
  $("toConfigNote").textContent=notes.join(" • ");
  return a;
 }
@@ -3163,7 +3171,7 @@ function updateWhatIfPlanner(force=false){
  const obstaclePending=true;       // explicit until obstacle analysis integrated
 
  let opsText=[];
- if(climbKnown)opsText.push(climbOK?"AFMS REV C CLIMB PASS":"AFMS REV C CLIMB NO-GO"); else opsText.push("AFMS REV C CLIMB SOURCE LOCKED");
+ if(climbKnown)opsText.push(climbOK?"AFMS CLIMB PASS":"AFMS CLIMB NO-GO"); else opsText.push("AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE");
  if(brakePending)opsText.push("BRAKE PENDING");
  if(obstaclePending)opsText.push("OBSTACLE NOT CHECKED");
  $("whatIfOps").textContent=opsText.join(" • ");
@@ -3179,7 +3187,7 @@ function updateWhatIfPlanner(force=false){
  }else if(climbKnown&&!climbOK){
    gate="NO-GO"; note="Hypothetical weight exceeds climb-limited takeoff weight."; cls="bad";
  }else if(!climbKnown||brakePending||obstaclePending){
-   gate="NOT FULLY EVALUATED"; note="Field length passes, but FTA-PA-001019 Rev C climb and/or other operational limits are still pending/not checked."; cls="warn";
+   gate="NOT FULLY EVALUATED"; note="Field length passes, but one or more operational limits remain unavailable or unchecked."; cls="warn";
  }else{
    gate="GO"; note="All implemented performance gates pass for this hypothetical point."; cls="ok";
  }
@@ -3513,6 +3521,11 @@ async function checkNotamConnection(){
  const e=$("notamConnectionState");
  try{
    const r=await fetch("/api/notams/config",{cache:"no-store"});
+   const ct=String(r.headers.get("content-type")||"").toLowerCase();
+   if(!ct.includes("application/json")){
+     if(e){e.textContent="BACKEND BUILD MISMATCH — REDEPLOY SERVER";e.className="small bad";}
+     return false;
+   }
    const j=await r.json();
    if(j.configured&&j.authenticated){
      const env=String(j.environment||"STAGING").toUpperCase();
@@ -3520,13 +3533,14 @@ async function checkNotamConnection(){
      return true;
    }
    if(j.configured&&!j.authenticated){
-     if(e){e.textContent="FAA NMS OAUTH2 AUTH FAILED";e.className="small bad";}
+     const msg=String(j.message||"OAuth2 authentication failed").replace(/NMS OAuth2 token request failed:\s*/i,"");
+     if(e){e.textContent=`FAA NMS AUTH FAILED — ${msg}`;e.className="small bad";}
      return false;
    }
    if(e){e.textContent="FAA NMS OAUTH2 NOT CONFIGURED";e.className="small warn";}
    return false;
  }catch(err){
-   if(e){e.textContent="FAA NMS AUTHENTICATION ERROR";e.className="small bad";}
+   if(e){e.textContent="BACKEND NOTAM ENDPOINT UNAVAILABLE — REDEPLOY";e.className="small bad";}
    return false;
  }
 }
@@ -3540,7 +3554,7 @@ async function refreshNotams(){
    const res=await fetch(`/api/notams?icao=${encodeURIComponent(dest)}`),j=await res.json();
    if(!res.ok||!j.ok){
      currentNotams={status:"UNAVAILABLE",source:j.source||"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};
-     $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent=j.message||"FAA NMS OAuth2 access is not configured on this server.";if($("notamConnectionState")){$("notamConnectionState").textContent=j.configured===false?"FAA NMS OAUTH2 NOT CONFIGURED":"FAA NMS UNAVAILABLE";$("notamConnectionState").className="small warn";}
+     $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent=j.message||"FAA NMS unavailable.";if($("notamConnectionState")){const m=String(j.message||"");$("notamConnectionState").textContent=j.configured===false?"FAA NMS OAUTH2 NOT CONFIGURED":(m?`FAA NMS ERROR — ${m.replace(/NMS OAuth2 token request failed:\s*/i,"")}`:"FAA NMS UNAVAILABLE");$("notamConnectionState").className="small bad";}
      $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();updateToldCard();return;
    }
    const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);
@@ -3633,7 +3647,7 @@ function syncLandingSection(){
  }else if(a.vref!=null&&a.lfl!=null&&climb!=null){
    $("landStatus").textContent="GO";$("landStatus").className="ok";
  }else if(a.vref!=null&&a.lfl!=null){
-   $("landStatus").textContent="TABLE DATA READY • CLIMB DATA SOURCE REV C";$("landStatus").className="warn";
+   $("landStatus").textContent="FIELD DATA READY • AFMS LANDING CLIMB NOT DIGITIZED";$("landStatus").className="warn";
  }else if(a.vref!=null){
    $("landStatus").textContent="PARTIAL AUTO DATA";$("landStatus").className="warn";
  }else{
@@ -3687,7 +3701,7 @@ async function evaluateTakeoff(){
 
    const pending=[];
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
-   if(!Number.isFinite(climb.limit))pending.push("AFMS REV C CLIMB SOURCE LOCKED");
+   if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB DATA OUTSIDE SOURCE COVERAGE");
    if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
    if(j.status==="GO"&&!pending.length){
@@ -3717,7 +3731,7 @@ async function evaluateLanding(){
    $("landRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
    if(j.status==="NO-GO"){$("landStatus").textContent="NO-GO";$("landStatus").className="bad"}
    else if(j.status==="GO"){$("landStatus").textContent="GO";$("landStatus").className="ok"}
-   else{$("landStatus").textContent="TABLE DATA READY • CLIMB DATA SOURCE REV C";$("landStatus").className="warn"}
+   else{$("landStatus").textContent="FIELD DATA READY • AFMS LANDING CLIMB NOT DIGITIZED";$("landStatus").className="warn"}
    $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • FS P-18–P-21`;
    updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
