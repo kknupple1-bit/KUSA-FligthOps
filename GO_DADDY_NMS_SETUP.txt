@@ -1,4 +1,4 @@
-KUSA FLIGHTOPS v5.20 - FAA NMS STAGING SETUP
+KUSA FLIGHTOPS v5.21 - FAA NMS STAGING SETUP
 
 1. In GoDaddy/Airo app settings, add SERVER-SIDE environment variables:
    NMS_CLIENT_ID      = KEY from the encrypted FAA spreadsheet
