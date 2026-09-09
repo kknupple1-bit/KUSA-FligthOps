@@ -378,12 +378,13 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.3</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.6</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
-<button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">New Trip</button>
+<button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">Menu</button>
+<button id="newtripTabBtn" type="button" onclick="openNewTripForm()">New Trip</button>
 <button id="opsTabBtn" type="button" onclick="showPlatformView('ops')">Mission</button>
 <button id="toldTabBtn" type="button" onclick="showPlatformView('told')">TOLD</button>
 <button id="archiveTabBtn" type="button" onclick="showPlatformView('archive')">Flight Plans</button>
@@ -394,7 +395,46 @@ details summary{cursor:pointer;margin-top:8px}
 <main>
 <div id="homeView">
   <div class="home-shell">
-    <div class="beta-banner"><b>BETA PHASE</b> — DEVELOPMENT / VALIDATION ONLY. NOT APPROVED FOR FLIGHT USE.</div>
+    <div class="newtrip-card">
+      <div class="newtrip-title">FlightOps Menu</div>
+      <div class="newtrip-sub">Start a new mission, resume an auto-saved draft, or open completed flight plans.</div>
+
+      <div class="home-actions" style="margin-top:14px">
+        <div class="home-panel">
+          <h3 style="margin-top:0">New Trip</h3>
+          <div class="small">Start with a clean mission. A local draft is created automatically once the trip is started.</div>
+          <button type="button" style="margin-top:12px" onclick="openNewTripForm()">Start New Trip</button>
+        </div>
+        <div class="home-panel">
+          <h3 style="margin-top:0">Draft Flight Plans</h3>
+          <div class="small">Resume work that was not yet completed or archived.</div>
+          <div style="margin-top:10px"><b id="homeDraftCount">0</b> local draft(s).</div>
+          <button type="button" style="margin-top:12px" onclick="showPlatformView('archive')">Open Flight Plans</button>
+        </div>
+        <div class="home-panel">
+          <h3 style="margin-top:0">Completed Flight Plans</h3>
+          <div class="small">Review, share, duplicate, or reopen archived missions.</div>
+          <div style="margin-top:10px"><b id="homeArchiveCount">0</b> completed flight plan(s).</div>
+          <button type="button" style="margin-top:12px" onclick="showPlatformView('archive')">Open Archive</button>
+        </div>
+      </div>
+
+      <div class="home-panel" id="startupDataPanel" style="margin-top:14px">
+        <h3 style="margin-top:0">FlightOps Data Status</h3>
+        <div class="row">
+          <div class="wx"><div class="small">App / Server</div><b id="startupBuildStatus">CHECKING</b><div class="small" id="startupBuildNote">Verifying build integrity…</div></div>
+          <div class="wx"><div class="small">Performance + W&amp;B Data</div><b id="startupPerfStatus">LOADED</b><div class="small">N33AP • AFM/AFMS development dataset</div></div>
+          <div class="wx"><div class="small">Runway Data</div><b id="startupRunwayStatus">CHECKING</b><div class="small" id="startupRunwayNote">Packaged cache + FAA NASR live fallback</div></div>
+          <div class="wx"><div class="small">FAA NMS / Weather</div><b id="startupLiveStatus">CHECKING</b><div class="small" id="startupLiveNote">Checking live services…</div></div>
+        </div>
+        <div id="startupDataNotice" class="small" style="margin-top:10px">FlightOps checks local data integrity and live-service availability on startup. A manual download is requested only when a required packaged dataset is missing or the app/server build is mismatched.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="newtripView">
+  <div class="home-shell">
     <div class="newtrip-card">
       <div class="newtrip-title">New Trip</div>
       <div class="newtrip-sub">Start with a clean mission. No airport pair is loaded automatically.</div>
@@ -413,19 +453,8 @@ details summary{cursor:pointer;margin-top:8px}
         <div class="home-panel">
           <div class="small">Workflow</div>
           <b>New Trip → Mission → TOLD → Complete → Archive</b>
-          <div class="small" style="margin-top:8px">Only completed missions are saved to Archive.</div>
+          <div class="small" style="margin-top:8px">Trip progress auto-saves as a local Draft until Complete &amp; Archive is selected.</div>
         </div>
-      </div>
-
-      <div class="home-panel" id="startupDataPanel" style="margin-top:14px">
-        <h3 style="margin-top:0">FlightOps Data Status</h3>
-        <div class="row">
-          <div class="wx"><div class="small">App / Server</div><b id="startupBuildStatus">CHECKING</b><div class="small" id="startupBuildNote">Verifying build integrity…</div></div>
-          <div class="wx"><div class="small">Performance + W&amp;B Data</div><b id="startupPerfStatus">LOADED</b><div class="small">N33AP • AFM/AFMS development dataset</div></div>
-          <div class="wx"><div class="small">Runway Data</div><b id="startupRunwayStatus">CHECKING</b><div class="small" id="startupRunwayNote">Packaged cache + FAA NASR live fallback</div></div>
-          <div class="wx"><div class="small">FAA NMS / Weather</div><b id="startupLiveStatus">CHECKING</b><div class="small" id="startupLiveNote">Checking live services…</div></div>
-        </div>
-        <div id="startupDataNotice" class="small" style="margin-top:10px">FlightOps checks local data integrity and live-service availability on startup. A manual download is requested only when a required packaged dataset is missing or the app/server build is mismatched.</div>
       </div>
 
       <div class="home-actions" style="margin-top:14px">
@@ -470,9 +499,9 @@ details summary{cursor:pointer;margin-top:8px}
 
 <div id="opsView">
 <div class="mission-actionbar">
-  <button type="button" onclick="showPlatformView('home')">← New Trip</button>
-  <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
+  <button type="button" onclick="showPlatformView('home')">← Menu</button>
   <button type="button" onclick="completeMission()">Complete & Archive Flight Plan</button>
+  <span class="small" id="draftSaveStatus" style="align-self:center;margin-left:6px">Draft not started</span>
 </div>
 
 <div class="card">
@@ -1272,14 +1301,16 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
   <div class="card" style="max-width:1050px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
       <div>
-        <h2 style="margin-bottom:4px">Completed Flight Plans</h2>
-        <div class="small">Completed flight plans. Reopen any leg to review or revise it. Stored locally in this browser during beta.</div>
+        <h2 style="margin-bottom:4px">Flight Plans</h2>
+        <div class="small">Drafts auto-save locally while you work. Completed plans remain in the Archive.</div>
       </div>
       <button type="button" style="width:auto" onclick="renderArchive()">Refresh</button>
     </div>
-    <div class="callout small" style="margin-top:10px">
-A flight plan appears here after <b>Complete &amp; Archive Flight Plan</b> is selected. Build and retain multiple legs, then reopen any leg to review or revise it. During beta, flight plans are stored locally in this browser/device.
-</div>
+    <h3 style="margin-top:18px">Drafts</h3>
+    <div class="callout small">Drafts are local to this browser/device during beta and are updated automatically as the mission changes.</div>
+    <div id="draftList" class="archive-list" style="margin-top:14px"></div>
+    <h3 style="margin-top:24px">Completed / Archived</h3>
+    <div class="callout small">Selecting <b>Complete &amp; Archive Flight Plan</b> converts the active draft into a completed record.</div>
 
 <div class="archive-bulkbar">
   <button type="button" onclick="selectAllFlightPlans()">Select All</button>
@@ -1660,14 +1691,14 @@ function updateFOBVerifyLabel(){
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function showPlatformView(view){
- const ids=["home","ops","told","archive"];
+ const ids=["home","newtrip","ops","told","archive"];
  ids.forEach(v=>{
    const el=$(v+"View"); if(el)el.style.display=(v===view)?"block":"none";
    const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===view);
  });
  if(view==="told")updateToldCard();
  if(view==="archive")renderArchive();
- if(view==="home")updateHomeArchiveCount();
+ if(view==="home"){updateHomeArchiveCount();updateHomeDraftCount();}
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
@@ -1682,6 +1713,32 @@ function saveMissionArchive(arr){localStorage.setItem("kusaFlightOpsArchive",JSO
 function updateHomeArchiveCount(){
  const e=$("homeArchiveCount");if(e)e.textContent=getMissionArchive().length;
 }
+function getMissionDrafts(){
+ try{return JSON.parse(localStorage.getItem("kusaFlightOpsDrafts")||"[]")}catch{return[]}
+}
+function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.stringify(arr));updateHomeDraftCount()}
+function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
+let draftSaveTimer=null;
+function draftRecord(){
+ if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
+ const state=captureCurrentPlanState();
+ state.manual_weather=JSON.parse(JSON.stringify(manualWeather||{}));
+ state.fob_verified=!!$("fobVerified")?.checked;
+ state.low_fuel_confirmed=!!$("lowFuelConfirm")?.checked;
+ return {id:window.currentMissionMeta.id,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
+}
+function saveCurrentDraft(){
+ const rec=draftRecord();if(!rec)return;
+ const arr=getMissionDrafts();const ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
+ saveMissionDrafts(arr.slice(0,50));
+ const e=$("draftSaveStatus");if(e)e.textContent=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+}
+function scheduleDraftSave(){
+ if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
+ const e=$("draftSaveStatus");if(e)e.textContent="Saving draft…";
+ clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(saveCurrentDraft,450);
+}
+function removeMissionDraft(id){if(!id)return;saveMissionDrafts(getMissionDrafts().filter(x=>x.id!==id));}
 function resetMissionForNewTrip(){
  // Mission-identifying fields
  $("dep").value="";$("dest").value="";$("alt").value="";
@@ -1704,11 +1761,15 @@ function selectFuelEntry(el){
  requestAnimationFrame(()=>{try{el.select()}catch(e){}});
 }
 
-function initializeNewTripLanding(){
- resetMissionForNewTrip();
+function clearNewTripForm(){
  ["homeDep","homeDest","homeAlt","homeTripNote"].forEach(id=>{if($(id))$(id).value=""});
  if($("homeFOB"))$("homeFOB").value="0000";
  if($("homeMissionFuel"))$("homeMissionFuel").value="0000";
+}
+function openNewTripForm(){clearNewTripForm();showPlatformView("newtrip");}
+function initializeMenuLanding(){
+ resetMissionForNewTrip();
+ clearNewTripForm();
  window.currentMissionMeta=null;
  showPlatformView("home");
 }
@@ -1750,7 +1811,8 @@ note:$("homeTripNote").value.trim(),
  };
  recalculate();
  showPlatformView("ops");
- loadMission();
+ saveCurrentDraft();
+ loadMission().finally(()=>scheduleDraftSave());
 }
 function currentMissionSummaryText(){
  updateToldCard();
@@ -1894,7 +1956,10 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNot
      oat:valueOrNull("manualTOTemp"),
      weight:valueOrNull("manualTOWeight"),
      runway_length:valueOrNull("manualTORwyLen")
-   }
+   },
+   manual_weather:JSON.parse(JSON.stringify(manualWeather||{})),
+   fob_verified:!!$("fobVerified")?.checked,
+   low_fuel_confirmed:!!$("lowFuelConfirm")?.checked
  };
 }
 
@@ -2014,7 +2079,7 @@ function completeMission(){
  const ix=arr.findIndex(x=>x.id===rec.id);
  if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionArchive(arr.slice(0,100));
- if(window.currentMissionMeta)window.currentMissionMeta.completed=true;
+ if(window.currentMissionMeta){window.currentMissionMeta.completed=true;removeMissionDraft(window.currentMissionMeta.id)}
  renderArchive();
  alert("Flight plan saved to Archive on this device/browser.");
  showPlatformView("archive");
@@ -2072,7 +2137,26 @@ function deleteSelectedFlightPlans(){
 }
 
 
+function renderDrafts(){
+ const list=$("draftList");if(!list)return;
+ const arr=getMissionDrafts();
+ if(!arr.length){list.innerHTML='<div class="callout small">No drafts. Start a New Trip and FlightOps will auto-save it here.</div>';return}
+ list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—";return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route">${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Draft • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
+}
+async function openDraftFlightPlan(i){
+ const arr=getMissionDrafts(),m=arr[i];if(!m)return;
+ await restoreArchivedFlightPlan(m,i);
+ const s=m.state||{};
+ if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
+ if($("fobVerified"))$("fobVerified").checked=!!s.fob_verified;
+ if($("lowFuelConfirm"))$("lowFuelConfirm").checked=!!s.low_fuel_confirmed;
+ window.currentMissionMeta={id:m.id||newMissionId(),aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};
+ updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
+}
+function deleteDraftFlightPlan(i){const arr=getMissionDrafts(),m=arr[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"}?`))return;arr.splice(i,1);saveMissionDrafts(arr);renderDrafts()}
+
 function renderArchive(){
+ renderDrafts();
  const list=$("archiveList");if(!list)return;
  const arr=getMissionArchive();
 
@@ -4089,7 +4173,7 @@ async function evaluateLanding(){
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- const expected="5.22.3",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ const expected="5.22.6",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
  try{
    const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
    const buildOk=String(j.build||"")===expected;
@@ -4132,19 +4216,17 @@ $("perfObs").addEventListener("change",recalculate);
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
 setPerformanceInputMode();
-initializeNewTripLanding();
-// Always land on NEW TRIP at a fresh app launch/reload, including browser back-forward cache restores.
-window.addEventListener("pageshow",()=>{
-  if(!window.currentMissionMeta){
-    resetMissionForNewTrip();
-    showPlatformView("home");
-  }
-});
-window.addEventListener("load",()=>{
-  if(!window.currentMissionMeta) showPlatformView("home");
-});
+initializeMenuLanding();
+// A fresh app launch/reload always lands on the MENU. Drafts remain available under Flight Plans.
+window.addEventListener("pageshow",()=>{if(!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("load",()=>{if(!window.currentMissionMeta)showPlatformView("home")});
+// Debounced local draft persistence for active, incomplete missions.
+document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
+document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
+window.addEventListener("beforeunload",()=>{try{saveCurrentDraft()}catch(e){}});
 startupCheck();
 updateHomeArchiveCount();
+updateHomeDraftCount();
 addEventListener("resize",recalculate);
 </script>
 <script>
