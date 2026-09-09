@@ -1,4 +1,4 @@
-KUSA FLIGHTOPS v5.21 - FAA NMS STAGING SETUP
+KUSA FLIGHTOPS v5.21.1 - FAA NMS STAGING SETUP
 
 1. In GoDaddy/Airo app settings, add SERVER-SIDE environment variables:
    NMS_CLIENT_ID      = KEY from the encrypted FAA spreadsheet
@@ -25,3 +25,6 @@ SECURITY
 - Do not put them in public/index.html or public/config.js.
 - FlightOps obtains and caches the 30-minute bearer token on the Node server.
 - HTTP 401 triggers one forced token renewal/retry.
+
+
+v5.21.1 diagnostic change: /api/notams/config and /api/notams/ping return HTTP 200 with safe error details when FAA NMS auth fails, and log explicit NMS errors server-side. No credential values are logged.

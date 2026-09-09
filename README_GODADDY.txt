@@ -531,7 +531,7 @@ V5.19 AFMS REV C SOURCE CONTROL
 ============================================================
 V5.20 - FAA NMS OAUTH2 STAGING INTEGRATION
 ============================================================
-FlightOps v5.21 replaces the prior x-api-key NOTAM placeholder with the FAA/CGI
+FlightOps v5.21.1 replaces the prior x-api-key NOTAM placeholder with the FAA/CGI
 NMS OAuth2 client-credentials workflow supplied during KUSA onboarding.
 
 GoDaddy SERVER-SIDE environment variables (DO NOT put these in public files):
@@ -559,3 +559,6 @@ NMS request used by FlightOps:
 Local verification after environment variables are configured:
   /api/notams/config     -> configured:true, authenticated:true
   /api/notams?icao=KBPT -> live normalized NMS NOTAM items
+
+
+v5.21.1 diagnostic change: /api/notams/config and /api/notams/ping return HTTP 200 with safe error details when FAA NMS auth fails, and log explicit NMS errors server-side. No credential values are logged.
