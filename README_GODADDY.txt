@@ -389,3 +389,43 @@ v5.7 QRH SECOND-SEGMENT CLIMB INTEGRATION
 - If published QRH coverage ends before the structural maximum, the app uses the highest validated published weight as a conservative coverage cap and identifies that condition.
 - Takeoff status can now show GO • FIELD / CLIMB / OBSTACLE PASS when field, QRH climb, and manually verified obstacle gates all pass.
 - Falcon 50B QRH climb data remains an internal-beta validation source for N33AP; Dash-4 AFMS applicability must still be confirmed before operational approval.
+
+
+v5.8 FLIGHT PLAN ARCHIVE DELETE CONTROLS
+- Added individual Delete button to every saved flight plan.
+- Added per-plan selection checkbox.
+- Added Select All, Clear Selection, and Delete Selected controls.
+- Bulk delete supports deleting multiple selected flight plans in one action.
+- Individual and bulk deletes both require confirmation.
+- Selection state automatically clears for records that no longer exist.
+- All existing Open/Edit, Duplicate, Share, Email, and View TOLD functions remain intact.
+
+
+v5.9 CLIMB-LIMIT STATUS CORRECTION
+- Fixed QRH climb lookup at airports with negative pressure altitude: PA below 0 ft now uses the published 0-ft table conservatively instead of producing CLIMB DATA pending.
+- No extrapolation is performed above the published QRH pressure-altitude range.
+- Climb solver now explicitly checks structural MTOW 40,780 lb first. If it meets the QRH climb criterion, the app reports CLIMB NOT LIMITING and populates Climb-Limited Weight = 40,780 lb.
+- If climb is limiting, a binary solver determines the maximum climb-limited weight within published QRH coverage.
+- If QRH coverage ends below structural MTOW, the highest validated published weight is identified as a coverage cap rather than a generic pending condition.
+- Generic CLIMB LIMIT PENDING is replaced by a real climb result whenever the QRH provides valid data.
+- Source note updated to reflect base-Falcon performance architecture under the Dash-4 supplement, with final FTA-PA-001019 AFMS cross-check still required.
+
+
+v5.10 DIRECTIONAL RUNWAY-END SELECTION
+- Paired physical runway labels such as 12/30 are expanded into individual operational runway ends: 12 and 30.
+- Departure and destination runway selectors now show individual runway ends.
+- Initial automatic selection chooses the runway end that best favors current wind: headwind favored, tailwind heavily penalized, crosswind considered.
+- Pilot manual selection of a runway end overrides the automatic choice.
+- Wind components are recalculated for the selected runway-end heading.
+- TOLD, email, archive, runway summary, landing runway gate, and NOTAM matching now use the actual selected runway end rather than the paired physical-runway label.
+- Archived flight plans store and restore the selected runway end.
+
+
+v5.11 TOLD 40C / MTOW QUICK REFERENCE
+- Added permanent TOLD takeoff reference at 40°C and 40,780 lb MTOW.
+- Uses the same selected departure runway, runway length, departure pressure altitude, takeoff configuration, anti-ice state, and runway condition as the active flight plan.
+- Calculates BFL through the same digitized takeoff performance engine used by Section 6.
+- Adds runway margin for the 40°C / MTOW reference.
+- No extrapolation: if the 40°C / 40,780 lb point is outside the digitized source grid, TOLD shows SOURCE LOCKED rather than inventing a BFL.
+- Wet runway quick-reference remains source locked until the applicable wet-runway source is validated.
+- The 40°C / MTOW reference is also included in the comprehensive TOLD email/archive summary.
