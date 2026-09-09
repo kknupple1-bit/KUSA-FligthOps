@@ -1,0 +1,8 @@
+KUSA FlightOps v5.22.4
+
+Changes:
+- Header title changed to: KUSA FlightOps - Performance + W&B on one line.
+- Aircraft/platform descriptor moved to subline.
+- Startup routing hardened so a fresh open/reload lands on NEW TRIP.
+- Added pageshow/load guards to prevent browser restoration from reopening Mission/TOLD on a fresh launch.
+- Carries forward v5.22.3 data status, NMS, manual weather, AFMS landing climb, OEI gradient, and auto-review logic.
