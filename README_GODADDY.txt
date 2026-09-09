@@ -260,3 +260,56 @@ v4.9 CHANGES
 - WHAT-IF mode never changes actual aircraft W&B loading.
 - No extrapolation outside digitized source tables.
 - Wet WHAT-IF remains source locked pending aircraft-specific wet-data validation.
+
+
+v5.0 PLATFORM REVISION
+- Replaced automatic/default KBPT -> KDAL opening behavior with a dedicated New Trip home workflow.
+- Added New Trip / Mission / TOLD / Archive top navigation.
+- New Trip requires departure and destination ICAO entry before starting the mission.
+- Added aircraft selector architecture; N33AP Falcon 50-4 remains the only active aircraft dataset.
+- Added disabled future-aircraft placeholders: Falcon 900B, Citation CJ3, Challenger 300/301.
+- Added Complete Mission workflow.
+- Added Archive tab containing completed missions only.
+- Archive is stored locally in the beta tester's browser via localStorage; no server-side user account sync yet.
+- Added mission sharing from TOLD using Web Share API where supported (iPhone/iPad share sheet can expose Messages/Mail).
+- Added Email action using mailto fallback.
+- Added completed-mission sharing/email from Archive.
+- Added completed mission summary containing route, runway, weights/CG, FOB verification, takeoff speeds/BFL/status, landing data, and landing-fuel gate.
+- Preserves nationwide runway lookup, FOB verification, landing fuel gate, TOLD, Section 6 What-If, and v4.8.1 GoDaddy npm dev/start compatibility.
+- DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.
+
+
+v5.0.1 SECTION 6 WHAT-IF HOTFIX
+- Removed legacy hidden duplicate manual performance controls that caused duplicate DOM IDs.
+- Added deliberate PROCESS WHAT-IF button in Section 6.
+- WHAT-IF results no longer silently reprocess while values are being edited.
+- Any change to OAT, test weight, pressure altitude, runway length, takeoff configuration or runway condition marks the hypothetical result INPUTS CHANGED / PROCESS REQUIRED.
+- PROCESS WHAT-IF validates the four required hypothetical inputs, then calculates BFL, V1, VR=V2, Vfr/1.5Vs, runway margin, max weight at entered OAT, max OAT at entered weight, structural check and the current GO/NO-GO/NOT FULLY EVALUATED gate.
+- WHAT-IF remains isolated from actual W&B loading.
+- No extrapolation outside digitized performance source ranges.
+
+
+v5.0.2 NEW TRIP FUEL WORKFLOW
+- Added Fuel on Board (FOB) entry to the New Trip page.
+- Added Mission Required Fuel entry to the New Trip page.
+- Starting a New Trip now carries both values into the live Mission fuel section.
+- FOB must be greater than zero before a New Trip can start.
+- Mission Required Fuel is required; if it exceeds FOB, the user receives an explicit confirmation warning.
+- FOB verification remains a separate deliberate safety check in Mission Setup and is never assumed from entry.
+- Mission FOB label now clearly identifies the value as coming from New Trip.
+- Fuel verification control is visually emphasized as a separate safety check.
+
+
+v5.1 CONSOLIDATED BETA BASELINE
+- Carries forward v5.0 platform workflow, v5.0.1 Section 6 PROCESS WHAT-IF hotfix, and v5.0.2 New Trip fuel plan.
+- Added explicit RETURN TO LIVE control in Section 6.
+- LIVE mode is clearly labeled LIVE / ACTUAL MISSION and restores actual W&B weight, selected runway and mission weather.
+- WHAT-IF remains hypothetical only and never changes actual W&B loading.
+- Clarified source-lock behavior: interpolation only when required surrounding published/digitized points exist; never extrapolate.
+- Replaced abbreviated email/share mission body with comprehensive Aircraft Prep / TOLD text:
+  crew, passengers, seat assignments, baggage, FOB/verification, taxi/mission/landing fuel, ZFW/ramp/TOW/LDW, CG, departure runway/wind/OAT/PA/configuration, V1/VR=V2/Vfr/1.5Vs/emergency VREF, BFL/max TOW/runway margin/status, landing runway/wind/PA/configuration/VREF/LFL/max landing weight/runway margin/status, safety/source status.
+- Email subject now identifies TOLD, route, and N33AP.
+- Archive email uses the same comprehensive stored TOLD summary.
+- Renamed Complete Mission actions to Complete & Archive Mission.
+- Added archive instructions explaining that only completed missions appear and beta archive is local to the browser/device.
+- Explicit archive render after save.
