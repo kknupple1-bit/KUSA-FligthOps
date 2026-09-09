@@ -341,13 +341,19 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:1100px){.whatif-process-row{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){.whatif-process-row{grid-template-columns:1fr}}
 
+
+.newtrip-fuel{border:2px solid #315a80;background:#06182c;border-radius:12px;padding:14px;margin-top:14px}
+.newtrip-fuel h3{margin:0 0 8px}
+.newtrip-fuel .fuel-big input{font-size:20px;font-weight:800}
+.newtrip-fuel-note{margin-top:8px;color:var(--muted);font-size:12px}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.0.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.1</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -396,6 +402,24 @@ details summary{cursor:pointer;margin-top:8px}
             <div><label>Alternate ICAO</label><input id="homeAlt" maxlength="4" placeholder="optional"></div>
             <div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
           </div>
+
+          <div class="newtrip-fuel">
+            <h3>Fuel Plan</h3>
+            <div class="row">
+              <div class="fuel-big">
+                <label>Fuel on Board (FOB) lb</label>
+                <input id="homeFOB" type="number" min="0" max="15514" step="50" placeholder="Enter actual FOB">
+              </div>
+              <div class="fuel-big">
+                <label>Mission Required Fuel lb</label>
+                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" placeholder="Enter planned mission fuel">
+              </div>
+            </div>
+            <div class="newtrip-fuel-note">
+              Enter the planned fuel quantities here. FOB entry does not count as verification; the pilot must still complete the separate FOB verification check in Mission Setup.
+            </div>
+          </div>
+
           <button type="button" style="margin-top:12px" onclick="startNewTrip()">Start New Trip</button>
         </div>
 
@@ -413,7 +437,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="mission-actionbar">
   <button type="button" onclick="showPlatformView('home')">← New Trip</button>
   <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
-  <button type="button" onclick="completeMission()">Complete Mission</button>
+  <button type="button" onclick="completeMission()">Complete & Archive Mission</button>
 </div>
 
 <div class="card">
@@ -426,7 +450,7 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board lb</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()"><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="fuel" type="number" value="0" min="0" max="15514" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()"><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
 <div><label>Mission Fuel Required lb</label><input id="missionFuel" type="number" value="0" min="0" max="15514" oninput="resetLowFuelConfirmation();recalculate()"></div>
 <div><label>Taxi Fuel lb</label><input id="taxiFuel" type="number" value="200" min="0" oninput="recalculate()"></div>
 <div><label>Emer. Return Fuel Burn lb</label><input id="emerReturnBurn" type="number" value="0" min="0" oninput="recalculate()"></div>
@@ -438,8 +462,8 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
 <div><label>Load Airport / Weather Data</label><button onclick="loadMission()">Load / Refresh Mission</button></div>
 <div>
-  <label>Fuel Verification</label>
-  <div class="wx" style="min-height:58px;display:flex;align-items:center;gap:10px">
+  <label>Fuel Verification — Deliberate Safety Check</label>
+  <div class="wx" style="min-height:58px;display:flex;align-items:center;gap:10px;border:2px solid #6a5b28">
     <input id="fobVerified" type="checkbox" style="width:auto;transform:scale(1.25)" onchange="recalculate()">
     <div>
       <b id="fobVerifyLabel">FOB NOT VERIFIED</b>
@@ -742,7 +766,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div>
       <label>Performance Mode</label>
       <select id="perfInputMode">
-        <option value="LIVE">LIVE MISSION</option>
+        <option value="LIVE">LIVE MISSION / ACTUAL</option>
         <option value="MANUAL">WHAT-IF / HYPOTHETICAL</option>
       </select>
     </div>
@@ -773,6 +797,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div>
       <label>Process Hypothetical Point</label>
       <button id="processWhatIfBtn" type="button" onclick="processWhatIf()">PROCESS WHAT-IF</button>
+      <button id="restoreLiveBtn" type="button" style="margin-top:6px;background:#173a5c" onclick="restoreLivePerformance()">RETURN TO LIVE</button>
       <div class="small" id="whatIfProcessStatus">Select WHAT-IF mode, enter the test point, then process.</div>
     </div>
     <div class="whatif-gate" id="whatIfGateBox">
@@ -788,7 +813,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
 
   <div class="whatif-grid">
-    <div class="whatif-cell"><span class="small">Hypothetical BFL</span><b id="whatIfBFL">—</b><span class="small" id="whatIfBFLNote">Published table range only.</span></div>
+    <div class="whatif-cell"><span class="small">Hypothetical BFL</span><b id="whatIfBFL">—</b><span class="small" id="whatIfBFLNote">Published/digitized source grid only.</span></div>
     <div class="whatif-cell"><span class="small">V1</span><b id="whatIfV1">—</b><span class="small">Hypothetical point.</span></div>
     <div class="whatif-cell"><span class="small">VR = V2</span><b id="whatIfVR">—</b><span class="small">Weight-based schedule.</span></div>
     <div class="whatif-cell"><span class="small">Vfr / 1.5Vs</span><b id="whatIfVF">—</b><span class="small">Weight-based schedule.</span></div>
@@ -799,7 +824,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
 
   <div class="callout small" style="margin-top:10px">
-    WHAT-IF mode changes only the performance test point. It does not alter the actual aircraft W&amp;B load. After changing OAT, weight, pressure altitude, runway length, configuration or runway condition, press PROCESS WHAT-IF to create a new result. No extrapolation outside the digitized source tables. A green GO is shown only when all currently implemented gates pass; missing climb/brake/obstacle data produces NOT FULLY EVALUATED rather than a false GO.
+    WHAT-IF mode changes only the performance test point. It does not alter the actual aircraft W&amp;B load. After changing OAT, weight, pressure altitude, runway length, configuration or runway condition, press PROCESS WHAT-IF to create a new result. Interpolation is allowed only when the required surrounding published source points exist; no extrapolation outside the digitized source tables. A green GO is shown only when all currently implemented gates pass; missing climb/brake/obstacle data produces NOT FULLY EVALUATED rather than a false GO.
   </div>
 </div>
 <div></div><div></div>
@@ -960,7 +985,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <button type="button" onclick="shareCurrentMission()">Share</button>
     <button type="button" onclick="emailCurrentMission()">Email</button>
     <button type="button" onclick="window.print()">Print</button>
-    <button type="button" onclick="completeMission()">Complete Mission</button>
+    <button type="button" onclick="completeMission()">Complete & Archive Mission</button>
   </div>
 </div>
 
@@ -1073,7 +1098,10 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Verify th
       </div>
       <button type="button" style="width:auto" onclick="renderArchive()">Refresh</button>
     </div>
-    <div id="archiveList" class="archive-list" style="margin-top:14px"></div>
+    <div class="callout small" style="margin-top:10px">
+A mission appears here only after <b>Complete &amp; Archive Mission</b> is selected. During beta, completed missions are stored locally in this browser/device.
+</div>
+<div id="archiveList" class="archive-list" style="margin-top:14px"></div>
   </div>
 </div>
 
@@ -1216,19 +1244,40 @@ function resetMissionForNewTrip(){
 }
 function startNewTrip(){
  const dep=cleanICAO($("homeDep").value),dest=cleanICAO($("homeDest").value),alt=cleanICAO($("homeAlt").value);
+ const fob=Number($("homeFOB").value);
+ const missionFuel=Number($("homeMissionFuel").value);
  if(!dep||!dest){
    alert("Enter departure and destination ICAO identifiers.");
    return;
  }
+ if(!Number.isFinite(fob)||fob<=0){
+   alert("Enter Fuel on Board before starting the trip.");
+   return;
+ }
+ if(!Number.isFinite(missionFuel)||missionFuel<0){
+   alert("Enter Mission Required Fuel before starting the trip.");
+   return;
+ }
+ if(missionFuel>fob){
+   const ok=confirm("Mission Required Fuel exceeds Fuel on Board. Start the trip anyway?");
+   if(!ok)return;
+ }
  resetMissionForNewTrip();
  $("dep").value=dep;$("dest").value=dest;$("alt").value=alt;
+ $("fuel").value=Math.round(fob);
+ $("missionFuel").value=Math.round(missionFuel);
+ if($("fobVerified"))$("fobVerified").checked=false;
+ resetLowFuelConfirmation();
  window.currentMissionMeta={
    id:newMissionId(),
    aircraft:$("homeAircraft").value||"N33AP",
    note:$("homeTripNote").value.trim(),
+   initial_fob_lb:Math.round(fob),
+   planned_mission_fuel_lb:Math.round(missionFuel),
    started_at:new Date().toISOString(),
    completed:false
  };
+ recalculate();
  showPlatformView("ops");
  loadMission();
 }
@@ -1237,19 +1286,85 @@ function currentMissionSummaryText(){
  const c=latestCalc||{};
  const dep=cleanICAO($("dep").value)||"—",dest=cleanICAO($("dest").value)||"—",alt=cleanICAO($("alt").value)||"—";
  const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
+ const dw=dr&&dr.wind_components||{},lw=lr&&lr.wind_components||{};
+ const bagLoads=baggageLoadsFromUI();
+ const bagTotal=bagLoads.reduce((a,b)=>a+b,0);
+ const counts={male:0,female:0,child:0};
+ const seatText=[];
+ seatAssignments.forEach((pid,i)=>{
+   if(!pid)return;
+   const p=getPassenger(pid); if(!p)return;
+   counts[p.type]=(counts[p.type]||0)+1;
+   const short=p.type==="male"?"M":p.type==="female"?"F":"C";
+   seatText.push(`${seats[i].n}:${short}/${Math.round(p.weight)}lb`);
+ });
+ const fob=Math.max(0,num("fuel")),taxi=Math.max(0,num("taxiFuel")),missionFuel=Math.max(0,num("missionFuel"));
+ const depPA=perfTakeoffPA(), depTemp=perfTakeoffTemp();
+ const destPA=missionData&&Number.isFinite(Number(missionData.destination.pressure_altitude_ft))
+   ?Math.round(Number(missionData.destination.pressure_altitude_ft)):null;
+ const toConfig=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
+ const landConfig=FS_PERF.landing[$("landConfig").value]?.label||"—";
  const lines=[
-   "KUSA FlightOps — N33AP",
-   `${dep} → ${dest}${alt!=="—"?" | ALT "+alt:""}`,
+   "KUSA FLIGHTOPS — AIRCRAFT PREP / TOLD",
+   "N33AP — FALCON 50-4",
+   `${dep} → ${dest}${alt!=="—"?" | ALTERNATE "+alt:""}`,
+   `Generated: ${new Date().toLocaleString()}`,
    "",
-   `TOW: ${Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—"} | TO CG: ${Number.isFinite(c.takeoffPct)?c.takeoffPct.toFixed(2)+"% MAC":"—"}`,
-   `LDW: ${Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—"} | LDG CG: ${Number.isFinite(c.landingPct)?c.landingPct.toFixed(2)+"% MAC":"—"}`,
-   `FOB: ${Math.round(num("fuel")).toLocaleString()} lb | FOB Verified: ${$("fobVerified")?.checked?"YES":"NO"}`,
-   `DEP RWY: ${dr?dr.runway_id:"—"} | ${$("toRunwayCondition")?.value||"—"}`,
-   `V1 ${textOf("vsV1")} | VR=V2 ${textOf("vsVR")} | Vfr ${textOf("vsVFT")} | 1.5Vs ${textOf("vsVFS")}`,
-   `BFL: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"—"} | TO Status: ${textOf("toStatus")}`,
-   `DEST RWY: ${lr?lr.runway_id:"—"} | ${$("landRunwayCondition")?.value||"—"}`,
-   `VREF: ${$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"—"} | LFL: ${$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"—"}`,
-   `Landing Fuel: ${Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—"} | Fuel Gate: ${textOf("landingFuelGuardStatus")}`,
+   "=== AIRCRAFT / LOAD ===",
+   `Captain: ${Math.round(num("captWt")).toLocaleString()} lb`,
+   `First Officer: ${Math.round(num("foWt")).toLocaleString()} lb`,
+   `Passengers seated: ${seatAssignments.filter(Boolean).length} | M ${counts.male||0} / F ${counts.female||0} / C ${counts.child||0}`,
+   `Seat assignments: ${seatText.length?seatText.join(" | "):"None"}`,
+   `Baggage: ${Math.round(bagTotal).toLocaleString()} lb total | I ${Math.round(bagLoads[0]||0)} | II ${Math.round(bagLoads[1]||0)} | III ${Math.round(bagLoads[2]||0)} lb`,
+   "",
+   "=== FUEL PLAN ===",
+   `FOB: ${Math.round(fob).toLocaleString()} lb | Verified: ${$("fobVerified")?.checked?"YES":"NO"}`,
+   `Taxi fuel: ${Math.round(taxi).toLocaleString()} lb`,
+   `Mission required fuel: ${Math.round(missionFuel).toLocaleString()} lb`,
+   `Planned landing fuel: ${Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—"}`,
+   `Landing fuel gate: ${textOf("landingFuelGuardStatus")}`,
+   "",
+   "=== WEIGHT & BALANCE ===",
+   `ZFW: ${Number.isFinite(c.zfw)?Math.round(c.zfw).toLocaleString()+" lb":"—"}`,
+   `Ramp Weight: ${Number.isFinite(c.ramp)?Math.round(c.ramp).toLocaleString()+" lb":"—"}`,
+   `Takeoff Weight: ${Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—"}`,
+   `Landing Weight: ${Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—"}`,
+   `Takeoff CG: ${Number.isFinite(c.takeoffPct)?c.takeoffPct.toFixed(2)+"% MAC":"—"}`,
+   `Landing CG: ${Number.isFinite(c.landingPct)?c.landingPct.toFixed(2)+"% MAC":"—"}`,
+   `W&B Status: ${c.wbOK?"READY":"CHECK"}`,
+   "",
+   "=== TAKEOFF TOLD ===",
+   `Airport / Runway: ${dep} / ${dr?dr.runway_id:"—"}`,
+   `Runway: ${dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—"} | Condition: ${$("toRunwayCondition")?.value||"—"}`,
+   `Wind: HW ${dw.headwind_kt??"—"} / TW ${dw.tailwind_kt??"—"} / XW ${dw.crosswind_kt??"—"} kt`,
+   `OAT: ${Number.isFinite(depTemp)?depTemp+"°C":"—"} | Pressure Altitude: ${Number.isFinite(depPA)?Math.round(depPA).toLocaleString()+" ft":"—"}`,
+   `Configuration: ${toConfig}`,
+   `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
+   `Emergency Return VREF: ${textOf("vsVREF")}`,
+   `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
+   `Max Allowable TOW: ${textOf("toMax")}`,
+   `Runway Margin: ${textOf("toRwyMargin")}`,
+   `Takeoff Status: ${textOf("toStatus")}`,
+   `Obstacle Analysis: ${$("obstacleStatus")?$("obstacleStatus").value||textOf("obstacleStatus"):"Pending / not checked"}`,
+   "",
+   "=== LANDING TOLD ===",
+   `Airport / Runway: ${dest} / ${lr?lr.runway_id:"—"}`,
+   `Runway: ${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} | Condition: ${$("landRunwayCondition")?.value||"—"}`,
+   `Wind: HW ${lw.headwind_kt??"—"} / TW ${lw.tailwind_kt??"—"} / XW ${lw.crosswind_kt??"—"} kt`,
+   `Pressure Altitude: ${destPA==null?"—":destPA.toLocaleString()+" ft"}`,
+   `Configuration: ${landConfig}`,
+   `VREF: ${$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED"}`,
+   `Landing Field Length: ${$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
+   `Max Allowable Landing Weight: ${textOf("landMax")}`,
+   `Runway Margin: ${textOf("landRwyMargin")}`,
+   `Landing Status: ${textOf("landStatus")}`,
+   "",
+   "=== SAFETY / SOURCE STATUS ===",
+   `FOB verification: ${$("fobVerified")?.checked?"VERIFIED":"NOT VERIFIED"}`,
+   `Low landing fuel confirmation: ${textOf("landingFuelGuardStatus")}`,
+   `Takeoff performance mode: ${perfIsManual()?"WHAT-IF / HYPOTHETICAL":"LIVE / ACTUAL MISSION"}`,
+   `Takeoff source status: ${textOf("toStatus")}`,
+   `Landing source status: ${textOf("landStatus")}`,
    "",
    "DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE"
  ];
@@ -1267,7 +1382,7 @@ async function shareCurrentMission(){
  }
 }
 function emailCurrentMission(){
- const subject=encodeURIComponent(`KUSA FlightOps ${cleanICAO($("dep").value)}-${cleanICAO($("dest").value)}`);
+ const subject=encodeURIComponent(`KUSA FlightOps TOLD — ${cleanICAO($("dep").value)} to ${cleanICAO($("dest").value)} — N33AP`);
  const body=encodeURIComponent(currentMissionSummaryText());
  window.location.href=`mailto:?subject=${subject}&body=${body}`;
 }
@@ -1311,7 +1426,8 @@ function completeMission(){
  if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionArchive(arr.slice(0,100));
  if(window.currentMissionMeta)window.currentMissionMeta.completed=true;
- alert("Mission completed and saved to Archive.");
+ renderArchive();
+ alert("Mission completed and saved to Archive on this device/browser.");
  showPlatformView("archive");
 }
 function renderArchive(){
@@ -1344,7 +1460,7 @@ async function shareArchiveMission(i){
 }
 function emailArchiveMission(i){
  const m=getMissionArchive()[i];if(!m)return;
- location.href=`mailto:?subject=${encodeURIComponent("KUSA FlightOps "+m.dep+"-"+m.dest)}&body=${encodeURIComponent(m.summary)}`;
+ location.href=`mailto:?subject=${encodeURIComponent("KUSA FlightOps TOLD — "+m.dep+" to "+m.dest+" — "+(m.aircraft||"N33AP"))}&body=${encodeURIComponent(m.summary)}`;
 }
 function viewArchiveMission(i){
  const m=getMissionArchive()[i];if(!m)return;
@@ -2015,6 +2131,18 @@ function markWhatIfDirty(){
  if(n)n.textContent="Hypothetical inputs changed. Process the point before using the result.";
  if(box)box.className="whatif-gate warn";
 }
+function restoreLivePerformance(){
+ if($("perfInputMode"))$("perfInputMode").value="LIVE";
+ whatIfDirty=true;
+ setPerformanceInputMode();
+ recalculate();
+ const s=$("whatIfProcessStatus");
+ if(s){s.textContent="LIVE MISSION DATA RESTORED";s.className="small ok";}
+ const g=$("whatIfGate"),n=$("whatIfGateNote"),box=$("whatIfGateBox");
+ if(g)g.textContent="LIVE DATA";
+ if(n)n.textContent="Section 6 is using actual mission weather, runway and calculated aircraft weight.";
+ if(box)box.className="whatif-gate ok";
+}
 function processWhatIf(){
  if(!perfIsManual()){
    alert("Select WHAT-IF / HYPOTHETICAL mode first.");
@@ -2055,7 +2183,7 @@ function perfLandingPA(){
 }
 function setPerformanceInputMode(){
  const manual=perfIsManual();
-  $("perfModeStatus").textContent=manual?"MANUAL / WHAT-IF":"LIVE";
+  $("perfModeStatus").textContent=manual?"WHAT-IF / HYPOTHETICAL":"LIVE / ACTUAL MISSION";
  $("perfModeStatus").className=manual?"warn":"ok";
  $("perfModeNote").textContent=manual
   ?"Edit OAT and aircraft weight directly below to test a hypothetical takeoff point. Actual W&B is unchanged."
@@ -2180,7 +2308,7 @@ function updateWhatIfPlanner(force=false){
  if(!structuralOK){
    gate="NO-GO"; note="Hypothetical weight exceeds structural MTOW."; cls="bad";
  }else if(!sourceOK){
-   gate="NOT FULLY EVALUATED"; note="Hypothetical point is outside published/digitized table coverage — no extrapolation."; cls="warn";
+   gate="NOT FULLY EVALUATED"; note="Hypothetical point requires a BFL/V1 table value that is not present in the currently digitized source grid. No extrapolation is permitted."; cls="warn";
  }else if(!fieldOK){
    gate="NO-GO"; note=`Calculated BFL exceeds available runway by ${Math.abs(Math.round(rwy-r.bfl)).toLocaleString()} ft.`; cls="bad";
  }else if(climbKnown&&!climbOK){
