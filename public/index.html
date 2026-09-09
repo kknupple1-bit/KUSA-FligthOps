@@ -1,11 +1,11 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KUSA FlightOps — Performance + W&amp;B</title>
+<title>KUSA FlightOps - Performance + W&amp;B</title>
 <style>
 :root{--bg:#071b33;--panel:#0d294a;--panel2:#12365f;--text:#edf5ff;--muted:#9db6cf;--ok:#55d18b;--warn:#ffca58;--bad:#ff6b6b;--line:#2a4b70}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
 header{padding:18px 24px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-h1{margin:0;font-size:25px}.sub,.small{font-size:12px;color:var(--muted)}main{max-width:1600px;margin:auto;padding:20px}
+h1{margin:0;font-size:25px;white-space:nowrap}.sub,.small{font-size:12px;color:var(--muted)}main{max-width:1600px;margin:auto;padding:20px}
 .grid{display:grid;grid-template-columns:1.35fr .65fr;gap:18px}.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:18px}
 .card h2{font-size:16px;margin:0 0 12px}.row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.metric-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .metric{background:var(--panel2);padding:12px;border-radius:10px}.metric b{display:block;font-size:21px;margin-top:3px}
@@ -381,7 +381,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.3</div>
 
 <header>
-<div><h1>KUSA FlightOps</h1><div class="sub"><b>Performance + W&amp;B</b> • N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
+<div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
 <button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">New Trip</button>
 <button id="opsTabBtn" type="button" onclick="showPlatformView('ops')">Mission</button>
@@ -4133,6 +4133,16 @@ setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
 setPerformanceInputMode();
 initializeNewTripLanding();
+// Always land on NEW TRIP at a fresh app launch/reload, including browser back-forward cache restores.
+window.addEventListener("pageshow",()=>{
+  if(!window.currentMissionMeta){
+    resetMissionForNewTrip();
+    showPlatformView("home");
+  }
+});
+window.addEventListener("load",()=>{
+  if(!window.currentMissionMeta) showPlatformView("home");
+});
 startupCheck();
 updateHomeArchiveCount();
 addEventListener("resize",recalculate);
