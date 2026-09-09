@@ -24,7 +24,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.21.2",
+    build:"5.21.4",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -50,7 +50,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.21.2"
+      "User-Agent":"KUSA-FlightOps/5.21.4"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -232,15 +232,25 @@ async function airportBundle(icao){
 }
 
 function evalTakeoff(p){
- const f=[["Structural",40780]];
- if(p.climb_limited_weight_lb!=null)f.push(["Climb",Number(p.climb_limited_weight_lb)]);
- if(p.field_limited_weight_lb!=null)f.push(["Field length",Number(p.field_limited_weight_lb)]);
+ const structuralMtow=40780;
+ const f=[["Structural MTOW",structuralMtow]];
+ if(p.climb_limited_weight_lb!=null)f.push(["AFMS climb",Number(p.climb_limited_weight_lb)]);
+ if(p.field_limited_weight_lb!=null){
+   const label=p.field_limit_basis==="SOURCE_CEILING"?"Field source coverage":"Field length";
+   f.push([label,Number(p.field_limited_weight_lb)]);
+ }
  f.sort((a,b)=>a[1]-b[1]);
  const [lim,max]=f[0],wm=max-Number(p.actual_takeoff_weight_lb),rm=p.balanced_field_length_ft==null?null:Number(p.runway_length_ft)-Number(p.balanced_field_length_ft);
  const checks={weight:wm>=0,runway:rm==null?true:rm>=0,obstacle:p.obstacle_clearance_verified==null?true:!!p.obstacle_clearance_verified};
  const complete=[p.climb_limited_weight_lb,p.field_limited_weight_lb,p.balanced_field_length_ft,p.v1_kt,p.vr_v2_kt].every(v=>v!=null);
  const ok=Object.values(checks).every(Boolean);
- return{max_allowable_takeoff_weight_lb:Math.round(max),limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),v1_kt:p.v1_kt??null,vr_v2_kt:p.vr_v2_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"};
+ return{
+   structural_mtow_lb:structuralMtow,
+   source_evaluated_max_takeoff_weight_lb:Math.round(max),
+   max_allowable_takeoff_weight_lb:Math.round(max), // backward-compatible field; UI labels this source-evaluated max
+   limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),
+   v1_kt:p.v1_kt??null,vr_v2_kt:p.vr_v2_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"
+ };
 }
 function evalLanding(p){
  const f=[["Structural landing",35715]];
@@ -253,12 +263,12 @@ function evalLanding(p){
  return{max_allowable_landing_weight_lb:Math.round(max),limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),vref_kt:p.vref_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"};
 }
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.21.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT}));
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.21.4",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.21.0",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.21.4",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -324,7 +334,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.21.2"
+      "User-Agent":"KUSA-FlightOps/5.21.4"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
