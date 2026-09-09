@@ -131,7 +131,7 @@ v4.2 CHANGES
 - Takeoff operational items not yet supplied are listed as pending (climb limit, field limit, obstacle analysis).
 - Slats Only selector now explicitly identifies that digitized V1/BFL coverage begins at 4,000 ft pressure altitude; no extrapolation below source range.
 - VR=V2, Vfr and 1.5Vs still refresh by takeoff weight when available.
-- Landing now reports TABLE DATA READY • CLIMB LIMIT PENDING when VREF/LFL are valid but landing climb limit is not entered.
+- Landing now reports TABLE DATA READY • CLIMB DATA SOURCE REV B when VREF/LFL are valid but landing climb limit is not entered.
 - Obstacle selector wording changed to Pending / not checked, Verified clear, Not cleared.
 
 
@@ -373,7 +373,7 @@ v5.6 TAKEOFF OPERATIONAL LIMIT CLEANUP
 - Field-Limited Weight is read-only and no longer a manual pilot entry.
 - Evaluate Takeoff no longer reports FIELD LIMIT pending when the source grid supports an automatic field limit.
 - Obstacle Analysis = Verified clear is treated as satisfied.
-- If climb limit is the only unresolved item, status explicitly reads FIELD LIMIT PASS • CLIMB LIMIT PENDING.
+- If climb limit is the only unresolved item, status explicitly reads FIELD LIMIT PASS • CLIMB DATA SOURCE REV B.
 - No climb-limited weight is invented. It remains source-locked until the applicable climb-limit chart is digitized and validated.
 - Wet runway field-limit logic remains source locked.
 
@@ -407,7 +407,7 @@ v5.9 CLIMB-LIMIT STATUS CORRECTION
 - Climb solver now explicitly checks structural MTOW 40,780 lb first. If it meets the QRH climb criterion, the app reports CLIMB NOT LIMITING and populates Climb-Limited Weight = 40,780 lb.
 - If climb is limiting, a binary solver determines the maximum climb-limited weight within published QRH coverage.
 - If QRH coverage ends below structural MTOW, the highest validated published weight is identified as a coverage cap rather than a generic pending condition.
-- Generic CLIMB LIMIT PENDING is replaced by a real climb result whenever the QRH provides valid data.
+- Generic CLIMB DATA SOURCE REV B is replaced by a real climb result whenever the QRH provides valid data.
 - Source note updated to reflect base-Falcon performance architecture under the Dash-4 supplement, with final FTA-PA-001019 AFMS cross-check still required.
 
 
@@ -490,3 +490,40 @@ Set these server environment variables with values supplied by FAA NMS API acces
   NMS_NOTAM_API_URL=<FAA-provided NMS distribution endpoint>
   NMS_NOTAM_API_KEY=<FAA-provided API credential>
 Then restart/redeploy the Node application.
+
+
+v5.17.1 DASH-4 AFMS REV B SOURCE LABEL UPDATE
+---------------------------------------
+- FTA-PA-001019 Rev B is now treated as the temporary controlling Dash-4 AFM Supplement pending receipt/comparison of Rev C.
+- DTM813 / DTM912 remain controlling where not superseded by the Dash-4 AFMS.
+- Section 6 source banner identifies FTA-PA-001019 Rev B and the pending Rev C review.
+- Legacy Falcon 50 QRH second-segment climb data is retained as REFERENCE ONLY and can no longer clear the Dash-4 AFMS climb gate.
+- A green takeoff GO cannot be generated from the legacy QRH climb grid while the applicable FTA-PA-001019 Rev B chart remains undigitized/unvalidated.
+- Wet runway BFL/V1 remains source locked pending applicable source/method validation.
+- WHAT-IF remains isolated from LIVE W&B and now explicitly reports AFMS CLIMB SOURCE REV B when the Dash-4 climb chart has not been cleared.
+- DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
+
+
+v5.17.1 DASH-4 AFMS REV B SOURCE LABEL UPDATE
+- Replaced user-facing CLIMB LIMIT PENDING wording with DATA SOURCE: FTA-PA-001019 REV B.
+- No performance values were invented or extrapolated; Rev B remains the temporary controlling Dash-4 AFMS pending Rev C review.
+
+
+V5.18 AFMS REV B DIGITIZATION
+- FTA-PA-001019 Rev B is temporary controlling Dash-4 AFMS pending Rev C.
+- Section 5-18 S+Flaps 20 takeoff climb-limit chart digitized.
+- Section 5-27 Slats takeoff climb-limit chart digitized.
+- Bounded interpolation only between published pressure-altitude contours and within source-drawn chart segments.
+- No extrapolation; chart-derived limits rounded down to nearest 100 lb.
+- QRH GCLB2 remains reference/cross-check only.
+- DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
+
+
+V5.19 AFMS REV C SOURCE CONTROL
+- FTA-PA-001019 Revision C, FAA approved September 30, 2009, is now the controlling Dash-4 AFM Supplement.
+- Rev C log identifies only page iii and Section 6 page 6-1 as affected.
+- Section 5 performance pages were not revised by Rev C; the previously digitized takeoff climb charts remain valid under the Rev C document set.
+- Source labels now identify Rev C as controlling. Where applicable, chart labels note that the individual Section 5 page remains Rev A and was unchanged by Rev C.
+- No performance values were altered solely because of the revision-letter change.
+- Existing bounded interpolation/no-extrapolation safeguards remain in force.
+- DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
