@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>KUSA FlightOps — N33AP Planning Beta</title>
+<title>KUSA FlightOps — Performance + W&amp;B</title>
 <style>
 :root{--bg:#071b33;--panel:#0d294a;--panel2:#12365f;--text:#edf5ff;--muted:#9db6cf;--ok:#55d18b;--warn:#ffca58;--bad:#ff6b6b;--line:#2a4b70}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,Helvetica,sans-serif}
@@ -378,10 +378,10 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.3</div>
 
 <header>
-<div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
+<div><h1>KUSA FlightOps</h1><div class="sub"><b>Performance + W&amp;B</b> • N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
 <button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">New Trip</button>
 <button id="opsTabBtn" type="button" onclick="showPlatformView('ops')">Mission</button>
@@ -415,6 +415,17 @@ details summary{cursor:pointer;margin-top:8px}
           <b>New Trip → Mission → TOLD → Complete → Archive</b>
           <div class="small" style="margin-top:8px">Only completed missions are saved to Archive.</div>
         </div>
+      </div>
+
+      <div class="home-panel" id="startupDataPanel" style="margin-top:14px">
+        <h3 style="margin-top:0">FlightOps Data Status</h3>
+        <div class="row">
+          <div class="wx"><div class="small">App / Server</div><b id="startupBuildStatus">CHECKING</b><div class="small" id="startupBuildNote">Verifying build integrity…</div></div>
+          <div class="wx"><div class="small">Performance + W&amp;B Data</div><b id="startupPerfStatus">LOADED</b><div class="small">N33AP • AFM/AFMS development dataset</div></div>
+          <div class="wx"><div class="small">Runway Data</div><b id="startupRunwayStatus">CHECKING</b><div class="small" id="startupRunwayNote">Packaged cache + FAA NASR live fallback</div></div>
+          <div class="wx"><div class="small">FAA NMS / Weather</div><b id="startupLiveStatus">CHECKING</b><div class="small" id="startupLiveNote">Checking live services…</div></div>
+        </div>
+        <div id="startupDataNotice" class="small" style="margin-top:10px">FlightOps checks local data integrity and live-service availability on startup. A manual download is requested only when a required packaged dataset is missing or the app/server build is mismatched.</div>
       </div>
 
       <div class="home-actions" style="margin-top:14px">
@@ -640,9 +651,9 @@ PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplet
   <div><label>Wind Speed kt</label><input id="manualWxSpeed" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional"></div>
   <div><label>Wind Gust kt</label><input id="manualWxGust" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional"></div>
   <div><label>Manual Weather Note</label><input id="manualWxNote" placeholder="Optional source / remarks"></div>
-  <div><label>Apply</label><button type="button" onclick="applyManualWeather()">APPLY MANUAL WEATHER</button></div>
+  <div><label>Update / Toggle</label><button id="manualWxActionBtn" type="button" onclick="applyManualWeather()">REFRESH / USE LIVE WEATHER</button></div>
 </div>
-<div class="small" id="manualWxStatus" style="margin-top:10px">Live weather remains active until manual weather is applied.</div>
+<div class="small" id="manualWxStatus" style="margin-top:10px">Select LIVE or MANUAL, then use the update/toggle button to make that source controlling.</div>
 </div>
 
 <div class="grid" id="missionResultsStart">
@@ -966,7 +977,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>2nd Segment Gross Gradient % — AUTO</label><input id="perfGrad" type="number" step=".1" readonly></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Manual Obstacle Verification</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Manually verified clear</option><option value="false">Not cleared</option></select></div>
+<div><label>Pilot Obstacle Review — Optional</label><select id="perfObs"><option value="">No pilot override</option><option value="true">Pilot reviewed / no conflict identified</option><option value="false">Pilot conflict / do not use runway</option></select></div>
+<div class="wx"><div class="small">Automated Obstacle Review</div><b id="autoObstacleReview">NOT CHECKED</b><div class="small" id="autoObstacleReviewNote">FAA NMS departure NOTAM scan only — not a clearance analysis.</div></div>
 <div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
 <div class="wx"><div class="small">Digitized Field-Source Ceiling</div><b id="toMax">—</b><div class="small">Structural MTOW 40,780 lb</div></div>
 <div class="wx"><div class="small">Takeoff Status</div><b id="toStatus">—</b></div>
@@ -1570,9 +1582,10 @@ const $=id=>document.getElementById(id);
 const num=id=>+$((id)).value||0;
 let latestCalc=null;
 let currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+let departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
 let manualWeather={
- dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null},
- dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null}
+ dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null},
+ dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null}
 };
 function wxPoint(which){return missionData?(which==="dep"?missionData.departure:missionData.destination):null}
 function weatherSourceState(which){
@@ -1589,32 +1602,50 @@ function updateWeatherSourceBadges(){
 function loadManualWeatherForm(){
  const which=$("manualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
  if($("manualWxMode"))$("manualWxMode").value=st?.applied?"MANUAL":"LIVE";
- const m=p?.metar||{};
+ const m=p?.metar||{},saved=st?.manual_values||null;
  const val=(id,v)=>{const e=$(id);if(e)e.value=(v===null||v===undefined||v==="")?"":v};
- val("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));
- val("manualWxPA",p?.pressure_altitude_ft); val("manualWxAlt",p?.altimeter_inhg);
- val("manualWxDir",firstVal(m,["wind_dir","wdir","windDir","wind_direction"])); val("manualWxSpeed",firstVal(m,["wind_kt","wspd","windSpeed","wind_speed_kt"])); val("manualWxGust",firstVal(m,["wind_gust_kt","wgst"]));
- val("manualWxNote",st?.note||""); manualWeatherModeChanged(); updateWeatherSourceBadges();
+ if(st?.applied&&saved){
+   val("manualWxOAT",saved.oat);val("manualWxPA",saved.pa);val("manualWxAlt",saved.alt);val("manualWxDir",saved.dir);val("manualWxSpeed",saved.spd);val("manualWxGust",saved.gust);val("manualWxNote",st?.note||"");
+ }else{
+   val("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));
+   val("manualWxPA",p?.pressure_altitude_ft);val("manualWxAlt",p?.altimeter_inhg);
+   val("manualWxDir",firstVal(m,["wind_dir","wdir","windDir","wind_direction"]));val("manualWxSpeed",firstVal(m,["wind_kt","wspd","windSpeed","wind_speed_kt"]));val("manualWxGust",firstVal(m,["wind_gust_kt","wgst"]));
+   val("manualWxNote",st?.note||"");
+ }
+ manualWeatherModeChanged();updateWeatherSourceBadges();
+}
+function updateManualWeatherActionButton(){
+ const mode=$("manualWxMode")?.value||"LIVE",b=$("manualWxActionBtn");if(!b)return;
+ b.textContent=mode==="MANUAL"?"UPDATE MANUAL WEATHER":"REFRESH / USE LIVE WEATHER";
 }
 function manualWeatherModeChanged(){
- const mode=$("manualWxMode")?.value||"LIVE",ids=["manualWxOAT","manualWxPA","manualWxAlt","manualWxDir","manualWxSpeed","manualWxGust","manualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
- const s=$("manualWxStatus");if(s)s.textContent=mode==="MANUAL"?"Enter pilot-observed/known weather and press APPLY MANUAL WEATHER.":"LIVE / reported weather selected. Apply is not required.";
+ const mode=$("manualWxMode")?.value||"LIVE",which=$("manualWxTarget")?.value||"dep",st=manualWeather[which],p=wxPoint(which);
+ const ids=["manualWxOAT","manualWxPA","manualWxAlt","manualWxDir","manualWxSpeed","manualWxGust","manualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
+ if(mode==="MANUAL"&&st?.manual_values){const v=st.manual_values;const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",v.oat);put("manualWxPA",v.pa);put("manualWxAlt",v.alt);put("manualWxDir",v.dir);put("manualWxSpeed",v.spd);put("manualWxGust",v.gust);put("manualWxNote",st.note||"");}
+ if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{};const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("manualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("manualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");put("manualWxDir",firstVal(m,["wind_dir","wdir","windDir","wind_direction"]));put("manualWxSpeed",firstVal(m,["wind_kt","wspd","windSpeed","wind_speed_kt"]));put("manualWxGust",firstVal(m,["wind_gust_kt","wgst"]));}
+ const stxt=$("manualWxStatus");if(stxt)stxt.textContent=mode==="MANUAL"?"MANUAL selected. Enter or revise pilot weather, then press UPDATE MANUAL WEATHER.":"LIVE selected. Press REFRESH / USE LIVE WEATHER to restore the live feed and recalculate.";
+ updateManualWeatherActionButton();
 }
-function applyManualWeather(){
+async function applyManualWeather(){
  const which=$("manualWxTarget")?.value||"dep",mode=$("manualWxMode")?.value||"LIVE";
  if(!missionData){const dep=cleanICAO($("dep").value),dest=cleanICAO($("dest").value);if(!dep||!dest){alert("Enter departure and destination identifiers first.");return}missionData={departure:{icao:dep,airport:{ident:dep},runways:[],metar:null,taf:null},destination:{icao:dest,airport:{ident:dest},runways:[],metar:null,taf:null},alternate:null};}
- const p=wxPoint(which),st=manualWeather[which]; if(!p)return;
+ const p=wxPoint(which),st=manualWeather[which];if(!p)return;
  if(!st.live){st.live={metar:p.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p.pressure_altitude_ft??null,density_altitude_ft:p.density_altitude_ft??null,altimeter_inhg:p.altimeter_inhg??null};}
- if(mode==="LIVE"){const L=st.live||{};p.metar=L.metar||null;p.pressure_altitude_ft=L.pressure_altitude_ft??null;p.density_altitude_ft=L.density_altitude_ft??null;p.altimeter_inhg=L.altimeter_inhg??null;st.mode="LIVE";st.applied=false;st.entered_at=null;st.note="";}
- else{
+ if(mode==="LIVE"){
+   const L=st.live||{};p.metar=L.metar||null;p.pressure_altitude_ft=L.pressure_altitude_ft??null;p.density_altitude_ft=L.density_altitude_ft??null;p.altimeter_inhg=L.altimeter_inhg??null;st.mode="LIVE";st.applied=false;
+   // If online, refresh the mission feed so LIVE means the newest available report rather than only the pre-manual snapshot.
+   try{if(cleanICAO($("dep").value)&&cleanICAO($("dest").value)){await loadMission({preserveManualWeather:true,quiet:true});return;}}catch(e){}
+ }else{
    const oat=valueOrNull("manualWxOAT"),alt=valueOrNull("manualWxAlt"),dir=valueOrNull("manualWxDir"),spd=valueOrNull("manualWxSpeed"),gust=valueOrNull("manualWxGust");let pa=valueOrNull("manualWxPA");
-   const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation); if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;
+   const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;
    if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}
-   const now=new Date().toISOString();p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:Number.isFinite(dir)?dir:null,wind_kt:Number.isFinite(spd)?spd:null,wind_gust_kt:Number.isFinite(gust)?gust:null,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=Number.isFinite(alt)?alt:null;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("manualWxNote")?.value||"").trim();
+   const now=new Date().toISOString();st.manual_values={oat,pa:Math.round(pa),alt:Number.isFinite(alt)?alt:null,dir:Number.isFinite(dir)?dir:null,spd:Number.isFinite(spd)?spd:null,gust:Number.isFinite(gust)?gust:null};
+   p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:st.manual_values.dir,wind_kt:st.manual_values.spd,wind_gust_kt:st.manual_values.gust,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=st.manual_values.alt;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("manualWxNote")?.value||"").trim();
  }
  populatePoint(which,p);selectedRunwayChanged();if(valueOrNull("perfTOW")){syncTakeoffSection();syncLandingSection()}updateWeatherSourceBadges();updateToldCard();
  const ws=$("weatherDecodeStatus");if(ws)ws.innerHTML=weatherSourceState(which).mode==="MANUAL"?'<span class="warn">MANUAL WEATHER ACTIVE — pilot-entered values control performance for this station.</span>':'<span class="ok">LIVE / reported weather restored where available.</span>';
- const ms=$("manualWxStatus");if(ms)ms.textContent=weatherSourceState(which).mode==="MANUAL"?`MANUAL WEATHER APPLIED ${new Date(manualWeather[which].entered_at).toLocaleString()}`:"LIVE weather restored.";
+ const ms=$("manualWxStatus");if(ms)ms.textContent=weatherSourceState(which).mode==="MANUAL"?`MANUAL WEATHER UPDATED ${new Date(manualWeather[which].entered_at).toLocaleString()}`:"LIVE weather restored.";
+ updateManualWeatherActionButton();
 }
 
 
@@ -1658,7 +1689,7 @@ function resetMissionForNewTrip(){
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
  missionData=null;
- manualWeather={dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null}};
+ manualWeather={dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null}};
  updateWeatherSourceBadges();
  // Clear runway selectors and mission-derived summary/performance fields
  ["depRunway","destRunway"].forEach(id=>{const e=$(id);if(e)e.innerHTML='<option value="">Load mission first</option>'});
@@ -1671,6 +1702,15 @@ function resetMissionForNewTrip(){
 function selectFuelEntry(el){
  if(!el)return;
  requestAnimationFrame(()=>{try{el.select()}catch(e){}});
+}
+
+function initializeNewTripLanding(){
+ resetMissionForNewTrip();
+ ["homeDep","homeDest","homeAlt","homeTripNote"].forEach(id=>{if($(id))$(id).value=""});
+ if($("homeFOB"))$("homeFOB").value="0000";
+ if($("homeMissionFuel"))$("homeMissionFuel").value="0000";
+ window.currentMissionMeta=null;
+ showPlatformView("home");
 }
 
 function startNewTrip(){
@@ -1780,7 +1820,7 @@ function currentMissionSummaryText(){
    `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
    `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
-   `Obstacle Analysis: ${$("obstacleStatus")?$("obstacleStatus").value||textOf("obstacleStatus"):"Pending / not checked"}`,
+   `Auto Obstacle Review: ${departureObstacleReview?.status||"NOT_CHECKED"} • FAA NMS text scan only; not a certified clearance analysis`,
    "",
    "=== LANDING TOLD ===",
    `Airport / Runway: ${dest} / ${lr?lr.runway_id:"—"}`,
@@ -1910,6 +1950,7 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
  currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+ departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
 
  window.currentMissionMeta={
    id:record.id||newMissionId(),
@@ -2371,12 +2412,15 @@ function updateToldCard(){
  if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push("PASSENGER SEATING CHECK REQUIRED");
  if(!dr||!lr)issues.push("RUNWAY SELECTION REQUIRED");
  if(currentNotams.status!=="CHECKED")issues.push("NOTAM VERIFICATION REQUIRED");
- issues.push($("perfObs")?.value==="true"
-   ?"MANUAL OBSTACLE CLEARANCE VERIFIED • AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED"
-   :"AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED");
+ const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
+ if(obs.status==="FLAGGED")issues.push(`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`);
+ else if(obs.status!=="REVIEWED")issues.push("AUTO OBSTACLE NOTAM REVIEW REQUIRED");
+ if($("perfObs")?.value==="false")issues.push("PILOT OBSTACLE CONFLICT RECORDED");
  if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
  if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
- if(textOf("toStatus").includes("PENDING")||textOf("toStatus").includes("LOCKED"))issues.push("TAKEOFF LIMITS NOT FULLY EVALUATED");
+ const ts=textOf("toStatus");
+ if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push("TAKEOFF PERFORMANCE REVIEW REQUIRED");
+ else if(ts.includes("PERFORMANCE PASS")&&obs.status!=="REVIEWED")issues.push("TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE");
  if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
  $("toldOverall").textContent=issues.length?issues.join(" • "):"AIRCRAFT PREP / TOLD SUMMARY CURRENT — review all values before use.";
  $("toldOverall").className=issues.length?"callout small warn":"callout small ok";
@@ -2766,8 +2810,11 @@ function syncTakeoffSection(){
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
  if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(climb.pass===false)pending.push("CLIMB FAIL");
- pending.push("AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED");
- if($("perfObs").value==="false")pending.push("MANUAL OBSTACLE CHECK NOT CLEARED");
+ const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
+ if(obs.status==="FLAGGED")pending.push("AUTO OBSTACLE REVIEW FLAGGED");
+ else if(obs.status==="UNAVAILABLE")pending.push("AUTO OBSTACLE REVIEW UNAVAILABLE");
+ else if(obs.status!=="REVIEWED")pending.push("AUTO OBSTACLE REVIEW PENDING");
+ if($("perfObs").value==="false")pending.push("PILOT OBSTACLE CONFLICT");
 
  if(climb.pass===false){
    $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
@@ -3076,6 +3123,7 @@ function fillRunwaySelect(id,runways){
 }
 function selectedRunwayChanged(){
  currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+ departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
  if(!missionData)return;
  const depRw=selectedRunwayObj("dep"),destRw=selectedRunwayObj("dest");
  if(depRw){
@@ -3099,13 +3147,18 @@ function selectedRunwayChanged(){
  updateLandingRunwayAssessment();
  updateToldCard();
 }
-async function loadMission(){
+async function loadMission(options={}){
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim(),alt=$("alt").value.toUpperCase().trim();
- $("dep").value=dep;$("dest").value=dest;$("alt").value=alt;$("missionStatus").textContent="Loading airport and weather data...";
+ const preserveManualWeather=!!options.preserveManualWeather,quiet=!!options.quiet;
+ const savedManual=preserveManualWeather?JSON.parse(JSON.stringify(manualWeather)):null;
+ $("dep").value=dep;$("dest").value=dest;$("alt").value=alt;if(!quiet)$("missionStatus").textContent="Loading airport and weather data...";
  try{
    const altQuery=alt?`&alt=${encodeURIComponent(alt)}`:"";
    const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}${altQuery}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
-   manualWeather={dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null}};
+   manualWeather=savedManual||{dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null}};
+   if(savedManual){
+     ["dep","dest"].forEach(which=>{const p=which==="dep"?missionData.departure:missionData.destination,st=manualWeather[which];st.live={metar:p?.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p?.pressure_altitude_ft??null,density_altitude_ft:p?.density_altitude_ft??null,altimeter_inhg:p?.altimeter_inhg??null};st.mode="LIVE";st.applied=false;});
+   }
    $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;$("depWxIdent").textContent=dep;$("depWxIdent2").textContent=dep;$("destWxIdent").textContent=dest;$("destWxIdent2").textContent=dest;
    populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);
    if(alt&&missionData.alternate){
@@ -3140,8 +3193,8 @@ async function loadMission(){
    $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
    selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();updateWeatherSourceBadges();loadManualWeatherForm();
    setTimeout(()=>{refreshNotams().catch(()=>{});},150);
-   $("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
- }catch(e){$("missionStatus").innerHTML='<span class="bad">'+e+'</span>'}
+   if(!quiet)$("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
+ }catch(e){if(!quiet)$("missionStatus").innerHTML='<span class="bad">'+e+'</span>';throw e}
 }
 
 function enableFastNumericEntry(){
@@ -3402,7 +3455,7 @@ function updateWhatIfPlanner(force=false){
  let opsText=[];
  if(climbKnown)opsText.push(climbOK?"AFMS CLIMB PASS":"AFMS CLIMB NO-GO"); else opsText.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(brakePending)opsText.push("BRAKE PENDING");
- if(obstaclePending)opsText.push("OBSTACLE NOT CHECKED");
+ if(obstaclePending)opsText.push("OBSTACLE CLEARANCE NOT EVALUATED");
  $("whatIfOps").textContent=opsText.join(" • ");
  $("whatIfOps").className=(climbKnown&&!climbOK)?"bad":"warn";
 
@@ -3740,8 +3793,8 @@ function updateLandingRunwayAssessment(){
      note.textContent=`Runway length + NOTAM check pass • Margin ${margin} ft • ${a.state}`;
      box.className="runway-gate ok";
    }else{
-     gate.textContent="NOTAM NOT VERIFIED";
-     note.textContent=`Runway length passes by ${margin} ft, but live NOTAM verification is incomplete.`;
+     gate.textContent="NOTAM REVIEW REQUIRED";
+     note.textContent=`Runway length passes by ${margin} ft, but the FAA NMS review is unavailable or incomplete.`;
      box.className="runway-gate warn";
    }
  }
@@ -3772,6 +3825,48 @@ async function checkNotamConnection(){
    if(e){e.textContent="BACKEND NOTAM ENDPOINT UNAVAILABLE — REDEPLOY";e.className="small bad";}
    return false;
  }
+}
+
+
+function obstacleNotamText(n){
+ return String((n&&(n.raw||n.text||n.message||n.featureText||n.description))||"").toUpperCase();
+}
+function classifyObstacleNotams(items){
+ const rx=/\b(OBST|OBSTACLE|TOWER|CRANE|MAST|STACK|POLE|ANTENNA)\b/;
+ return (Array.isArray(items)?items:[]).filter(n=>rx.test(obstacleNotamText(n)));
+}
+function renderDepartureObstacleReview(){
+ const b=$("autoObstacleReview"),n=$("autoObstacleReviewNote"); if(!b||!n)return;
+ const r=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
+ if(r.status==="FLAGGED"){
+   b.textContent=`ATTENTION • ${r.items.length} OBSTACLE NOTAM${r.items.length===1?"":"S"}`;b.className="warn";
+   n.textContent="FAA NMS departure NOTAM scan found obstacle-related text. Pilot review required; this is not a takeoff obstacle-clearance analysis.";
+ }else if(r.status==="REVIEWED"){
+   b.textContent="NO OBSTACLE NOTAMS IDENTIFIED";b.className="ok";
+   n.textContent="FAA NMS departure NOTAM scan complete. This does not evaluate terrain, surveyed obstacles, departure path, or certified obstacle clearance.";
+ }else if(r.status==="UNAVAILABLE"){
+   b.textContent="AUTO REVIEW UNAVAILABLE";b.className="warn";
+   n.textContent=r.message||"FAA NMS departure NOTAM scan unavailable — manual review required.";
+ }else{
+   b.textContent="NOT CHECKED";b.className="warn";
+   n.textContent="FAA NMS departure NOTAM scan only — not a clearance analysis.";
+ }
+}
+async function refreshDepartureObstacleReview(force=false){
+ const dep=cleanICAO($("dep")?.value||"");
+ if(!dep){departureObstacleReview={status:"UNAVAILABLE",airport:null,items:[],checked_at:new Date().toISOString(),message:"Departure airport unavailable."};renderDepartureObstacleReview();return departureObstacleReview;}
+ const age=departureObstacleReview.checked_at?Date.now()-new Date(departureObstacleReview.checked_at).getTime():Infinity;
+ if(!force&&departureObstacleReview.airport===dep&&age<300000&&["REVIEWED","FLAGGED"].includes(departureObstacleReview.status)){renderDepartureObstacleReview();return departureObstacleReview;}
+ try{
+   const res=await fetch(`/api/notams?icao=${encodeURIComponent(dep)}`),j=await res.json();
+   if(!res.ok||!j.ok)throw new Error(j.message||"FAA NMS unavailable");
+   const items=Array.isArray(j.items)?j.items:[],hits=classifyObstacleNotams(items);
+   departureObstacleReview={status:hits.length?"FLAGGED":"REVIEWED",airport:dep,items:hits,checked_at:j.checked_at||new Date().toISOString(),message:null};
+ }catch(e){
+   departureObstacleReview={status:"UNAVAILABLE",airport:dep,items:[],checked_at:new Date().toISOString(),message:`FAA NMS departure obstacle review unavailable — ${String(e.message||e)}`};
+ }
+ renderDepartureObstacleReview();
+ return departureObstacleReview;
 }
 
 async function refreshNotams(){
@@ -3904,6 +3999,7 @@ function syncLandingSection(){
 }
 
 async function evaluateTakeoff(){
+ await refreshDepartureObstacleReview(false);
  const a=syncTakeoffSection();
  const fieldWt=autoFieldLimitedWeight(),climb=autoClimbAssessment();
  const sourceCeiling=takeoffFieldSourceCeilingLb(a.cfg,perfTakeoffPA(),perfTakeoffTemp());
@@ -3948,18 +4044,26 @@ async function evaluateTakeoff(){
    const pending=[];
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
    if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
-   pending.push("AUTOMATED OBSTACLE ANALYSIS NOT IMPLEMENTED");
-   if($("perfObs").value==="false")pending.push("MANUAL OBSTACLE CHECK NOT CLEARED");
+   const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
+   if($("perfObs").value==="false"){
+     $("toStatus").textContent="NO-GO • OBSTACLE CLEARANCE NOT CONFIRMED";$("toStatus").className="bad";return;
+   }
+   if(obs.status==="FLAGGED")pending.push("AUTO OBSTACLE REVIEW FLAGGED");
+   else if(obs.status==="UNAVAILABLE")pending.push("AUTO OBSTACLE REVIEW UNAVAILABLE");
+   else if(obs.status!=="REVIEWED")pending.push("AUTO OBSTACLE REVIEW PENDING");
 
    if(j.status==="GO"&&!pending.length){
-     $("toStatus").textContent=climb.noLimitation?"GO • FIELD PASS / CLIMB NOT LIMITING / OBSTACLE PASS":"GO • FIELD / CLIMB / OBSTACLE PASS";
+     $("toStatus").textContent=climb.noLimitation?"PASS • TAKEOFF PERFORMANCE • AUTO OBSTACLE REVIEW COMPLETE":"PASS • TAKEOFF PERFORMANCE / CLIMB • AUTO OBSTACLE REVIEW COMPLETE";
      $("toStatus").className="ok";
-     const gradText=Number.isFinite(climb.gradient)?`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`:`QRH GRADIENT REFERENCE UNAVAILABLE`;
-     $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • ${gradText} • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • manual obstacle verification recorded; automated obstacle analysis not implemented.`;
+   }else if(j.status==="GO"&&Number.isFinite(fieldWt)&&Number.isFinite(climb.limit)){
+     $("toStatus").textContent=obs.status==="FLAGGED"?"PERFORMANCE PASS • OBSTACLE NOTAM REVIEW REQUIRED":"PERFORMANCE PASS • AUTO OBSTACLE REVIEW INCOMPLETE";
+     $("toStatus").className="warn";
    }else{
      $("toStatus").textContent=pending.length?`PENDING • ${pending.join(" • ")}`:"TABLE DATA READY";
      $("toStatus").className="warn";
    }
+   const gradText=Number.isFinite(climb.gradient)?`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`:`QRH GRADIENT REFERENCE UNAVAILABLE`;
+   $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • ${gradText} • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • FAA NMS automated obstacle NOTAM review: ${obs.status}; not a certified obstacle-clearance analysis.`;
  }catch(e){
    $("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";
    $("toLimit").textContent=String(e.message||e);
@@ -3985,7 +4089,17 @@ async function evaluateLanding(){
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- try{const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();$("missionStatus").innerHTML=`<span class="${j.awc_metar?'ok':'bad'}">FlightOps server online — ${j.awc_metar?'weather connected':'weather unavailable'}</span>`}catch(e){$("missionStatus").innerHTML='<span class="bad">FlightOps server unavailable: '+e+'</span>'}
+ const expected="5.22.3",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ try{
+   const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
+   const buildOk=String(j.build||"")===expected;
+   if(bs){bs.textContent=buildOk?"MATCHED":"UPDATE / REDEPLOY REQUIRED";bs.className=buildOk?"ok":"bad"}if(bn)bn.textContent=`Browser ${expected} • Server ${j.build||"unknown"}`;
+   const runwayCount=Number(j.runway_airports_loaded||0);if(rs){rs.textContent=runwayCount>0?"READY":"PACKAGED DATA MISSING";rs.className=runwayCount>0?"ok":"bad"}if(rn)rn.textContent=`${runwayCount.toLocaleString()} packaged airport entr${runwayCount===1?"y":"ies"} • FAA NASR live fallback ${j.nasr_live?"enabled":"unavailable"}`;
+   const wx=!!j.awc_metar,nms=!!j.nms?.authenticated;if(ls){ls.textContent=(wx&&nms)?"ONLINE":(wx||nms)?"PARTIAL":"OFFLINE";ls.className=(wx&&nms)?"ok":(wx||nms)?"warn":"bad"}if(ln)ln.textContent=`Weather ${wx?"online":"unavailable"} • FAA NMS ${nms?"authenticated":"unavailable"}`;
+   if(notice){if(!buildOk||runwayCount<1){notice.innerHTML='<span class="bad"><b>DATA ACTION REQUIRED.</b> Required packaged data or app/server version is not ready. Redeploy/update before relying on mission calculations.</span>';}else if(!wx||!nms){notice.innerHTML='<span class="warn"><b>LOCAL DATA READY.</b> One or more live services are unavailable. Manual weather / manual review may be required. No manual data download is needed unless a required packaged dataset is reported missing.</span>';}else{notice.innerHTML='<span class="ok"><b>LOCAL DATA READY • LIVE SERVICES ONLINE.</b></span> No manual data download is required.';}}
+   if($("missionStatus"))$("missionStatus").innerHTML=`<span class="${wx?'ok':'warn'}">FlightOps server online — ${wx?'weather connected':'weather unavailable'}</span>`;
+ }catch(e){
+   if(bs){bs.textContent="SERVER UNAVAILABLE";bs.className="bad"}if(rs){rs.textContent="LOCAL APP ONLY";rs.className="warn"}if(ls){ls.textContent="OFFLINE";ls.className="warn"}if(ln)ln.textContent="Live weather / FAA NMS unavailable";if(notice)notice.innerHTML='<span class="warn"><b>OFFLINE MODE.</b> Embedded Performance + W&amp;B logic remains available after the app is loaded, but live weather, NOTAM, and FAA NASR requests are unavailable. Use manual inputs and independent source verification.</span>';if($("missionStatus"))$("missionStatus").innerHTML='<span class="warn">FlightOps live server unavailable — manual/offline inputs may be used.</span>';}
 }
 
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
@@ -4018,8 +4132,8 @@ $("perfObs").addEventListener("change",recalculate);
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
 setPerformanceInputMode();
+initializeNewTripLanding();
 startupCheck();
-showPlatformView("home");
 updateHomeArchiveCount();
 addEventListener("resize",recalculate);
 </script>
