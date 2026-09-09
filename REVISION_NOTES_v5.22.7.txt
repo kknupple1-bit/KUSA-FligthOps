@@ -1,0 +1,8 @@
+KUSA FlightOps v5.22.7 — Startup/Menu View Isolation Fix
+
+Changes:
+- Hard-defaults startup rendering to Menu only.
+- New Trip, Mission, TOLD, and Flight Plans views are hidden in the HTML until explicitly selected.
+- Prevents multiple page sections from appearing together if JavaScript startup is delayed, cached, or interrupted.
+- Retains v5.22.6 navigation cleanup, Menu landing, startup data status, auto-drafts, NMS/weather, and performance logic.
+- Build diagnostics updated to 5.22.7.
