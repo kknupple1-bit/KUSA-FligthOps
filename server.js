@@ -24,7 +24,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.21.1",
+    build:"5.21.2",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -50,7 +50,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.21.1"
+      "User-Agent":"KUSA-FlightOps/5.21.2"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -288,8 +288,8 @@ app.get("/api/notams/ping",async(req,res)=>{
   try{
     let token=await getNmsAccessToken();
     const u=`${NMS_BASE_URL}/ping`;
-    let r=await fetch(u,{headers:{"Authorization":`Bearer ${token}`,"Accept":"application/json","User-Agent":"KUSA-FlightOps/5.21.1"},cache:"no-store"});
-    if(r.status===401){token=await getNmsAccessToken(true);r=await fetch(u,{headers:{"Authorization":`Bearer ${token}`,"Accept":"application/json","User-Agent":"KUSA-FlightOps/5.21.1"},cache:"no-store"});}
+    let r=await fetch(u,{headers:{"Authorization":`Bearer ${token}`},cache:"no-store"});
+    if(r.status===401){token=await getNmsAccessToken(true);r=await fetch(u,{headers:{"Authorization":`Bearer ${token}`},cache:"no-store"});}
     const text=await r.text();
     let body=null;try{body=JSON.parse(text)}catch{}
     if(!r.ok){
@@ -324,7 +324,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.21.1"
+      "User-Agent":"KUSA-FlightOps/5.21.2"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
