@@ -429,3 +429,12 @@ v5.11 TOLD 40C / MTOW QUICK REFERENCE
 - No extrapolation: if the 40°C / 40,780 lb point is outside the digitized source grid, TOLD shows SOURCE LOCKED rather than inventing a BFL.
 - Wet runway quick-reference remains source locked until the applicable wet-runway source is validated.
 - The 40°C / MTOW reference is also included in the comprehensive TOLD email/archive summary.
+
+
+v5.12 FAST NUMERIC ENTRY / MOBILE KEYPAD
+- All editable numeric fields select their entire existing value on focus/click/tap.
+- The next digit entered replaces the old value without requiring backspace/delete.
+- Editable numeric fields explicitly request the numeric keypad on iPhone, iPad, and Android.
+- Added inputmode=decimal and enterkeyhint=done to editable number inputs.
+- Applies to crew weights, fuel, baggage, manual runway length, WHAT-IF numeric inputs, and other editable numeric fields.
+- Read-only calculated fields remain protected and are not modified.
