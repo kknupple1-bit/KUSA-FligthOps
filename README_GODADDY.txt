@@ -376,3 +376,16 @@ v5.6 TAKEOFF OPERATIONAL LIMIT CLEANUP
 - If climb limit is the only unresolved item, status explicitly reads FIELD LIMIT PASS • CLIMB LIMIT PENDING.
 - No climb-limited weight is invented. It remains source-locked until the applicable climb-limit chart is digitized and validated.
 - Wet runway field-limit logic remains source locked.
+
+
+v5.7 QRH SECOND-SEGMENT CLIMB INTEGRATION
+- Integrated Dassault Falcon 50B QRH1 takeoff GCLB2 data from pages 50-10 through 50-13.
+- Digitized Slats and Slats + Flaps 20°, A/I OFF and A/I ON, PA 0/2,000/4,000/6,000 ft.
+- Added Takeoff Anti-Ice selector.
+- Second Segment Gross Gradient is now automatic/read-only.
+- Climb-Limited Weight is now automatic/read-only.
+- Uses 2.7% gross second-segment climb minimum for a three-engine airplane as the takeoff climb gate.
+- Interpolation is allowed only inside published QRH cells; no extrapolation.
+- If published QRH coverage ends before the structural maximum, the app uses the highest validated published weight as a conservative coverage cap and identifies that condition.
+- Takeoff status can now show GO • FIELD / CLIMB / OBSTACLE PASS when field, QRH climb, and manually verified obstacle gates all pass.
+- Falcon 50B QRH climb data remains an internal-beta validation source for N33AP; Dash-4 AFMS applicability must still be confirmed before operational approval.
