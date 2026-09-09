@@ -334,3 +334,26 @@ v5.2 DESTINATION RUNWAY / NOTAM + TOLD TIMESTAMP
 - Added NOTAM and runway availability information to TOLD and comprehensive email.
 - Added generated date/time stamp to TOLD card.
 - Carries forward v5.1.1 500-lb emergency return fuel default.
+
+
+v5.3 INTERNAL BETA CLEANUP
+- New Trip Fuel Plan wording cleaned for mobile/iPad:
+  * Fuel on Board (FOB) lb -> placeholder "Enter FOB"
+  * Mission Required Fuel lb -> placeholder "Enter Fuel"
+- Fuel Plan inputs sized for narrower screens.
+- Added persistent INTERNAL BETA / NOT APPROVED FOR FLIGHT USE banner.
+- TOLD overall status now explicitly calls out NOTAM verification and unimplemented obstacle analysis when unresolved.
+- Carries forward v5.2 NOTAM/runway assessment and TOLD date/time stamp.
+- Carries forward 500 lb default emergency return fuel burn.
+
+
+v5.4 MULTI-LEG FLIGHT PLAN ARCHIVE
+- Archive renamed to Completed Flight Plans.
+- Complete & Archive Flight Plan replaces Complete & Archive Mission terminology.
+- Added Flight Plan / Leg Name on New Trip.
+- Archived plans preserve route, crew, passengers, seating, baggage, fuel, selected runways, runway conditions/configuration, NOTAM manual overrides, and WHAT-IF state.
+- Added Open / Edit to reopen an archived leg for review or revision.
+- Re-saving an opened plan updates the same archived flight plan.
+- Added Duplicate to create a copy for a next leg or alternate planning scenario.
+- Multi-leg workflow supported: build/archive Leg 1, Leg 2, Leg 3, then reopen any leg and revise.
+- FOB verification and low-fuel confirmation intentionally reset when reopening a plan and must be re-confirmed.
