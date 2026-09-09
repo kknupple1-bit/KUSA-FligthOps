@@ -438,3 +438,38 @@ v5.12 FAST NUMERIC ENTRY / MOBILE KEYPAD
 - Added inputmode=decimal and enterkeyhint=done to editable number inputs.
 - Applies to crew weights, fuel, baggage, manual runway length, WHAT-IF numeric inputs, and other editable numeric fields.
 - Read-only calculated fields remain protected and are not modified.
+
+
+v5.13 PASSENGER COUNT FAST ENTRY
+- Number of Passengers now uses the same replace-on-entry behavior as crew weights and other editable numeric fields.
+- Tap/click/focus selects the entire existing passenger count so the next number replaces it.
+- iPhone/iPad explicitly request the integer numeric keypad for passenger count.
+- Passenger count remains constrained by the existing min/max values.
+
+
+v5.14 AIRPORT/RUNWAY FALLBACK PROCESSOR
+- Fallback block now pulls individual runway ends from the loaded airport data.
+- Departure/Destination target selector repopulates the fallback runway list automatically.
+- Selecting a runway auto-populates runway ID, length, heading, width and surface.
+- MANUAL ENTRY remains available when airport runway data are unavailable.
+- PROCESS RUNWAY / WEATHER calculates headwind, tailwind and crosswind from the loaded METAR for the selected runway end.
+- Departure fallback runs the current actual TOW/OAT/PA/configuration against the available runway using the existing BFL table engine.
+- Destination fallback runs current landing LFL against the selected runway.
+- Fallback Status is GREEN GO only when the implemented field-length check passes.
+- Missing weather, missing performance source coverage, or wet-runway source lock is RED NO-GO / NOT EVALUATED.
+- No crosswind or tailwind operational limit is invented; components are displayed for pilot review.
+- Selected fallback runway is synchronized back to the active mission runway selector and TOLD.
+
+
+v5.15 40C MAX-TOW + FAA NOTAM CORRECTION
+- 40°C TOLD reference no longer blindly requests structural 40,780 lb when that exact point is outside source coverage.
+- It now solves the maximum source-supported/field-allowable takeoff weight at 40°C for the active runway, pressure altitude and configuration, then reports its BFL and runway margin.
+- TOLD now distinguishes 40°C Max Allowable TOW from structural MTOW.
+- No extrapolation is used.
+- Fixed a server defect where NOTAM_API_URL / NOTAM_API_KEY were referenced without being defined.
+- Standardized server variables to FAA_NOTAM_API_URL and FAA_NOTAM_API_KEY, with backward-compatible NOTAM_API_URL / NOTAM_API_KEY aliases.
+- FAA NOTAM query now uses icaoLocation and X-API-KEY, matching the official FAA NOTAM API access model.
+- Added support for common JSON and GeoJSON response shapes.
+- NOTAM retrieval now runs automatically after mission airport/weather data load.
+- Landing runway assessment immediately evaluates the returned NOTAM set against the actual selected runway end.
+- If FAA NOTAM API credentials are absent, the app explicitly remains NOT VERIFIED; it never produces a false checked state.

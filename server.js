@@ -3,6 +3,16 @@ const path = require("path");
 const fs = require("fs");
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+const FAA_NOTAM_API_URL =
+  process.env.FAA_NOTAM_API_URL ||
+  process.env.NOTAM_API_URL ||
+  "";
+const FAA_NOTAM_API_KEY =
+  process.env.FAA_NOTAM_API_KEY ||
+  process.env.NOTAM_API_KEY ||
+  "";
+
 const AWC = "https://aviationweather.gov/api/data";
 const NASR_RUNWAYS = "https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/Runways_View/FeatureServer/0/query";
 
@@ -158,25 +168,97 @@ function evalLanding(p){
 }
 
 app.get("/api/health",(req,res)=>res.json({ok:true,build:"4.7.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length}));
-app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,build:"4.7.0",awc_metar:ok,awc_message:msg,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true});});
+app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,build:"4.7.0",awc_metar:ok,awc_message:msg,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,notam_api_configured:!!(FAA_NOTAM_API_URL&&FAA_NOTAM_API_KEY)});});
 
 app.get("/api/notams",async(req,res)=>{
   const icao=String(req.query.icao||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
   if(!icao)return res.status(400).json({ok:false,source:"NONE",message:"ICAO required"});
-  if(!NOTAM_API_URL||!NOTAM_API_KEY){
-    return res.status(503).json({ok:false,source:"NONE",configured:false,message:"Live NOTAM API not configured. Manual NOTAM verification required."});
+
+  if(!FAA_NOTAM_API_URL||!FAA_NOTAM_API_KEY){
+    return res.status(503).json({
+      ok:false,
+      source:"FAA NOTAM API",
+      configured:false,
+      message:"FAA NOTAM API credentials are not configured on the server.",
+      required_env:["FAA_NOTAM_API_URL","FAA_NOTAM_API_KEY"]
+    });
   }
+
   try{
-    const url=new URL(NOTAM_API_URL);url.searchParams.set("icao",icao);
-    const r=await fetch(url,{headers:{"Accept":"application/json","Authorization":`Bearer ${NOTAM_API_KEY}`,"x-api-key":NOTAM_API_KEY}});
+    const url=new URL(FAA_NOTAM_API_URL);
+    // FAA NOTAM API uses ICAO location filtering.
+    if(!url.searchParams.has("icaoLocation"))url.searchParams.set("icaoLocation",icao);
+
+    const r=await fetch(url,{
+      headers:{
+        "Accept":"application/json",
+        "X-API-KEY":FAA_NOTAM_API_KEY
+      },
+      cache:"no-store"
+    });
+
     const txt=await r.text();
-    if(!r.ok)return res.status(502).json({ok:false,source:"FAA NOTAM",message:`NOTAM service HTTP ${r.status}`});
-    let data;try{data=JSON.parse(txt)}catch{data={raw:txt}}
-    const arr=Array.isArray(data)?data:Array.isArray(data.items)?data.items:Array.isArray(data.notams)?data.notams:Array.isArray(data.results)?data.results:[];
-    const items=arr.map(x=>typeof x==="string"?{raw:x}:{raw:x.raw||x.text||x.message||x.notamText||x.traditionalMessage||x.description||JSON.stringify(x)});
-    res.json({ok:true,source:"FAA NOTAM",icao,items});
+    if(!r.ok){
+      return res.status(502).json({
+        ok:false,
+        source:"FAA NOTAM API",
+        configured:true,
+        message:`FAA NOTAM API HTTP ${r.status}`
+      });
+    }
+
+    let data;
+    try{data=JSON.parse(txt)}catch{
+      return res.status(502).json({ok:false,source:"FAA NOTAM API",message:"FAA NOTAM API returned non-JSON data."});
+    }
+
+    // Support common FAA API response shapes, including GeoJSON FeatureCollection.
+    let arr=[];
+    if(Array.isArray(data))arr=data;
+    else if(Array.isArray(data.items))arr=data.items;
+    else if(Array.isArray(data.notams))arr=data.notams;
+    else if(Array.isArray(data.results))arr=data.results;
+    else if(Array.isArray(data.features))arr=data.features;
+
+    const items=arr.map(x=>{
+      if(typeof x==="string")return{raw:x};
+      const p=x?.properties||x||{};
+      const raw=
+        p.traditionalMessage ||
+        p.notamText ||
+        p.raw ||
+        p.text ||
+        p.message ||
+        p.description ||
+        p.icaoMessage ||
+        p.plainText ||
+        "";
+      return{
+        raw:String(raw||JSON.stringify(p)),
+        notamNumber:p.notamNumber||p.number||null,
+        effectiveStartDate:p.effectiveStartDate||p.startDate||null,
+        effectiveEndDate:p.effectiveEndDate||p.endDate||null,
+        featureType:p.featureType||null
+      };
+    }).filter(x=>x.raw);
+
+    res.set("Cache-Control","no-store");
+    res.json({
+      ok:true,
+      configured:true,
+      source:"FAA NOTAM API",
+      icao,
+      count:items.length,
+      checked_at:new Date().toISOString(),
+      items
+    });
   }catch(e){
-    res.status(502).json({ok:false,source:"FAA NOTAM",message:"NOTAM service request failed"});
+    res.status(502).json({
+      ok:false,
+      source:"FAA NOTAM API",
+      configured:true,
+      message:`FAA NOTAM request failed: ${String(e.message||e)}`
+    });
   }
 });
 
