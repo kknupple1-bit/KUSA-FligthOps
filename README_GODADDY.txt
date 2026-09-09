@@ -357,3 +357,22 @@ v5.4 MULTI-LEG FLIGHT PLAN ARCHIVE
 - Added Duplicate to create a copy for a next leg or alternate planning scenario.
 - Multi-leg workflow supported: build/archive Leg 1, Leg 2, Leg 3, then reopen any leg and revise.
 - FOB verification and low-fuel confirmation intentionally reset when reopening a plan and must be re-confirmed.
+
+
+v5.5 NEW TRIP INPUT CLEANUP
+- Removed Flight Plan / Leg Name field from New Trip.
+- Archived flight plans are identified by route and saved date/time.
+- Fuel Plan inputs now display 0000 by default with no placeholder wording.
+- Tapping/clicking either fuel field selects all four digits so the pilot can immediately type the correct value.
+- New Trip Fuel Plan labels shortened to FOB lb and Mission Fuel lb.
+- Multi-leg archive Open/Edit/Duplicate workflow remains intact.
+
+
+v5.6 TAKEOFF OPERATIONAL LIMIT CLEANUP
+- Field-Limited Weight now auto-solves from the digitized dry BFL table using configuration, pressure altitude, OAT, and available runway length.
+- Field-Limited Weight is read-only and no longer a manual pilot entry.
+- Evaluate Takeoff no longer reports FIELD LIMIT pending when the source grid supports an automatic field limit.
+- Obstacle Analysis = Verified clear is treated as satisfied.
+- If climb limit is the only unresolved item, status explicitly reads FIELD LIMIT PASS • CLIMB LIMIT PENDING.
+- No climb-limited weight is invented. It remains source-locked until the applicable climb-limit chart is digitized and validated.
+- Wet runway field-limit logic remains source locked.
