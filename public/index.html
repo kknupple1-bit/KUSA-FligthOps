@@ -344,7 +344,7 @@ details summary{cursor:pointer;margin-top:8px}
 
 .newtrip-fuel{border:2px solid #315a80;background:#06182c;border-radius:12px;padding:14px;margin-top:14px}
 .newtrip-fuel h3{margin:0 0 8px}
-.newtrip-fuel .fuel-big input{font-size:20px;font-weight:800}
+.newtrip-fuel .fuel-big input{font-size:18px;font-weight:800;min-width:0;width:100%}
 .newtrip-fuel-note{margin-top:8px;color:var(--muted);font-size:12px}
 
 
@@ -360,13 +360,17 @@ details summary{cursor:pointer;margin-top:8px}
 .told-stamp{font-size:12px;font-weight:800;letter-spacing:.03em;margin-top:6px}
 @media(max-width:900px){.notam-grid{grid-template-columns:1fr 1fr}}
 
+.beta-banner{border:2px solid #8a6d1d;background:#2a2207;color:#fff3bf;border-radius:10px;padding:10px 12px;margin:10px 0;font-weight:800;text-align:center}
+
+.archive-legtag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 7px;font-size:11px;margin-left:6px}
+.archive-actions button.primary-open{background:#173a5c}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.2</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.4</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -374,10 +378,11 @@ details summary{cursor:pointer;margin-top:8px}
 <button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">New Trip</button>
 <button id="opsTabBtn" type="button" onclick="showPlatformView('ops')">Mission</button>
 <button id="toldTabBtn" type="button" onclick="showPlatformView('told')">TOLD</button>
-<button id="archiveTabBtn" type="button" onclick="showPlatformView('archive')">Archive</button>
+<button id="archiveTabBtn" type="button" onclick="showPlatformView('archive')">Flight Plans</button>
 </div>
 <div class="status warn">DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE</div>
 </header>
+<div class="beta-banner">INTERNAL BETA — DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE</div>
 <main>
 <div id="homeView">
   <div class="home-shell">
@@ -413,7 +418,8 @@ details summary{cursor:pointer;margin-top:8px}
           </div>
           <div class="row" style="margin-top:10px">
             <div><label>Alternate ICAO</label><input id="homeAlt" maxlength="4" placeholder="optional"></div>
-            <div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
+            <div><label>Flight Plan / Leg Name</label><input id="homePlanName" placeholder="e.g. Leg 1 — BPT to DAL"></div>
+<div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
           </div>
 
           <div class="newtrip-fuel">
@@ -421,11 +427,11 @@ details summary{cursor:pointer;margin-top:8px}
             <div class="row">
               <div class="fuel-big">
                 <label>Fuel on Board (FOB) lb</label>
-                <input id="homeFOB" type="number" min="0" max="15514" step="50" placeholder="Enter actual FOB">
+                <input id="homeFOB" type="number" min="0" max="15514" step="50" placeholder="Enter FOB">
               </div>
               <div class="fuel-big">
                 <label>Mission Required Fuel lb</label>
-                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" placeholder="Enter planned mission fuel">
+                <input id="homeMissionFuel" type="number" min="0" max="15514" step="50" placeholder="Enter Fuel">
               </div>
             </div>
             <div class="newtrip-fuel-note">
@@ -439,7 +445,7 @@ details summary{cursor:pointer;margin-top:8px}
         <div class="home-panel">
           <h3 style="margin-top:0">Beta Test Notes</h3>
           <div class="small">Use real routes and realistic loading scenarios, but independently verify every result against approved aircraft data. Report anything confusing, missing, or inconsistent.</div>
-          <div style="margin-top:12px"><b id="homeArchiveCount">0</b> completed missions in local Archive.</div>
+          <div style="margin-top:12px"><b id="homeArchiveCount">0</b> completed flight plans in local Archive.</div>
         </div>
       </div>
     </div>
@@ -450,7 +456,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="mission-actionbar">
   <button type="button" onclick="showPlatformView('home')">← New Trip</button>
   <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
-  <button type="button" onclick="completeMission()">Complete & Archive Mission</button>
+  <button type="button" onclick="completeMission()">Complete & Archive Flight Plan</button>
 </div>
 
 <div class="card">
@@ -1027,7 +1033,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <button type="button" onclick="shareCurrentMission()">Share</button>
     <button type="button" onclick="emailCurrentMission()">Email</button>
     <button type="button" onclick="window.print()">Print</button>
-    <button type="button" onclick="completeMission()">Complete & Archive Mission</button>
+    <button type="button" onclick="completeMission()">Complete & Archive Flight Plan</button>
   </div>
 </div>
 
@@ -1139,13 +1145,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Verify th
   <div class="card" style="max-width:1050px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
       <div>
-        <h2 style="margin-bottom:4px">Completed Mission Archive</h2>
-        <div class="small">Completed missions only. Stored locally in this browser during beta.</div>
+        <h2 style="margin-bottom:4px">Completed Flight Plans</h2>
+        <div class="small">Completed flight plans. Reopen any leg to review or revise it. Stored locally in this browser during beta.</div>
       </div>
       <button type="button" style="width:auto" onclick="renderArchive()">Refresh</button>
     </div>
     <div class="callout small" style="margin-top:10px">
-A mission appears here only after <b>Complete &amp; Archive Mission</b> is selected. During beta, completed missions are stored locally in this browser/device.
+A flight plan appears here after <b>Complete &amp; Archive Flight Plan</b> is selected. Build and retain multiple legs, then reopen any leg to review or revise it. During beta, flight plans are stored locally in this browser/device.
 </div>
 <div id="archiveList" class="archive-list" style="margin-top:14px"></div>
   </div>
@@ -1318,6 +1324,7 @@ function startNewTrip(){
  window.currentMissionMeta={
    id:newMissionId(),
    aircraft:$("homeAircraft").value||"N33AP",
+   plan_name:$("homePlanName")?.value?.trim()||`${dep}-${dest}`,
    note:$("homeTripNote").value.trim(),
    initial_fob_lb:Math.round(fob),
    planned_mission_fuel_lb:Math.round(missionFuel),
@@ -1427,7 +1434,7 @@ async function shareCurrentMission(){
  try{
    if(navigator.share){await navigator.share({title,text});return}
    await navigator.clipboard.writeText(text);
-   alert("Mission summary copied to clipboard.");
+   alert("Flight plan TOLD copied to clipboard.");
  }catch(e){
    if(e&&e.name!=="AbortError")alert("Unable to share automatically. Use Email or Print.");
  }
@@ -1437,19 +1444,125 @@ function emailCurrentMission(){
  const body=encodeURIComponent(currentMissionSummaryText());
  window.location.href=`mailto:?subject=${subject}&body=${body}`;
 }
-function buildArchiveRecord(){
- const c=latestCalc||{};
+
+function captureCurrentPlanState(){
  const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
- return {
+ return{
+   dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
+   aircraft:$("homeAircraft")?.value||"N33AP",
+   plan_name:(window.currentMissionMeta&&window.currentMissionMeta.plan_name)||$("homePlanName")?.value?.trim()||"",
+   note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNote")?.value?.trim()||"",
+   captain_weight_lb:num("captWt"),fo_weight_lb:num("foWt"),
+   fob_lb:num("fuel"),mission_fuel_lb:num("missionFuel"),taxi_fuel_lb:num("taxiFuel"),
+   emer_return_fuel_burn_lb:num("emerReturnBurn"),
+   passengers:passengers.map(p=>({...p})),
+   seat_assignments:[...seatAssignments],
+   baggage:baggageLoadsFromUI(),
+   dep_runway_id:dr?dr.runway_id:null,dest_runway_id:lr?lr.runway_id:null,
+   takeoff_condition:$("toRunwayCondition")?.value||"DRY",
+   landing_condition:$("landRunwayCondition")?.value||"DRY",
+   takeoff_config:$("toConfig")?.value||"S20",
+   landing_config:$("landConfig")?.value||"S48",
+   manual_usable_lda:valueOrNull("manualUsableLda"),
+   manual_runway_status:$("manualRunwayStatusOverride")?.value||"",
+   manual_notam_note:$("manualNotamNote")?.value||"",
+   performance_mode:$("perfInputMode")?.value||"LIVE",
+   what_if:{
+     pa:valueOrNull("manualTOPA"),
+     oat:valueOrNull("manualTOTemp"),
+     weight:valueOrNull("manualTOWeight"),
+     runway_length:valueOrNull("manualTORwyLen")
+   }
+ };
+}
+
+function selectArchivedRunway(selectId,runwayId){
+ const sel=$(selectId);if(!sel||!runwayId)return;
+ const options=[...sel.options];
+ const ix=options.findIndex(o=>String(o.textContent||"").trim().startsWith(String(runwayId)) || String(o.dataset?.runway||"")===String(runwayId));
+ if(ix>=0)sel.selectedIndex=ix;
+}
+
+async function restoreArchivedFlightPlan(record,index){
+ if(!record)return;
+ const s=record.state||{};
+ resetMissionForNewTrip();
+
+ $("dep").value=s.dep||record.dep||"";
+ $("dest").value=s.dest||record.dest||"";
+ $("alt").value=s.alt||record.alt||"";
+
+ if($("homePlanName"))$("homePlanName").value=s.plan_name||record.plan_name||"";
+ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
+
+ if(Number.isFinite(Number(s.captain_weight_lb)))$("captWt").value=s.captain_weight_lb;
+ if(Number.isFinite(Number(s.fo_weight_lb)))$("foWt").value=s.fo_weight_lb;
+ if(Number.isFinite(Number(s.fob_lb)))$("fuel").value=s.fob_lb;
+ if(Number.isFinite(Number(s.mission_fuel_lb)))$("missionFuel").value=s.mission_fuel_lb;
+ if(Number.isFinite(Number(s.taxi_fuel_lb)))$("taxiFuel").value=s.taxi_fuel_lb;
+ if(Number.isFinite(Number(s.emer_return_fuel_burn_lb)))$("emerReturnBurn").value=s.emer_return_fuel_burn_lb;
+
+ passengers=Array.isArray(s.passengers)?s.passengers.map(p=>({...p})):[];
+ seatAssignments=Array.isArray(s.seat_assignments)?[...s.seat_assignments]:Array(9).fill(null);
+ $("paxRequested").value=passengers.length;
+ renderSeating();
+
+ if(Array.isArray(s.baggage)){
+   ["bagComp0","bagComp1","bagComp2"].forEach((id,i)=>{
+     if($(id)&&Number.isFinite(Number(s.baggage[i])))$(id).value=s.baggage[i];
+   });
+ }
+
+ if($("toRunwayCondition")&&s.takeoff_condition)$("toRunwayCondition").value=s.takeoff_condition;
+ if($("landRunwayCondition")&&s.landing_condition)$("landRunwayCondition").value=s.landing_condition;
+ if($("toConfig")&&s.takeoff_config)$("toConfig").value=s.takeoff_config;
+ if($("landConfig")&&s.landing_config)$("landConfig").value=s.landing_config;
+
+ if($("manualUsableLda"))$("manualUsableLda").value=Number.isFinite(Number(s.manual_usable_lda))?s.manual_usable_lda:"";
+ if($("manualRunwayStatusOverride"))$("manualRunwayStatusOverride").value=s.manual_runway_status||"";
+ if($("manualNotamNote"))$("manualNotamNote").value=s.manual_notam_note||"";
+
+ if($("fobVerified"))$("fobVerified").checked=false;
+ if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
+ currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+
+ window.currentMissionMeta={
+   id:record.id||newMissionId(),
+   aircraft:s.aircraft||record.aircraft||"N33AP",
+   plan_name:s.plan_name||record.plan_name||`${record.dep||""}-${record.dest||""}`,
+   note:s.note||record.note||"",
+   started_at:new Date().toISOString(),
+   completed:false,
+   reopened_from_archive:true,
+   source_archive_index:index
+ };
+
+ showPlatformView("ops");
+ try{await loadMission()}catch(e){}
+ setTimeout(()=>{
+   selectArchivedRunway("depRunway",s.dep_runway_id||record.dep_runway);
+   selectArchivedRunway("destRunway",s.dest_runway_id||record.dest_runway);
+   selectedRunwayChanged();
+   recalculate();
+   updateFOBVerifyLabel();
+   updateToldCard();
+ },300);
+}
+
+function buildArchiveRecord(){
+ const c=latestCalc||{},dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest"),state=captureCurrentPlanState();
+ return{
    id:(window.currentMissionMeta&&window.currentMissionMeta.id)||newMissionId(),
    aircraft:"N33AP",
-   note:(window.currentMissionMeta&&window.currentMissionMeta.note)||"",
+   plan_name:(window.currentMissionMeta&&window.currentMissionMeta.plan_name)||state.plan_name||`${state.dep}-${state.dest}`,
+   note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||"",
    started_at:(window.currentMissionMeta&&window.currentMissionMeta.started_at)||null,
    completed_at:new Date().toISOString(),
-   dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
+   dep:state.dep,dest:state.dest,alt:state.alt,
    dep_runway:dr?dr.runway_id:null,dest_runway:lr?lr.runway_id:null,
    takeoff_condition:$("toRunwayCondition")?.value||null,landing_condition:$("landRunwayCondition")?.value||null,
    fob_lb:Math.round(num("fuel")),fob_verified:!!$("fobVerified")?.checked,
+   mission_fuel_lb:Math.round(num("missionFuel")),
    zfw_lb:Number.isFinite(c.zfw)?Math.round(c.zfw):null,
    ramp_lb:Number.isFinite(c.ramp)?Math.round(c.ramp):null,
    tow_lb:Number.isFinite(c.tow)?Math.round(c.tow):null,
@@ -1458,55 +1571,81 @@ function buildArchiveRecord(){
    takeoff_cg:Number.isFinite(c.takeoffPct)?Number(c.takeoffPct.toFixed(2)):null,
    landing_cg:Number.isFinite(c.landingPct)?Number(c.landingPct.toFixed(2)):null,
    to_status:textOf("toStatus"),ldg_status:textOf("landStatus"),
-   summary:currentMissionSummaryText()
+   notam_status:currentNotams?.status||"NOT_CHECKED",
+   summary:currentMissionSummaryText(),
+   state
  };
 }
 function completeMission(){
  const dep=cleanICAO($("dep").value),dest=cleanICAO($("dest").value);
- if(!dep||!dest){alert("Start a mission before completing it.");return}
+ if(!dep||!dest){alert("Start a flight plan before archiving it.");return}
  const problems=[];
  if(!$("fobVerified")?.checked)problems.push("FOB is not verified");
  if(latestCalc?.lowLandingFuel&&!latestCalc?.lowLandingFuelConfirmed)problems.push("landing fuel below 3,000 lb is not confirmed");
  if(problems.length){
-   const ok=confirm("Mission has unresolved safety confirmations:\n\n• "+problems.join("\n• ")+"\n\nComplete and archive anyway?");
+   const ok=confirm("Flight plan has unresolved safety confirmations:\n\n• "+problems.join("\n• ")+"\n\nArchive the flight plan anyway?");
    if(!ok)return;
  }
- const rec=buildArchiveRecord();
- const arr=getMissionArchive();
+ const rec=buildArchiveRecord(),arr=getMissionArchive();
  const ix=arr.findIndex(x=>x.id===rec.id);
  if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionArchive(arr.slice(0,100));
  if(window.currentMissionMeta)window.currentMissionMeta.completed=true;
  renderArchive();
- alert("Mission completed and saved to Archive on this device/browser.");
+ alert("Flight plan saved to Archive on this device/browser.");
  showPlatformView("archive");
 }
 function renderArchive(){
  const list=$("archiveList");if(!list)return;
  const arr=getMissionArchive();
- if(!arr.length){list.innerHTML='<div class="callout small">No completed missions yet.</div>';return}
+ if(!arr.length){list.innerHTML='<div class="callout small">No completed flight plans yet.</div>';return}
  list.innerHTML=arr.map((m,i)=>{
    const dt=m.completed_at?new Date(m.completed_at).toLocaleString():"—";
+   const planName=m.plan_name||m.state?.plan_name||`${m.dep||"—"} → ${m.dest||"—"}`;
    return `<div class="archive-item">
      <div class="archive-head">
-       <div><div class="archive-route">${m.dep||"—"} → ${m.dest||"—"}</div>
-       <div class="archive-meta">${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div></div>
+       <div>
+         <div class="archive-route">${esc(planName)} <span class="archive-legtag">${m.dep||"—"} → ${m.dest||"—"}</span></div>
+         <div class="archive-meta">${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div>
+       </div>
        <div class="status ${String(m.to_status).includes("NO-GO")||String(m.ldg_status).includes("NO-GO")?"bad":"warn"}">${esc(m.to_status||"—")}</div>
      </div>
-     <div class="small" style="margin-top:8px">TOW ${m.tow_lb==null?"—":Number(m.tow_lb).toLocaleString()+" lb"} • LDW ${m.ldw_lb==null?"—":Number(m.ldw_lb).toLocaleString()+" lb"} • Landing fuel ${m.landing_fuel_lb==null?"—":Number(m.landing_fuel_lb).toLocaleString()+" lb"}</div>
+     <div class="small" style="margin-top:8px">
+       TOW ${m.tow_lb==null?"—":Number(m.tow_lb).toLocaleString()+" lb"} •
+       Mission fuel ${m.mission_fuel_lb==null?"—":Number(m.mission_fuel_lb).toLocaleString()+" lb"} •
+       LDW ${m.ldw_lb==null?"—":Number(m.ldw_lb).toLocaleString()+" lb"} •
+       Landing fuel ${m.landing_fuel_lb==null?"—":Number(m.landing_fuel_lb).toLocaleString()+" lb"}
+     </div>
      <div class="archive-actions">
+       <button type="button" class="primary-open" onclick="openArchiveFlightPlan(${i})">Open / Edit</button>
+       <button type="button" onclick="duplicateArchiveFlightPlan(${i})">Duplicate</button>
        <button type="button" onclick="shareArchiveMission(${i})">Share</button>
        <button type="button" onclick="emailArchiveMission(${i})">Email</button>
-       <button type="button" onclick="viewArchiveMission(${i})">View Summary</button>
+       <button type="button" onclick="viewArchiveMission(${i})">View TOLD</button>
      </div>
    </div>`
  }).join("");
+}
+async function openArchiveFlightPlan(i){
+ const arr=getMissionArchive(),m=arr[i];if(!m)return;
+ await restoreArchivedFlightPlan(m,i);
+}
+function duplicateArchiveFlightPlan(i){
+ const arr=getMissionArchive(),m=arr[i];if(!m)return;
+ const copy=JSON.parse(JSON.stringify(m));
+ copy.id=newMissionId();
+ copy.plan_name=(m.plan_name||m.state?.plan_name||`${m.dep}-${m.dest}`)+" — Copy";
+ if(copy.state)copy.state.plan_name=copy.plan_name;
+ copy.completed_at=new Date().toISOString();
+ arr.unshift(copy);
+ saveMissionArchive(arr.slice(0,100));
+ renderArchive();
 }
 async function shareArchiveMission(i){
  const m=getMissionArchive()[i];if(!m)return;
  try{
    if(navigator.share){await navigator.share({title:`KUSA FlightOps ${m.dep}-${m.dest}`,text:m.summary});return}
-   await navigator.clipboard.writeText(m.summary);alert("Completed mission summary copied to clipboard.");
+   await navigator.clipboard.writeText(m.summary);alert("Completed flight plan TOLD copied to clipboard.");
  }catch(e){}
 }
 function emailArchiveMission(i){
@@ -1626,6 +1765,8 @@ function updateToldCard(){
  const issues=[];
  if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push("PASSENGER SEATING CHECK REQUIRED");
  if(!dr||!lr)issues.push("RUNWAY SELECTION REQUIRED");
+ if(currentNotams.status!=="CHECKED")issues.push("NOTAM VERIFICATION REQUIRED");
+ issues.push("OBSTACLE ANALYSIS NOT IMPLEMENTED");
  if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
  if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
  if(textOf("toStatus").includes("PENDING")||textOf("toStatus").includes("LOCKED"))issues.push("TAKEOFF LIMITS NOT FULLY EVALUATED");
