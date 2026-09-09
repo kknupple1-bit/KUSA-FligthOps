@@ -370,7 +370,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.6</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.7</div>
 
 <header>
 <div><h1>KUSA FlightOps</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -836,7 +836,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="whatif-cell"><span class="small">Max Weight at Entered OAT</span><b id="whatIfMaxWeight">—</b><span class="small" id="whatIfMaxWeightNote">Field-length limit only unless other limits are evaluated.</span></div>
     <div class="whatif-cell"><span class="small">Max OAT at Entered Weight</span><b id="whatIfMaxTemp">—</b><span class="small" id="whatIfMaxTempNote">Field-length limit only unless other limits are evaluated.</span></div>
     <div class="whatif-cell"><span class="small">Structural MTOW Check</span><b id="whatIfStructural">—</b><span class="small">40,780 lb structural maximum.</span></div>
-    <div class="whatif-cell"><span class="small">Operational Limits</span><b id="whatIfOps">—</b><span class="small">Climb / brake / obstacle status.</span></div>
+    <div class="whatif-cell"><span class="small">Operational Limits</span><b id="whatIfOps">—</b><span class="small">QRH climb / brake / obstacle status.</span></div>
   </div>
 
   <div class="callout small" style="margin-top:10px">
@@ -847,6 +847,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
   <div class="row">
 <div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only (V1/BFL source ≥ 4,000 ft PA)</option></select></div>
+<div><label>Takeoff Anti-Ice</label><select id="toAntiIce"><option value="OFF">A/I OFF</option><option value="ON">A/I ON</option></select></div>
+<div></div><div></div>
 </div>
 <div id="toConfigNote" class="small" style="margin-top:8px">Takeoff configuration changes will auto-refresh the available FlightSafety numbers.</div>
 <div class="row" style="margin-top:10px">
@@ -857,14 +859,14 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
 <div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
-<div><label>Climb-Limited Weight lb</label><input id="perfClimbWt" type="number"></div>
+<div><label>Climb-Limited Weight lb — AUTO</label><input id="perfClimbWt" type="number" readonly></div>
 <div><label>Field-Limited Weight lb — AUTO</label><input id="perfFieldWt" type="number" readonly></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Balanced Field Length ft</label><input id="perfBFL" type="number" readonly></div>
 <div><label>V1 kt</label><input id="perfV1" type="number" step=".1" readonly></div>
 <div><label>VR = V2 kt</label><input id="perfVR" type="number" step=".1" readonly></div>
-<div><label>2nd Segment Net Gradient %</label><input id="perfGrad" type="number" step=".1"></div>
+<div><label>2nd Segment Gross Gradient % — AUTO</label><input id="perfGrad" type="number" step=".1" readonly></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Obstacle Analysis</label><select id="perfObs"><option value="">Pending / not checked</option><option value="true">Verified clear</option><option value="false">Not cleared</option></select></div>
@@ -1188,6 +1190,9 @@ const baggageStations=[
 ];
 const fwd=[[18959,14.0],[30618,14.0],[35715,19.2],[40300,22.99],[40780,23.3]];
 const aft=[[18959,32.0],[40300,32.0],[40780,29.57]];
+const QRH_CLIMB_GCLB2={"S20":{"OFF":{"0":{"25000":{"0.0":15.5,"15.0":15.4,"30.0":13.8,"45.0":10.1},"26000":{"0.0":14.4,"15.0":14.4,"30.0":12.7,"45.0":9.2},"27000":{"0.0":13.4,"15.0":13.3,"30.0":11.8,"45.0":8.4},"28000":{"0.0":12.4,"15.0":12.4,"30.0":10.9,"45.0":7.6},"29000":{"0.0":11.5,"15.0":11.5,"30.0":10.1,"45.0":6.9},"30000":{"0.0":10.7,"15.0":10.7,"30.0":9.3,"45.0":6.3},"31000":{"0.0":10.0,"15.0":10.0,"30.0":8.6,"45.0":5.8},"32000":{"0.0":9.3,"15.0":9.3,"30.0":8.0,"45.0":5.3},"33000":{"0.0":8.7,"15.0":8.7,"30.0":7.4,"45.0":4.8},"34000":{"0.0":8.2,"15.0":8.2,"30.0":6.9,"45.0":4.4},"35000":{"0.0":7.6,"15.0":7.6,"30.0":6.4,"45.0":3.9},"36000":{"0.0":7.1,"15.0":7.1,"30.0":5.9,"45.0":3.5},"37000":{"0.0":6.6,"15.0":6.6,"30.0":5.5,"45.0":3.2},"38000":{"0.0":6.2,"15.0":6.1,"30.0":5.1,"45.0":2.8},"39000":{"0.0":5.7,"15.0":5.7,"30.0":4.6},"40000":{"0.0":5.3,"15.0":5.3,"30.0":4.3},"40780":{"0.0":5.0,"15.0":5.0,"30.0":4.0}},"2000":{"25000":{"0.0":15.6,"15.0":15.2,"30.0":11.9,"45.0":8.6},"26000":{"0.0":14.5,"15.0":14.1,"30.0":10.9,"45.0":7.7},"27000":{"0.0":13.4,"15.0":13.1,"30.0":10.0,"45.0":7.0},"28000":{"0.0":12.5,"15.0":12.2,"30.0":9.2,"45.0":6.3},"29000":{"0.0":11.6,"15.0":11.3,"30.0":8.5,"45.0":5.6},"30000":{"0.0":10.8,"15.0":10.5,"30.0":7.8,"45.0":5.1},"31000":{"0.0":10.1,"15.0":9.8,"30.0":7.2,"45.0":4.6},"32000":{"0.0":9.4,"15.0":9.1,"30.0":6.6,"45.0":4.1},"33000":{"0.0":8.8,"15.0":8.5,"30.0":6.1,"45.0":3.7},"34000":{"0.0":8.2,"15.0":8.0,"30.0":5.6,"45.0":3.3},"35000":{"0.0":7.7,"15.0":7.4,"30.0":5.2,"45.0":2.9},"36000":{"0.0":7.2,"15.0":6.92,"30.0":4.7},"37000":{"0.0":6.7,"15.0":6.4,"30.0":4.3},"38000":{"0.0":6.2,"15.0":6.0,"30.0":3.9},"39000":{"0.0":5.8,"15.0":5.5,"30.0":3.5},"40000":{"0.0":5.4,"15.0":5.1,"30.0":3.2},"40780":{"0.0":5.1,"15.0":4.8,"30.0":2.9}},"4000":{"25000":{"0.0":15.4,"15.0":13.3,"30.0":10.2},"26000":{"0.0":14.3,"15.0":12.3,"30.0":9.2},"27000":{"0.0":13.3,"15.0":11.4,"30.0":8.4},"28000":{"0.0":12.3,"15.0":10.5,"30.0":7.7},"29000":{"0.0":11.4,"15.0":9.7,"30.0":7.0},"30000":{"0.0":10.6,"15.0":8.9,"30.0":6.4},"31000":{"0.0":9.9,"15.0":8.2,"30.0":5.8},"32000":{"0.0":9.3,"15.0":7.6,"30.0":5.3},"33000":{"0.0":8.7,"15.0":7.1,"30.0":4.8},"34000":{"0.0":8.1,"15.0":6.6,"30.0":4.4},"35000":{"0.0":7.6,"15.0":6.1,"30.0":4.0},"36000":{"0.0":7.0,"15.0":5.6,"30.0":3.6},"37000":{"0.0":6.5,"15.0":5.2,"30.0":3.2},"38000":{"0.0":6.1,"15.0":4.8,"30.0":2.8},"39000":{"0.0":5.6,"15.0":4.4},"40000":{"0.0":5.2,"15.0":4.0},"40780":{"0.0":4.9,"15.0":3.7}},"6000":{"25000":{"0.0":13.9,"15.0":11.4,"30.0":8.5},"26000":{"0.0":12.9,"15.0":10.4,"30.0":7.7},"27000":{"0.0":12.0,"15.0":9.6,"30.0":6.9},"28000":{"0.0":11.1,"15.0":8.8,"30.0":6.2},"29000":{"0.0":10.2,"15.0":8.0,"30.0":5.6},"30000":{"0.0":9.5,"15.0":7.4,"30.0":5.1},"31000":{"0.0":8.8,"15.0":6.8,"30.0":4.5},"32000":{"0.0":8.1,"15.0":6.2,"30.0":4.1},"33000":{"0.0":7.6,"15.0":5.8,"30.0":3.7},"34000":{"0.0":7.1,"15.0":5.3,"30.0":3.3},"35000":{"0.0":6.6,"15.0":4.8,"30.0":2.9},"36000":{"0.0":6.1,"15.0":4.4,"30.0":2.5},"37000":{"0.0":5.6,"15.0":4.0},"38000":{"0.0":5.2,"15.0":3.6},"39000":{"0.0":4.8,"15.0":3.2},"40000":{"0.0":4.4,"15.0":2.9},"40780":{"0.0":4.1}}},"ON":{"0":{"25000":{"-30.0":14.4,"-15.0":14.4,"0.0":14.4},"26000":{"-30.0":13.3,"-15.0":13.3,"0.0":13.3},"27000":{"-30.0":12.4,"-15.0":12.4,"0.0":12.3},"28000":{"-30.0":11.5,"-15.0":11.4,"0.0":11.4},"29000":{"-30.0":10.6,"-15.0":10.6,"0.0":10.6},"30000":{"-30.0":9.8,"-15.0":9.8,"0.0":9.8},"31000":{"-30.0":9.1,"-15.0":9.1,"0.0":9.1},"32000":{"-30.0":8.5,"-15.0":8.5,"0.0":8.5},"33000":{"-30.0":7.9,"-15.0":7.9,"0.0":7.9},"34000":{"-30.0":7.4,"-15.0":7.4,"0.0":7.4},"35000":{"-30.0":6.9,"-15.0":6.9,"0.0":6.8},"36000":{"-30.0":6.4,"-15.0":6.4,"0.0":6.3},"37000":{"-30.0":5.9,"-15.0":5.9,"0.0":5.9},"38000":{"-30.0":5.4,"-15.0":5.4,"0.0":5.4},"39000":{"-30.0":5.0,"-15.0":5.0,"0.0":5.0},"40000":{"-30.0":4.6,"-15.0":4.6,"0.0":4.6},"40780":{"-30.0":4.3,"-15.0":4.3,"0.0":4.3}},"2000":{"25000":{"-30.0":14.4,"-15.0":14.4,"0.0":14.4},"26000":{"-30.0":13.4,"-15.0":13.4,"0.0":13.4},"27000":{"-30.0":12.4,"-15.0":12.4,"0.0":12.4},"28000":{"-30.0":11.5,"-15.0":11.5,"0.0":11.5},"29000":{"-30.0":10.7,"-15.0":10.7,"0.0":10.6},"30000":{"-30.0":9.9,"-15.0":9.9,"0.0":9.8},"31000":{"-30.0":9.2,"-15.0":9.2,"0.0":9.2},"32000":{"-30.0":8.6,"-15.0":8.6,"0.0":8.5},"33000":{"-30.0":8.0,"-15.0":8.0,"0.0":8.0},"34000":{"-30.0":7.4,"-15.0":7.4,"0.0":7.4},"35000":{"-30.0":6.9,"-15.0":6.9,"0.0":6.9},"36000":{"-30.0":6.4,"-15.0":6.4,"0.0":6.4},"37000":{"-30.0":5.9,"-15.0":5.9,"0.0":5.9},"38000":{"-30.0":5.5,"-15.0":5.5,"0.0":5.5},"39000":{"-30.0":5.0,"-15.0":5.0,"0.0":5.0},"40000":{"-30.0":4.6,"-15.0":4.6,"0.0":4.6},"40780":{"-30.0":4.3,"-15.0":4.3,"0.0":4.3}},"4000":{"25000":{"-30.0":14.2,"-15.0":14.2,"0.0":13.2},"26000":{"-30.0":13.2,"-15.0":13.2,"0.0":12.2},"27000":{"-30.0":12.2,"-15.0":12.2,"0.0":11.3},"28000":{"-30.0":11.3,"-15.0":11.3,"0.0":10.4},"29000":{"-30.0":10.4,"-15.0":10.4,"0.0":9.6},"30000":{"-30.0":9.7,"-15.0":9.7,"0.0":8.9},"31000":{"-30.0":9.0,"-15.0":9.0,"0.0":8.2},"32000":{"-30.0":8.4,"-15.0":8.4,"0.0":7.6},"33000":{"-30.0":7.8,"-15.0":7.8,"0.0":7.0},"34000":{"-30.0":7.2,"-15.0":7.2,"0.0":6.5},"35000":{"-30.0":6.7,"-15.0":6.7,"0.0":6.1},"36000":{"-30.0":6.2,"-15.0":6.2,"0.0":5.6},"37000":{"-30.0":5.8,"-15.0":5.8,"0.0":5.2},"38000":{"-30.0":5.3,"-15.0":5.3,"0.0":4.8},"39000":{"-30.0":4.9,"-15.0":4.9,"0.0":4.4},"40000":{"-30.0":4.5,"-15.0":4.5,"0.0":4.0},"40780":{"-30.0":4.2,"-15.0":4.2,"0.0":3.7}},"6000":{"25000":{"-30.0":13.8,"-15.0":13.8,"0.0":11.4},"26000":{"-30.0":12.7,"-15.0":12.7,"0.0":10.5},"27000":{"-30.0":11.8,"-15.0":11.8,"0.0":9.6},"28000":{"-30.0":10.9,"-15.0":10.9,"0.0":8.8},"29000":{"-30.0":10.1,"-15.0":10.1,"0.0":8.0},"30000":{"-30.0":9.3,"-15.0":9.3,"0.0":7.4},"31000":{"-30.0":8.6,"-15.0":8.6,"0.0":6.8},"32000":{"-30.0":8.0,"-15.0":8.0,"0.0":6.2},"33000":{"-30.0":7.4,"-15.0":7.4,"0.0":5.8},"34000":{"-30.0":6.9,"-15.0":6.9,"0.0":5.3},"35000":{"-30.0":6.4,"-15.0":6.4,"0.0":4.8},"36000":{"-30.0":5.9,"-15.0":5.9,"0.0":4.4},"37000":{"-30.0":5.5,"-15.0":5.5,"0.0":4.0},"38000":{"-30.0":5.1,"-15.0":5.1,"0.0":3.6},"39000":{"-30.0":4.6,"-15.0":4.6,"0.0":3.2},"40000":{"-30.0":4.3,"-15.0":4.3,"0.0":2.9},"40780":{"-30.0":4.0,"-15.0":4.0,"0.0":2.7}}}},"SLATS":{"OFF":{"0":{"25000":{"0.0":16.0,"15.0":16.0,"30.0":15.4,"45.0":11.7},"26000":{"0.0":15.8,"15.0":15.8,"30.0":14.4,"45.0":10.8},"27000":{"0.0":14.9,"15.0":14.9,"30.0":13.4,"45.0":10.0},"28000":{"0.0":14.0,"15.0":14.0,"30.0":12.6,"45.0":9.3},"29000":{"0.0":13.2,"15.0":13.2,"30.0":11.8,"45.0":8.7},"30000":{"0.0":12.4,"15.0":12.4,"30.0":11.1,"45.0":8.0},"31000":{"0.0":11.6,"15.0":11.6,"30.0":10.4,"45.0":7.5},"32000":{"0.0":10.9,"15.0":10.9,"30.0":9.8,"45.0":6.9},"33000":{"0.0":10.3,"15.0":10.3,"30.0":9.2,"45.0":6.4},"34000":{"0.0":9.7,"15.0":9.7,"30.0":8.6,"45.0":5.9},"35000":{"0.0":9.1,"15.0":9.1,"30.0":8.1,"45.0":5.5},"36000":{"0.0":8.6,"15.0":8.6,"30.0":7.6,"45.0":5.1},"37000":{"0.0":8.2,"15.0":8.2,"30.0":7.2,"45.0":4.7},"38000":{"0.0":7.8,"15.0":7.8,"30.0":6.8,"45.0":4.4},"39000":{"0.0":7.4,"15.0":7.4,"30.0":6.4,"45.0":4.1},"40000":{"0.0":7.1,"15.0":7.1,"30.0":6.1,"45.0":3.8},"40780":{"0.0":6.8,"15.0":6.8,"30.0":5.8,"45.0":3.6}},"2000":{"25000":{"0.0":16.0,"15.0":16.0,"30.0":13.6,"45.0":10.1},"26000":{"0.0":15.9,"15.0":15.9,"30.0":12.7,"45.0":9.3},"27000":{"0.0":15.0,"15.0":15.0,"30.0":11.8,"45.0":8.6},"28000":{"0.0":14.1,"15.0":14.1,"30.0":11.1,"45.0":7.9},"29000":{"0.0":13.3,"15.0":13.3,"30.0":10.3,"45.0":7.3},"30000":{"0.0":12.5,"15.0":12.5,"30.0":9.6,"45.0":6.8},"31000":{"0.0":11.7,"15.0":11.7,"30.0":9.0,"45.0":6.3},"32000":{"0.0":11.0,"15.0":11.0,"30.0":8.4,"45.0":5.8},"33000":{"0.0":10.3,"15.0":10.3,"30.0":7.9,"45.0":5.3},"34000":{"0.0":9.7,"15.0":9.7,"30.0":7.4,"45.0":4.9},"35000":{"0.0":9.2,"15.0":9.2,"30.0":6.9,"45.0":4.5},"36000":{"0.0":8.7,"15.0":8.7,"30.0":6.5,"45.0":4.1},"37000":{"0.0":8.2,"15.0":8.2,"30.0":6.1,"45.0":3.8},"38000":{"0.0":7.8,"15.0":7.8,"30.0":5.7,"45.0":3.5},"39000":{"0.0":7.5,"15.0":7.5,"30.0":5.4,"45.0":3.2},"40000":{"0.0":7.1,"15.0":7.1,"30.0":5.0},"40780":{"0.0":6.8,"15.0":6.9,"30.0":4.7}},"4000":{"25000":{"0.0":16.0,"15.0":15.0,"30.0":11.8},"26000":{"0.0":15.9,"15.0":14.0,"30.0":10.9},"27000":{"0.0":15.0,"15.0":13.0,"30.0":10.1},"28000":{"0.0":14.1,"15.0":12.2,"30.0":9.4},"29000":{"0.0":13.3,"15.0":11.4,"30.0":8.7},"30000":{"0.0":12.5,"15.0":10.7,"30.0":8.1},"31000":{"0.0":11.7,"15.0":10.1,"30.0":7.5},"32000":{"0.0":11.0,"15.0":9.4,"30.0":7.0},"33000":{"0.0":10.3,"15.0":8.8,"30.0":6.5},"34000":{"0.0":9.7,"15.0":8.3,"30.0":6.0},"35000":{"0.0":9.2,"15.0":7.8,"30.0":5.5},"36000":{"0.0":8.7,"15.0":7.3,"30.0":5.1},"37000":{"0.0":8.2,"15.0":6.9,"30.0":4.8},"38000":{"0.0":7.8,"15.0":6.5,"30.0":4.4},"39000":{"0.0":7.4,"15.0":6.2,"30.0":4.1},"40000":{"0.0":7.1,"15.0":5.8,"30.0":3.8},"40780":{"0.0":6.8,"15.0":5.5,"30.0":3.6}},"6000":{"25000":{"0.0":15.6,"15.0":13.0,"30.0":10.3},"26000":{"0.0":14.6,"15.0":12.1,"30.0":9.4},"27000":{"0.0":13.7,"15.0":11.3,"30.0":8.7},"28000":{"0.0":12.8,"15.0":10.5,"30.0":8.1},"29000":{"0.0":12.0,"15.0":9.8,"30.0":7.4},"30000":{"0.0":11.3,"15.0":9.1,"30.0":6.9},"31000":{"0.0":10.6,"15.0":8.5,"30.0":6.4},"32000":{"0.0":10.0,"15.0":8.0,"30.0":5.9},"33000":{"0.0":9.4,"15.0":7.4,"30.0":5.4},"34000":{"0.0":8.8,"15.0":6.9,"30.0":5.0},"35000":{"0.0":8.3,"15.0":6.5,"30.0":4.6},"36000":{"0.0":7.8,"15.0":6.0,"30.0":4.2},"37000":{"0.0":7.4,"15.0":5.6,"30.0":3.9},"38000":{"0.0":7.0,"15.0":5.3,"30.0":3.5},"39000":{"0.0":6.6,"15.0":5.0,"30.0":3.3},"40000":{"0.0":6.2,"15.0":4.6},"40780":{"0.0":6.0,"15.0":4.3}}},"ON":{"0":{"25000":{"-30.0":15.9,"-15.0":15.9,"0.0":15.9},"26000":{"-30.0":14.9,"-15.0":14.9,"0.0":14.9},"27000":{"-30.0":13.9,"-15.0":13.9,"0.0":14.0},"28000":{"-30.0":13.0,"-15.0":13.1,"0.0":13.1},"29000":{"-30.0":12.2,"-15.0":12.2,"0.0":12.3},"30000":{"-30.0":11.5,"-15.0":11.5,"0.0":11.6},"31000":{"-30.0":10.8,"-15.0":10.8,"0.0":10.9},"32000":{"-30.0":10.1,"-15.0":10.1,"0.0":10.2},"33000":{"-30.0":9.5,"-15.0":9.5,"0.0":9.6},"34000":{"-30.0":9.0,"-15.0":9.0,"0.0":9.0},"35000":{"-30.0":8.4,"-15.0":8.4,"0.0":8.5},"36000":{"-30.0":7.9,"-15.0":8.0,"0.0":8.0},"37000":{"-30.0":7.5,"-15.0":7.5,"0.0":7.6},"38000":{"-30.0":7.1,"-15.0":7.1,"0.0":7.2},"39000":{"-30.0":6.8,"-15.0":6.8,"0.0":6.8},"40000":{"-30.0":6.4,"-15.0":6.4,"0.0":6.5},"40780":{"-30.0":6.1,"-15.0":6.1,"0.0":6.2}},"2000":{"25000":{"-30.0":15.9,"-15.0":16.0,"0.0":16.0},"26000":{"-30.0":14.9,"-15.0":15.0,"0.0":15.0},"27000":{"-30.0":14.0,"-15.0":14.0,"0.0":14.1},"28000":{"-30.0":13.1,"-15.0":13.1,"0.0":13.2},"29000":{"-30.0":12.3,"-15.0":12.3,"0.0":12.4},"30000":{"-30.0":11.6,"-15.0":11.6,"0.0":11.6},"31000":{"-30.0":10.9,"-15.0":10.9,"0.0":10.9},"32000":{"-30.0":10.2,"-15.0":10.2,"0.0":10.3},"33000":{"-30.0":9.6,"-15.0":9.6,"0.0":9.6},"34000":{"-30.0":9.0,"-15.0":9.0,"0.0":9.1},"35000":{"-30.0":8.5,"-15.0":8.5,"0.0":8.5},"36000":{"-30.0":8.0,"-15.0":8.0,"0.0":8.1},"37000":{"-30.0":7.6,"-15.0":7.6,"0.0":7.6},"38000":{"-30.0":7.2,"-15.0":7.2,"0.0":7.2},"39000":{"-30.0":6.8,"-15.0":6.8,"0.0":6.9},"40000":{"-30.0":6.5,"-15.0":6.5,"0.0":6.5},"40780":{"-30.0":6.2,"-15.0":6.2,"0.0":6.2}},"4000":{"25000":{"-30.0":15.7,"-15.0":15.8,"0.0":15.8},"26000":{"-30.0":14.7,"-15.0":14.8,"0.0":14.8},"27000":{"-30.0":13.8,"-15.0":13.8,"0.0":13.8},"28000":{"-30.0":12.9,"-15.0":12.9,"0.0":13.0},"29000":{"-30.0":12.1,"-15.0":12.1,"0.0":12.2},"30000":{"-30.0":11.4,"-15.0":11.4,"0.0":11.4},"31000":{"-30.0":10.7,"-15.0":10.7,"0.0":10.7},"32000":{"-30.0":10.1,"-15.0":10.1,"0.0":10.1},"33000":{"-30.0":9.4,"-15.0":9.4,"0.0":9.5},"34000":{"-30.0":8.9,"-15.0":8.9,"0.0":8.9},"35000":{"-30.0":8.4,"-15.0":8.4,"0.0":8.4},"36000":{"-30.0":7.9,"-15.0":7.9,"0.0":7.9},"37000":{"-30.0":7.4,"-15.0":7.4,"0.0":7.5},"38000":{"-30.0":7.0,"-15.0":7.1,"0.0":7.1},"39000":{"-30.0":6.7,"-15.0":6.7,"0.0":6.7},"40000":{"-30.0":6.3,"-15.0":6.3,"0.0":6.3},"40780":{"-30.0":6.0,"-15.0":6.0,"0.0":6.1}},"6000":{"25000":{"-30.0":15.4,"-15.0":15.4,"0.0":13.1},"26000":{"-30.0":14.4,"-15.0":14.4,"0.0":12.2},"27000":{"-30.0":13.5,"-15.0":13.4,"0.0":11.4},"28000":{"-30.0":12.6,"-15.0":12.6,"0.0":10.6},"29000":{"-30.0":11.8,"-15.0":11.8,"0.0":9.9},"30000":{"-30.0":11.1,"-15.0":11.1,"0.0":9.2},"31000":{"-30.0":10.4,"-15.0":10.4,"0.0":8.6},"32000":{"-30.0":9.8,"-15.0":9.8,"0.0":8.0},"33000":{"-30.0":9.2,"-15.0":9.2,"0.0":7.5},"34000":{"-30.0":8.6,"-15.0":8.6,"0.0":7.0},"35000":{"-30.0":8.1,"-15.0":8.1,"0.0":6.5},"36000":{"-30.0":7.6,"-15.0":7.6,"0.0":6.1},"37000":{"-30.0":7.2,"-15.0":7.2,"0.0":5.7},"38000":{"-30.0":6.8,"-15.0":6.8,"0.0":5.3},"39000":{"-30.0":6.4,"-15.0":6.4,"0.0":5.0},"40000":{"-30.0":6.1,"-15.0":6.1,"0.0":4.7},"40780":{"-30.0":5.8,"-15.0":5.8}}}}};
+const QRH_CLIMB_MIN_GROSS=2.7; // 3-engine second-segment minimum, 14 CFR 25.121(b)
+const QRH_CLIMB_SOURCE="Dassault Falcon 50B QRH1 50-10/50-11/50-12/50-13";
 const FS_PERF={
  takeoff:{
   S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,36:119,38:122,40:126,40.7:127},vfr:{24:113,26:116,28:120,30:124,32:127,34:131,36:134,38:137,40:141,40.7:142},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192,40.7:195},tables:{
@@ -1996,6 +2001,94 @@ function updateRunwayConditionWarnings(){
 }
 
 
+
+function qrhCellGradient(cfg,ai,pa,temp,weightLb){
+ const ptab=QRH_CLIMB_GCLB2?.[cfg]?.[ai]?.[String(pa)];
+ if(!ptab)return null;
+ const weights=kN(ptab);
+ const wb=bracketN(weights,weightLb);
+ if(!wb)return null;
+
+ function atWeight(w){
+   const tm=ptab[String(w)];
+   if(!tm)return null;
+   const temps=kN(tm);
+   const tb=bracketN(temps,temp);
+   if(!tb)return null;
+   const [ta,tb2]=tb;
+   const A=Number(tm[String(ta)]),B=Number(tm[String(tb2)]);
+   if(!Number.isFinite(A)||!Number.isFinite(B))return null;
+   if(ta===tb2)return A;
+   return lerpN(A,B,(temp-ta)/(tb2-ta));
+ }
+ const [wa,wb2]=wb,A=atWeight(wa),B=atWeight(wb2);
+ if(!Number.isFinite(A)||!Number.isFinite(B))return null;
+ if(wa===wb2)return A;
+ return lerpN(A,B,(weightLb-wa)/(wb2-wa));
+}
+
+function qrhGradientAt(cfg,ai,pa,temp,weightLb){
+ const ptab=QRH_CLIMB_GCLB2?.[cfg]?.[ai];
+ if(!ptab||![pa,temp,weightLb].every(Number.isFinite))return null;
+ const pb=bracketN(kN(ptab),pa);
+ if(!pb)return null;
+ const [pa1,pa2]=pb;
+ const A=qrhCellGradient(cfg,ai,pa1,temp,weightLb);
+ const B=qrhCellGradient(cfg,ai,pa2,temp,weightLb);
+ if(!Number.isFinite(A)||!Number.isFinite(B))return null;
+ if(pa1===pa2)return A;
+ return lerpN(A,B,(pa-pa1)/(pa2-pa1));
+}
+
+function autoClimbAssessment(){
+ const cfg=$("toConfig").value,ai=$("toAntiIce")?.value||"OFF";
+ const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),actual=perfTakeoffWeightLb();
+ const result={cfg,ai,pa,temp,actual,gradient:null,limit:null,pass:null,coverageLimited:false,msg:""};
+ if(![pa,temp,actual].every(Number.isFinite)||actual<=0){
+   $("perfGrad").value="";$("perfClimbWt").value="";
+   result.msg="Mission pressure altitude, OAT and takeoff weight required.";
+   return result;
+ }
+ if($("toRunwayCondition").value!=="DRY"){
+   $("perfGrad").value="";$("perfClimbWt").value="";
+   result.msg="QRH climb integration currently validated for the dry takeoff table set only.";
+   return result;
+ }
+
+ const g=qrhGradientAt(cfg,ai,pa,temp,actual);
+ if(!Number.isFinite(g)){
+   $("perfGrad").value="";$("perfClimbWt").value="";
+   result.msg="Selected PA/OAT/weight is outside the published QRH GCLB2 interpolation coverage — no extrapolation.";
+   return result;
+ }
+ result.gradient=g;
+ result.pass=g>=QRH_CLIMB_MIN_GROSS;
+ $("perfGrad").value=g.toFixed(2);
+
+ // Determine the highest weight supported by the published QRH grid that still meets 2.7%.
+ let best=null,lastValid=null,seenGap=false;
+ for(let w=25000;w<=40750;w+=50){
+   const gw=qrhGradientAt(cfg,ai,pa,temp,w);
+   if(!Number.isFinite(gw)){if(lastValid!=null)seenGap=true;continue}
+   lastValid=w;
+   if(gw>=QRH_CLIMB_MIN_GROSS)best=w;
+ }
+ const g40780=qrhGradientAt(cfg,ai,pa,temp,40780);
+ if(Number.isFinite(g40780)){
+   lastValid=40780;
+   if(g40780>=QRH_CLIMB_MIN_GROSS)best=40780;
+ }
+ if(Number.isFinite(best)){
+   result.limit=best;
+   result.coverageLimited=best===lastValid && best<40780 && seenGap;
+   $("perfClimbWt").value=Math.round(best);
+ }else{
+   $("perfClimbWt").value="";
+ }
+ result.msg=`${QRH_CLIMB_SOURCE} • ${cfg==="S20"?"S+F 20°":"SLATS"} • A/I ${ai} • GCLB2 ${g.toFixed(2)}%`;
+ return result;
+}
+
 function autoFieldLimitedWeight(){
  const cfg=$("toConfig").value;
  const runwayCondition=$("toRunwayCondition")?.value||"DRY";
@@ -2014,10 +2107,9 @@ function autoFieldLimitedWeight(){
 }
 
 function syncTakeoffSection(){
- const cfg=$("toConfig").value;
- const d=FS_PERF.takeoff[cfg];
- const a=autoTO();
+ const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],a=autoTO();
  const autoFieldWt=autoFieldLimitedWeight();
+ const climb=autoClimbAssessment();
  updateRunwayConditionWarnings();
  const runwayCondition=$("toRunwayCondition").value;
  const wk=(perfTakeoffWeightLb()||0)/1000;
@@ -2027,64 +2119,58 @@ function syncTakeoffSection(){
  if(a.vfr!=null)speedParts.push(`Vfr ${a.vfr.toFixed(1)}`);
  if(a.v15vs!=null)speedParts.push(`1.5Vs ${a.v15vs.toFixed(1)}`);
  if(a.bfl!=null)speedParts.push(`BFL ${Math.round(a.bfl).toLocaleString()} ft`);
- $("toSpeeds").textContent=speedParts.length?`${$("toRunwayCondition").value} • ${speedParts.join(" • ")}`:"—";
+ $("toSpeeds").textContent=speedParts.length?`${runwayCondition} • ${speedParts.join(" • ")}`:"—";
 
  if(!missionData&&!perfIsManual()){
-   $("toStatus").textContent="LOAD MISSION";
-   $("toStatus").className="warn";
+   $("toStatus").textContent="LOAD MISSION";$("toStatus").className="warn";
    $("toLimit").textContent="Load mission airport and weather data first";
-   $("toConfigNote").textContent="Takeoff configuration changes will auto-refresh the available FlightSafety numbers once mission data is loaded.";
+   $("toConfigNote").textContent="Load mission data to calculate field and QRH climb checks.";
    return a;
  }
 
- const pa=perfTakeoffPA();
- const paKeys=kN(d.tables), wtKeys=kN(d.vr);
- const minPA=Math.min(...paKeys), maxPA=Math.max(...paKeys), minWT=Math.min(...wtKeys), maxWT=Math.max(...wtKeys);
- const parts=[d.label];
- if(Number.isFinite(pa))parts.push(`PA ${Math.round(pa).toLocaleString()} ft`);
- if(Number.isFinite(wk)&&wk>0)parts.push(`WT ${wk.toFixed(1)}k lb`);
-
  if(runwayCondition==="WET"){
-   $("toStatus").textContent="WET SELECTED • BFL/V1 SOURCE LOCKED";
-   $("toStatus").className="warn";
+   $("toStatus").textContent="WET SELECTED • BFL/V1 SOURCE LOCKED";$("toStatus").className="warn";
    $("toLimit").textContent=`WET RUNWAY • ${d.label} • ${a.msg}`;
-   let note=`WET runway confirmed • ${d.label}. `;
-   note += cfg==="S20"?"Wet source: DTM813 5.46A.":"Wet source: DTM813 5.51A.";
-   note += " VR=V2, Vfr and 1.5Vs remain weight-based; wet BFL and wet V1 are deliberately blank until the wet curves are digitized and validated.";
-   $("toConfigNote").textContent=note;
- }else if(a.v1!=null || a.bfl!=null){
-   if(Number.isFinite(autoFieldWt)&&valueOrNull("perfClimbWt")==null){
-     $("toStatus").textContent="FIELD LIMIT READY • CLIMB LIMIT PENDING";
-     $("toStatus").className="warn";
-   }else{
-     $("toStatus").textContent="TABLE DATA READY";
-     $("toStatus").className="ok";
-   }
-   $("toLimit").textContent=`AUTO TABLE • ${d.label} • FlightSafety P-2–P-5${a.paBasis==="SEA LEVEL row"?" • SEA LEVEL PA row":""}`;
-   const note = [`Using ${d.label}`];
-   if(Number.isFinite(pa)) note.push(`pressure altitude ${Math.round(pa).toLocaleString()} ft`);
-   if(Number.isFinite(wk)&&wk>0) note.push(`weight ${wk.toFixed(1)}k lb`);
-   note.push("configuration change applied");
-   if(Number.isFinite(autoFieldWt))note.push(`field limit auto ${Math.round(autoFieldWt).toLocaleString()} lb`);
-   $("toConfigNote").textContent=note.join(" • ");
- }else if(a.vr!=null || a.vfr!=null || a.v15vs!=null){
-   $("toStatus").textContent="WEIGHT SPEEDS READY • V1/BFL OUT OF RANGE";
-   $("toStatus").className="warn";
-   const limits=[];
-   if(Number.isFinite(pa) && (pa<minPA || pa>maxPA))limits.push(`PA outside ${minPA.toLocaleString()}–${maxPA.toLocaleString()} ft`);
-   if(Number.isFinite(wk) && (wk<minWT || wk>maxWT))limits.push(`weight outside ${minWT.toFixed(1)}–${maxWT.toFixed(1)}k lb`);
-   $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"V1/BFL not available for the selected cell"}`;
-   let note=`${d.label} selected.`;
-   if(limits.length)note += ` ${limits.join(' • ')}.`;
-   note += ' VR=V2, Vfr and 1.5Vs are weight-based and refresh independently.';
-   if(cfg==="SLATS") note += ' The digitized Slats Only V1/BFL source begins at 4,000 ft PA, so below that altitude V1/BFL are intentionally not extrapolated. 1.5Vs is the same published value as S+20 at the same weight.';
-   $("toConfigNote").textContent=note;
- }else{
-   $("toStatus").textContent="SOURCE LOCKED";
-   $("toStatus").className="warn";
-   $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"No takeoff data available for the selected weight / PA / temperature"}`;
-   $("toConfigNote").textContent=`${d.label} selected, but the current performance point is outside the digitized FlightSafety table coverage.`;
+   $("toConfigNote").textContent=`WET runway confirmed • ${d.label}. Wet BFL/V1 and QRH climb integration remain source locked until the applicable wet method is validated.`;
+   return a;
  }
+
+ if(a.v1==null&&a.bfl==null){
+   $("toStatus").textContent=(a.vr!=null||a.vfr!=null)?"WEIGHT SPEEDS READY • V1/BFL OUT OF RANGE":"SOURCE LOCKED";
+   $("toStatus").className="warn";
+   $("toLimit").textContent=`AUTO TABLE • ${d.label} • ${a.msg||"No V1/BFL data for selected point"}`;
+   $("toConfigNote").textContent=`${d.label}: V1/BFL source coverage is incomplete at this point. ${climb.msg}`;
+   return a;
+ }
+
+ const pending=[];
+ if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
+ if(!Number.isFinite(climb.gradient))pending.push("CLIMB DATA");
+ if(climb.pass===false)pending.push("CLIMB FAIL");
+ if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
+
+ if(climb.pass===false){
+   $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
+ }else if(pending.length){
+   $("toStatus").textContent=`PENDING • ${pending.join(" • ")}`;$("toStatus").className="warn";
+ }else{
+   $("toStatus").textContent="TABLE DATA READY • CLIMB PASS";$("toStatus").className="ok";
+ }
+
+ const limits=[`AUTO TABLE • ${d.label}`];
+ if(Number.isFinite(autoFieldWt))limits.push(`Field ${Math.round(autoFieldWt).toLocaleString()} lb`);
+ if(Number.isFinite(climb.limit))limits.push(`Climb ${Math.round(climb.limit).toLocaleString()} lb`);
+ $("toLimit").textContent=limits.join(" • ");
+
+ const notes=[`Using ${d.label}`];
+ if(Number.isFinite(perfTakeoffPA()))notes.push(`PA ${Math.round(perfTakeoffPA()).toLocaleString()} ft`);
+ if(Number.isFinite(wk)&&wk>0)notes.push(`WT ${wk.toFixed(1)}k lb`);
+ if(Number.isFinite(autoFieldWt))notes.push(`field limit auto ${Math.round(autoFieldWt).toLocaleString()} lb`);
+ if(Number.isFinite(climb.gradient))notes.push(`QRH GCLB2 ${climb.gradient.toFixed(2)}%`);
+ if(Number.isFinite(climb.limit))notes.push(`QRH climb limit ${Math.round(climb.limit).toLocaleString()} lb${climb.coverageLimited?" (published coverage cap)":""}`);
+ notes.push(`A/I ${climb.ai}`);
+ notes.push("Falcon 50B QRH climb source — Dash-4 applicability remains a validation item");
+ $("toConfigNote").textContent=notes.join(" • ");
  return a;
 }
 
@@ -2747,12 +2833,12 @@ function syncLandingSection(){
 
 async function evaluateTakeoff(){
  const a=syncTakeoffSection();
- const fieldWt=autoFieldLimitedWeight();
+ const fieldWt=autoFieldLimitedWeight(),climb=autoClimbAssessment();
  const body={
    runway_length_ft:perfTakeoffRunwayLen(),
    actual_takeoff_weight_lb:perfTakeoffWeightLb(),
-   climb_limited_weight_lb:valueOrNull("perfClimbWt"),
-   field_limited_weight_lb:Number.isFinite(fieldWt)?fieldWt:valueOrNull("perfFieldWt"),
+   climb_limited_weight_lb:Number.isFinite(climb.limit)?climb.limit:null,
+   field_limited_weight_lb:Number.isFinite(fieldWt)?fieldWt:null,
    balanced_field_length_ft:valueOrNull("perfBFL"),
    v1_kt:valueOrNull("perfV1"),
    vr_v2_kt:valueOrNull("perfVR"),
@@ -2760,9 +2846,7 @@ async function evaluateTakeoff(){
  };
  try{
    const r=await fetch(apiUrl("/api/performance/takeoff"),{
-     method:"POST",
-     headers:{"Content-Type":"application/json"},
-     body:JSON.stringify(body)
+     method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)
    });
    const j=await r.json();
    if(j.error)throw new Error(j.error);
@@ -2771,34 +2855,31 @@ async function evaluateTakeoff(){
    $("toWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
    $("toRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
 
+   if(climb.pass===false){
+     $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
+     $("toLimit").textContent=`QRH GCLB2 ${climb.gradient.toFixed(2)}% < ${QRH_CLIMB_MIN_GROSS.toFixed(1)}% minimum`;
+     return;
+   }
    if(j.status==="NO-GO"){
-     $("toStatus").textContent="NO-GO";
-     $("toStatus").className="bad";
+     $("toStatus").textContent="NO-GO";$("toStatus").className="bad";
      return;
    }
 
    const pending=[];
-   if(valueOrNull("perfClimbWt")==null)pending.push("CLIMB LIMIT");
-   if(valueOrNull("perfFieldWt")==null)pending.push("FIELD LIMIT");
+   if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
+   if(!Number.isFinite(climb.gradient)||!Number.isFinite(climb.limit))pending.push("CLIMB DATA");
    if($("perfObs").value==="")pending.push("OBSTACLE ANALYSIS");
 
    if(j.status==="GO"&&!pending.length){
-     $("toStatus").textContent="GO • ALL IMPLEMENTED LIMITS PASS";
+     $("toStatus").textContent="GO • FIELD / CLIMB / OBSTACLE PASS";
      $("toStatus").className="ok";
-   }else if(pending.length===1&&pending[0]==="CLIMB LIMIT"){
-     $("toStatus").textContent="FIELD LIMIT PASS • CLIMB LIMIT PENDING";
-     $("toStatus").className="warn";
-     $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} table and field-limit data calculated. Obstacle analysis satisfied. Applicable climb-limit chart still requires source integration.`;
+     $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • QRH GCLB2 ${climb.gradient.toFixed(2)}% • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • obstacle verified clear.`;
    }else{
      $("toStatus").textContent=pending.length?`PENDING • ${pending.join(" • ")}`:"TABLE DATA READY";
      $("toStatus").className="warn";
-     if(pending.length){
-       $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} table data calculated. Remaining item${pending.length>1?"s":""}: ${pending.join(", ")}.`;
-     }
    }
  }catch(e){
-   $("toStatus").textContent="EVALUATION ERROR";
-   $("toStatus").className="bad";
+   $("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";
    $("toLimit").textContent=String(e.message||e);
  }
 }
@@ -2838,6 +2919,7 @@ $("perfInputMode").addEventListener("change",setPerformanceInputMode);
  }
 }));
 $("toConfig").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate()});
+$("toAntiIce").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();});
 $("toRunwayCondition").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();updateWhatIfPlanner()});
 $("landConfig").addEventListener("change",recalculate);
 $("landRunwayCondition").addEventListener("change",recalculate);
