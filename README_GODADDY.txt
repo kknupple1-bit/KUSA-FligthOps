@@ -473,3 +473,20 @@ v5.15 40C MAX-TOW + FAA NOTAM CORRECTION
 - NOTAM retrieval now runs automatically after mission airport/weather data load.
 - Landing runway assessment immediately evaluates the returned NOTAM set against the actual selected runway end.
 - If FAA NOTAM API credentials are absent, the app explicitly remains NOT VERIFIED; it never produces a false checked state.
+
+
+v5.16 FAA NMS NOTAM CONNECTION / GATE CORRECTION
+- Updated NOTAM provider naming for the FAA NOTAM Management Service (NMS) transition.
+- Added NMS_NOTAM_API_URL and NMS_NOTAM_API_KEY as the preferred deployment variables, while retaining older FAA_NOTAM_* and NOTAM_* aliases.
+- Added /api/notams/config so the UI can distinguish 'not configured' from 'configured but unavailable.'
+- NOTAM panel now displays FAA NMS API CONNECTED / NOT CONFIGURED / CONNECTION ERROR.
+- Landing Runway Gate can no longer display RUNWAY LENGTH PASS as the main gate status when live NOTAM verification is missing.
+- If runway length passes but NOTAMs are unavailable, the gate now reads NOTAM NOT VERIFIED in yellow.
+- Green PASS requires a successful NOTAM retrieval plus the runway-length check.
+- Current FAA NMS distribution access still requires authorized API access. The application intentionally does not fabricate or scrape NOTAM data when credentials are absent.
+
+GODADDY DEPLOYMENT REQUIREMENT
+Set these server environment variables with values supplied by FAA NMS API access:
+  NMS_NOTAM_API_URL=<FAA-provided NMS distribution endpoint>
+  NMS_NOTAM_API_KEY=<FAA-provided API credential>
+Then restart/redeploy the Node application.

@@ -5,10 +5,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 const FAA_NOTAM_API_URL =
+  process.env.NMS_NOTAM_API_URL ||
   process.env.FAA_NOTAM_API_URL ||
   process.env.NOTAM_API_URL ||
   "";
 const FAA_NOTAM_API_KEY =
+  process.env.NMS_NOTAM_API_KEY ||
   process.env.FAA_NOTAM_API_KEY ||
   process.env.NOTAM_API_KEY ||
   "";
@@ -170,6 +172,17 @@ function evalLanding(p){
 app.get("/api/health",(req,res)=>res.json({ok:true,build:"4.7.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length}));
 app.get("/api/diagnostics",async(req,res)=>{let ok=false,msg=null;try{ok=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){msg=String(e.message||e);}res.json({backend:true,build:"4.7.0",awc_metar:ok,awc_message:msg,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,notam_api_configured:!!(FAA_NOTAM_API_URL&&FAA_NOTAM_API_KEY)});});
 
+app.get("/api/notams/config",(req,res)=>{
+  res.set("Cache-Control","no-store");
+  res.json({
+    ok:true,
+    configured:!!(FAA_NOTAM_API_URL&&FAA_NOTAM_API_KEY),
+    provider:"FAA NMS NOTAM API",
+    endpoint_configured:!!FAA_NOTAM_API_URL,
+    api_key_configured:!!FAA_NOTAM_API_KEY
+  });
+});
+
 app.get("/api/notams",async(req,res)=>{
   const icao=String(req.query.icao||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);
   if(!icao)return res.status(400).json({ok:false,source:"NONE",message:"ICAO required"});
@@ -179,20 +192,26 @@ app.get("/api/notams",async(req,res)=>{
       ok:false,
       source:"FAA NOTAM API",
       configured:false,
-      message:"FAA NOTAM API credentials are not configured on the server.",
-      required_env:["FAA_NOTAM_API_URL","FAA_NOTAM_API_KEY"]
+      message:"FAA NMS NOTAM API access is not configured on this server.",
+      required_env:["NMS_NOTAM_API_URL","NMS_NOTAM_API_KEY"],
+      aliases:["FAA_NOTAM_API_URL / FAA_NOTAM_API_KEY","NOTAM_API_URL / NOTAM_API_KEY"]
     });
   }
 
   try{
     const url=new URL(FAA_NOTAM_API_URL);
     // FAA NOTAM API uses ICAO location filtering.
-    if(!url.searchParams.has("icaoLocation"))url.searchParams.set("icaoLocation",icao);
+    if(!url.searchParams.has("icaoLocation") &&
+       !url.searchParams.has("location") &&
+       !url.searchParams.has("icao")){
+      url.searchParams.set("icaoLocation",icao);
+    }
 
     const r=await fetch(url,{
       headers:{
         "Accept":"application/json",
-        "X-API-KEY":FAA_NOTAM_API_KEY
+        "X-API-KEY":FAA_NOTAM_API_KEY,
+        "x-api-key":FAA_NOTAM_API_KEY
       },
       cache:"no-store"
     });
