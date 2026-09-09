@@ -1,0 +1,19 @@
+KUSA FlightOps v5.22.3 — Performance + W&B
+
+Changes
+- Product title updated to “KUSA FlightOps — Performance + W&B”.
+- App always opens on a clean New Trip landing page; completed-flight archive is retained.
+- Startup integrity/status panel checks browser/server build match, embedded runway dataset presence, FAA NASR fallback availability, FAA NMS authentication, and live weather availability.
+- Startup messaging requests update/redeploy only when a required packaged dataset is missing or the browser/server builds do not match.
+- Manual weather control revised to a source toggle workflow: LIVE / REPORTED vs MANUAL / PILOT ENTRY.
+- Contextual action button now reads “REFRESH / USE LIVE WEATHER” or “UPDATE MANUAL WEATHER”.
+- Manual weather entries are retained when switching back to LIVE so the pilot can toggle back without retyping.
+- Returning to LIVE refreshes the mission feed when online; offline fallback restores the last captured live values if available.
+- Landing runway gate now uses “NOTAM REVIEW REQUIRED” rather than the misleading “NOTAM NOT VERIFIED” when the live review is incomplete.
+- Automated obstacle review remains an FAA NMS NOTAM text scan only; it does not claim certified obstacle-clearance analysis.
+- A clear automated obstacle NOTAM review no longer makes otherwise valid takeoff performance display as “not fully evaluated.”
+- Pilot obstacle review remains an optional independent override/conflict input.
+- OEI second-segment data remains on TOLD as QRH REFERENCE; AFMS remains the controlling climb-limit source.
+
+Safety
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE. No extrapolation outside digitized source coverage.

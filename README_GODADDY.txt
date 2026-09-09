@@ -562,3 +562,11 @@ Local verification after environment variables are configured:
 
 
 v5.21.2 diagnostic change: /api/notams/config and /api/notams/ping return HTTP 200 with safe error details when FAA NMS auth fails, and log explicit NMS errors server-side. No credential values are logged.
+
+
+v5.22.3
+- Added automated departure obstacle NOTAM review using FAA NMS.
+- Review flags obstacle-related NOTAM text only; it is explicitly NOT a certified obstacle-clearance analysis.
+- Takeoff performance status now separates field/climb performance from obstacle-clearance status.
+- TOLD no longer says takeoff limits are incomplete solely because obstacle analysis is unavailable; it reports performance evaluated and obstacle clearance separate when appropriate.
+- Obstacle manual selector renamed to Obstacle Clearance Confirmation.
