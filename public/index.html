@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.5</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.6</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -1830,10 +1830,16 @@ function clearNewTripForm(){
 }
 function openNewTripForm(){clearNewTripForm();showPlatformView("newtrip");}
 function initializeMenuLanding(){
+ // Read persisted counts before first paint. localStorage is synchronous; this also
+ // makes the menu correct even if a later optional UI initializer fails.
+ updateHomeDraftCount();
+ updateHomeArchiveCount();
  resetMissionForNewTrip();
  clearNewTripForm();
  window.currentMissionMeta=null;
  showPlatformView("home");
+ updateHomeDraftCount();
+ updateHomeArchiveCount();
 }
 
 function startNewTrip(){
@@ -4467,7 +4473,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.23.5",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.23.6",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(rs){rs.textContent="CHECKING";rs.className="warn"} if(rn)rn.textContent="Checking packaged runway data…";
@@ -4506,36 +4512,40 @@ async function startupCheck(manual=false){
 }
 
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
-$("paxRequested").addEventListener("change",setPassengerCount);
-$("paxRequested").addEventListener("blur",setPassengerCount);
-$("applyPaxEditor").addEventListener("click",updatePassengerData);
-$("perfInputMode").addEventListener("change",setPerformanceInputMode);
-["manualTOPA","manualTOTemp","manualTOWeight","manualTORwyLen"].forEach(id=>$(id).addEventListener("input",()=>{
+$("paxRequested")?.addEventListener("change",setPassengerCount);
+$("paxRequested")?.addEventListener("blur",setPassengerCount);
+$("applyPaxEditor")?.addEventListener("click",updatePassengerData);
+$("perfInputMode")?.addEventListener("change",setPerformanceInputMode);
+["manualTOPA","manualTOTemp","manualTOWeight","manualTORwyLen"].forEach(id=>$(id)?.addEventListener("input",()=>{
  if(perfIsManual()){
    $("perfTOW").value=valueOrNull("manualTOWeight")||"";
    $("perfRwyLen").value=valueOrNull("manualTORwyLen")||"";
    markWhatIfDirty();
  }
 }));
-$("toConfig").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate()});
-$("toAntiIce").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();});
-$("toRunwayCondition").addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();updateWhatIfPlanner()});
-$("landConfig").addEventListener("change",recalculate);
-$("landAntiIce").addEventListener("change",recalculate);
-$("landRunwayCondition").addEventListener("change",recalculate);
+$("toConfig")?.addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate()});
+$("toAntiIce")?.addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();});
+$("toRunwayCondition")?.addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();updateWhatIfPlanner()});
+$("landConfig")?.addEventListener("change",recalculate);
+$("landAntiIce")?.addEventListener("change",recalculate);
+$("landRunwayCondition")?.addEventListener("change",recalculate);
 
-["manualUsableLda","manualNotamNote"].forEach(id=>$(id).addEventListener("input",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()}));
-$("manualRunwayStatusOverride").addEventListener("change",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()});
+["manualUsableLda","manualNotamNote"].forEach(id=>$(id)?.addEventListener("input",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()}));
+$("manualRunwayStatusOverride")?.addEventListener("change",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()});
 
-$("totalBag").addEventListener("input",onTotalBagInput);
+$("totalBag")?.addEventListener("input",onTotalBagInput);
 ["bagComp0","bagComp1","bagComp2"].forEach(id=>$(id).addEventListener("input",onBaggageCompInput));
-["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id).addEventListener("input",recalculate));
-$("perfObs").addEventListener("change",recalculate);
+["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id)?.addEventListener("input",recalculate));
+$("perfObs")?.addEventListener("change",recalculate);
 
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
 setPerformanceInputMode();
 initializeMenuLanding();
+
+window.addEventListener("DOMContentLoaded",()=>{
+  try{updateHomeDraftCount();updateHomeArchiveCount();}catch(e){console.warn("Menu count refresh failed",e)}
+});
 // A fresh app launch/reload always lands on the MENU. Drafts remain available under Flight Plans.
 window.addEventListener("pageshow",()=>{refreshMenuCounts();if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
 window.addEventListener("load",()=>{refreshMenuCounts();if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
