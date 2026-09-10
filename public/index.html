@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.3</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.4</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -4455,7 +4455,7 @@ async function evaluateLanding(){
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- const expected="5.23.3",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ const expected="5.23.4",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
  try{
    const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
    const buildOk=String(j.build||"")===expected;
