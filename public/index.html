@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.0</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.1</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -1008,6 +1008,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="notam-box"><span class="small">Published Length</span><b id="depPublishedTora">—</b><span class="small">From runway database.</span></div>
     <div class="notam-box"><span class="small">Usable Length</span><b id="depUsableTora">—</b><span class="small">After NOTAM review.</span></div>
   </div>
+  <div class="small" id="depNotamImpact" style="margin-top:8px">Runway impact: not evaluated.</div>
   <div class="row" style="margin-top:10px">
     <div class="runway-gate" id="takeoffRunwayGateBox"><span class="small">TAKEOFF RUNWAY GATE</span><b id="takeoffRunwayGate">NOT EVALUATED</b><span class="small" id="takeoffRunwayGateNote">Load departure runway and NOTAM status.</span></div>
     <div></div><div></div><div></div>
@@ -1068,6 +1069,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="notam-box"><span class="small">Published Length</span><b id="publishedLda">—</b><span class="small">From runway database.</span></div>
     <div class="notam-box"><span class="small">Usable Length</span><b id="usableLda">—</b><span class="small">After NOTAM/manual restriction.</span></div>
   </div>
+  <div class="small" id="notamRunwayImpact" style="margin-top:8px">Runway impact: not evaluated.</div>
   <div class="row" style="margin-top:10px">
     <div><label>Manual Usable Runway Length ft</label><input id="manualUsableLda" type="number" min="1" placeholder="Optional override" inputmode="decimal" enterkeyhint="done"></div>
     <div><label>Manual Runway Status</label><select id="manualRunwayStatusOverride"><option value="">Use NOTAM / published status</option><option value="OPEN">OPEN</option><option value="CLOSED">CLOSED</option><option value="RESTRICTED">RESTRICTED</option></select></div>
@@ -1178,7 +1180,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </aside>
 </div>
 
-<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:relative">
+<div id="missionBottomActions" class="card" style="display:none;gap:10px;align-items:center;flex-wrap:wrap;position:relative">
   <button type="button" style="width:auto;min-width:180px" onclick="showPlatformView('told')">Open TOLD</button>
   <button type="button" style="width:auto;min-width:240px" onclick="completeAndArchiveFlightPlan()">Complete &amp; Archive Flight Plan</button>
   <span class="small" id="draftSaveStatusBottom">Draft auto-save active</span>
@@ -1731,6 +1733,8 @@ function showPlatformView(view){
    const el=$(v+"View"); if(el)el.style.display=(v===view)?"block":"none";
    const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===view);
  });
+ const bottomActions=$("missionBottomActions");
+ if(bottomActions)bottomActions.style.display=(view==="ops")?"flex":"none";
  if(view==="told"){recalculate();updateToldCard();}
  if(view==="archive")renderArchive();
  if(view==="home"){updateHomeArchiveCount();updateHomeDraftCount();}
@@ -3916,15 +3920,16 @@ function applyManualRunway(){processFallbackRunway();}
 function selectedDepartureRunway(){return selectedRunwayObj("dep")}
 function departurePublishedLength(){const r=selectedDepartureRunway();return r&&Number.isFinite(Number(r.length_ft))?Number(r.length_ft):null}
 function effectiveDepartureRunwayAssessment(){
- const published=departurePublishedLength();let state="OPEN",usable=published,source="PUBLISHED";
- if(departureNotams.status==="CHECKED"){state=departureNotams.runway_state||"OPEN";if(Number.isFinite(departureNotams.usable_length_ft))usable=departureNotams.usable_length_ft;source=departureNotams.source||"FAA NMS";}
- return{runway:selectedDepartureRunway(),published,usable,state,source};
+ const runway=selectedDepartureRunway(),published=departurePublishedLength();let state="OPEN",usable=published,source="PUBLISHED",parsed=null;
+ if(departureNotams.status==="CHECKED"){parsed=parseRunwayClosureFromNotams(departureNotams.items||[],runway?runway.runway_id:null);departureNotams.runway_parse=parsed;departureNotams.runway_state=parsed.state;departureNotams.usable_length_ft=parsed.usable;state=parsed.state||"OPEN";if(Number.isFinite(parsed.usable))usable=parsed.usable;source=departureNotams.source||"FAA NMS";}
+ return{runway,published,usable,state,source,parsed};
 }
 function updateDepartureRunwayAssessment(){
  const a=effectiveDepartureRunwayAssessment(),r=a.runway,bfl=valueOrNull("perfBFL");
  if($("depNotamRunwayState"))$("depNotamRunwayState").textContent=a.state||"—";
  if($("depPublishedTora"))$("depPublishedTora").textContent=Number.isFinite(a.published)?`${Math.round(a.published).toLocaleString()} ft`:"—";
  if($("depUsableTora"))$("depUsableTora").textContent=Number.isFinite(a.usable)?`${Math.round(a.usable).toLocaleString()} ft`:"—";
+ if($("depNotamImpact")&&departureNotams.status==="CHECKED")$("depNotamImpact").textContent=runwayImpactSummary(a.parsed,r?r.runway_id:null);
  if(r&&!perfIsManual()&&Number.isFinite(a.usable))$("perfRwyLen").value=Math.round(a.usable);
  const box=$("takeoffRunwayGateBox"),gate=$("takeoffRunwayGate"),note=$("takeoffRunwayGateNote");if(!box||!gate||!note)return;
  if(!r||!Number.isFinite(a.usable)){gate.textContent="NOT EVALUATED";note.textContent="Departure runway/usable length unavailable.";box.className="runway-gate warn";}
@@ -3937,8 +3942,9 @@ async function refreshDepartureNotams(force=false){
  await checkNotamConnection();const dep=cleanICAO($("dep")?.value||""),r=selectedDepartureRunway();if(!dep)return;
  if($("depNotamStatus")){$("depNotamStatus").textContent="CHECKING…";$("depNotamStatus").className="warn"}if($("depNotamList"))$("depNotamList").textContent="Requesting current departure NOTAM data…";
  try{const res=await fetch(`/api/notams?icao=${encodeURIComponent(dep)}`),j=await res.json();if(!res.ok||!j.ok)throw new Error(j.message||"FAA NMS unavailable");
-   const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);departureNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,checked_at:j.checked_at||new Date().toISOString()};
+   const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);departureNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,runway_parse:parsed,checked_at:j.checked_at||new Date().toISOString()};
    if($("depNotamStatus")){$("depNotamStatus").textContent="CHECKED";$("depNotamStatus").className="ok"}if($("depNotamSource"))$("depNotamSource").textContent=departureNotams.source;
+   if($("depNotamImpact"))$("depNotamImpact").textContent=runwayImpactSummary(parsed,r?r.runway_id:null);
    if($("depNotamList"))$("depNotamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
    const hits=classifyObstacleNotams(items);departureObstacleReview={status:hits.length?"FLAGGED":"REVIEWED",airport:dep,items:hits,checked_at:departureNotams.checked_at,message:null};renderDepartureObstacleReview();
  }catch(e){departureNotams={status:"UNAVAILABLE",source:"ERROR",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};if($("depNotamStatus")){ $("depNotamStatus").textContent="NOT AVAILABLE";$("depNotamStatus").className="warn"}if($("depNotamSource"))$("depNotamSource").textContent=String(e.message||e);if($("depNotamList"))$("depNotamList").textContent="Manual departure NOTAM verification required.";}
@@ -3950,43 +3956,81 @@ function runwayPublishedLength(){
  const r=selectedLandingRunway();
  return r&&Number.isFinite(Number(r.length_ft))?Number(r.length_ft):null;
 }
+function normRunwayId(v){
+ return String(v||"").toUpperCase().trim().replace(/^0(?=\d)/,"");
+}
+function selectedRunwayMention(raw,runwayId){
+ const id=normRunwayId(runwayId);if(!id)return /\bRWY\b|\bRUNWAY\b/.test(raw);
+ const padded=/^\d$/.test(id)?`0${id}`:id;
+ const ids=[id,padded].filter((v,i,a)=>a.indexOf(v)===i).map(v=>v.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"));
+ const token=ids.join("|");
+ return new RegExp(`\\b(?:RWY|RUNWAY)\\s+(?:${token})(?=\\b|/|\\s)`).test(raw) ||
+        new RegExp(`\\b(?:RWY|RUNWAY)\\s+[0-9]{1,2}[LCR]?/(?:${token})\\b`).test(raw);
+}
+function explicitSelectedRunwayClosure(raw,runwayId){
+ const id=normRunwayId(runwayId);if(!id)return false;
+ const matches=[...raw.matchAll(/\b(?:RWY|RUNWAY)\s+([0-9]{1,2}[LCR]?(?:\s*\/\s*[0-9]{1,2}[LCR]?)?)\s+CLSD\b/g)];
+ for(const m of matches){
+   const listed=String(m[1]||"").split("/").map(normRunwayId);
+   if(listed.includes(id))return true;
+ }
+ // Common explicit phrasing: RWY 12 AND RWY 30 CLSD
+ const pair=[...raw.matchAll(/\bRWY\s+([0-9]{1,2}[LCR]?)\s+(?:AND|&)\s+RWY\s+([0-9]{1,2}[LCR]?)\s+CLSD\b/g)];
+ return pair.some(m=>[normRunwayId(m[1]),normRunwayId(m[2])].includes(id));
+}
 function parseRunwayClosureFromNotams(items, runwayId){
- const rawId=String(runwayId||"");
- const ids=[rawId,rawId.replace(/^0/,"")].filter(Boolean);
- let state="OPEN",usable=null,matched=[];
+ let state="OPEN",usable=null,matched=[],closureMatches=[],restrictionMatches=[],advisoryMatches=[];
  for(const n of items||[]){
-   const raw=String(n.raw||n.text||n.message||n||"").toUpperCase();
-   if(!raw)continue;
-   const runwayMention=/\bRWY\b|\bRUNWAY\b/.test(raw);
-   const idHit=!ids.length||ids.some(id=>raw.includes(`RWY ${id}`)||raw.includes(`RUNWAY ${id}`));
-   if(runwayMention&&idHit){
-     matched.push(raw);
-     if(/\bCLSD\b|\bCLOSED\b/.test(raw))state="CLOSED";
-     else if(state!=="CLOSED")state="RESTRICTED";
-     for(const p of [
-       /(?:LDA|USABLE|AVBL|AVAILABLE|TORA)\D{0,12}(\d{3,5})\s*FT/,
-       /(\d{3,5})\s*FT\D{0,12}(?:USABLE|AVBL|AVAILABLE)/
-     ]){
-       const m=raw.match(p);
-       if(m){const v=Number(m[1]);if(Number.isFinite(v))usable=usable==null?v:Math.min(usable,v);}
-     }
+   const raw=String(n.raw||n.text||n.message||n||"").toUpperCase().replace(/\s+/g," ").trim();
+   if(!raw||!selectedRunwayMention(raw,runwayId))continue;
+   matched.push(raw);
+   if(explicitSelectedRunwayClosure(raw,runwayId)){
+     state="CLOSED";closureMatches.push(raw);continue;
+   }
+   let localUsable=null;
+   for(const p of [
+     /(?:LDA|USABLE|AVBL|AVAILABLE|TORA)\D{0,12}(\d{3,5})\s*FT/,
+     /(\d{3,5})\s*FT\D{0,12}(?:USABLE|AVBL|AVAILABLE)/
+   ]){
+     const m=raw.match(p);if(m){const v=Number(m[1]);if(Number.isFinite(v))localUsable=localUsable==null?v:Math.min(localUsable,v);}
+   }
+   if(Number.isFinite(localUsable)){
+     usable=usable==null?localUsable:Math.min(usable,localUsable);
+     if(state!=="CLOSED")state="RESTRICTED";
+     restrictionMatches.push(raw);
+   }else if(/\bRSTR\b|\bRESTRICTED\b/.test(raw)){
+     if(state!=="CLOSED")state="RESTRICTED";
+     restrictionMatches.push(raw);
+   }else{
+     // ILS/LOC/GP/light/procedure/obstruction notices are advisories unless
+     // the NOTAM explicitly closes or shortens the selected runway.
+     advisoryMatches.push(raw);
    }
  }
- return{state,usable,matched};
+ return{state,usable,matched,closureMatches,restrictionMatches,advisoryMatches};
+}
+function runwayImpactSummary(parsed,runwayId){
+ const id=runwayId||"—";
+ if(!parsed)return`RWY ${id}: NOTAM impact not evaluated.`;
+ if(parsed.state==="CLOSED")return`RWY ${id}: CLOSED by ${parsed.closureMatches.length} explicit runway-closure NOTAM${parsed.closureMatches.length===1?"":"s"}.`;
+ if(parsed.state==="RESTRICTED")return`RWY ${id}: RESTRICTED by ${parsed.restrictionMatches.length} runway-specific NOTAM${parsed.restrictionMatches.length===1?"":"s"}${Number.isFinite(parsed.usable)?` • usable ${Math.round(parsed.usable).toLocaleString()} ft`:""}.`;
+ if(parsed.advisoryMatches.length)return`RWY ${id}: OPEN • ${parsed.advisoryMatches.length} runway-related advisory NOTAM${parsed.advisoryMatches.length===1?"":"s"} • no explicit closure/usable-length reduction identified.`;
+ return`RWY ${id}: OPEN • no runway-specific closure or usable-length restriction identified.`;
 }
 function effectiveLandingRunwayAssessment(){
- const published=runwayPublishedLength();
+ const runway=selectedLandingRunway(),published=runwayPublishedLength();
  const manualStatus=$("manualRunwayStatusOverride")?.value||"";
  const manualLen=valueOrNull("manualUsableLda");
- let state="OPEN",usable=published,source="PUBLISHED";
+ let state="OPEN",usable=published,source="PUBLISHED",parsed=null;
  if(currentNotams.status==="CHECKED"){
-   state=currentNotams.runway_state||"OPEN";
-   if(Number.isFinite(currentNotams.usable_length_ft))usable=currentNotams.usable_length_ft;
+   parsed=parseRunwayClosureFromNotams(currentNotams.items||[],runway?runway.runway_id:null);currentNotams.runway_parse=parsed;currentNotams.runway_state=parsed.state;currentNotams.usable_length_ft=parsed.usable;
+   state=parsed.state||"OPEN";
+   if(Number.isFinite(parsed.usable))usable=parsed.usable;
    source=currentNotams.source||"NOTAM";
  }
  if(manualStatus){state=manualStatus;source="MANUAL OVERRIDE";}
  if(Number.isFinite(manualLen)&&manualLen>0){usable=manualLen;source=manualStatus?source:"MANUAL LENGTH";}
- return{runway:selectedLandingRunway(),published,usable,state,source};
+ return{runway,published,usable,state,source,parsed};
 }
 function updateLandingRunwayAssessment(){
  const a=effectiveLandingRunwayAssessment(),r=a.runway,lfl=valueOrNull("landFieldLen");
@@ -3994,6 +4038,7 @@ function updateLandingRunwayAssessment(){
  if($("publishedLda"))$("publishedLda").textContent=Number.isFinite(a.published)?`${Math.round(a.published).toLocaleString()} ft`:"—";
  if($("usableLda"))$("usableLda").textContent=Number.isFinite(a.usable)?`${Math.round(a.usable).toLocaleString()} ft`:"—";
  if($("landUsableLen"))$("landUsableLen").value=Number.isFinite(a.usable)?Math.round(a.usable):"";
+ if($("notamRunwayImpact")&&currentNotams.status==="CHECKED")$("notamRunwayImpact").textContent=runwayImpactSummary(a.parsed,r?r.runway_id:null);
  const box=$("landingRunwayGateBox"),gate=$("landingRunwayGate"),note=$("landingRunwayGateNote");
  if(!box||!gate||!note)return;
  if(!r||!Number.isFinite(a.usable)){gate.textContent="NOT EVALUATED";note.textContent="Destination runway/usable length unavailable.";box.className="runway-gate warn";}
@@ -4096,8 +4141,9 @@ async function refreshNotams(){
      $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();updateToldCard();return;
    }
    const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);
-   currentNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,checked_at:j.checked_at||new Date().toISOString()};
+   currentNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,runway_parse:parsed,checked_at:j.checked_at||new Date().toISOString()};
    $("notamStatus").textContent="CHECKED";$("notamStatus").className="ok";$("notamSource").textContent=currentNotams.source;if($("notamConnectionState")){ $("notamConnectionState").textContent="AUTHENTICATED"; $("notamConnectionState").className="small ok";}
+   if($("notamRunwayImpact"))$("notamRunwayImpact").textContent=runwayImpactSummary(parsed,r?r.runway_id:null);
    $("notamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
    updateLandingRunwayAssessment();applyLandingRunwayGateToStatus();updateToldCard();scheduleDraftSave();
  }catch(e){
@@ -4310,7 +4356,7 @@ async function evaluateLanding(){
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- const expected="5.23.0",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ const expected="5.23.1",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
  try{
    const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
    const buildOk=String(j.build||"")===expected;
