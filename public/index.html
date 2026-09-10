@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.3</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -1188,6 +1188,23 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 
 </div>
 
+<div id="sharedView" style="display:none">
+  <div class="card told-card">
+    <div class="told-head">
+      <div>
+        <div class="told-title" id="sharedToldTitle">KUSA FlightOps — Shared TOLD Snapshot</div>
+        <div class="small" id="sharedToldStamp">—</div>
+      </div>
+      <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" onclick="window.print()">Print</button>
+        <button type="button" onclick="showPlatformView('home')">Open FlightOps</button>
+      </div>
+    </div>
+    <div class="callout small">Read-only shared snapshot. Values reflect the TOLD at the time the link was created and are not automatically refreshed.</div>
+    <pre id="sharedToldText" style="white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.5;margin-top:14px"></pre>
+  </div>
+</div>
+
 <div id="toldView" style="display:none">
 <div class="card told-card">
 <div class="told-head">
@@ -1200,6 +1217,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap">
     <button type="button" onclick="updateToldCard()">Refresh</button>
     <button type="button" onclick="shareCurrentMission()">Share</button>
+    <button type="button" onclick="copyCurrentToldLink()">Copy TOLD Link</button>
     <button type="button" onclick="emailCurrentMission()">Email</button>
     <button type="button" onclick="window.print()">Print</button>
     <button type="button" onclick="completeMission()">Complete & Archive Flight Plan</button>
@@ -1728,7 +1746,7 @@ function updateFOBVerifyLabel(){
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function showPlatformView(view){
- const ids=["home","newtrip","ops","told","archive"];
+ const ids=["home","newtrip","ops","told","archive","shared"];
  ids.forEach(v=>{
    const el=$(v+"View"); if(el)el.style.display=(v===view)?"block":"none";
    const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===view);
@@ -1736,6 +1754,7 @@ function showPlatformView(view){
  const bottomActions=$("missionBottomActions");
  if(bottomActions)bottomActions.style.display=(view==="ops")?"flex":"none";
  if(view==="told"){recalculate();updateToldCard();}
+ if(view==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
  if(view==="archive")renderArchive();
  if(view==="home"){updateHomeArchiveCount();updateHomeDraftCount();}
  window.scrollTo({top:0,behavior:"smooth"});
@@ -1954,25 +1973,65 @@ function currentMissionSummaryText(){
  ];
  return lines.join("\n");
 }
+function b64urlEncodeUtf8(text){
+ const bytes=new TextEncoder().encode(String(text||""));let bin="";for(const b of bytes)bin+=String.fromCharCode(b);
+ return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/g,"");
+}
+function b64urlDecodeUtf8(text){
+ let s=String(text||"").replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";
+ const bin=atob(s),bytes=Uint8Array.from(bin,c=>c.charCodeAt(0));return new TextDecoder().decode(bytes);
+}
+function makeToldShareLink(summary=currentMissionSummaryText(),title=null){
+ const dep=cleanICAO($("dep")?.value||""),dest=cleanICAO($("dest")?.value||"");
+ const payload={v:1,title:title||`N33AP TOLD — ${dep||"—"} → ${dest||"—"}`,generated:new Date().toISOString(),summary:String(summary||"")};
+ return `${window.location.origin}${window.location.pathname}#told=${b64urlEncodeUtf8(JSON.stringify(payload))}`;
+}
+async function copyCurrentToldLink(){
+ const link=makeToldShareLink();
+ try{await navigator.clipboard.writeText(link);alert("Shareable TOLD snapshot link copied.");}
+ catch(e){prompt("Copy this TOLD snapshot link:",link);}
+}
+function openSharedToldFromHash(){
+ const hash=String(window.location.hash||"");if(!hash.startsWith("#told="))return false;
+ try{
+   const p=JSON.parse(b64urlDecodeUtf8(hash.slice(6)));if(!p||!p.summary)return false;
+   if($("sharedToldTitle"))$("sharedToldTitle").textContent=p.title||"KUSA FlightOps — Shared TOLD Snapshot";
+   if($("sharedToldStamp"))$("sharedToldStamp").textContent=`Snapshot created ${p.generated?new Date(p.generated).toLocaleString():"—"}`;
+   if($("sharedToldText"))$("sharedToldText").textContent=p.summary;
+   showPlatformView("shared");return true;
+ }catch(e){return false}
+}
 async function shareCurrentMission(){
  const text=currentMissionSummaryText();
- const title=`KUSA FlightOps ${cleanICAO($("dep").value)}-${cleanICAO($("dest").value)}`;
+ const title=`KUSA FlightOps TOLD — ${cleanICAO($("dep").value)}-${cleanICAO($("dest").value)}`;
+ const url=makeToldShareLink(text,title);
  try{
-   if(navigator.share){await navigator.share({title,text});return}
-   await navigator.clipboard.writeText(text);
-   alert("Flight plan TOLD copied to clipboard.");
+   if(navigator.share){await navigator.share({title,text:"KUSA FlightOps TOLD snapshot",url});return}
+   await navigator.clipboard.writeText(`${text}\n\nShared TOLD snapshot: ${url}`);
+   alert("TOLD summary and shareable link copied to clipboard.");
  }catch(e){
-   if(e&&e.name!=="AbortError")alert("Unable to share automatically. Use Email or Print.");
+   if(e&&e.name!=="AbortError")alert("Unable to share automatically. Use Copy TOLD Link, Email, or Print.");
  }
 }
 function emailCurrentMission(){
- const subject=encodeURIComponent(`KUSA FlightOps TOLD — ${cleanICAO($("dep").value)} to ${cleanICAO($("dest").value)} — N33AP`);
- const body=encodeURIComponent(currentMissionSummaryText());
+ const dep=cleanICAO($("dep").value),dest=cleanICAO($("dest").value);
+ const subject=encodeURIComponent(`KUSA FlightOps - Performance + W&B | TOLD | ${dep} to ${dest} | N33AP`);
+ const link=makeToldShareLink();
+ const body=encodeURIComponent(`KUSA FlightOps - Performance + W&B\nTOLD PACKAGE — N33AP\nRoute: ${dep} → ${dest}\n\n${currentMissionSummaryText()}\n\nSHARED TOLD SNAPSHOT\n${link}\n\nDevelopment / validation only — not approved for flight use.`);
  window.location.href=`mailto:?subject=${subject}&body=${body}`;
 }
 
 function captureCurrentPlanState(){
  const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
+ // Canonicalize baggage at save time so drafts cannot capture a stale 0-lb compartment state
+ // when Total Baggage contains the controlling value.
+ const enteredBagTotal=Math.max(0,num("totalBag"));
+ let savedBaggage=baggageLoadsFromUI();
+ const compartmentTotal=savedBaggage.reduce((a,b)=>a+b,0);
+ if(Math.abs(enteredBagTotal-compartmentTotal)>0.5){
+   savedBaggage=distributeBaggage(enteredBagTotal).stations.map(st=>Math.round(st.load));
+ }
+ const savedBagTotal=savedBaggage.reduce((a,b)=>a+b,0);
  return{
    dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
    aircraft:$("homeAircraft")?.value||"N33AP",
@@ -1982,8 +2041,8 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNot
    emer_return_fuel_burn_lb:num("emerReturnBurn"),
    passengers:passengers.map(p=>({...p})),
    seat_assignments:[...seatAssignments],
-   baggage:baggageLoadsFromUI(),
-   total_baggage_lb:Math.max(0,num("totalBag")),
+   baggage:savedBaggage,
+   total_baggage_lb:savedBagTotal,
    dep_runway_id:dr?dr.runway_id:null,dest_runway_id:lr?lr.runway_id:null,
    takeoff_condition:$("toRunwayCondition")?.value||"DRY",
    landing_condition:$("landRunwayCondition")?.value||"DRY",
@@ -2041,14 +2100,21 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
  $("paxRequested").value=passengers.length;
  renderSeating();
 
- if(Array.isArray(s.baggage)){
-   ["bagComp0","bagComp1","bagComp2"].forEach((id,i)=>{
-     if($(id)&&Number.isFinite(Number(s.baggage[i])))$(id).value=s.baggage[i];
-   });
-   // Keep the mission Total Baggage field and compartment loads synchronized on restore.
-   syncTotalBagFromCompartments();
- } else if(Number.isFinite(Number(s.total_baggage_lb))){
-   setBaggageFromTotal(Number(s.total_baggage_lb));
+ {
+   const savedTotal=Number(s.total_baggage_lb);
+   const hasSavedTotal=Number.isFinite(savedTotal)&&savedTotal>=0;
+   const savedLoads=Array.isArray(s.baggage)?s.baggage.slice(0,3).map(v=>Number(v)||0):null;
+   const loadTotal=savedLoads?savedLoads.reduce((a,b)=>a+b,0):NaN;
+   // total_baggage_lb is the recovery value. If an older/stale draft stored zeroed
+   // compartments beside a valid total, reconstruct the compartments from the total.
+   if(hasSavedTotal && (!savedLoads || Math.abs(savedTotal-loadTotal)>0.5)){
+     setBaggageFromTotal(savedTotal);
+   }else if(savedLoads){
+     ["bagComp0","bagComp1","bagComp2"].forEach((id,i)=>{if($(id))$(id).value=savedLoads[i]||0;});
+     syncTotalBagFromCompartments();
+   }else{
+     setBaggageFromTotal(0);
+   }
  }
 
  if($("toRunwayCondition")&&s.takeoff_condition)$("toRunwayCondition").value=s.takeoff_condition;
@@ -2248,6 +2314,7 @@ function renderArchive(){
        <button type="button" class="primary-open" onclick="openArchiveFlightPlan(${i})">Open / Edit</button>
        <button type="button" onclick="duplicateArchiveFlightPlan(${i})">Duplicate</button>
        <button type="button" onclick="shareArchiveMission(${i})">Share</button>
+       <button type="button" onclick="copyArchiveToldLink(${i})">Copy TOLD Link</button>
        <button type="button" onclick="emailArchiveMission(${i})">Email</button>
        <button type="button" onclick="viewArchiveMission(${i})">View TOLD</button>
        <button type="button" class="archive-delete" onclick="deleteArchiveFlightPlan(${i})">Delete</button>
@@ -2269,16 +2336,18 @@ copy.completed_at=new Date().toISOString();
  saveMissionArchive(arr.slice(0,100));
  renderArchive();
 }
+function archiveToldShareLink(m){return makeToldShareLink(m?.summary||"",`N33AP TOLD — ${m?.dep||"—"} → ${m?.dest||"—"}`)}
+async function copyArchiveToldLink(i){const m=getMissionArchive()[i];if(!m)return;const link=archiveToldShareLink(m);try{await navigator.clipboard.writeText(link);alert("Completed TOLD snapshot link copied.");}catch(e){prompt("Copy this TOLD snapshot link:",link)}}
 async function shareArchiveMission(i){
- const m=getMissionArchive()[i];if(!m)return;
+ const m=getMissionArchive()[i];if(!m)return;const url=archiveToldShareLink(m);
  try{
-   if(navigator.share){await navigator.share({title:`KUSA FlightOps ${m.dep}-${m.dest}`,text:m.summary});return}
-   await navigator.clipboard.writeText(m.summary);alert("Completed flight plan TOLD copied to clipboard.");
+   if(navigator.share){await navigator.share({title:`KUSA FlightOps ${m.dep}-${m.dest}`,text:"KUSA FlightOps completed TOLD snapshot",url});return}
+   await navigator.clipboard.writeText(`${m.summary}\n\nShared TOLD snapshot: ${url}`);alert("Completed TOLD and link copied to clipboard.");
  }catch(e){}
 }
 function emailArchiveMission(i){
- const m=getMissionArchive()[i];if(!m)return;
- location.href=`mailto:?subject=${encodeURIComponent("KUSA FlightOps TOLD — "+m.dep+" to "+m.dest+" — "+(m.aircraft||"N33AP"))}&body=${encodeURIComponent(m.summary)}`;
+ const m=getMissionArchive()[i];if(!m)return;const link=archiveToldShareLink(m);
+ location.href=`mailto:?subject=${encodeURIComponent("KUSA FlightOps - Performance + W&B | TOLD | "+m.dep+" to "+m.dest+" | "+(m.aircraft||"N33AP"))}&body=${encodeURIComponent(`${m.summary}\n\nSHARED TOLD SNAPSHOT\n${link}\n\nDevelopment / validation only — not approved for flight use.`)}`;
 }
 function viewArchiveMission(i){
  const m=getMissionArchive()[i];if(!m)return;
@@ -2713,7 +2782,11 @@ function onBaggageCompInput(){
 }
 function drawTrace(zfwW,zfwCG,path,toW,toCG,ldW,ldCG){
  const c=$("cgChart");if(!c)return;
- const dpr=devicePixelRatio||1,W=c.clientWidth,H=320;c.width=W*dpr;c.height=H*dpr;
+ const W=c.clientWidth;
+ // Do not erase the canvas while the Mission view is hidden (clientWidth=0).
+ // It will be redrawn when the Mission view becomes visible again.
+ if(!Number.isFinite(W)||W<120)return;
+ const dpr=devicePixelRatio||1,H=320;c.width=W*dpr;c.height=H*dpr;
  const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
 
  const minW=18000,maxW=41000,minCG=10,maxCG=35;
@@ -2766,7 +2839,11 @@ function drawTrace(zfwW,zfwCG,path,toW,toCG,ldW,ldCG){
  }
 }
 
-
+function redrawCgEnvelope(){
+ const c=latestCalc||{};
+ if(!Number.isFinite(c.zfw)||!Number.isFinite(c.pct))return;
+ drawTrace(c.zfw,c.pct,c.burnPath,c.tow,c.takeoffPct,c.landing,c.landingPct);
+}
 
 function rawMetarText(point){
  const m=point&&point.metar||{};
@@ -3967,16 +4044,47 @@ function selectedRunwayMention(raw,runwayId){
  return new RegExp(`\\b(?:RWY|RUNWAY)\\s+(?:${token})(?=\\b|/|\\s)`).test(raw) ||
         new RegExp(`\\b(?:RWY|RUNWAY)\\s+[0-9]{1,2}[LCR]?/(?:${token})\\b`).test(raw);
 }
+function notamOperationalBody(raw){
+ let body=String(raw||"").toUpperCase().replace(/\s+/g," ").trim();
+ // Strip standard domestic NOTAM prefix, e.g. !BPT 11/004 BPT ...
+ body=body.replace(/^!?[A-Z0-9]{3,4}\s+\d{2}\/\d{3,4}\s+/,"");
+ // Most domestic NOTAMs repeat the location after the number.
+ body=body.replace(/^[A-Z0-9]{3,4}\s+/,"");
+ return body.trim();
+}
+function runwayIdsFromSubject(subject){
+ const ids=[];
+ for(const m of String(subject||"").matchAll(/\b(?:RWY|RUNWAY)\s+([0-9]{1,2}[LCR]?(?:\s*\/\s*[0-9]{1,2}[LCR]?)?)/g)){
+   String(m[1]||"").split("/").map(normRunwayId).forEach(x=>{if(x&&!ids.includes(x))ids.push(x)});
+ }
+ return ids;
+}
 function explicitSelectedRunwayClosure(raw,runwayId){
  const id=normRunwayId(runwayId);if(!id)return false;
- const matches=[...raw.matchAll(/\b(?:RWY|RUNWAY)\s+([0-9]{1,2}[LCR]?(?:\s*\/\s*[0-9]{1,2}[LCR]?)?)\s+CLSD\b/g)];
- for(const m of matches){
-   const listed=String(m[1]||"").split("/").map(normRunwayId);
-   if(listed.includes(id))return true;
+ const body=notamOperationalBody(raw);
+ // Critical safety rule: only the facility that is the SUBJECT of the NOTAM may be closed.
+ // Example that must NOT close RWY 12/30:
+ //   TWY E BTN TWY D AND RWY 12/30 CLSD
+ // The closed subject there is TWY E, not the runway.
+ if(!/^(?:RWY|RUNWAY)\s+/.test(body))return false;
+ const clsd=body.search(/\bCLSD\b/);if(clsd<0)return false;
+ const subject=body.slice(0,clsd);
+ return runwayIdsFromSubject(subject).includes(id);
+}
+function explicitSelectedRunwayRestriction(raw,runwayId){
+ const id=normRunwayId(runwayId);if(!id)return null;
+ const body=notamOperationalBody(raw);
+ if(!/^(?:RWY|RUNWAY)\s+/.test(body))return null;
+ if(!runwayIdsFromSubject(body).includes(id))return null;
+ let usable=null;
+ for(const p of [
+   /(?:LDA|USABLE|AVBL|AVAILABLE|TORA)\D{0,16}(\d{3,5})\s*FT/,
+   /(\d{3,5})\s*FT\D{0,16}(?:USABLE|AVBL|AVAILABLE)/
+ ]){
+   const m=body.match(p);if(m){const v=Number(m[1]);if(Number.isFinite(v))usable=usable==null?v:Math.min(usable,v)}
  }
- // Common explicit phrasing: RWY 12 AND RWY 30 CLSD
- const pair=[...raw.matchAll(/\bRWY\s+([0-9]{1,2}[LCR]?)\s+(?:AND|&)\s+RWY\s+([0-9]{1,2}[LCR]?)\s+CLSD\b/g)];
- return pair.some(m=>[normRunwayId(m[1]),normRunwayId(m[2])].includes(id));
+ const restricted=/\bRSTR\b|\bRESTRICTED\b/.test(body);
+ return Number.isFinite(usable)||restricted?{usable,restricted}:null;
 }
 function parseRunwayClosureFromNotams(items, runwayId){
  let state="OPEN",usable=null,matched=[],closureMatches=[],restrictionMatches=[],advisoryMatches=[];
@@ -3987,23 +4095,14 @@ function parseRunwayClosureFromNotams(items, runwayId){
    if(explicitSelectedRunwayClosure(raw,runwayId)){
      state="CLOSED";closureMatches.push(raw);continue;
    }
-   let localUsable=null;
-   for(const p of [
-     /(?:LDA|USABLE|AVBL|AVAILABLE|TORA)\D{0,12}(\d{3,5})\s*FT/,
-     /(\d{3,5})\s*FT\D{0,12}(?:USABLE|AVBL|AVAILABLE)/
-   ]){
-     const m=raw.match(p);if(m){const v=Number(m[1]);if(Number.isFinite(v))localUsable=localUsable==null?v:Math.min(localUsable,v);}
-   }
-   if(Number.isFinite(localUsable)){
-     usable=usable==null?localUsable:Math.min(usable,localUsable);
-     if(state!=="CLOSED")state="RESTRICTED";
-     restrictionMatches.push(raw);
-   }else if(/\bRSTR\b|\bRESTRICTED\b/.test(raw)){
+   const rr=explicitSelectedRunwayRestriction(raw,runwayId);
+   if(rr){
+     if(Number.isFinite(rr.usable))usable=usable==null?rr.usable:Math.min(usable,rr.usable);
      if(state!=="CLOSED")state="RESTRICTED";
      restrictionMatches.push(raw);
    }else{
-     // ILS/LOC/GP/light/procedure/obstruction notices are advisories unless
-     // the NOTAM explicitly closes or shortens the selected runway.
+     // ILS/LOC/GP, lighting, taxiway, procedure, obstacle, and other notices that
+     // merely mention the runway are advisories unless the runway itself is the subject.
      advisoryMatches.push(raw);
    }
  }
@@ -4012,7 +4111,7 @@ function parseRunwayClosureFromNotams(items, runwayId){
 function runwayImpactSummary(parsed,runwayId){
  const id=runwayId||"—";
  if(!parsed)return`RWY ${id}: NOTAM impact not evaluated.`;
- if(parsed.state==="CLOSED")return`RWY ${id}: CLOSED by ${parsed.closureMatches.length} explicit runway-closure NOTAM${parsed.closureMatches.length===1?"":"s"}.`;
+ if(parsed.state==="CLOSED"){const t=parsed.closureMatches[0]||"";return`RWY ${id}: CLOSED by ${parsed.closureMatches.length} explicit runway-subject closure NOTAM${parsed.closureMatches.length===1?"":"s"}${t?` • Trigger: ${t.slice(0,180)}`:""}.`;}
  if(parsed.state==="RESTRICTED")return`RWY ${id}: RESTRICTED by ${parsed.restrictionMatches.length} runway-specific NOTAM${parsed.restrictionMatches.length===1?"":"s"}${Number.isFinite(parsed.usable)?` • usable ${Math.round(parsed.usable).toLocaleString()} ft`:""}.`;
  if(parsed.advisoryMatches.length)return`RWY ${id}: OPEN • ${parsed.advisoryMatches.length} runway-related advisory NOTAM${parsed.advisoryMatches.length===1?"":"s"} • no explicit closure/usable-length reduction identified.`;
  return`RWY ${id}: OPEN • no runway-specific closure or usable-length restriction identified.`;
@@ -4356,7 +4455,7 @@ async function evaluateLanding(){
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- const expected="5.23.1",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ const expected="5.23.3",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
  try{
    const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
    const buildOk=String(j.build||"")===expected;
@@ -4401,8 +4500,8 @@ setPassengerCount();
 setPerformanceInputMode();
 initializeMenuLanding();
 // A fresh app launch/reload always lands on the MENU. Drafts remain available under Flight Plans.
-window.addEventListener("pageshow",()=>{if(!window.currentMissionMeta)showPlatformView("home")});
-window.addEventListener("load",()=>{if(!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("pageshow",()=>{if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("load",()=>{if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
 // Debounced local draft persistence for active, incomplete missions.
 document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
@@ -4410,7 +4509,8 @@ window.addEventListener("beforeunload",()=>{try{saveCurrentDraft()}catch(e){}});
 startupCheck();
 updateHomeArchiveCount();
 updateHomeDraftCount();
-addEventListener("resize",recalculate);
+addEventListener("resize",()=>{recalculate();requestAnimationFrame(redrawCgEnvelope)});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsView")?.style.display!=="none")requestAnimationFrame(redrawCgEnvelope)});
 </script>
 <script>
 if ("serviceWorker" in navigator) {
