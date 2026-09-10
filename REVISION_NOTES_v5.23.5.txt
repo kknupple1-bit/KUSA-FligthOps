@@ -1,0 +1,11 @@
+KUSA FlightOps v5.23.5 — Startup Menu/Data Status Reliability
+
+- Corrects Menu draft/archive counts on first application paint.
+- Rechecks counts on pageshow/load and after startup checks for Safari/iOS reliability.
+- Changes startup data verification to resolve each status instead of remaining indefinitely on CHECKING.
+- Fast /api/health pass verifies browser/server build and packaged runway cache first.
+- Deep /api/diagnostics pass verifies AWC weather and FAA NMS authentication.
+- Adds finite timeouts and explicit CHECK TIMED OUT/OFFLINE states instead of permanent spinners.
+- Adds Refresh Data Status control.
+- Displays FAA NMS environment (including PRODUCTION) when available.
+- Preserves existing manual/offline fallback behavior.
