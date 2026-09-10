@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.22.7</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.0</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -522,8 +522,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 <div class="row" style="margin-top:10px">
 <div><label>Number of Passengers</label><input id="paxRequested" type="number" value="0" min="0" max="9" inputmode="numeric" enterkeyhint="done" step="1"></div>
-<div><label>Departure Runway</label><select id="depRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
-<div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged()"><option value="">Load mission first</option></select></div>
+<div><label>Departure Runway</label><select id="depRunway" onchange="selectedRunwayChanged('dep')"><option value="">Load mission first</option></select></div>
+<div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged('dest')"><option value="">Load mission first</option></select></div>
 <div><label>Load Airport / Weather Data</label><button onclick="loadMission()">Load / Refresh Mission</button></div>
 <div>
   <label>Fuel Verification — Deliberate Safety Check</label>
@@ -993,6 +993,28 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="wx"><div class="small">Weather Cross-Check</div><b id="toWxRunwayCheck">NO PRECIP FLAG</b><div class="small" id="toWxRunwayNote">Pilot selection controls performance.</div></div>
 <div></div><div></div>
 </div>
+
+<div class="notam-panel">
+  <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
+    <div>
+      <h3 style="margin:0">Departure Runway / NOTAM Assessment</h3>
+      <div class="small">Select the controlling takeoff runway here. FAA NMS runway review and the separate obstacle-NOTAM scan update from the same departure data.</div>
+    </div>
+    <button type="button" style="width:auto" onclick="refreshDepartureNotams(true)">Refresh NOTAMs</button>
+  </div>
+  <div class="notam-grid" style="margin-top:10px">
+    <div class="notam-box"><span class="small">NOTAM Status</span><b id="depNotamStatus">NOT CHECKED</b><span class="small" id="depNotamSource">—</span></div>
+    <div class="notam-box"><label class="small" for="depNotamRunwaySelect">Selected Runway</label><select id="depNotamRunwaySelect" onchange="assessmentRunwayChanged('dep',this.value)"><option value="">Load mission first</option></select><span class="small" id="depNotamRunwayState">—</span></div>
+    <div class="notam-box"><span class="small">Published Length</span><b id="depPublishedTora">—</b><span class="small">From runway database.</span></div>
+    <div class="notam-box"><span class="small">Usable Length</span><b id="depUsableTora">—</b><span class="small">After NOTAM review.</span></div>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <div class="runway-gate" id="takeoffRunwayGateBox"><span class="small">TAKEOFF RUNWAY GATE</span><b id="takeoffRunwayGate">NOT EVALUATED</b><span class="small" id="takeoffRunwayGateNote">Load departure runway and NOTAM status.</span></div>
+    <div></div><div></div><div></div>
+  </div>
+  <div id="depNotamList" class="notam-list small">No departure NOTAM data loaded.</div>
+</div>
+
 <div class="row" style="margin-top:10px">
 <div><label>Runway Length ft</label><input id="perfRwyLen" type="number" readonly></div>
 <div><label>Actual Takeoff Weight lb</label><input id="perfTOW" type="number" readonly></div>
@@ -1042,7 +1064,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
   <div class="notam-grid" style="margin-top:10px">
     <div class="notam-box"><span class="small">NOTAM Status</span><b id="notamStatus">NOT CHECKED</b><span class="small" id="notamSource">—</span><span class="small" aria-hidden="true"> • </span><span class="small" id="notamConnectionState">NMS connection not checked.</span></div>
-    <div class="notam-box"><span class="small">Selected Runway</span><b id="notamRunway">—</b><span class="small" id="notamRunwayState">—</span></div>
+    <div class="notam-box"><label class="small" for="destNotamRunwaySelect">Selected Runway</label><select id="destNotamRunwaySelect" onchange="assessmentRunwayChanged('dest',this.value)"><option value="">Load mission first</option></select><span class="small" id="notamRunwayState">—</span></div>
     <div class="notam-box"><span class="small">Published Length</span><b id="publishedLda">—</b><span class="small">From runway database.</span></div>
     <div class="notam-box"><span class="small">Usable Length</span><b id="usableLda">—</b><span class="small">After NOTAM/manual restriction.</span></div>
   </div>
@@ -1154,6 +1176,12 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </table>
 </div>
 </aside>
+</div>
+
+<div class="card" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:relative">
+  <button type="button" style="width:auto;min-width:180px" onclick="showPlatformView('told')">Open TOLD</button>
+  <button type="button" style="width:auto;min-width:240px" onclick="completeAndArchiveFlightPlan()">Complete &amp; Archive Flight Plan</button>
+  <span class="small" id="draftSaveStatusBottom">Draft auto-save active</span>
 </div>
 
 </div>
@@ -1613,6 +1641,7 @@ const $=id=>document.getElementById(id);
 const num=id=>+$((id)).value||0;
 let latestCalc=null;
 let currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+let departureNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
 let departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
 let manualWeather={
  dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null},
@@ -1630,6 +1659,12 @@ function formatWeatherSource(which){const w=weatherSourceState(which);if(w.mode=
 function updateWeatherSourceBadges(){
  [["dep","depWxSourceBadge","depWxSourceTime"],["dest","destWxSourceBadge","destWxSourceTime"]].forEach(([which,bid,tid])=>{const w=weatherSourceState(which),b=$(bid),t=$(tid);if(!b)return;b.textContent=w.mode;b.className=w.mode==="LIVE"?"ok":w.mode==="MANUAL"?"warn":"bad";if(t)t.textContent=w.mode==="MANUAL"?(w.time?new Date(w.time).toLocaleString():"Pilot entry"):(w.mode==="LIVE"?(w.time?fmtUtc(w.time):"Reported weather"):(w.note||"No report"));});
 }
+function parseWindFromRawMetar(m){
+ const raw=String(firstVal(m||{},["raw","rawOb","raw_text"])||"").toUpperCase();
+ const mt=raw.match(/\b(VRB|\d{3})(\d{2,3})(?:G(\d{2,3}))?KT\b/);if(!mt)return{dir:null,spd:null,gust:null};
+ return{dir:mt[1]==="VRB"?"VRB":Number(mt[1]),spd:Number(mt[2]),gust:mt[3]?Number(mt[3]):null};
+}
+function activeWindValues(m){const raw=parseWindFromRawMetar(m);let dir=firstVal(m||{},["wind_dir","wdir","windDir","wind_direction"]),spd=firstVal(m||{},["wind_kt","wspd","windSpeed","wind_speed_kt"]),gust=firstVal(m||{},["wind_gust_kt","wgst","windGust","wind_gust"]);if(dir==null)dir=raw.dir;if(spd==null)spd=raw.spd;if(gust==null)gust=raw.gust;return{dir,spd,gust}}
 function loadManualWeatherForm(){
  const which=$("manualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
  if($("manualWxMode"))$("manualWxMode").value=st?.applied?"MANUAL":"LIVE";
@@ -1640,7 +1675,7 @@ function loadManualWeatherForm(){
  }else{
    val("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));
    val("manualWxPA",p?.pressure_altitude_ft);val("manualWxAlt",p?.altimeter_inhg);
-   val("manualWxDir",firstVal(m,["wind_dir","wdir","windDir","wind_direction"]));val("manualWxSpeed",firstVal(m,["wind_kt","wspd","windSpeed","wind_speed_kt"]));val("manualWxGust",firstVal(m,["wind_gust_kt","wgst"]));
+   const w=activeWindValues(m);val("manualWxDir",w.dir);val("manualWxSpeed",w.spd);val("manualWxGust",w.gust);
    val("manualWxNote",st?.note||"");
  }
  manualWeatherModeChanged();updateWeatherSourceBadges();
@@ -1653,7 +1688,7 @@ function manualWeatherModeChanged(){
  const mode=$("manualWxMode")?.value||"LIVE",which=$("manualWxTarget")?.value||"dep",st=manualWeather[which],p=wxPoint(which);
  const ids=["manualWxOAT","manualWxPA","manualWxAlt","manualWxDir","manualWxSpeed","manualWxGust","manualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
  if(mode==="MANUAL"&&st?.manual_values){const v=st.manual_values;const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",v.oat);put("manualWxPA",v.pa);put("manualWxAlt",v.alt);put("manualWxDir",v.dir);put("manualWxSpeed",v.spd);put("manualWxGust",v.gust);put("manualWxNote",st.note||"");}
- if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{};const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("manualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("manualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");put("manualWxDir",firstVal(m,["wind_dir","wdir","windDir","wind_direction"]));put("manualWxSpeed",firstVal(m,["wind_kt","wspd","windSpeed","wind_speed_kt"]));put("manualWxGust",firstVal(m,["wind_gust_kt","wgst"]));}
+ if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{};const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("manualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("manualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");const w=activeWindValues(m);put("manualWxDir",w.dir);put("manualWxSpeed",w.spd);put("manualWxGust",w.gust);}
  const stxt=$("manualWxStatus");if(stxt)stxt.textContent=mode==="MANUAL"?"MANUAL selected. Enter or revise pilot weather, then press UPDATE MANUAL WEATHER.":"LIVE selected. Press REFRESH / USE LIVE WEATHER to restore the live feed and recalculate.";
  updateManualWeatherActionButton();
 }
@@ -1696,7 +1731,7 @@ function showPlatformView(view){
    const el=$(v+"View"); if(el)el.style.display=(v===view)?"block":"none";
    const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===view);
  });
- if(view==="told")updateToldCard();
+ if(view==="told"){recalculate();updateToldCard();}
  if(view==="archive")renderArchive();
  if(view==="home"){updateHomeArchiveCount();updateHomeDraftCount();}
  window.scrollTo({top:0,behavior:"smooth"});
@@ -1731,11 +1766,12 @@ function saveCurrentDraft(){
  const rec=draftRecord();if(!rec)return;
  const arr=getMissionDrafts();const ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionDrafts(arr.slice(0,50));
- const e=$("draftSaveStatus");if(e)e.textContent=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+ const txt=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
+ const e=$("draftSaveStatus");if(e)e.textContent=txt; const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt;
 }
 function scheduleDraftSave(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
- const e=$("draftSaveStatus");if(e)e.textContent="Saving draft…";
+ const e=$("draftSaveStatus");if(e)e.textContent="Saving draft…";const eb=$("draftSaveStatusBottom");if(eb)eb.textContent="Saving draft…";
  clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(saveCurrentDraft,450);
 }
 function removeMissionDraft(id){if(!id)return;saveMissionDrafts(getMissionDrafts().filter(x=>x.id!==id));}
@@ -1746,6 +1782,8 @@ function resetMissionForNewTrip(){
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
  missionData=null;
+ currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+ departureNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
  manualWeather={dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null}};
  updateWeatherSourceBadges();
  // Clear runway selectors and mission-derived summary/performance fields
@@ -1878,7 +1916,7 @@ function currentMissionSummaryText(){
    `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
    `40°C / SOURCE-EVALUATED TOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
    `Structural MTOW: 40,780 lb | Digitized Field-Source Ceiling: ${textOf("toMax")}`,
-   `Climb-Limited TOW: ${$("toClimbWt")?.value?Number($("toClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
+   `Climb-Limited TOW: ${$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
    `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
    `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
@@ -1941,6 +1979,7 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNot
    passengers:passengers.map(p=>({...p})),
    seat_assignments:[...seatAssignments],
    baggage:baggageLoadsFromUI(),
+   total_baggage_lb:Math.max(0,num("totalBag")),
    dep_runway_id:dr?dr.runway_id:null,dest_runway_id:lr?lr.runway_id:null,
    takeoff_condition:$("toRunwayCondition")?.value||"DRY",
    landing_condition:$("landRunwayCondition")?.value||"DRY",
@@ -1950,6 +1989,8 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNot
    manual_usable_lda:valueOrNull("manualUsableLda"),
    manual_runway_status:$("manualRunwayStatusOverride")?.value||"",
    manual_notam_note:$("manualNotamNote")?.value||"",
+   departure_notam_state:{status:departureNotams.status,source:departureNotams.source,runway_state:departureNotams.runway_state,usable_length_ft:departureNotams.usable_length_ft,checked_at:departureNotams.checked_at},
+   destination_notam_state:{status:currentNotams.status,source:currentNotams.source,runway_state:currentNotams.runway_state,usable_length_ft:currentNotams.usable_length_ft,checked_at:currentNotams.checked_at},
    performance_mode:$("perfInputMode")?.value||"LIVE",
    what_if:{
      pa:valueOrNull("manualTOPA"),
@@ -2000,6 +2041,10 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
    ["bagComp0","bagComp1","bagComp2"].forEach((id,i)=>{
      if($(id)&&Number.isFinite(Number(s.baggage[i])))$(id).value=s.baggage[i];
    });
+   // Keep the mission Total Baggage field and compartment loads synchronized on restore.
+   syncTotalBagFromCompartments();
+ } else if(Number.isFinite(Number(s.total_baggage_lb))){
+   setBaggageFromTotal(Number(s.total_baggage_lb));
  }
 
  if($("toRunwayCondition")&&s.takeoff_condition)$("toRunwayCondition").value=s.takeoff_condition;
@@ -2015,6 +2060,7 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
  currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+ departureNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
  departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
 
  window.currentMissionMeta={
@@ -2032,8 +2078,11 @@ note:s.note||record.note||"",
  setTimeout(()=>{
    selectArchivedRunway("depRunway",s.dep_runway_id||record.dep_runway);
    selectArchivedRunway("destRunway",s.dest_runway_id||record.dest_runway);
+   if(s.departure_notam_state)departureNotams={...departureNotams,...s.departure_notam_state,items:[]};
+   if(s.destination_notam_state)currentNotams={...currentNotams,...s.destination_notam_state,items:[]};
    selectedRunwayChanged();
    recalculate();
+   updateDepartureRunwayAssessment();updateLandingRunwayAssessment();applyLandingRunwayGateToStatus();
    updateFOBVerifyLabel();
    updateToldCard();
  },300);
@@ -2382,8 +2431,16 @@ function updateToldCard(){
  $("toldRoute").textContent=`${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
  $("toldDateTime").textContent=`Generated ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
  const altCode=$("alt").value.toUpperCase().trim();
- const bagLoads=baggageLoadsFromUI();
- const bagTotal=bagLoads.reduce((a,b)=>a+b,0);
+ let bagLoads=baggageLoadsFromUI();
+ let bagTotal=bagLoads.reduce((a,b)=>a+b,0);
+ const enteredBagTotal=Math.max(0,num("totalBag"));
+ // Defensive synchronization: TOLD must never show 0 when Mission shows a nonzero total.
+ // Normally the input handlers keep these equal; this also repairs restored/programmatically loaded states.
+ if(Math.abs(enteredBagTotal-bagTotal)>0.5){
+   setBaggageFromTotal(enteredBagTotal);
+   bagLoads=baggageLoadsFromUI();
+   bagTotal=bagLoads.reduce((a,b)=>a+b,0);
+ }
  const seated=seatAssignments.filter(Boolean).length;
  const counts={male:0,female:0,child:0};
  const seatText=[];
@@ -2432,7 +2489,8 @@ function updateToldCard(){
  $("toldPrepGenerated").textContent=`UPDATED ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
 
  $("toldDepRwy").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
- $("toldDepSurface").textContent=`${perfIsManual()&&perfTakeoffRunwayLen()?Number(perfTakeoffRunwayLen()).toLocaleString()+" ft":(dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—")} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
+ const depRunwayEval=effectiveDepartureRunwayAssessment();
+ $("toldDepSurface").textContent=`${Number.isFinite(depRunwayEval.usable)?Math.round(depRunwayEval.usable).toLocaleString()+" ft":(perfIsManual()&&perfTakeoffRunwayLen()?Number(perfTakeoffRunwayLen()).toLocaleString()+" ft":(dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—"))} / ${$("toRunwayCondition")?$("toRunwayCondition").value:"DRY"}`;
  $("toldDepWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
  $("toldDepWx").textContent=`${temp==null?"—":temp+"°C"} / ${Number.isFinite(perfTakeoffPA())?Math.round(perfTakeoffPA()).toLocaleString()+" ft":"—"}`;
  if($("toldDepWxSource"))$("toldDepWxSource").textContent=formatWeatherSource("dep");
@@ -2460,7 +2518,7 @@ function updateToldCard(){
  if($("toldStructuralMTOW"))$("toldStructuralMTOW").textContent="40,780 lb";
  $("toldMaxTOW").textContent=textOf("toMax");
  $("toldTORwyMargin").textContent=textOf("toRwyMargin");
- if($("toldClimbTOW"))$("toldClimbTOW").textContent=$("toClimbWt")?.value?Number($("toClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED";
+ if($("toldClimbTOW"))$("toldClimbTOW").textContent=$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED";
  if($("toldSecondSegment")){const g=valueOrNull("perfGrad");$("toldSecondSegment").textContent=Number.isFinite(g)?`${g.toFixed(2)}% • OEI • QRH REFERENCE`:"SOURCE LOCKED";}
  $("toldTOStatus").textContent=textOf("toStatus");
  $("toldV1").textContent=textOf("vsV1");
@@ -2857,6 +2915,11 @@ function syncTakeoffSection(){
  const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],a=autoTO();
  const autoFieldWt=autoFieldLimitedWeight();
  const climb=autoClimbAssessment();
+ const sourceCeiling=takeoffFieldSourceCeilingLb(cfg,perfTakeoffPA(),perfTakeoffTemp());
+ const actualTow=perfTakeoffWeightLb(),usableDep=effectiveDepartureRunwayAssessment().usable;
+ if($("toMax"))$("toMax").textContent=Number.isFinite(sourceCeiling)?`${Math.round(sourceCeiling).toLocaleString()} lb`:"—";
+ if($("toWtMargin"))$("toWtMargin").textContent=(Number.isFinite(autoFieldWt)&&Number.isFinite(climb.limit)&&Number.isFinite(actualTow))?`${Math.round(Math.min(autoFieldWt,climb.limit)-actualTow).toLocaleString()} lb`:"—";
+ if($("toRwyMargin"))$("toRwyMargin").textContent=(Number.isFinite(usableDep)&&Number.isFinite(a.bfl))?`${Math.round(usableDep-a.bfl).toLocaleString()} ft`:"—";
  updateRunwayConditionWarnings();
  const runwayCondition=$("toRunwayCondition").value;
  const wk=(perfTakeoffWeightLb()||0)/1000;
@@ -2891,6 +2954,11 @@ function syncTakeoffSection(){
  }
 
  const pending=[];
+ const depAssessment=effectiveDepartureRunwayAssessment();
+ if(depAssessment.state==="CLOSED"){
+   $("toStatus").textContent="NO-GO • SELECTED DEPARTURE RUNWAY CLOSED";$("toStatus").className="bad";updateDepartureRunwayAssessment();return a;
+ }
+ if(departureNotams.status!=="CHECKED")pending.push("DEPARTURE NOTAM REVIEW");
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
  if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(climb.pass===false)pending.push("CLIMB FAIL");
@@ -2978,7 +3046,17 @@ function recalculate(){
  const requested=passengers.length;
  const seatedCount=seatAssignments.filter(Boolean).length;
  const unseated=requested-seatedCount;
- const capt=num("captWt"),fo=num("foWt"),crew=capt+fo; const bagLoads=baggageLoadsFromUI(); const bag=bagLoads.reduce((a,b)=>a+b,0);
+ const capt=num("captWt"),fo=num("foWt"),crew=capt+fo;
+ let bagLoads=baggageLoadsFromUI();
+ let bag=bagLoads.reduce((a,b)=>a+b,0);
+ const enteredBagTotal=Math.max(0,num("totalBag"));
+ if(Math.abs(enteredBagTotal-bag)>0.5){
+   const dist=distributeBaggage(enteredBagTotal);
+   dist.stations.forEach((st,i)=>{const el=$("bagComp"+i);if(el)el.value=Math.round(st.load)});
+   bagLoads=baggageLoadsFromUI();
+   bag=bagLoads.reduce((a,b)=>a+b,0);
+   if($("bagStatusNote"))$("bagStatusNote").textContent=`Total loaded baggage ${Math.round(bag).toLocaleString()} / 2,205 lb`;
+ }
  let fob=Math.min(maxFuel,Math.max(0,num("fuel")));$("fuel").value=fob;
  const fobVerified=fob>0 && !!$("fobVerified")?.checked;
  const fvn=$("fobVerifyNote");
@@ -3204,10 +3282,28 @@ function fillRunwaySelect(id,runways){
    opt.textContent=`${x.runway_end} • ${esc(x.runway.length_ft)} ft${wind}`;
    sel.appendChild(opt);
  });
+ syncAssessmentRunwaySelectors();
 }
-function selectedRunwayChanged(){
- currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
- departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
+function syncAssessmentRunwaySelectors(){
+ [["depRunway","depNotamRunwaySelect"],["destRunway","destNotamRunwaySelect"]].forEach(([srcId,dstId])=>{
+   const src=$(srcId),dst=$(dstId);if(!src||!dst)return;
+   const prior=dst.value;dst.innerHTML="";
+   [...src.options].forEach(o=>{const n=document.createElement("option");n.value=o.value;n.textContent=o.textContent;dst.appendChild(n)});
+   dst.value=src.value||prior||"";
+ });
+}
+function assessmentRunwayChanged(which,value){
+ const main=$(which==="dep"?"depRunway":"destRunway");if(!main)return;
+ main.value=value;selectedRunwayChanged(which);
+ if(which==="dep")refreshDepartureNotams(true).catch(()=>{});else refreshNotams().catch(()=>{});
+ scheduleDraftSave();
+}
+function selectedRunwayChanged(whichChanged=null){
+ if(whichChanged==="dest")currentNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+ if(whichChanged==="dep"){
+   departureNotams={status:"NOT_CHECKED",source:"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
+   departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
+ }
  if(!missionData)return;
  const depRw=selectedRunwayObj("dep"),destRw=selectedRunwayObj("dest");
  if(depRw){
@@ -3224,13 +3320,16 @@ function selectedRunwayChanged(){
    $("sumDestRwy").textContent=destRw.runway_id;
    $("landRwyLen").value=destRw.length_ft||"";
  }
+ syncAssessmentRunwaySelectors();
  if(valueOrNull("perfTOW")){
    autoTO();autoLDG();
    updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
  }
+ updateDepartureRunwayAssessment();
  updateLandingRunwayAssessment();
  updateToldCard();
 }
+
 async function loadMission(options={}){
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim(),alt=$("alt").value.toUpperCase().trim();
  const preserveManualWeather=!!options.preserveManualWeather,quiet=!!options.quiet;
@@ -3276,7 +3375,7 @@ async function loadMission(options={}){
    $("sumFAA").textContent=depCount&&destCount?"LOADED":(depCount||destCount?"PARTIAL":"NO RUNWAY DATA");$("sumFAA").className=depCount&&destCount?"ok":"warn";
    $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
    selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();updateWeatherSourceBadges();loadManualWeatherForm();
-   setTimeout(()=>{refreshNotams().catch(()=>{});},150);
+   setTimeout(()=>{refreshDepartureNotams(true).catch(()=>{});refreshNotams().catch(()=>{});},150);
    if(!quiet)$("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
  }catch(e){if(!quiet)$("missionStatus").innerHTML='<span class="bad">'+e+'</span>';throw e}
 }
@@ -3814,6 +3913,38 @@ function applyManualRunway(){processFallbackRunway();}
 
 
 
+function selectedDepartureRunway(){return selectedRunwayObj("dep")}
+function departurePublishedLength(){const r=selectedDepartureRunway();return r&&Number.isFinite(Number(r.length_ft))?Number(r.length_ft):null}
+function effectiveDepartureRunwayAssessment(){
+ const published=departurePublishedLength();let state="OPEN",usable=published,source="PUBLISHED";
+ if(departureNotams.status==="CHECKED"){state=departureNotams.runway_state||"OPEN";if(Number.isFinite(departureNotams.usable_length_ft))usable=departureNotams.usable_length_ft;source=departureNotams.source||"FAA NMS";}
+ return{runway:selectedDepartureRunway(),published,usable,state,source};
+}
+function updateDepartureRunwayAssessment(){
+ const a=effectiveDepartureRunwayAssessment(),r=a.runway,bfl=valueOrNull("perfBFL");
+ if($("depNotamRunwayState"))$("depNotamRunwayState").textContent=a.state||"—";
+ if($("depPublishedTora"))$("depPublishedTora").textContent=Number.isFinite(a.published)?`${Math.round(a.published).toLocaleString()} ft`:"—";
+ if($("depUsableTora"))$("depUsableTora").textContent=Number.isFinite(a.usable)?`${Math.round(a.usable).toLocaleString()} ft`:"—";
+ if(r&&!perfIsManual()&&Number.isFinite(a.usable))$("perfRwyLen").value=Math.round(a.usable);
+ const box=$("takeoffRunwayGateBox"),gate=$("takeoffRunwayGate"),note=$("takeoffRunwayGateNote");if(!box||!gate||!note)return;
+ if(!r||!Number.isFinite(a.usable)){gate.textContent="NOT EVALUATED";note.textContent="Departure runway/usable length unavailable.";box.className="runway-gate warn";}
+ else if(a.state==="CLOSED"){gate.textContent="NO-GO";note.textContent=`Selected runway ${r.runway_id} is CLOSED.`;box.className="runway-gate bad";}
+ else if(Number.isFinite(bfl)&&bfl>a.usable){gate.textContent="NO-GO";note.textContent=`BFL exceeds usable runway by ${Math.round(bfl-a.usable).toLocaleString()} ft.`;box.className="runway-gate bad";}
+ else if(departureNotams.status==="CHECKED"){const margin=Number.isFinite(bfl)?Math.round(a.usable-bfl).toLocaleString():"—";gate.textContent="PASS";note.textContent=`FAA NMS checked • RWY ${r.runway_id} ${a.state} • usable ${Math.round(a.usable).toLocaleString()} ft${margin!=="—"?` • margin ${margin} ft`:""}`;box.className="runway-gate ok";}
+ else{gate.textContent="NOTAM REVIEW REQUIRED";note.textContent="Runway data loaded; FAA NMS departure review is not complete.";box.className="runway-gate warn";}
+}
+async function refreshDepartureNotams(force=false){
+ await checkNotamConnection();const dep=cleanICAO($("dep")?.value||""),r=selectedDepartureRunway();if(!dep)return;
+ if($("depNotamStatus")){$("depNotamStatus").textContent="CHECKING…";$("depNotamStatus").className="warn"}if($("depNotamList"))$("depNotamList").textContent="Requesting current departure NOTAM data…";
+ try{const res=await fetch(`/api/notams?icao=${encodeURIComponent(dep)}`),j=await res.json();if(!res.ok||!j.ok)throw new Error(j.message||"FAA NMS unavailable");
+   const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);departureNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,checked_at:j.checked_at||new Date().toISOString()};
+   if($("depNotamStatus")){$("depNotamStatus").textContent="CHECKED";$("depNotamStatus").className="ok"}if($("depNotamSource"))$("depNotamSource").textContent=departureNotams.source;
+   if($("depNotamList"))$("depNotamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
+   const hits=classifyObstacleNotams(items);departureObstacleReview={status:hits.length?"FLAGGED":"REVIEWED",airport:dep,items:hits,checked_at:departureNotams.checked_at,message:null};renderDepartureObstacleReview();
+ }catch(e){departureNotams={status:"UNAVAILABLE",source:"ERROR",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};if($("depNotamStatus")){ $("depNotamStatus").textContent="NOT AVAILABLE";$("depNotamStatus").className="warn"}if($("depNotamSource"))$("depNotamSource").textContent=String(e.message||e);if($("depNotamList"))$("depNotamList").textContent="Manual departure NOTAM verification required.";}
+ updateDepartureRunwayAssessment();syncTakeoffSection();updateToldCard();scheduleDraftSave();return departureNotams;
+}
+
 function selectedLandingRunway(){return selectedRunwayObj("dest")}
 function runwayPublishedLength(){
  const r=selectedLandingRunway();
@@ -3859,7 +3990,6 @@ function effectiveLandingRunwayAssessment(){
 }
 function updateLandingRunwayAssessment(){
  const a=effectiveLandingRunwayAssessment(),r=a.runway,lfl=valueOrNull("landFieldLen");
- if($("notamRunway"))$("notamRunway").textContent=r?r.runway_id:"—";
  if($("notamRunwayState"))$("notamRunwayState").textContent=a.state||"—";
  if($("publishedLda"))$("publishedLda").textContent=Number.isFinite(a.published)?`${Math.round(a.published).toLocaleString()} ft`:"—";
  if($("usableLda"))$("usableLda").textContent=Number.isFinite(a.usable)?`${Math.round(a.usable).toLocaleString()} ft`:"—";
@@ -3969,11 +4099,11 @@ async function refreshNotams(){
    currentNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,checked_at:j.checked_at||new Date().toISOString()};
    $("notamStatus").textContent="CHECKED";$("notamStatus").className="ok";$("notamSource").textContent=currentNotams.source;if($("notamConnectionState")){ $("notamConnectionState").textContent="AUTHENTICATED"; $("notamConnectionState").className="small ok";}
    $("notamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
-   updateLandingRunwayAssessment();updateToldCard();
+   updateLandingRunwayAssessment();applyLandingRunwayGateToStatus();updateToldCard();scheduleDraftSave();
  }catch(e){
    currentNotams={status:"UNAVAILABLE",source:"ERROR",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};
    $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent="NOTAM request failed.";
-   $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();updateToldCard();
+   $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();applyLandingRunwayGateToStatus();updateToldCard();
  }
 }
 function applyLandingRunwayGateToStatus(){
@@ -4076,10 +4206,9 @@ function syncLandingSection(){
  else note.push(afms.basis||"AFMS landing climb source coverage pending");
  if(a.msg)note.push(a.msg);
  $("landConfigNote").textContent=note.join(" • ");
- return a;
-
  updateLandingRunwayAssessment();
  applyLandingRunwayGateToStatus();
+ return a;
 }
 
 async function evaluateTakeoff(){
@@ -4126,6 +4255,11 @@ async function evaluateTakeoff(){
    }
 
    const pending=[];
+   const depAssessment=effectiveDepartureRunwayAssessment();
+   if(depAssessment.state==="CLOSED"){
+     $("toStatus").textContent="NO-GO • SELECTED DEPARTURE RUNWAY CLOSED";$("toStatus").className="bad";updateDepartureRunwayAssessment();updateToldCard();return;
+   }
+   if(departureNotams.status!=="CHECKED")pending.push("DEPARTURE NOTAM REVIEW");
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
    if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
    const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
@@ -4146,6 +4280,9 @@ async function evaluateTakeoff(){
      $("toStatus").textContent=pending.length?`PENDING • ${pending.join(" • ")}`:"TABLE DATA READY";
      $("toStatus").className="warn";
    }
+   updateDepartureRunwayAssessment();
+   const depGate=effectiveDepartureRunwayAssessment();
+   if(Number.isFinite(depGate.usable)&&Number.isFinite(valueOrNull("perfBFL"))&&valueOrNull("perfBFL")>depGate.usable){$("toStatus").textContent="NO-GO • BFL EXCEEDS USABLE DEPARTURE RUNWAY";$("toStatus").className="bad";}
    const gradText=Number.isFinite(climb.gradient)?`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`:`QRH GRADIENT REFERENCE UNAVAILABLE`;
    $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • ${gradText} • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • FAA NMS automated obstacle NOTAM review: ${obs.status}; not a certified obstacle-clearance analysis.`;
  }catch(e){
@@ -4166,14 +4303,14 @@ async function evaluateLanding(){
    $("landWtMargin").textContent=`${j.weight_margin_lb.toLocaleString()} lb`;
    $("landRwyMargin").textContent=j.runway_margin_ft==null?"—":`${j.runway_margin_ft.toLocaleString()} ft`;
    if(j.status==="NO-GO"){$("landStatus").textContent="NO-GO";$("landStatus").className="bad"}
-   else if(j.status==="GO"){$("landStatus").textContent="GO";$("landStatus").className="ok"}
-   else{$("landStatus").textContent="PENDING • AFMS LANDING CLIMB SOURCE COVERAGE";$("landStatus").className="warn"}
+   else{syncLandingSection();}
+   applyLandingRunwayGateToStatus();
    $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • A/I ${$("landAntiIce")?.value||"OFF"} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • AFMS ${AFMS_REVC_LDG_CLIMB_SOURCE[a.cfg]||"landing climb source"}`;
-   updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);
+   updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);updateToldCard();scheduleDraftSave();
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
 async function startupCheck(){
- const expected="5.22.7",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+ const expected="5.23.0",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
  try{
    const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
    const buildOk=String(j.build||"")===expected;
