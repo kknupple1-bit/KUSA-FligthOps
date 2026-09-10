@@ -1,0 +1,14 @@
+FAA NMS PRODUCTION — GoDaddy Secrets
+
+Use the production credential workbook issued by FAA. Do not commit credentials to GitHub.
+
+NMS_CLIENT_ID = production workbook KEY
+NMS_CLIENT_SECRET = production workbook SECRET
+NMS_AUTH_URL = https://api-nms.aim.faa.gov/v1/auth/token
+NMS_BASE_URL = https://api-nms.aim.faa.gov/nmsapi/v1
+NMS_RESPONSE_FORMAT = GEOJSON
+NMS_ENVIRONMENT = PRODUCTION
+
+FAA production usage expectation: one data pull every 3 minutes; bulk initial-load/full-classification pulls no more than once every 24 hours unless FAA approves more frequent use. FlightOps v5.23.2 caches repeated requests for the same airport for 3 minutes in production.
+
+After saving secrets/redeploying, test /api/notams/ping and /api/health.

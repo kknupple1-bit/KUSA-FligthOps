@@ -1,0 +1,11 @@
+KUSA FlightOps v5.23.2
+
+- Fixes false runway closures caused by taxiway NOTAMs that mention a runway (e.g. TWY E ... AND RWY 12/30 CLSD). Only a runway-subject NOTAM can close the runway.
+- Runway restrictions/usable-length changes also require the runway to be the NOTAM subject; ILS/LOC/GP, lighting, taxiway, obstacle, and procedure notices remain advisories.
+- Closed runway impact text now identifies the triggering NOTAM.
+- Adds FAA NMS Production endpoint support/defaults and PRODUCTION environment detection.
+- Adds per-airport 3-minute production cache to suppress repeated pulls when navigating/refeshing the same airport.
+- Adds Copy TOLD Link for current and archived TOLD snapshots. Shared links are read-only snapshots encoded in the URL fragment and do not require server storage.
+- Share uses the native share sheet with a snapshot URL when available.
+- Email packages the TOLD summary plus a shareable snapshot link and validation disclaimer.
+- Build 5.23.2.
