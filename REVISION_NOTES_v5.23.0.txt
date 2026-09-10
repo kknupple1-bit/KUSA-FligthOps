@@ -1,0 +1,17 @@
+KUSA FlightOps v5.23.0 — Departure NOTAM + Runway State Consolidation
+
+- Adds Departure Runway / NOTAM Assessment with direct runway selector.
+- Adds matching direct runway selector in Destination Runway / NOTAM Assessment.
+- Runway changes from either selector synchronize to Mission/TOLD and trigger the appropriate FAA NMS review.
+- Departure FAA NMS runway review now feeds usable takeoff runway length and takeoff runway gate.
+- Departure obstacle-NOTAM scan reuses the same NMS result while remaining explicitly NOT a certified obstacle-clearance analysis.
+- Prevents Mission ↔ TOLD navigation from resetting selected runway or NOTAM assessment state.
+- Fixes TOLD Climb-Limited TOW to use perfClimbWt (previously referenced a nonexistent toClimbWt element).
+- Restores persistent digitized source ceiling, takeoff weight margin, and runway margin even when other review gates remain pending.
+- Repairs landing status flow so runway/NOTAM gate is applied before returning and TOLD does not inherit stale generic NO-GO state.
+- Improves LIVE weather wind population with raw-METAR wind fallback when normalized fields are absent.
+- Preserves summarized runway/NOTAM state in local drafts; live NOTAMs refresh on mission load.
+- Carries forward v5.22.8 baggage-to-TOLD synchronization.
+- Adds bottom Mission-page Open TOLD and Complete & Archive actions for iOS workflow.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.

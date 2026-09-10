@@ -1,0 +1,7 @@
+KUSA FlightOps v5.22.8 — Baggage/TOLD Synchronization Fix
+
+- Fixes Mission Total Baggage not carrying to the TOLD card in restored/programmatically loaded states.
+- Adds defensive synchronization between Total Baggage and Baggage Compartments I/II/III.
+- Draft/archive state now stores both compartment loads and total baggage for compatibility.
+- Restoring a draft/archive re-synchronizes the Total Baggage field before recalculation/TOLD rendering.
+- Build diagnostics updated to 5.22.8.
