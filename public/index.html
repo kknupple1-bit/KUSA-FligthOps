@@ -378,7 +378,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.4</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.5</div>
 
 <header>
 <div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -428,6 +428,7 @@ details summary{cursor:pointer;margin-top:8px}
           <div class="wx"><div class="small">FAA NMS / Weather</div><b id="startupLiveStatus">CHECKING</b><div class="small" id="startupLiveNote">Checking live services…</div></div>
         </div>
         <div id="startupDataNotice" class="small" style="margin-top:10px">FlightOps checks local data integrity and live-service availability on startup. A manual download is requested only when a required packaged dataset is missing or the app/server build is mismatched.</div>
+        <button type="button" id="refreshDataStatusBtn" style="margin-top:10px;width:auto" onclick="startupCheck(true)">Refresh Data Status</button>
       </div>
     </div>
   </div>
@@ -1756,7 +1757,7 @@ function showPlatformView(view){
  if(view==="told"){recalculate();updateToldCard();}
  if(view==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
  if(view==="archive")renderArchive();
- if(view==="home"){updateHomeArchiveCount();updateHomeDraftCount();}
+ if(view==="home"){refreshMenuCounts();}
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
@@ -4454,18 +4455,54 @@ async function evaluateLanding(){
    updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);updateToldCard();scheduleDraftSave();
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
-async function startupCheck(){
- const expected="5.23.4",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice");
+async function fetchJsonWithTimeout(url,ms=8000){
+ const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),ms);
+ try{const r=await fetch(url,{cache:"no-store",signal:ctrl.signal});const j=await r.json();if(!r.ok)throw new Error(j?.message||`HTTP ${r.status}`);return j}
+ finally{clearTimeout(t)}
+}
+function refreshMenuCounts(){
+ updateHomeDraftCount();updateHomeArchiveCount();
+ // One deferred pass catches Safari/localStorage availability after initial paint/pageshow.
+ requestAnimationFrame(()=>{updateHomeDraftCount();updateHomeArchiveCount()});
+ setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
+}
+async function startupCheck(manual=false){
+ const expected="5.23.5",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ if(btn)btn.disabled=true;
+ if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
+ if(rs){rs.textContent="CHECKING";rs.className="warn"} if(rn)rn.textContent="Checking packaged runway data…";
+ if(ls){ls.textContent="CHECKING";ls.className="warn"} if(ln)ln.textContent="Checking FAA NMS and weather…";
  try{
-   const r=await fetch(apiUrl("/api/diagnostics?_="+Date.now()),{cache:"no-store"}),j=await r.json();
-   const buildOk=String(j.build||"")===expected;
-   if(bs){bs.textContent=buildOk?"MATCHED":"UPDATE / REDEPLOY REQUIRED";bs.className=buildOk?"ok":"bad"}if(bn)bn.textContent=`Browser ${expected} • Server ${j.build||"unknown"}`;
-   const runwayCount=Number(j.runway_airports_loaded||0);if(rs){rs.textContent=runwayCount>0?"READY":"PACKAGED DATA MISSING";rs.className=runwayCount>0?"ok":"bad"}if(rn)rn.textContent=`${runwayCount.toLocaleString()} packaged airport entr${runwayCount===1?"y":"ies"} • FAA NASR live fallback ${j.nasr_live?"enabled":"unavailable"}`;
-   const wx=!!j.awc_metar,nms=!!j.nms?.authenticated;if(ls){ls.textContent=(wx&&nms)?"ONLINE":(wx||nms)?"PARTIAL":"OFFLINE";ls.className=(wx&&nms)?"ok":(wx||nms)?"warn":"bad"}if(ln)ln.textContent=`Weather ${wx?"online":"unavailable"} • FAA NMS ${nms?"authenticated":"unavailable"}`;
-   if(notice){if(!buildOk||runwayCount<1){notice.innerHTML='<span class="bad"><b>DATA ACTION REQUIRED.</b> Required packaged data or app/server version is not ready. Redeploy/update before relying on mission calculations.</span>';}else if(!wx||!nms){notice.innerHTML='<span class="warn"><b>LOCAL DATA READY.</b> One or more live services are unavailable. Manual weather / manual review may be required. No manual data download is needed unless a required packaged dataset is reported missing.</span>';}else{notice.innerHTML='<span class="ok"><b>LOCAL DATA READY • LIVE SERVICES ONLINE.</b></span> No manual data download is required.';}}
-   if($("missionStatus"))$("missionStatus").innerHTML=`<span class="${wx?'ok':'warn'}">FlightOps server online — ${wx?'weather connected':'weather unavailable'}</span>`;
+   const h=await fetchJsonWithTimeout(apiUrl("/api/health?_="+Date.now()),5000);
+   const buildOk=String(h.build||"")===expected;
+   if(bs){bs.textContent=buildOk?"CURRENT":"UPDATE / REDEPLOY REQUIRED";bs.className=buildOk?"ok":"bad"}
+   if(bn)bn.textContent=`Browser ${expected} • Server ${h.build||"unknown"}`;
+   const runwayCount=Number(h.runway_airports_loaded||0);
+   if(rs){rs.textContent=runwayCount>0?"READY":"PACKAGED DATA MISSING";rs.className=runwayCount>0?"ok":"bad"}
+   if(rn)rn.textContent=`${runwayCount.toLocaleString()} packaged airport entr${runwayCount===1?"y":"ies"} • FAA NASR live fallback configured`;
+
+   try{
+     const j=await fetchJsonWithTimeout(apiUrl("/api/diagnostics?_="+Date.now()),9000);
+     const wx=!!j.awc_metar,nms=!!j.nms?.authenticated;
+     if(ls){ls.textContent=(wx&&nms)?"ONLINE":(wx||nms)?"PARTIAL":"UNAVAILABLE";ls.className=(wx&&nms)?"ok":(wx||nms)?"warn":"bad"}
+     if(ln)ln.textContent=`Weather ${wx?"online":"unavailable"} • FAA NMS ${nms?"authenticated":"unavailable"}${j.nms?.environment?" • "+j.nms.environment:""}`;
+     if(notice){
+       if(!buildOk||runwayCount<1)notice.innerHTML='<span class="bad"><b>DATA ACTION REQUIRED.</b> Required packaged data or app/server version is not ready. Redeploy/update before relying on mission calculations.</span>';
+       else if(!wx||!nms)notice.innerHTML='<span class="warn"><b>LOCAL DATA READY.</b> One or more live services are unavailable. Manual weather / manual review may be required.</span>';
+       else notice.innerHTML='<span class="ok"><b>DATA CURRENT • LIVE SERVICES ONLINE.</b></span> No manual data download is required.';
+     }
+   }catch(e){
+     if(ls){ls.textContent="CHECK TIMED OUT";ls.className="warn"}
+     if(ln)ln.textContent=`Live-service check did not complete${e?.name==="AbortError"?" within 9 seconds":""}. Tap Refresh Data Status to retry.`;
+     if(notice&&buildOk&&runwayCount>0)notice.innerHTML='<span class="warn"><b>LOCAL DATA READY.</b> Live-service verification timed out; mission may continue with manual weather / independent NOTAM verification as required.</span>';
+   }
  }catch(e){
-   if(bs){bs.textContent="SERVER UNAVAILABLE";bs.className="bad"}if(rs){rs.textContent="LOCAL APP ONLY";rs.className="warn"}if(ls){ls.textContent="OFFLINE";ls.className="warn"}if(ln)ln.textContent="Live weather / FAA NMS unavailable";if(notice)notice.innerHTML='<span class="warn"><b>OFFLINE MODE.</b> Embedded Performance + W&amp;B logic remains available after the app is loaded, but live weather, NOTAM, and FAA NASR requests are unavailable. Use manual inputs and independent source verification.</span>';if($("missionStatus"))$("missionStatus").innerHTML='<span class="warn">FlightOps live server unavailable — manual/offline inputs may be used.</span>';}
+   if(bs){bs.textContent="SERVER UNAVAILABLE";bs.className="bad"}if(bn)bn.textContent="Could not verify server build.";
+   if(rs){rs.textContent="LOCAL APP ONLY";rs.className="warn"}if(rn)rn.textContent="Packaged runway cache status could not be verified.";
+   if(ls){ls.textContent="OFFLINE";ls.className="warn"}if(ln)ln.textContent="Live weather / FAA NMS unavailable";
+   if(notice)notice.innerHTML='<span class="warn"><b>OFFLINE MODE.</b> Embedded Performance + W&amp;B logic remains available after the app is loaded, but live weather, NOTAM, and FAA NASR requests are unavailable. Use manual inputs and independent source verification.</span>';
+ }
+ finally{if(btn)btn.disabled=false;refreshMenuCounts()}
 }
 
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
@@ -4500,8 +4537,8 @@ setPassengerCount();
 setPerformanceInputMode();
 initializeMenuLanding();
 // A fresh app launch/reload always lands on the MENU. Drafts remain available under Flight Plans.
-window.addEventListener("pageshow",()=>{if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
-window.addEventListener("load",()=>{if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("pageshow",()=>{refreshMenuCounts();if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("load",()=>{refreshMenuCounts();if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
 // Debounced local draft persistence for active, incomplete missions.
 document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
