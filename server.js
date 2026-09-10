@@ -17,7 +17,7 @@ const NMS_AUTH_URL =
 const NMS_BASE_URL =
   (process.env.NMS_BASE_URL || "https://api-nms.aim.faa.gov/nmsapi/v1").replace(/\/$/,"");
 const NMS_RESPONSE_FORMAT = String(process.env.NMS_RESPONSE_FORMAT || "GEOJSON").toUpperCase()==="AIXM"?"AIXM":"GEOJSON";
-const NMS_ENVIRONMENT = process.env.NMS_ENVIRONMENT || (NMS_BASE_URL.includes("api-nms.aim.faa.gov")?"PRODUCTION":NMS_BASE_URL.includes("api-staging")?"STAGING":"CUSTOM");
+const NMS_ENVIRONMENT = NMS_BASE_URL.includes("api-nms.aim.faa.gov")?"PRODUCTION":NMS_BASE_URL.includes("api-staging")?"STAGING":(process.env.NMS_ENVIRONMENT||"CUSTOM");
 const NMS_MIN_PULL_MS = Math.max(0,Number(process.env.NMS_MIN_PULL_MS || (NMS_ENVIRONMENT==="PRODUCTION"?180000:0)));
 const nmsAirportCache=new Map();
 
@@ -26,7 +26,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.23.3",
+    build:"5.23.4",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -52,7 +52,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.23.3"
+      "User-Agent":"KUSA-FlightOps/5.23.4"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -265,12 +265,12 @@ function evalLanding(p){
  return{max_allowable_landing_weight_lb:Math.round(max),limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),vref_kt:p.vref_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"};
 }
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.23.3",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT}));
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.23.4",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.23.3",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.23.4",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -298,10 +298,6 @@ app.get("/api/notams/config",async(req,res)=>{
 app.get("/api/notams/ping",async(req,res)=>{
   if(!nmsConfigured())return res.status(503).json({ok:false,configured:false,message:"FAA NMS OAuth2 credentials are not configured."});
   try{
-    const cached=nmsAirportCache.get(icao);
-    if(cached && NMS_MIN_PULL_MS>0 && (Date.now()-cached.ts)<NMS_MIN_PULL_MS){
-      return res.json({...cached.payload,cached:true,cache_age_sec:Math.floor((Date.now()-cached.ts)/1000),next_faa_refresh_sec:Math.ceil((NMS_MIN_PULL_MS-(Date.now()-cached.ts))/1000)});
-    }
     let token=await getNmsAccessToken();
     const u=`${NMS_BASE_URL}/ping`;
     let r=await fetch(u,{headers:{"Authorization":`Bearer ${token}`},cache:"no-store"});
@@ -333,6 +329,10 @@ app.get("/api/notams",async(req,res)=>{
   });
 
   try{
+    const cached=nmsAirportCache.get(icao);
+    if(cached && NMS_MIN_PULL_MS>0 && (Date.now()-cached.ts)<NMS_MIN_PULL_MS){
+      return res.json({...cached.payload,cached:true,cache_age_sec:Math.floor((Date.now()-cached.ts)/1000),next_faa_refresh_sec:Math.ceil((NMS_MIN_PULL_MS-(Date.now()-cached.ts))/1000)});
+    }
     let token=await getNmsAccessToken();
     const url=new URL(`${NMS_BASE_URL}/notams`);
     url.searchParams.set("location",icao);
@@ -340,7 +340,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.23.3"
+      "User-Agent":"KUSA-FlightOps/5.23.4"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
