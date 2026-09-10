@@ -1,0 +1,11 @@
+KUSA FlightOps v5.23.1
+
+- Removes Mission bottom action controls from the Menu view while retaining them at the end of the active Mission page.
+- Tightens FAA NMS runway NOTAM parsing. A selected runway is marked CLOSED only by explicit runway-closure language such as RWY 12 CLSD / RWY 12/30 CLSD.
+- ILS/LOC/GP, lighting, procedure, obstacle and other runway-related advisories no longer automatically close or restrict the runway.
+- Usable-length reductions and explicit restriction language remain runway restrictions.
+- Adds a Runway Impact summary to departure and destination NOTAM panels, distinguishing CLOSED, RESTRICTED, and OPEN with advisories.
+- Re-parses the current FAA NMS NOTAM set whenever the selected runway changes, preventing stale closure state from another runway.
+- Build/version updated to 5.23.1.
+
+DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
