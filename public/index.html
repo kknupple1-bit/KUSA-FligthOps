@@ -372,16 +372,91 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
+/* v5.23.7 — dedicated responsive phone/tablet layout */
+.brand-suffix::before{content:" - ";}
+@media(max-width:700px){
+  html,body{max-width:100%;overflow-x:hidden}
+  body{padding-bottom:68px}
+  header{padding:12px 14px;display:block;position:relative;min-height:88px}
+  .brand-block{padding-right:4px}
+  h1{font-size:22px;line-height:1.08;white-space:normal;max-width:100%}
+  .brand-main,.brand-suffix{display:block}
+  .brand-suffix{font-size:17px;margin-top:3px}
+  .brand-suffix::before{content:""}
+  header>.status{display:none!important}
+  header .sub{margin-top:5px;font-size:11px;white-space:normal}
+  .platform-tabs{position:fixed;left:0;right:0;bottom:0;z-index:9998;display:grid;grid-template-columns:repeat(5,1fr);gap:0;background:#06182c;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -4px 18px rgba(0,0,0,.28)}
+  .platform-tabs button{width:100%;min-width:0;border:0;border-right:1px solid #173858;border-radius:0;padding:10px 2px 9px;font-size:11px;line-height:1.05;min-height:48px;background:#071d35}
+  .platform-tabs button:last-child{border-right:0}
+  .platform-tabs button.active{background:#245f96}
+  .beta-banner{margin:0;border-left:0;border-right:0;border-radius:0;padding:8px 12px;font-size:10px;line-height:1.25}
+  main{width:100%;max-width:none;padding:12px}
+  .card{border-radius:12px;padding:12px;margin-bottom:12px}
+  .home-shell,.told-card{width:100%;max-width:none;margin:0}
+  .newtrip-card{padding:12px;border-radius:12px}
+  .newtrip-title{font-size:24px}
+  .newtrip-sub{font-size:14px;line-height:1.35;margin-bottom:12px}
+  .home-actions{grid-template-columns:1fr;gap:10px}
+  .home-panel{padding:12px}
+  .row,.aircraft-select-card,.weather-decode-grid,.notam-grid,.whatif-grid,.whatif-process-row{grid-template-columns:1fr!important}
+  #startupDataPanel .row{grid-template-columns:1fr 1fr!important}
+  .told-head{display:block;padding-bottom:10px;margin-bottom:10px}
+  .told-title{font-size:23px;line-height:1.08;letter-spacing:.02em}
+  .told-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;margin-top:12px}
+  .told-actions button{width:100%!important;min-width:0!important;padding:10px 6px!important;font-size:12px}
+  .told-actions button:last-child{grid-column:1/-1}
+  .told-grid,.told-load-grid{grid-template-columns:1fr!important;gap:10px}
+  .told-prep{padding:10px}
+  .told-prep-grid{grid-template-columns:1fr 1fr!important;gap:8px}
+  .told-prep-box{padding:9px}
+  .told-prep-box b{font-size:16px}
+  .told-panel{padding:11px}
+  .told-row{grid-template-columns:1fr auto;gap:10px;padding:7px 0}
+  .told-row span:last-child{max-width:58vw;overflow-wrap:anywhere}
+  .told-speeds{grid-template-columns:repeat(2,1fr)!important;gap:8px}
+  .told-speed{padding:9px}
+  .told-speed b{font-size:19px}
+  .callout{font-size:11px!important;line-height:1.35;overflow-wrap:anywhere}
+  input,select,button{min-height:44px;font-size:16px}
+  label{font-size:11px}
+  table{font-size:11px}
+  td,th{padding:7px 5px}
+  canvas{height:250px}
+  .mission-actionbar{gap:8px}
+  .mission-actionbar button{width:100%}
+  .notam-list{max-height:240px}
+  .notam-item{overflow-wrap:anywhere}
+  .runway-gate{padding:10px}
+  #buildBadge{right:6px!important;bottom:58px!important;font-size:9px!important;padding:3px 6px!important;opacity:.75!important}
+}
+@media(max-width:430px){
+  #startupDataPanel .row{grid-template-columns:1fr!important}
+  .told-prep-grid{grid-template-columns:1fr!important}
+  .told-actions{grid-template-columns:1fr 1fr!important}
+  .newtrip-fuel .row{grid-template-columns:1fr 1fr!important}
+  .pax-check{grid-template-columns:1fr 1fr!important}
+  .archive-head{display:block}
+  .archive-actions button{width:100%}
+}
+@media(min-width:701px) and (max-width:1100px){
+  header{padding:14px 18px;flex-wrap:wrap;gap:10px}
+  header>.status{width:100%;text-align:right}
+  main{padding:16px}
+  .told-head{flex-wrap:wrap}
+  .told-actions{width:100%;justify-content:flex-start}
+  .notam-grid{grid-template-columns:1fr 1fr}
+}
+
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.6</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.7</div>
 
 <header>
-<div><h1>KUSA FlightOps - Performance + W&amp;B</h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
 <button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">Menu</button>
 <button id="newtripTabBtn" type="button" onclick="openNewTripForm()">New Trip</button>
