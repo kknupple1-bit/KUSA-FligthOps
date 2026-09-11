@@ -410,7 +410,19 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.24.2 — takeoff configuration comparison and refresh controls */
+/* v5.25.1 — Falcon 900B performance-source correction */
+.f900b-shell{max-width:1120px;margin:0 auto}
+.f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
+.f900b-titlebar h2{margin:0 0 4px;font-size:24px}
+.f900b-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}
+.f900b-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
+.f900b-result{background:#06182c;border:1px solid #294d70;border-radius:9px;padding:9px}
+.f900b-result span{display:block;color:var(--muted);font-size:11px}
+.f900b-result b{display:block;margin-top:4px;font-size:16px}
+.f900b-source{margin-top:12px;padding-top:10px;border-top:1px solid #294d70}
+.f900b-source-lock{color:#ffc857}
+@media(max-width:850px){.f900b-inputs,.f900b-results{grid-template-columns:1fr 1fr}.f900b-titlebar{display:block}.f900b-titlebar button{margin-top:10px}}
+@media(max-width:480px){.f900b-inputs,.f900b-results{grid-template-columns:1fr}}
 .brand-suffix::before{content:" - ";}
 @media(max-width:700px){
   html,body{max-width:100%;overflow-x:hidden}
@@ -503,10 +515,10 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.24.2</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.1</div>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
 <button id="homeTabBtn" class="active" type="button" onclick="showPlatformView('home')">Menu</button>
 <button id="newtripTabBtn" type="button" onclick="openNewTripForm()">New Trip</button>
@@ -548,7 +560,7 @@ details summary{cursor:pointer;margin-top:8px}
         <h3 style="margin-top:0">FlightOps Data Status</h3>
         <div class="row">
           <div class="wx"><div class="small">App / Server</div><b id="startupBuildStatus">CHECKING</b><div class="small" id="startupBuildNote">Verifying build integrity…</div></div>
-          <div class="wx"><div class="small">Performance + W&amp;B Data</div><b id="startupPerfStatus">LOADED</b><div class="small">N33AP • AFM/AFMS development dataset</div></div>
+          <div class="wx"><div class="small">Performance + W&amp;B Data</div><b id="startupPerfStatus">CHECKING</b><div class="small" id="startupPerfNote">N33AP + Falcon 900B QRH1 Rev02</div></div>
           <div class="wx"><div class="small">Runway Data</div><b id="startupRunwayStatus">CHECKING</b><div class="small" id="startupRunwayNote">Packaged cache + FAA NASR live fallback</div></div>
           <div class="wx"><div class="small">FAA NMS / Weather</div><b id="startupLiveStatus">CHECKING</b><div class="small" id="startupLiveNote">Checking live services…</div></div>
         </div>
@@ -570,11 +582,11 @@ details summary{cursor:pointer;margin-top:8px}
           <label>Aircraft</label>
           <select id="homeAircraft">
             <option value="N33AP">N33AP — Falcon 50-4</option>
-            <option disabled>Falcon 900B — coming later</option>
+            <option value="F900B">Falcon 900B — Performance Model</option>
             <option disabled>Citation CJ3 — coming later</option>
             <option disabled>Challenger 300/301 — coming later</option>
           </select>
-          <div class="small" style="margin-top:8px">Current validated development dataset: N33AP only.</div>
+          <div class="small" style="margin-top:8px">Available development datasets: N33AP Falcon 50-4 Performance + W&amp;B, and Falcon 900B Performance. The 900B model uses manual TOW/LDW inputs; FOB is optional until aircraft-specific W&amp;B data are loaded.</div>
         </div>
         <div class="home-panel">
           <div class="small">Workflow</div>
@@ -616,7 +628,7 @@ details summary{cursor:pointer;margin-top:8px}
         <div class="home-panel">
           <h3 style="margin-top:0">Beta Test Notes</h3>
           <div class="small">Use real routes and realistic loading scenarios, but independently verify every result against approved aircraft data. Report anything confusing, missing, or inconsistent.</div>
-          <div style="margin-top:12px"><b id="homeArchiveCount">0</b> completed flight plans in local Archive.</div>
+          <div style="margin-top:12px"><b id="homeArchiveCountSecondary">0</b> completed flight plans in local Archive.</div>
         </div>
       </div>
     </div>
@@ -1588,6 +1600,107 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 
 
+<div id="f900bView" style="display:none">
+  <div class="f900b-shell">
+    <div class="card">
+      <div class="f900b-titlebar">
+        <div>
+          <h2>Falcon 900B — PERFORMANCE TOLD</h2>
+          <div class="small" id="f9Route">— → —</div>
+        </div>
+        <button type="button" style="width:auto" onclick="refreshF900B()">Refresh 900B TOLD</button>
+      </div>
+      <div class="callout small warn"><b>DEVELOPMENT / VALIDATION ONLY.</b> QRH1 Rev02 data are interpolated only inside published pressure-altitude, temperature and weight cells. Wind and runway-slope corrections are not applied. Falcon 900B W&amp;B remains locked until the applicable Loading Manual and aircraft basic-operating-weight record are loaded.</div>
+    </div>
+
+    <div class="told-operational-stack" style="margin-top:14px">
+      <section class="told-op-panel takeoff" aria-labelledby="f9TakeoffHeading">
+        <div class="told-op-head">
+          <div class="told-op-heading"><span class="told-op-number">1</span><div><div class="told-op-title" id="f9TakeoffHeading">TAKEOFF</div><div class="small">Falcon 900B QRH1 50-10 — zero wind and zero runway slope</div></div></div>
+          <span class="told-op-status" id="f9ToStatus">SOURCE LOADING</span>
+        </div>
+        <div class="f900b-inputs">
+          <div><label>Configuration</label><select id="f9ToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
+          <div><label>Anti-Ice</label><select id="f9ToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+          <div><label>Runway</label><select id="f9ToSurface"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
+          <div><label>Runway Available ft</label><input id="f9ToRunway" type="number" min="0" step="1" placeholder="e.g. 7000"></div>
+          <div><label>Pressure Altitude ft</label><input id="f9ToPA" type="number" step="1" placeholder="0 to 6000"></div>
+          <div><label>OAT °C</label><input id="f9ToTemp" type="number" step="0.1" placeholder="published range"></div>
+          <div><label>Takeoff Weight lb</label><input id="f9ToWeight" type="number" min="0" step="10" placeholder="28,000 to 45,500"></div>
+          <div><label>Emergency Return Burn lb</label><input id="f9ReturnBurn" type="number" min="0" step="10" value="500"></div>
+        </div>
+        <div class="f900b-results">
+          <div class="f900b-result"><span>V1</span><b id="f9V1">—</b></div>
+          <div class="f900b-result"><span>VR = V2</span><b id="f9VR">—</b></div>
+          <div class="f900b-result"><span>VFT</span><b id="f9VFT">—</b></div>
+          <div class="f900b-result"><span>VFR</span><b id="f9VFR">—</b></div>
+          <div class="f900b-result"><span>Balanced Field Length</span><b id="f9BFL">—</b></div>
+          <div class="f900b-result"><span>Runway Remaining</span><b id="f9ToMargin">—</b></div>
+          <div class="f900b-result"><span>N1 Single / Channel</span><b id="f9N1">—</b></div>
+          <div class="f900b-result"><span>Second-Segment Gross Gradient</span><b id="f9GCLB2">—</b></div>
+          <div class="f900b-result"><span>Acceleration</span><b id="f9Accel">—</b></div>
+          <div class="f900b-result"><span>Pitch</span><b id="f9Pitch">—</b></div>
+          <div class="f900b-result"><span>Limitation Code</span><b id="f9Limit">—</b></div>
+          <div class="f900b-result"><span>Structural MTOW</span><b>45,500 lb</b></div>
+        </div>
+        <div class="small f900b-source" id="f9ToSource">Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • table loading</div>
+      </section>
+
+      <section class="told-op-panel emergency" aria-labelledby="f9EmergencyHeading">
+        <div class="told-op-head">
+          <div class="told-op-heading"><span class="told-op-number">2</span><div><div class="told-op-title" id="f9EmergencyHeading">EMERGENCY RETURN</div><div class="small">Departure PA/OAT • 40° Flaps + Slats • landing distance × 1.67</div></div></div>
+          <span class="told-op-status" id="f9EmerStatus">—</span>
+        </div>
+        <div class="f900b-inputs">
+          <div><label>Emergency Return Anti-Ice</label><select id="f9EmerAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        </div>
+        <div class="f900b-results">
+          <div class="f900b-result"><span>Return Weight</span><b id="f9EmerWeight">—</b></div>
+          <div class="f900b-result"><span>VREF</span><b id="f9EmerVref">—</b></div>
+          <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9EmerLD">—</b></div>
+          <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9EmerRequired">—</b></div>
+          <div class="f900b-result"><span>Runway Available</span><b id="f9EmerAvailable">—</b></div>
+          <div class="f900b-result"><span>Runway Remaining</span><b id="f9EmerMargin">—</b></div>
+          <div class="f900b-result"><span>Approach Climb</span><b id="f9EmerACG">—</b></div>
+          <div class="f900b-result"><span>Landing Climb</span><b id="f9EmerLCG">—</b></div>
+        </div>
+        <div class="small f900b-source" id="f9EmerSource">Falcon 900B QRH1 Rev02 • 50-25</div>
+      </section>
+
+      <section class="told-op-panel landing" aria-labelledby="f9LandingHeading">
+        <div class="told-op-head">
+          <div class="told-op-heading"><span class="told-op-number">3</span><div><div class="told-op-title" id="f9LandingHeading">LANDING — DESTINATION</div><div class="small">40° Flaps + Slats • select the controlling runway-comparison factor</div></div></div>
+          <span class="told-op-status" id="f9LdgStatus">—</span>
+        </div>
+        <div class="f900b-inputs">
+          <div><label>Anti-Ice</label><select id="f9LdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+          <div><label>Pressure Altitude ft</label><input id="f9LdgPA" type="number" step="1" placeholder="0 to 6000"></div>
+          <div><label>OAT °C</label><input id="f9LdgTemp" type="number" step="0.1" placeholder="published range"></div>
+          <div><label>Landing Weight lb</label><input id="f9LdgWeight" type="number" min="0" step="10" placeholder="28,000 to 42,000"></div>
+          <div><label>Runway Available ft</label><input id="f9LdgRunway" type="number" min="0" step="1" placeholder="e.g. 6500"></div>
+          <div><label>Runway Comparison</label><select id="f9LdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
+        </div>
+        <div class="f900b-results">
+          <div class="f900b-result"><span>VREF</span><b id="f9LdgVref">—</b></div>
+          <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9LdgLD">—</b></div>
+          <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9Ldg167">—</b></div>
+          <div class="f900b-result"><span>Landing Distance × 1.92</span><b id="f9Ldg192">—</b></div>
+          <div class="f900b-result"><span>Controlling Comparison</span><b id="f9LdgRequired">—</b></div>
+          <div class="f900b-result"><span>Runway Remaining</span><b id="f9LdgMargin">—</b></div>
+          <div class="f900b-result"><span>Approach Climb</span><b id="f9LdgACG">—</b></div>
+          <div class="f900b-result"><span>Landing Climb</span><b id="f9LdgLCG">—</b></div>
+        </div>
+        <div class="small f900b-source" id="f9LdgSource">Falcon 900B QRH1 Rev02 • 50-25 / 50-28 / 50-29</div>
+      </section>
+
+      <section class="told-supporting" aria-labelledby="f9SupportHeading">
+        <h2 id="f9SupportHeading">SUPPORTING DOCUMENTATION</h2>
+        <div class="told-support-note">Performance source set: Falcon 900B QRH1 Performance Rev02 (DGAC18DSOF182A), AFM Rev31 source package, AFM Supplements, Falcon 900 Performance Manual DTM9823 Revision 16, Performance Manual Supplements, and SBAS-LPV operating-manual material. DTM9823 is the Falcon 900 performance manual; it is not a loading/W&amp;B manual. W&amp;B remains intentionally unavailable until the applicable aircraft loading data and aircraft-specific basic-operating-weight record are validated.</div>
+      </section>
+    </div>
+  </div>
+</div>
+
 <div id="archiveView" style="display:none">
   <div class="card" style="max-width:1050px;margin:0 auto">
     <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
@@ -1894,6 +2007,141 @@ function fsTakeoff(cfg,pa,temp,wk){
  const[a,b]=pb,A=atP(a),B=atP(b);if(!A||!B)return null;const P=a===b?A:[lerpN(A[0],B[0],(pa-a)/(b-a)),lerpN(A[1],B[1],(pa-a)/(b-a))],vr=interpScalarN(d.vr,wk);if(vr==null)return null;return{v1:P[0],bfl:P[1],vr}}
 function fsLanding(cfg,pa,wk){const d=FS_PERF.landing[cfg],pb=d&&bracketN(kN(d.tables),pa);if(!pb)return null;const[a,b]=pb,A=interpPairN(d.tables[a],wk),B=interpPairN(d.tables[b],wk);if(!A||!B)return null;const P=a===b?A:[lerpN(A[0],B[0],(pa-a)/(b-a)),lerpN(A[1],B[1],(pa-a)/(b-a))],s=interpScalarN(d.speed,wk);if(s==null)return null;return{speed:s,ld:P[0],lfl:P[1],speedLabel:d.speedLabel||"VREF"}}
 
+let F900B_QRH=null,F900B_LOAD_PROMISE=null,F900B_REFRESH_TIMER=null;
+function activeAircraftCode(){return window.currentMissionMeta?.aircraft||$("homeAircraft")?.value||"N33AP"}
+async function loadF900BData(){
+ if(F900B_QRH)return F900B_QRH;
+ if(!F900B_LOAD_PROMISE)F900B_LOAD_PROMISE=fetch(apiUrl("/data/f900b_qrh_rev02.json"),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(`900B dataset HTTP ${r.status}`);return r.json()}).then(d=>{
+   if(d?.source?.document_id!=="DGAC18DSOF182A"||d?.source?.revision!=="Rev02"||d?.takeoff?.length!==32||d?.landing?.length!==8)throw new Error("900B dataset integrity check failed");
+   F900B_QRH=d;return d;
+ }).catch(e=>{F900B_LOAD_PROMISE=null;throw e});
+ return F900B_LOAD_PROMISE;
+}
+function f9Num(id){const v=$(id)?.value;return v===""||v==null?null:Number(v)}
+function f9Fmt(value,digits=0,suffix=""){return Number.isFinite(value)?`${value.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits})}${suffix}`:"—"}
+function f9Put(id,value){const el=$(id);if(el)el.textContent=value}
+function f9Status(id,text,tone="warn"){
+ const el=$(id);if(!el)return;el.textContent=text;el.className=`told-op-status ${tone}`;
+}
+function f9ArrayBracket(values,value){
+ const a=[...new Set(values.map(Number).filter(Number.isFinite))].sort((x,y)=>x-y);
+ if(!a.length||!Number.isFinite(value)||value<a[0]||value>a[a.length-1])return null;
+ for(let i=0;i<a.length;i++)if(value===a[i])return[a[i],a[i]];
+ for(let i=0;i<a.length-1;i++)if(value>a[i]&&value<a[i+1])return[a[i],a[i+1]];
+ return null;
+}
+function f9CellValue(table,weight,temp,key,transform=v=>v){
+ const tb=f9ArrayBracket(table.temperatures_c,temp);if(!tb)return null;
+ const weights=[...new Set(table.cells.map(c=>c.weight_lb))];const wb=f9ArrayBracket(weights,weight);if(!wb)return null;
+ function atTemperature(t){
+   const values=wb.map(w=>{const cell=table.cells.find(c=>c.weight_lb===w&&c.temperature_c===t);const value=cell?transform(cell[key]):null;return Number.isFinite(value)?value:null});
+   if(values.some(v=>v==null))return null;
+   return wb[0]===wb[1]?values[0]:lerpN(values[0],values[1],(weight-wb[0])/(wb[1]-wb[0]));
+ }
+ const values=tb.map(atTemperature);if(values.some(v=>v==null))return null;
+ return tb[0]===tb[1]?values[0]:lerpN(values[0],values[1],(temp-tb[0])/(tb[1]-tb[0]));
+}
+function f9GridValue(kind,filters,pa,temp,weight,key,transform){
+ if(!F900B_QRH)return null;
+ const tables=F900B_QRH[kind].filter(t=>Object.entries(filters).every(([k,v])=>String(t[k])===String(v)));
+ const pb=f9ArrayBracket(tables.map(t=>t.pressure_altitude_ft),pa);if(!pb)return null;
+ const values=pb.map(p=>{const table=tables.find(t=>t.pressure_altitude_ft===p);return table?f9CellValue(table,weight,temp,key,transform):null});
+ if(values.some(v=>v==null))return null;
+ return pb[0]===pb[1]?values[0]:lerpN(values[0],values[1],(pa-pb[0])/(pb[1]-pb[0]));
+}
+function f9Speed(rows,weight,key){
+ if(!rows)return null;const wb=f9ArrayBracket(rows.map(r=>r.weight_lb),weight);if(!wb)return null;
+ const values=wb.map(w=>rows.find(r=>r.weight_lb===w)?.[key]);if(values.some(v=>!Number.isFinite(v)))return null;
+ return wb[0]===wb[1]?values[0]:lerpN(values[0],values[1],(weight-wb[0])/(wb[1]-wb[0]));
+}
+function f9ExactLimitCode(filters,pa,temp,weight){
+ if(![pa,temp,weight].every(Number.isFinite))return "—";
+ const table=F900B_QRH?.takeoff.find(t=>t.pressure_altitude_ft===pa&&Object.entries(filters).every(([k,v])=>String(t[k])===String(v)));
+ const cell=table?.cells.find(c=>c.weight_lb===weight&&c.temperature_c===temp);
+ if(cell)return cell.limit_code||"NONE";
+ const matching=F900B_QRH?.takeoff.filter(t=>Object.entries(filters).every(([k,v])=>String(t[k])===String(v)))||[];
+ const paBracket=f9ArrayBracket(matching.map(t=>t.pressure_altitude_ft),pa);
+ if(!paBracket)return "SOURCE LOCKED";
+ return "INTERPOLATED — REVIEW SOURCE CELLS";
+}
+function f9TakeoffResult(){
+ const pa=f9Num("f9ToPA"),temp=f9Num("f9ToTemp"),weight=f9Num("f9ToWeight"),runway=f9Num("f9ToRunway");
+ const filters={flaps_deg:Number($("f9ToConfig")?.value||20),surface:$("f9ToSurface")?.value||"DRY",anti_ice:$("f9ToAI")?.value||"OFF"};
+ const keys=["v1_kt","vr_v2_kt","vft_kt","balanced_field_length_ft","second_segment_gross_gradient_pct","acceleration_g","pitch_deg"];
+ const out={pa,temp,weight,runway,filters};keys.forEach(key=>out[key]=f9GridValue("takeoff",filters,pa,temp,weight,key));
+ out.n1a=f9GridValue("takeoff",filters,pa,temp,weight,"n1_sc_pct",v=>Number(String(v||"").split("/")[0]));
+ out.n1b=f9GridValue("takeoff",filters,pa,temp,weight,"n1_sc_pct",v=>Number(String(v||"").split("/")[1]));
+ out.vfr_kt=Number.isFinite(out.vr_v2_kt)?out.vr_v2_kt+25:null;
+ out.margin=Number.isFinite(runway)&&Number.isFinite(out.balanced_field_length_ft)?runway-out.balanced_field_length_ft:null;
+ out.limit=f9ExactLimitCode(filters,pa,temp,weight);
+ return out;
+}
+function f9LandingResult(pa,temp,weight,antiIce,runway){
+ const filters={anti_ice:antiIce};
+ const keys=["landing_distance_ft","landing_distance_x_1_67_ft","landing_distance_x_1_92_ft","approach_climb_gradient_pct","landing_climb_gradient_pct"];
+ const out={pa,temp,weight,runway,antiIce};keys.forEach(key=>out[key]=f9GridValue("landing",filters,pa,temp,weight,key));
+ out.vref_kt=f9Speed(F900B_QRH?.vref,weight,"vref_kt");
+ return out;
+}
+function f9SourceLockText(pa,temp,weight){
+ if(![pa,temp,weight].every(Number.isFinite))return"ENTER PRESSURE ALTITUDE, OAT AND WEIGHT";
+ if(pa<0||pa>6000)return"SOURCE LOCKED — PA OUTSIDE 0–6,000 FT";
+ if(weight<28000||weight>46500)return"SOURCE LOCKED — WEIGHT OUTSIDE 28,000–46,500 LB";
+ return"SOURCE LOCKED — SELECTED POINT CROSSES AN UNPUBLISHED CELL";
+}
+function renderF900BTakeoff(out){
+ f9Put("f9V1",f9Fmt(out.v1_kt,1," kt"));f9Put("f9VR",f9Fmt(out.vr_v2_kt,1," kt"));f9Put("f9VFT",f9Fmt(out.vft_kt,1," kt"));f9Put("f9VFR",f9Fmt(out.vfr_kt,1," kt"));
+ f9Put("f9BFL",f9Fmt(out.balanced_field_length_ft,0," ft"));f9Put("f9ToMargin",f9Fmt(out.margin,0," ft"));
+ f9Put("f9N1",Number.isFinite(out.n1a)&&Number.isFinite(out.n1b)?`${out.n1a.toFixed(1)} / ${out.n1b.toFixed(1)}%`:"—");
+ f9Put("f9GCLB2",f9Fmt(out.second_segment_gross_gradient_pct,2,"%"));f9Put("f9Accel",f9Fmt(out.acceleration_g,2," G"));f9Put("f9Pitch",f9Fmt(out.pitch_deg,1,"°"));f9Put("f9Limit",out.limit);
+ const fieldReady=[out.v1_kt,out.vr_v2_kt,out.balanced_field_length_ft].every(Number.isFinite);
+ let status,tone="warn";
+ if(Number.isFinite(out.weight)&&out.weight>45500){status="NO-GO • OVER STRUCTURAL MTOW";tone="bad"}
+ else if(!fieldReady)status=f9SourceLockText(out.pa,out.temp,out.weight);
+ else if(!Number.isFinite(out.runway))status="RUNWAY REQUIRED";
+ else if(out.margin<0){status="NO-GO • BFL EXCEEDS RUNWAY";tone="bad"}
+ else if(!Number.isFinite(out.second_segment_gross_gradient_pct))status="FIELD PASS • CLIMB VALUE NOT PUBLISHED";
+ else{status="FIELD PASS • CLIMB VALUE DISPLAYED";tone="ok"}
+ f9Status("f9ToStatus",status,tone);
+ f9Put("f9ToSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-10 • ${out.filters.flaps_deg}° F+S • A/I ${out.filters.anti_ice} • ${out.filters.surface} • bounded interpolation • wind 0 kt • slope 0%`);
+}
+function renderF900BLanding(prefix,out,factor,structuralGate=true){
+ const required=factor===1?out.landing_distance_ft:factor===1.92?out.landing_distance_x_1_92_ft:out.landing_distance_x_1_67_ft;
+ const margin=Number.isFinite(out.runway)&&Number.isFinite(required)?out.runway-required:null;
+ if(prefix==="f9Emer"){
+   f9Put("f9EmerWeight",f9Fmt(out.weight,0," lb"));f9Put("f9EmerVref",f9Fmt(out.vref_kt,1," kt"));f9Put("f9EmerLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9EmerRequired",f9Fmt(required,0," ft"));f9Put("f9EmerAvailable",f9Fmt(out.runway,0," ft"));f9Put("f9EmerMargin",f9Fmt(margin,0," ft"));f9Put("f9EmerACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9EmerLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
+ }else{
+   f9Put("f9LdgVref",f9Fmt(out.vref_kt,1," kt"));f9Put("f9LdgLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9Ldg167",f9Fmt(out.landing_distance_x_1_67_ft,0," ft"));f9Put("f9Ldg192",f9Fmt(out.landing_distance_x_1_92_ft,0," ft"));f9Put("f9LdgRequired",f9Fmt(required,0," ft"));f9Put("f9LdgMargin",f9Fmt(margin,0," ft"));f9Put("f9LdgACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9LdgLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
+ }
+ const ready=[out.vref_kt,required,out.approach_climb_gradient_pct,out.landing_climb_gradient_pct].every(Number.isFinite);
+ let status,tone="warn";
+ if(structuralGate&&Number.isFinite(out.weight)&&out.weight>42000){status="NO-GO • OVER 42,000 LB MLW";tone="bad"}
+ else if(!ready)status=f9SourceLockText(out.pa,out.temp,out.weight);
+ else if(!Number.isFinite(out.runway))status="RUNWAY REQUIRED";
+ else if(margin<0){status="NO-GO • REQUIRED DISTANCE EXCEEDS RUNWAY";tone="bad"}
+ else{status="FIELD PASS • CLIMB VALUES DISPLAYED";tone="ok"}
+ f9Status(prefix+"Status",status,tone);
+ return{required,margin,status};
+}
+async function refreshF900B(){
+ try{await loadF900BData()}catch(e){f9Status("f9ToStatus","900B DATASET UNAVAILABLE","bad");f9Put("f9ToSource",String(e.message||e));return}
+ const takeoff=f9TakeoffResult();renderF900BTakeoff(takeoff);
+ const returnWeight=Number.isFinite(takeoff.weight)?takeoff.weight-Math.max(0,f9Num("f9ReturnBurn")||0):null;
+ const emerg=f9LandingResult(takeoff.pa,takeoff.temp,returnWeight,$("f9EmerAI")?.value||"OFF",takeoff.runway);
+ renderF900BLanding("f9Emer",emerg,1.67,true);
+ f9Put("f9EmerSource",`Falcon 900B QRH1 Rev02 • 50-25 • 40° F+S • A/I ${emerg.antiIce} • departure PA/OAT • LD × 1.67`);
+ const ldg=f9LandingResult(f9Num("f9LdgPA"),f9Num("f9LdgTemp"),f9Num("f9LdgWeight"),$("f9LdgAI")?.value||"OFF",f9Num("f9LdgRunway"));
+ const factor=Number($("f9LdgFactor")?.value||1.67);renderF900BLanding("f9Ldg",ldg,factor,true);
+ f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}`);
+}
+function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
+async function startF900BTrip(dep,dest,alt){
+ window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",started_at:new Date().toISOString(),completed:false};
+ f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
+ showPlatformView("ops");
+ await refreshF900B();
+}
+
 
 let missionData=null;
 let passengers=[];
@@ -1989,17 +2237,20 @@ function updateFOBVerifyLabel(){
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function showPlatformView(view){
- const ids=["home","newtrip","ops","told","archive","shared"];
+ const requestedView=view;
+ const actualView=activeAircraftCode()==="F900B"&&["ops","told"].includes(view)?"f900b":view;
+ const ids=["home","newtrip","ops","told","f900b","archive","shared"];
  ids.forEach(v=>{
-   const el=$(v+"View"); if(el)el.style.display=(v===view)?"block":"none";
-   const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===view);
+   const el=$(v+"View"); if(el)el.style.display=(v===actualView)?"block":"none";
+   const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===requestedView);
  });
  const bottomActions=$("missionBottomActions");
- if(bottomActions)bottomActions.style.display=(view==="ops")?"flex":"none";
- if(view==="told"){recalculate();updateToldCard();}
- if(view==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
- if(view==="archive")renderArchive();
- if(view==="home"){refreshMenuCounts();}
+ if(bottomActions)bottomActions.style.display=(actualView==="ops")?"flex":"none";
+ if(actualView==="told"){recalculate();updateToldCard();}
+ if(actualView==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
+ if(actualView==="f900b"){refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
+ if(actualView==="archive")renderArchive();
+ if(actualView==="home"){refreshMenuCounts();}
  window.scrollTo({top:0,behavior:"smooth"});
 }
 function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
@@ -2012,7 +2263,8 @@ function getMissionArchive(){
 }
 function saveMissionArchive(arr){localStorage.setItem("kusaFlightOpsArchive",JSON.stringify(arr));updateHomeArchiveCount()}
 function updateHomeArchiveCount(){
- const e=$("homeArchiveCount");if(e)e.textContent=getMissionArchive().length;
+ const count=getMissionArchive().length;
+ ["homeArchiveCount","homeArchiveCountSecondary"].forEach(id=>{const e=$(id);if(e)e.textContent=count});
 }
 function getMissionDrafts(){
  try{return JSON.parse(localStorage.getItem("kusaFlightOpsDrafts")||"[]")}catch{return[]}
@@ -2086,10 +2338,15 @@ function initializeMenuLanding(){
 
 function startNewTrip(){
  const dep=cleanICAO($("homeDep").value),dest=cleanICAO($("homeDest").value),alt=cleanICAO($("homeAlt").value);
+ const aircraft=$("homeAircraft").value||"N33AP";
  const fob=Number($("homeFOB").value);
  const missionFuel=Number($("homeMissionFuel").value);
  if(!dep||!dest){
    alert("Enter departure and destination ICAO identifiers.");
+   return;
+ }
+ if(aircraft==="F900B"){
+   startF900BTrip(dep,dest,alt).catch(e=>alert(`Falcon 900B dataset could not be loaded: ${e.message||e}`));
    return;
  }
  if(!Number.isFinite(fob)||fob<=0){
@@ -4846,9 +5103,10 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.24.2",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.1",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
+ if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
  if(rs){rs.textContent="CHECKING";rs.className="warn"} if(rn)rn.textContent="Checking packaged runway data…";
  if(ls){ls.textContent="CHECKING";ls.className="warn"} if(ln)ln.textContent="Checking FAA NMS and weather…";
  try{
@@ -4856,6 +5114,12 @@ async function startupCheck(manual=false){
    const buildOk=String(h.build||"")===expected;
    if(bs){bs.textContent=buildOk?"CURRENT":"UPDATE / REDEPLOY REQUIRED";bs.className=buildOk?"ok":"bad"}
    if(bn)bn.textContent=`Browser ${expected} • Server ${h.build||"unknown"}`;
+   try{
+     const f9=await loadF900BData();
+     const perfOk=f9?.takeoff?.length===32&&f9?.landing?.length===8;
+     if(ps){ps.textContent=perfOk?"LOADED":"DATA MISSING";ps.className=perfOk?"ok":"bad"}
+     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 • 32 takeoff / 8 landing tables":"Falcon 900B dataset failed integrity check";
+   }catch(perfError){if(ps){ps.textContent="900B DATA MISSING";ps.className="bad"}if(pn)pn.textContent="N33AP remains available; redeploy the Falcon 900B dataset."}
    const runwayCount=Number(h.runway_airports_loaded||0);
    if(rs){rs.textContent=runwayCount>0?"READY":"PACKAGED DATA MISSING";rs.className=runwayCount>0?"ok":"bad"}
    if(rn)rn.textContent=`${runwayCount.toLocaleString()} packaged airport entr${runwayCount===1?"y":"ies"} • FAA NASR live fallback configured`;
@@ -4902,6 +5166,9 @@ $("toRunwayCondition")?.addEventListener("change",()=>{if(perfIsManual())markWha
 $("landConfig")?.addEventListener("change",recalculate);
 $("landAntiIce")?.addEventListener("change",recalculate);
 $("landRunwayCondition")?.addEventListener("change",recalculate);
+
+["f9ToPA","f9ToTemp","f9ToWeight","f9ToRunway","f9ReturnBurn","f9LdgPA","f9LdgTemp","f9LdgWeight","f9LdgRunway"].forEach(id=>$(id)?.addEventListener("input",scheduleF900BRefresh));
+["f9ToConfig","f9ToAI","f9ToSurface","f9EmerAI","f9LdgAI","f9LdgFactor"].forEach(id=>$(id)?.addEventListener("change",refreshF900B));
 
 ["manualUsableLda","manualNotamNote"].forEach(id=>$(id)?.addEventListener("input",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()}));
 $("manualRunwayStatusOverride")?.addEventListener("change",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()});
