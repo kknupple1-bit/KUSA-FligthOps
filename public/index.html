@@ -410,7 +410,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.25.1 — Falcon 900B performance-source correction */
+/* v5.25.2 — Falcon 900B Mission/TOLD separation */
 .f900b-shell{max-width:1120px;margin:0 auto}
 .f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
 .f900b-titlebar h2{margin:0 0 4px;font-size:24px}
@@ -515,7 +515,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.2</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1600,6 +1600,93 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 
 
+<div id="f900bmissionView" style="display:none">
+  <div class="f900b-shell">
+    <div class="mission-actionbar">
+      <button type="button" onclick="showPlatformView('home')">← Menu</button>
+      <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
+      <button type="button" onclick="completeMission()">Complete &amp; Archive Flight Plan</button>
+      <span class="small" id="f9mDraftStatus" style="align-self:center;margin-left:6px">Falcon 900B mission planning</span>
+    </div>
+
+    <div class="card">
+      <div class="f900b-titlebar">
+        <div>
+          <h2>Falcon 900B — MISSION</h2>
+          <div class="small" id="f9mRoute">— → —</div>
+        </div>
+        <button type="button" style="width:auto" onclick="refreshF900BMission()">Refresh 900B Mission</button>
+      </div>
+      <div class="callout small warn"><b>MISSION PLANNING PAGE.</b> Use this page to set route-performance assumptions and weights. Falcon 900B aircraft-specific W&amp;B is not yet loaded, so takeoff and landing weights remain manual entries. The TOLD tab is a separate operational card.</div>
+    </div>
+
+    <div class="card">
+      <h2>1. Mission Setup</h2>
+      <div class="row">
+        <div><label>Departure</label><input id="f9mDep" maxlength="4" readonly></div>
+        <div><label>Destination</label><input id="f9mDest" maxlength="4" readonly></div>
+        <div><label>Alternate</label><input id="f9mAlt" maxlength="4" readonly></div>
+        <div><label>Trip / Tail Note</label><input id="f9mNote" placeholder="optional"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><label>Emergency Return Fuel Burn lb</label><input id="f9mReturnBurn" type="number" min="0" step="10" value="500"></div>
+        <div><label>Takeoff Weight lb</label><input id="f9mToWeight" type="number" min="0" step="10" placeholder="28,000 to 45,500"></div>
+        <div><label>Landing Weight lb</label><input id="f9mLdgWeight" type="number" min="0" step="10" placeholder="28,000 to 42,000"></div>
+        <div><label>Weight &amp; Balance</label><div class="wx"><b class="warn">LOCKED</b><div class="small">Aircraft loading data / BOW required</div></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>2. Departure Performance Planning</h2>
+      <div class="f900b-inputs">
+        <div><label>Takeoff Configuration</label><select id="f9mToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
+        <div><label>Anti-Ice</label><select id="f9mToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        <div><label>Runway</label><select id="f9mToSurface"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
+        <div><label>Runway Available ft</label><input id="f9mToRunway" type="number" min="0" step="1" placeholder="e.g. 7000"></div>
+        <div><label>Pressure Altitude ft</label><input id="f9mToPA" type="number" step="1" placeholder="0 to 6000"></div>
+        <div><label>OAT °C</label><input id="f9mToTemp" type="number" step="0.1" placeholder="published range"></div>
+        <div><label>Recalculate</label><button type="button" onclick="refreshF900BMission()">Refresh Mission Performance</button></div>
+      </div>
+      <div class="f900b-results">
+        <div class="f900b-result"><span>V1</span><b id="f9mV1">—</b></div>
+        <div class="f900b-result"><span>VR = V2</span><b id="f9mVR">—</b></div>
+        <div class="f900b-result"><span>Balanced Field Length</span><b id="f9mBFL">—</b></div>
+        <div class="f900b-result"><span>Runway Remaining</span><b id="f9mToMargin">—</b></div>
+        <div class="f900b-result"><span>Second-Segment Gradient</span><b id="f9mGCLB2">—</b></div>
+        <div class="f900b-result"><span>Takeoff Status</span><b id="f9mToStatus">—</b></div>
+      </div>
+      <div class="small f900b-source" id="f9mToSource">Falcon 900B QRH1 Rev02 • DTM9823/AFM source package • bounded interpolation</div>
+    </div>
+
+    <div class="card">
+      <h2>3. Destination Landing Planning</h2>
+      <div class="f900b-inputs">
+        <div><label>Anti-Ice</label><select id="f9mLdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        <div><label>Pressure Altitude ft</label><input id="f9mLdgPA" type="number" step="1" placeholder="0 to 6000"></div>
+        <div><label>OAT °C</label><input id="f9mLdgTemp" type="number" step="0.1" placeholder="published range"></div>
+        <div><label>Runway Available ft</label><input id="f9mLdgRunway" type="number" min="0" step="1" placeholder="e.g. 6500"></div>
+        <div><label>Runway Comparison</label><select id="f9mLdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
+      </div>
+      <div class="f900b-results">
+        <div class="f900b-result"><span>VREF</span><b id="f9mLdgVref">—</b></div>
+        <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9mLdgLD">—</b></div>
+        <div class="f900b-result"><span>Controlling Comparison</span><b id="f9mLdgRequired">—</b></div>
+        <div class="f900b-result"><span>Runway Remaining</span><b id="f9mLdgMargin">—</b></div>
+        <div class="f900b-result"><span>Approach Climb</span><b id="f9mLdgACG">—</b></div>
+        <div class="f900b-result"><span>Landing Status</span><b id="f9mLdgStatus">—</b></div>
+      </div>
+      <div class="small f900b-source" id="f9mLdgSource">Falcon 900B QRH1 Rev02 • 40° Flaps + Slats landing performance</div>
+    </div>
+
+    <div class="card">
+      <h2>4. Mission → TOLD</h2>
+      <div class="small">Mission assumptions above are synchronized into the TOLD card. Use <b>Open TOLD</b> to review the operational Takeoff → Emergency Return → Destination Landing layout without losing the Mission page.</div>
+      <button type="button" style="margin-top:12px;width:auto" onclick="showPlatformView('told')">Open 900B TOLD</button>
+    </div>
+  </div>
+</div>
+
+
 <div id="f900bView" style="display:none">
   <div class="f900b-shell">
     <div class="card">
@@ -2123,6 +2210,45 @@ function renderF900BLanding(prefix,out,factor,structuralGate=true){
  f9Status(prefix+"Status",status,tone);
  return{required,margin,status};
 }
+
+function syncF900BMissionToTOLD(){
+ const pairs=[
+  ["f9mToConfig","f9ToConfig"],["f9mToAI","f9ToAI"],["f9mToSurface","f9ToSurface"],
+  ["f9mToRunway","f9ToRunway"],["f9mToPA","f9ToPA"],["f9mToTemp","f9ToTemp"],["f9mToWeight","f9ToWeight"],
+  ["f9mReturnBurn","f9ReturnBurn"],["f9mLdgAI","f9LdgAI"],["f9mLdgPA","f9LdgPA"],["f9mLdgTemp","f9LdgTemp"],
+  ["f9mLdgWeight","f9LdgWeight"],["f9mLdgRunway","f9LdgRunway"],["f9mLdgFactor","f9LdgFactor"]
+ ];
+ pairs.forEach(([a,b])=>{if($(a)&&$(b))$(b).value=$(a).value});
+ if(window.currentMissionMeta&&$("f9mNote"))window.currentMissionMeta.note=$("f9mNote").value.trim();
+}
+function syncF900BTOLDToMission(){
+ const pairs=[
+  ["f9ToConfig","f9mToConfig"],["f9ToAI","f9mToAI"],["f9ToSurface","f9mToSurface"],
+  ["f9ToRunway","f9mToRunway"],["f9ToPA","f9mToPA"],["f9ToTemp","f9mToTemp"],["f9ToWeight","f9mToWeight"],
+  ["f9ReturnBurn","f9mReturnBurn"],["f9LdgAI","f9mLdgAI"],["f9LdgPA","f9mLdgPA"],["f9LdgTemp","f9mLdgTemp"],
+  ["f9LdgWeight","f9mLdgWeight"],["f9LdgRunway","f9mLdgRunway"],["f9LdgFactor","f9mLdgFactor"]
+ ];
+ pairs.forEach(([a,b])=>{if($(a)&&$(b)&&String($(a).value)!=="")$(b).value=$(a).value});
+}
+function f9MissionCopy(id,val){const e=$(id);if(e)e.textContent=val??"—"}
+async function refreshF900BMission(){
+ syncF900BMissionToTOLD();
+ await refreshF900B();
+ f9MissionCopy("f9mV1",$("f9V1")?.textContent||"—");
+ f9MissionCopy("f9mVR",$("f9VR")?.textContent||"—");
+ f9MissionCopy("f9mBFL",$("f9BFL")?.textContent||"—");
+ f9MissionCopy("f9mToMargin",$("f9ToMargin")?.textContent||"—");
+ f9MissionCopy("f9mGCLB2",$("f9GCLB2")?.textContent||"—");
+ f9MissionCopy("f9mToStatus",$("f9ToStatus")?.textContent||"—");
+ f9MissionCopy("f9mToSource",$("f9ToSource")?.textContent||"—");
+ f9MissionCopy("f9mLdgVref",$("f9LdgVref")?.textContent||"—");
+ f9MissionCopy("f9mLdgLD",$("f9LdgLD")?.textContent||"—");
+ f9MissionCopy("f9mLdgRequired",$("f9LdgRequired")?.textContent||"—");
+ f9MissionCopy("f9mLdgMargin",$("f9LdgMargin")?.textContent||"—");
+ f9MissionCopy("f9mLdgACG",$("f9LdgACG")?.textContent||"—");
+ f9MissionCopy("f9mLdgStatus",$("f9LdgStatus")?.textContent||"—");
+ f9MissionCopy("f9mLdgSource",$("f9LdgSource")?.textContent||"—");
+}
 async function refreshF900B(){
  try{await loadF900BData()}catch(e){f9Status("f9ToStatus","900B DATASET UNAVAILABLE","bad");f9Put("f9ToSource",String(e.message||e));return}
  const takeoff=f9TakeoffResult();renderF900BTakeoff(takeoff);
@@ -2138,6 +2264,8 @@ function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_
 async function startF900BTrip(dep,dest,alt){
  window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",started_at:new Date().toISOString(),completed:false};
  f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
+ f9Put("f9mRoute",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
+ if($("f9mDep"))$("f9mDep").value=dep;if($("f9mDest"))$("f9mDest").value=dest;if($("f9mAlt"))$("f9mAlt").value=alt||"";if($("f9mNote"))$("f9mNote").value=window.currentMissionMeta.note||"";
  showPlatformView("ops");
  await refreshF900B();
 }
@@ -2238,8 +2366,8 @@ function updateFOBVerifyLabel(){
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function showPlatformView(view){
  const requestedView=view;
- const actualView=activeAircraftCode()==="F900B"&&["ops","told"].includes(view)?"f900b":view;
- const ids=["home","newtrip","ops","told","f900b","archive","shared"];
+ const actualView=activeAircraftCode()==="F900B"?(view==="ops"?"f900bmission":view==="told"?"f900b":view):view;
+ const ids=["home","newtrip","ops","told","f900bmission","f900b","archive","shared"];
  ids.forEach(v=>{
    const el=$(v+"View"); if(el)el.style.display=(v===actualView)?"block":"none";
    const btn=$(v+"TabBtn"); if(btn)btn.classList.toggle("active",v===requestedView);
@@ -2248,7 +2376,8 @@ function showPlatformView(view){
  if(bottomActions)bottomActions.style.display=(actualView==="ops")?"flex":"none";
  if(actualView==="told"){recalculate();updateToldCard();}
  if(actualView==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
- if(actualView==="f900b"){refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
+ if(actualView==="f900bmission"){syncF900BTOLDToMission();refreshF900BMission();}
+ if(actualView==="f900b"){syncF900BMissionToTOLD();refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
  if(actualView==="archive")renderArchive();
  if(actualView==="home"){refreshMenuCounts();}
  window.scrollTo({top:0,behavior:"smooth"});
@@ -5103,7 +5232,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.1",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.2",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
@@ -5168,6 +5297,8 @@ $("landAntiIce")?.addEventListener("change",recalculate);
 $("landRunwayCondition")?.addEventListener("change",recalculate);
 
 ["f9ToPA","f9ToTemp","f9ToWeight","f9ToRunway","f9ReturnBurn","f9LdgPA","f9LdgTemp","f9LdgWeight","f9LdgRunway"].forEach(id=>$(id)?.addEventListener("input",scheduleF900BRefresh));
+["f9mToPA","f9mToTemp","f9mToWeight","f9mToRunway","f9mReturnBurn","f9mLdgPA","f9mLdgTemp","f9mLdgWeight","f9mLdgRunway"].forEach(id=>$(id)?.addEventListener("input",()=>{clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900BMission,120)}));
+["f9mToConfig","f9mToAI","f9mToSurface","f9mLdgAI","f9mLdgFactor"].forEach(id=>$(id)?.addEventListener("change",refreshF900BMission));
 ["f9ToConfig","f9ToAI","f9ToSurface","f9EmerAI","f9LdgAI","f9LdgFactor"].forEach(id=>$(id)?.addEventListener("change",refreshF900B));
 
 ["manualUsableLda","manualNotamNote"].forEach(id=>$(id)?.addEventListener("input",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()}));
