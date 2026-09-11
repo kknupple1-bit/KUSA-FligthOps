@@ -1,0 +1,8 @@
+KUSA FlightOps v5.23.8
+
+BUILD MISMATCH HOTFIX
+- Corrected stale browser startup expected-build constant that remained at 5.23.6 inside public/index.html.
+- Browser/server build integrity now compares against 5.23.8 consistently.
+- Carries forward v5.23.7 responsive iPhone/iPad UI and all prior v5.23.x functionality.
+
+No performance, W&B, NMS, runway, or TOLD calculation logic changed in this hotfix.
