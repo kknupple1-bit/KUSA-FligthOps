@@ -1,0 +1,18 @@
+KUSA FlightOps v5.24.1 — Operational TOLD Layout
+
+- Reorders the TOLD page around the flight sequence:
+  1. Takeoff
+  2. Emergency Return
+  3. Landing — Destination
+- Places runway, runway available, required distance, runway remaining, speeds,
+  weight, configuration, wind and status in the three operational sections.
+- Adds a dedicated emergency-return section using departure runway availability,
+  takeoff weight less entered emergency-return burn, and the S+48 landing source
+  at departure pressure altitude.
+- Moves aircraft/load, fuel, W&B, weather, NOTAM, source, limit and safety detail
+  beneath the operational sections as Supporting Documentation.
+- Reorders copied, shared and emailed TOLD text to match the on-screen sequence.
+- Retains all v5.23.8 calculation safeguards, responsive behavior, trip workflow,
+  drafts, archive and sharing features.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.
