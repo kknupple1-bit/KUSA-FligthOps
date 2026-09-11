@@ -1,0 +1,18 @@
+KUSA FlightOps v5.25.1
+Falcon 900 Performance-Source Correction
+
+CORRECTION
+- Corrected the Falcon 900 Performance Manual reference: DTM9823, not DTM9821.
+- Identified the uploaded Falcon 900 Performance Manual as Pub. 420B DTM9823, Revision 16, August 16, 2011.
+- Updated the 900B TOLD supporting-documentation/source note to include DTM9823 Revision 16.
+- Removed wording that incorrectly described DTM9821 as the required Falcon 900 loading source.
+
+SOURCE CONTROL
+- The existing integrated Falcon 900B TOLD grids remain based on Falcon 900B QRH1 Performance Rev02 (DGAC18DSOF182A).
+- DTM9823 is now correctly identified as the Falcon 900 Performance Manual and is available for performance cross-checking and future migration of validated data.
+- No DTM9823 numerical chart data were silently substituted into the QRH-derived model in this revision.
+- Falcon 900B W&B remains locked pending applicable aircraft loading data and an aircraft-specific basic-operating-weight record.
+
+BUILD
+- Frontend, backend, package version, health endpoint, and startup build check advanced to 5.25.1.
+- Development/validation only - not approved for flight use.

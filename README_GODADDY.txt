@@ -570,3 +570,11 @@ v5.22.3
 - Takeoff performance status now separates field/climb performance from obstacle-clearance status.
 - TOLD no longer says takeoff limits are incomplete solely because obstacle analysis is unavailable; it reports performance evaluated and obstacle clearance separate when appropriate.
 - Obstacle manual selector renamed to Obstacle Clearance Confirmation.
+
+
+VERSION 5.25.1 - FALCON 900 PERFORMANCE-SOURCE CORRECTION
+- Corrected the Falcon 900 performance-manual reference to DTM9823.
+- DTM9823 Revision 16 (August 16, 2011) is identified as the Falcon 900 Performance Manual.
+- Removed the incorrect DTM9821/loading-manual reference from the Falcon 900B TOLD source note.
+- DTM9823 is treated as a performance reference/supporting source; the integrated 900B TOLD numerical grids remain sourced from QRH1 Performance Rev02 unless specifically cross-checked and migrated.
+- Falcon 900B W&B remains locked pending applicable aircraft loading data and the aircraft-specific basic-operating-weight record.

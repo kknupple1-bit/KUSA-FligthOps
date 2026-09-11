@@ -1,0 +1,28 @@
+KUSA FlightOps v5.25.0
+Falcon 900B Performance Model - Initial Integrated Revision
+
+NEW AIRCRAFT MODEL
+- Enabled Falcon 900B - Performance Model in the New Trip aircraft selector.
+- Added an isolated Falcon 900B Mission/TOLD surface so Falcon 900B source data cannot be mixed with N33AP Falcon 50-4 calculations.
+- Preserved the operational order: Takeoff, Emergency Return, Landing at Destination, then Supporting Documentation.
+- Added a dedicated Refresh 900B TOLD control; configuration and input changes also recalculate automatically.
+- The initial 900B model uses manual pressure-altitude, OAT, weight, and runway-available inputs while aircraft-specific integration is completed.
+
+CONTROLLING PERFORMANCE DATA
+- Falcon 900B QRH1 Performance Rev02, document DGAC18DSOF182A, revision date April 15, 2021.
+- 32 takeoff tables: 7-degree and 20-degree Flaps + Slats, anti-ice OFF/ON, dry/wet runway, and 0/2,000/4,000/6,000 ft pressure altitude.
+- 8 landing tables: 40-degree Flaps + Slats, anti-ice OFF/ON, and 0/2,000/4,000/6,000 ft pressure altitude.
+- VFT/VFR, VREF, V1, VR=V2, N1 single/channel, acceleration, BFL, second-segment gross climb gradient, pitch, limitation code, landing distance, 1.67/1.92 factors, approach climb, and landing climb are carried from the QRH source set.
+
+SOURCE PROTECTION
+- Bounded interpolation only between published pressure-altitude, temperature, and weight cells.
+- No extrapolation outside the QRH source envelope or across unpublished cells.
+- Wind and runway-slope corrections are not applied because the integrated QRH tables are published for zero wind and zero runway slope.
+- Structural gates use AFM limits: MRW 45,700 lb; MTOW 45,500 lb; MLW 42,000 lb; MZFW 28,220 lb; minimum flight weight 20,700 lb.
+- Falcon 900B W&B is intentionally locked pending applicable loading data and an aircraft-specific basic-operating-weight record. NOTE: v5.25.1 corrects the Falcon 900 Performance Manual reference to DTM9823; DTM9823 is not a loading manual.
+
+VALIDATION COMPLETED
+- Extracted 2,368 takeoff grid points and 640 landing grid points from the digitally generated QRH tables.
+- Verified published exact-cell samples, three-dimensional bounded interpolation, structural/source locks, and archive integrity.
+- Corrected the duplicated Archive-count element ID so both home-page archive counters remain synchronized.
+- Development/validation only - not approved for flight use.
