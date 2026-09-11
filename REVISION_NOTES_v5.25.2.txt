@@ -1,0 +1,15 @@
+KUSA FlightOps v5.25.2
+Falcon 900B Mission / TOLD Separation Fix
+
+Changes
+- Corrected a v5.25.x navigation regression that routed both the Mission and TOLD tabs to the same Falcon 900B performance card.
+- Added a dedicated Falcon 900B Mission page.
+- Mission page now includes route setup context, manual takeoff/landing weights, emergency-return burn, departure and destination performance assumptions, 7° vs 20° Flaps + Slats selection, anti-ice, dry/wet runway selection, pressure altitude, OAT, runway available, and explicit Refresh 900B Mission controls.
+- Mission performance inputs synchronize into the separate Falcon 900B TOLD card.
+- Returning from TOLD to Mission preserves/synchronizes the latest 900B performance inputs.
+- TOLD remains the operational Takeoff → Emergency Return → Destination Landing presentation.
+- Falcon 900B W&B remains source-locked pending applicable loading data and aircraft-specific basic operating weight record.
+- DTM9823 remains correctly identified as the Falcon 900 Performance Manual; associated supplements remain part of the source package.
+- Frontend, backend, package version, health endpoint, and startup build check advanced to 5.25.2.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.

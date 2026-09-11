@@ -572,7 +572,7 @@ v5.22.3
 - Obstacle manual selector renamed to Obstacle Clearance Confirmation.
 
 
-VERSION 5.25.1 - FALCON 900 PERFORMANCE-SOURCE CORRECTION
+VERSION 5.25.2 - FALCON 900 PERFORMANCE-SOURCE CORRECTION
 - Corrected the Falcon 900 performance-manual reference to DTM9823.
 - DTM9823 Revision 16 (August 16, 2011) is identified as the Falcon 900 Performance Manual.
 - Removed the incorrect DTM9821/loading-manual reference from the Falcon 900B TOLD source note.
