@@ -268,11 +268,29 @@ details summary{cursor:pointer;margin-top:8px}
 .told-op-detail span:first-child{color:var(--muted);font-size:12px}
 .told-op-detail span:last-child{text-align:right;font-weight:700}
 .told-support-title{margin:20px 0 10px;font-size:18px;letter-spacing:.035em}
+.takeoff-config-toolbar{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin:0 0 12px;padding:10px;background:#06182c;border:1px solid var(--line);border-radius:10px}
+.takeoff-config-choice{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.takeoff-config-choice button{width:auto;min-height:38px;padding:8px 12px;background:#0b2746}
+.takeoff-config-choice button.active{background:#245f96;border-color:#67a6dd;box-shadow:0 0 0 2px rgba(103,166,221,.18) inset}
+.takeoff-config-refresh{width:auto!important;white-space:nowrap}
+.takeoff-compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px}
+.takeoff-compare-card{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px}
+.takeoff-compare-card.active{border-color:#67a6dd;box-shadow:0 0 0 2px rgba(103,166,221,.15) inset}
+.takeoff-compare-head{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:7px}
+.takeoff-compare-head b{font-size:14px}
+.takeoff-compare-status{font-size:11px;font-weight:900;text-align:right}
+.takeoff-compare-values{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.takeoff-compare-value{border-top:1px solid #234361;padding-top:6px}
+.takeoff-compare-value span{display:block;color:var(--muted);font-size:11px}
+.takeoff-compare-value b{display:block;font-size:14px;margin-top:3px}
+.mission-config-control{display:flex;gap:8px;align-items:stretch}
+.mission-config-control select{flex:1}
+.mission-config-control button{width:auto;white-space:nowrap}
 .fuel-confirm{margin-top:12px;border:2px solid var(--bad);background:#311b22;border-radius:10px;padding:12px;display:none}
 .fuel-confirm label{color:#ffd4d4;font-size:13px;display:flex;gap:9px;align-items:flex-start}
 .fuel-confirm input{width:auto;margin-top:2px}
 #landingFuelGuardStatus{font-weight:800}
-@media(max-width:850px){.told-grid{grid-template-columns:1fr}.told-speeds{grid-template-columns:repeat(2,1fr)}.told-op-metrics{grid-template-columns:1fr 1fr}.told-op-details{grid-template-columns:1fr}}
+@media(max-width:850px){.told-grid{grid-template-columns:1fr}.told-speeds{grid-template-columns:repeat(2,1fr)}.told-op-metrics{grid-template-columns:1fr 1fr}.told-op-details{grid-template-columns:1fr}.takeoff-config-toolbar{display:block}.takeoff-config-refresh{margin-top:9px}.takeoff-compare{grid-template-columns:1fr}.takeoff-compare-values{grid-template-columns:1fr 1fr}}
 @media print{
  body{background:white;color:black}
  header,#opsView,#buildBadge,.told-actions{display:none!important}
@@ -392,7 +410,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.24.1 — operational TOLD hierarchy */
+/* v5.24.2 — takeoff configuration comparison and refresh controls */
 .brand-suffix::before{content:" - ";}
 @media(max-width:700px){
   html,body{max-width:100%;overflow-x:hidden}
@@ -444,6 +462,10 @@ details summary{cursor:pointer;margin-top:8px}
   .told-op-metric{padding:9px;min-height:68px}
   .told-op-metric b{font-size:17px}
   .told-op-details{grid-template-columns:1fr!important;margin-top:8px}
+  .takeoff-config-choice{display:grid;grid-template-columns:1fr 1fr}
+  .takeoff-config-choice button,.takeoff-config-refresh{width:100%!important}
+  .mission-config-control{display:grid;grid-template-columns:1fr}
+  .mission-config-control button{width:100%}
   .callout{font-size:11px!important;line-height:1.35;overflow-wrap:anywhere}
   input,select,button{min-height:44px;font-size:16px}
   label{font-size:11px}
@@ -481,7 +503,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.24.1</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.24.2</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -1087,7 +1109,14 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div></div><div></div>
   </div>
   <div class="row">
-<div><label>Takeoff Configuration</label><select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only (V1/BFL source ≥ 4,000 ft PA)</option></select></div>
+<div>
+  <label>Takeoff Configuration</label>
+  <div class="mission-config-control">
+    <select id="toConfig"><option value="S20">Slats + Flaps 20°</option><option value="SLATS">Slats Only (V1/BFL source ≥ 4,000 ft PA)</option></select>
+    <button type="button" onclick="refreshTakeoffConfiguration()">Refresh Takeoff</button>
+  </div>
+  <div class="small" id="missionTakeoffRefreshStamp" style="margin-top:5px">Configuration recalculates automatically.</div>
+</div>
 <div><label>Takeoff Anti-Ice</label><select id="toAntiIce"><option value="OFF">A/I OFF</option><option value="ON">A/I ON</option></select></div>
 <div></div><div></div>
 </div>
@@ -1336,6 +1365,37 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <div class="told-op-heading"><span class="told-op-number">1</span><div><div class="told-op-title" id="toldTakeoffHeading">TAKEOFF</div><div class="small">Departure runway, speeds, distance and available runway</div></div></div>
       <span class="told-op-status" id="opTakeoffStatus">—</span>
     </div>
+    <div class="takeoff-config-toolbar">
+      <div>
+        <span class="small">ACTIVE TAKEOFF CONFIGURATION</span>
+        <div class="takeoff-config-choice" role="group" aria-label="Takeoff configuration">
+          <button type="button" id="toldConfigS20" onclick="selectTakeoffConfiguration('S20')">Slats + Flaps 20°</button>
+          <button type="button" id="toldConfigSlats" onclick="selectTakeoffConfiguration('SLATS')">Slats Only</button>
+        </div>
+      </div>
+      <button type="button" class="takeoff-config-refresh" onclick="refreshTakeoffConfiguration()">Refresh Takeoff</button>
+    </div>
+    <div class="takeoff-compare" aria-label="Takeoff configuration comparison">
+      <div class="takeoff-compare-card" id="compareS20Card">
+        <div class="takeoff-compare-head"><b>SLATS + FLAPS 20°</b><span class="takeoff-compare-status" id="compareS20Status">—</span></div>
+        <div class="takeoff-compare-values">
+          <div class="takeoff-compare-value"><span>V1 / VR</span><b id="compareS20Speeds">—</b></div>
+          <div class="takeoff-compare-value"><span>Takeoff Distance</span><b id="compareS20Distance">—</b></div>
+          <div class="takeoff-compare-value"><span>Runway Remaining</span><b id="compareS20Margin">—</b></div>
+          <div class="takeoff-compare-value"><span>Source</span><b id="compareS20Source">—</b></div>
+        </div>
+      </div>
+      <div class="takeoff-compare-card" id="compareSlatsCard">
+        <div class="takeoff-compare-head"><b>SLATS ONLY</b><span class="takeoff-compare-status" id="compareSlatsStatus">—</span></div>
+        <div class="takeoff-compare-values">
+          <div class="takeoff-compare-value"><span>V1 / VR</span><b id="compareSlatsSpeeds">—</b></div>
+          <div class="takeoff-compare-value"><span>Takeoff Distance</span><b id="compareSlatsDistance">—</b></div>
+          <div class="takeoff-compare-value"><span>Runway Remaining</span><b id="compareSlatsMargin">—</b></div>
+          <div class="takeoff-compare-value"><span>Source</span><b id="compareSlatsSource">—</b></div>
+        </div>
+      </div>
+    </div>
+    <div class="small" style="margin:-3px 0 12px">Immediate field and speed comparison only. The highlighted configuration controls the full takeoff TOLD calculation. Published-source limits remain enforced; no extrapolation.</div>
     <div class="told-op-metrics">
       <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="opTakeoffRunway">—</b></div>
       <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="opTakeoffAvailable">—</b></div>
@@ -2874,6 +2934,8 @@ function updateToldCard(){
  $("opLandingRunwayState").textContent=landAssess.state||"—";
  $("opLandingStatus").textContent=textOf("landStatus");
  $("opLandingStatus").className=`told-op-status ${textOf("landStatus").includes("PASS")?"ok":textOf("landStatus").includes("NO-GO")?"bad":"warn"}`;
+
+ updateTakeoffComparison();
 
  const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
  const confirmed=$("lowFuelConfirm")?.checked;
@@ -4536,6 +4598,70 @@ function autoTO(){
  if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
  return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason,pa,temp:t,weightLb}
 }
+function takeoffComparisonFor(cfg){
+ const d=FS_PERF.takeoff[cfg],weightLb=perfTakeoffWeightLb(),wk=(weightLb||0)/1000;
+ const vr=d?interpScalarN(d.vr,wk):null;
+ const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),condition=$("toRunwayCondition")?.value||"DRY";
+ const runway=effectiveDepartureRunwayAssessment();
+ const available=Number.isFinite(runway?.usable)?runway.usable:perfTakeoffRunwayLen();
+ let result=null,source="PUBLISHED GRID",reason="";
+ if(condition==="WET")reason="WET DATA SOURCE LOCKED";
+ else if(!Number.isFinite(pa))reason="PRESSURE ALTITUDE REQUIRED";
+ else if(!Number.isFinite(temp))reason="TEMPERATURE REQUIRED";
+ else if(!d)reason="CONFIGURATION SOURCE MISSING";
+ else{
+   const minPA=Math.min(...kN(d.tables));
+   if(pa<minPA&&minPA>0){
+     reason=`SOURCE BEGINS AT ${minPA.toLocaleString()} FT PA`;
+     source=`≥ ${minPA.toLocaleString()} FT PA`;
+   }else{
+     let lookupPA=pa;
+     if(pa<minPA&&minPA===0&&pa>=-1000)lookupPA=0;
+     result=fsTakeoff(cfg,lookupPA,temp,wk);
+     if(!result)reason="SOURCE LOCKED AT THIS POINT";
+   }
+ }
+ const margin=result&&Number.isFinite(available)?available-result.bfl:null;
+ let status="FIELD DATA READY";
+ if(reason)status="SOURCE LOCKED";
+ else if(!Number.isFinite(available))status="RUNWAY REQUIRED";
+ else if(margin<0)status="FIELD FAIL";
+ else status="FIELD PASS";
+ return{cfg,vr,v1:result?.v1??null,bfl:result?.bfl??null,available,margin,status,reason,source};
+}
+function updateTakeoffComparison(){
+ if(!$("compareS20Card"))return;
+ const active=$("toConfig")?.value||"S20";
+ const entries=[
+   {cfg:"S20",prefix:"compareS20",card:"compareS20Card",button:"toldConfigS20"},
+   {cfg:"SLATS",prefix:"compareSlats",card:"compareSlatsCard",button:"toldConfigSlats"}
+ ];
+ entries.forEach(({cfg,prefix,card,button})=>{
+   const x=takeoffComparisonFor(cfg),selected=cfg===active;
+   $(card).className=`takeoff-compare-card${selected?" active":""}`;
+   $(button).className=selected?"active":"";
+   $(button).setAttribute("aria-pressed",selected?"true":"false");
+   $(`${prefix}Status`).textContent=x.status;
+   $(`${prefix}Status`).className=`takeoff-compare-status ${x.status==="FIELD PASS"?"ok":x.status==="FIELD FAIL"?"bad":"warn"}`;
+   $(`${prefix}Speeds`).textContent=`${Number.isFinite(x.v1)?x.v1.toFixed(1):"—"} / ${Number.isFinite(x.vr)?x.vr.toFixed(1):"—"} kt`;
+   $(`${prefix}Distance`).textContent=Number.isFinite(x.bfl)?`${Math.round(x.bfl).toLocaleString()} ft`:"SOURCE LOCKED";
+   $(`${prefix}Margin`).textContent=Number.isFinite(x.margin)?`${Math.round(x.margin).toLocaleString()} ft`:"—";
+   $(`${prefix}Source`).textContent=x.reason||x.source;
+ });
+}
+function refreshTakeoffConfiguration(){
+ if(perfIsManual())markWhatIfDirty();
+ recalculate();
+ updateTakeoffComparison();
+ const stamp=$("missionTakeoffRefreshStamp");
+ if(stamp)stamp.textContent=`Takeoff refreshed ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"})} • ${FS_PERF.takeoff[$("toConfig").value]?.label||"—"}`;
+ scheduleDraftSave();
+}
+function selectTakeoffConfiguration(cfg){
+ if(!["S20","SLATS"].includes(cfg)||!$("toConfig"))return;
+ $("toConfig").value=cfg;
+ refreshTakeoffConfiguration();
+}
 function autoLDG(){
  if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
  const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],wk=(valueOrNull("landWt")||0)/1000;
@@ -4720,7 +4846,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.24.1",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.24.2",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(rs){rs.textContent="CHECKING";rs.className="warn"} if(rn)rn.textContent="Checking packaged runway data…";
@@ -4770,7 +4896,7 @@ $("perfInputMode")?.addEventListener("change",setPerformanceInputMode);
    markWhatIfDirty();
  }
 }));
-$("toConfig")?.addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate()});
+$("toConfig")?.addEventListener("change",refreshTakeoffConfiguration);
 $("toAntiIce")?.addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();});
 $("toRunwayCondition")?.addEventListener("change",()=>{if(perfIsManual())markWhatIfDirty();recalculate();updateWhatIfPlanner()});
 $("landConfig")?.addEventListener("change",recalculate);
