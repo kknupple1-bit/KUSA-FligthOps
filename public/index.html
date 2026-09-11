@@ -248,11 +248,31 @@ details summary{cursor:pointer;margin-top:8px}
 .told-speeds{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
 .told-speed{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px;text-align:center}
 .told-speed b{display:block;font-size:21px;margin-top:4px}
+.told-operational-stack{display:grid;gap:14px;margin-bottom:14px}
+.told-op-panel{background:#071b31;border:1px solid var(--line);border-left:5px solid #2c78b8;border-radius:12px;padding:15px}
+.told-op-panel.emergency{border-left-color:#d69a20}
+.told-op-panel.landing{border-left-color:#32a66a}
+.told-op-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.told-op-heading{display:flex;gap:10px;align-items:center}
+.told-op-number{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:#245f96;color:white;font-weight:900}
+.told-op-panel.emergency .told-op-number{background:#9a6810}
+.told-op-panel.landing .told-op-number{background:#23794e}
+.told-op-title{font-size:20px;font-weight:900;letter-spacing:.035em}
+.told-op-status{border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900;text-align:right}
+.told-op-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.told-op-metric{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:72px}
+.told-op-metric .small{display:block}
+.told-op-metric b{display:block;font-size:20px;line-height:1.15;margin-top:5px}
+.told-op-details{display:grid;grid-template-columns:repeat(3,1fr);gap:8px 14px;margin-top:12px}
+.told-op-detail{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid #234361;padding:6px 0}
+.told-op-detail span:first-child{color:var(--muted);font-size:12px}
+.told-op-detail span:last-child{text-align:right;font-weight:700}
+.told-support-title{margin:20px 0 10px;font-size:18px;letter-spacing:.035em}
 .fuel-confirm{margin-top:12px;border:2px solid var(--bad);background:#311b22;border-radius:10px;padding:12px;display:none}
 .fuel-confirm label{color:#ffd4d4;font-size:13px;display:flex;gap:9px;align-items:flex-start}
 .fuel-confirm input{width:auto;margin-top:2px}
 #landingFuelGuardStatus{font-weight:800}
-@media(max-width:850px){.told-grid{grid-template-columns:1fr}.told-speeds{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:850px){.told-grid{grid-template-columns:1fr}.told-speeds{grid-template-columns:repeat(2,1fr)}.told-op-metrics{grid-template-columns:1fr 1fr}.told-op-details{grid-template-columns:1fr}}
 @media print{
  body{background:white;color:black}
  header,#opsView,#buildBadge,.told-actions{display:none!important}
@@ -372,7 +392,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.24.0 — TOLD / Trips / Sharing consolidated build */
+/* v5.24.1 — operational TOLD hierarchy */
 .brand-suffix::before{content:" - ";}
 @media(max-width:700px){
   html,body{max-width:100%;overflow-x:hidden}
@@ -416,6 +436,14 @@ details summary{cursor:pointer;margin-top:8px}
   .told-speeds{grid-template-columns:repeat(2,1fr)!important;gap:8px}
   .told-speed{padding:9px}
   .told-speed b{font-size:19px}
+  .told-op-panel{padding:11px}
+  .told-op-head{display:block}
+  .told-op-status{display:inline-block;margin-top:9px}
+  .told-op-title{font-size:18px}
+  .told-op-metrics{grid-template-columns:1fr 1fr!important;gap:8px}
+  .told-op-metric{padding:9px;min-height:68px}
+  .told-op-metric b{font-size:17px}
+  .told-op-details{grid-template-columns:1fr!important;margin-top:8px}
   .callout{font-size:11px!important;line-height:1.35;overflow-wrap:anywhere}
   input,select,button{min-height:44px;font-size:16px}
   label{font-size:11px}
@@ -453,7 +481,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.24.0</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.24.1</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -1302,6 +1330,81 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 
 <div id="toldOverall" class="callout small" style="margin-bottom:14px">Load mission and calculate performance.</div>
 
+<div class="told-operational-stack">
+  <section class="told-op-panel takeoff" aria-labelledby="toldTakeoffHeading">
+    <div class="told-op-head">
+      <div class="told-op-heading"><span class="told-op-number">1</span><div><div class="told-op-title" id="toldTakeoffHeading">TAKEOFF</div><div class="small">Departure runway, speeds, distance and available runway</div></div></div>
+      <span class="told-op-status" id="opTakeoffStatus">—</span>
+    </div>
+    <div class="told-op-metrics">
+      <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="opTakeoffRunway">—</b></div>
+      <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="opTakeoffAvailable">—</b></div>
+      <div class="told-op-metric"><span class="small">Takeoff Distance Required</span><b id="opTakeoffRequired">—</b></div>
+      <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="opTakeoffMargin">—</b></div>
+    </div>
+    <div class="told-speeds">
+      <div class="told-speed"><span class="small">V1</span><b id="opV1">—</b></div>
+      <div class="told-speed"><span class="small">VR = V2</span><b id="opVR">—</b></div>
+      <div class="told-speed"><span class="small">Vfr</span><b id="opVfr">—</b></div>
+      <div class="told-speed"><span class="small">1.5Vs</span><b id="op15Vs">—</b></div>
+    </div>
+    <div class="told-op-details">
+      <div class="told-op-detail"><span>Takeoff Weight</span><span id="opTakeoffWeight">—</span></div>
+      <div class="told-op-detail"><span>Configuration</span><span id="opTakeoffConfig">—</span></div>
+      <div class="told-op-detail"><span>Wind</span><span id="opTakeoffWind">—</span></div>
+    </div>
+  </section>
+
+  <section class="told-op-panel emergency" aria-labelledby="toldEmergencyHeading">
+    <div class="told-op-head">
+      <div class="told-op-heading"><span class="told-op-number">2</span><div><div class="told-op-title" id="toldEmergencyHeading">EMERGENCY RETURN</div><div class="small">Immediate return to the departure runway</div></div></div>
+      <span class="told-op-status" id="opEmerStatus">—</span>
+    </div>
+    <div class="told-op-metrics">
+      <div class="told-op-metric"><span class="small">Return Airport / Runway</span><b id="opEmerRunway">—</b></div>
+      <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="opEmerAvailable">—</b></div>
+      <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="opEmerRequired">—</b></div>
+      <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="opEmerMargin">—</b></div>
+    </div>
+    <div class="told-speeds">
+      <div class="told-speed"><span class="small">VREF</span><b id="opEmerVref">—</b></div>
+      <div class="told-speed"><span class="small">Return Weight</span><b id="opEmerWeight">—</b></div>
+      <div class="told-speed"><span class="small">Planned Fuel Burn</span><b id="opEmerBurn">—</b></div>
+      <div class="told-speed"><span class="small">Configuration</span><b>S+48</b></div>
+    </div>
+    <div class="told-op-details">
+      <div class="told-op-detail"><span>Wind</span><span id="opEmerWind">—</span></div>
+      <div class="told-op-detail"><span>Pressure Altitude</span><span id="opEmerPA">—</span></div>
+      <div class="told-op-detail"><span>Performance Source</span><span id="opEmerSource">—</span></div>
+    </div>
+  </section>
+
+  <section class="told-op-panel landing" aria-labelledby="toldLandingHeading">
+    <div class="told-op-head">
+      <div class="told-op-heading"><span class="told-op-number">3</span><div><div class="told-op-title" id="toldLandingHeading">LANDING — DESTINATION</div><div class="small">Destination runway, VREF, landing distance and available runway</div></div></div>
+      <span class="told-op-status" id="opLandingStatus">—</span>
+    </div>
+    <div class="told-op-metrics">
+      <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="opLandingRunway">—</b></div>
+      <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="opLandingAvailable">—</b></div>
+      <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="opLandingRequired">—</b></div>
+      <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="opLandingMargin">—</b></div>
+    </div>
+    <div class="told-speeds">
+      <div class="told-speed"><span class="small">VREF</span><b id="opLandingVref">—</b></div>
+      <div class="told-speed"><span class="small">Landing Weight</span><b id="opLandingWeight">—</b></div>
+      <div class="told-speed"><span class="small">Landing Fuel</span><b id="opLandingFuel">—</b></div>
+      <div class="told-speed"><span class="small">Configuration</span><b id="opLandingConfig">—</b></div>
+    </div>
+    <div class="told-op-details">
+      <div class="told-op-detail"><span>Wind</span><span id="opLandingWind">—</span></div>
+      <div class="told-op-detail"><span>NOTAM Status</span><span id="opLandingNotam">—</span></div>
+      <div class="told-op-detail"><span>Runway Availability</span><span id="opLandingRunwayState">—</span></div>
+    </div>
+  </section>
+</div>
+
+<h3 class="told-support-title">SUPPORTING DOCUMENTATION</h3>
 <div class="told-prep">
   <h3 style="margin:0 0 10px">AIRCRAFT PREP / LOAD SUMMARY</h3>
   <div class="told-prep-grid">
@@ -1352,7 +1455,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 
 <div class="told-grid">
   <div class="told-panel">
-    <h3>TAKEOFF</h3>
+    <h3>TAKEOFF SUPPORT / SOURCE DETAIL</h3>
     <div class="told-row"><span>Airport / Runway</span><span id="toldDepRwy">—</span></div>
     <div class="told-row"><span>Runway / Condition</span><span id="toldDepSurface">—</span></div>
     <div class="told-row"><span>Wind</span><span id="toldDepWind">—</span></div>
@@ -1391,7 +1494,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
 
   <div class="told-panel">
-    <h3>LANDING</h3>
+    <h3>DESTINATION LANDING SUPPORT / SOURCE DETAIL</h3>
     <div class="told-row"><span>Airport / Runway</span><span id="toldDestRwy">—</span></div>
     <div class="told-row"><span>Runway / Condition</span><span id="toldDestSurface">—</span></div>
     <div class="told-row"><span>Wind</span><span id="toldDestWind">—</span></div>
@@ -1412,6 +1515,10 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Fuel Gate</span><span id="toldFuelGate">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldLDGStatus">—</span></div>
   </div>
+</div>
+
+<div class="callout small" style="margin-top:14px">
+<b>Emergency-return basis:</b> Return weight equals takeoff weight less the entered emergency-return fuel burn. VREF and landing field length use the S+48 landing source at departure pressure altitude. Runway remaining compares that required distance with the selected departure runway available. No extrapolation is performed.
 </div>
 
 <div class="callout small" style="margin-top:14px">
@@ -1981,69 +2088,75 @@ function currentMissionSummaryText(){
  const toConfig=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  const landConfig=FS_PERF.landing[$("landConfig").value]?.label||"—";
  const lines=[
-   "KUSA FLIGHTOPS — AIRCRAFT PREP / TOLD",
+   "KUSA FLIGHTOPS — TOLD",
    "N33AP — FALCON 50-4",
    `${dep} → ${dest}${alt!=="—"?" | ALTERNATE "+alt:""}`,
    `Generated: ${new Date().toLocaleString()}`,
    "",
-   "=== AIRCRAFT / LOAD ===",
-   `Captain: ${Math.round(num("captWt")).toLocaleString()} lb`,
-   `First Officer: ${Math.round(num("foWt")).toLocaleString()} lb`,
-   `Passengers seated: ${seatAssignments.filter(Boolean).length} | M ${counts.male||0} / F ${counts.female||0} / C ${counts.child||0}`,
-   `Seat assignments: ${seatText.length?seatText.join(" | "):"None"}`,
-   `Baggage: ${Math.round(bagTotal).toLocaleString()} lb total | I ${Math.round(bagLoads[0]||0)} | II ${Math.round(bagLoads[1]||0)} | III ${Math.round(bagLoads[2]||0)} lb`,
-   "",
-   "=== FUEL PLAN ===",
-   `FOB: ${Math.round(fob).toLocaleString()} lb | Verified: ${$("fobVerified")?.checked?"YES":"NO"}`,
-   `Taxi fuel: ${Math.round(taxi).toLocaleString()} lb`,
-   `Mission required fuel: ${Math.round(missionFuel).toLocaleString()} lb`,
-   `Planned landing fuel: ${Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—"}`,
-   `Landing fuel gate: ${textOf("landingFuelGuardStatus")}`,
-   "",
-   "=== WEIGHT & BALANCE ===",
-   `ZFW: ${Number.isFinite(c.zfw)?Math.round(c.zfw).toLocaleString()+" lb":"—"}`,
-   `Ramp Weight: ${Number.isFinite(c.ramp)?Math.round(c.ramp).toLocaleString()+" lb":"—"}`,
-   `Takeoff Weight: ${Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—"}`,
-   `Landing Weight: ${Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—"}`,
-   `Takeoff CG: ${Number.isFinite(c.takeoffPct)?c.takeoffPct.toFixed(2)+"% MAC":"—"}`,
-   `Landing CG: ${Number.isFinite(c.landingPct)?c.landingPct.toFixed(2)+"% MAC":"—"}`,
-   `W&B Status: ${c.wbOK?"READY":"CHECK"}`,
-   "",
-   "=== TAKEOFF TOLD ===",
+   "=== 1. TAKEOFF ===",
    `Airport / Runway: ${dep} / ${dr?dr.runway_id:"—"}`,
-   `Runway: ${dr&&dr.length_ft?Number(dr.length_ft).toLocaleString()+" ft":"—"} | Condition: ${$("toRunwayCondition")?.value||"—"}`,
+   `Runway Available / Condition: ${textOf("opTakeoffAvailable")}`,
+   `Takeoff Distance Required: ${textOf("opTakeoffRequired")}`,
+   `Runway Remaining: ${textOf("opTakeoffMargin")}`,
+   `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
+   `Takeoff Weight: ${textOf("opTakeoffWeight")} | Configuration: ${toConfig}`,
    `Wind: HW ${dw.headwind_kt??"—"} / TW ${dw.tailwind_kt??"—"} / XW ${dw.crosswind_kt??"—"} kt`,
    `OAT: ${Number.isFinite(depTemp)?depTemp+"°C":"—"} | Pressure Altitude: ${Number.isFinite(depPA)?Math.round(depPA).toLocaleString()+" ft":"—"}`,
    `Weather Source: ${formatWeatherSource("dep")}`,
-   `Configuration: ${toConfig}`,
-   `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
-   `Emergency Return VREF: ${textOf("vsVREF")}`,
-   `Balanced Field Length: ${$("perfBFL").value?Number($("perfBFL").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
    `40°C / SOURCE-EVALUATED TOW Quick Reference BFL: ${Number.isFinite(hotMaxTakeoffReference().bfl)?Math.round(hotMaxTakeoffReference().bfl).toLocaleString()+" ft":"SOURCE LOCKED"} | Margin: ${Number.isFinite(hotMaxTakeoffReference().margin)?Math.round(hotMaxTakeoffReference().margin).toLocaleString()+" ft":"—"} | ${hotMaxTakeoffReference().status}`,
    `Structural MTOW: 40,780 lb | Digitized Field-Source Ceiling: ${textOf("toMax")}`,
    `Climb-Limited TOW: ${$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
    `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
-   `Runway Margin: ${textOf("toRwyMargin")}`,
    `Takeoff Status: ${textOf("toStatus")}`,
    `Auto Obstacle Review: ${departureObstacleReview?.status||"NOT_CHECKED"} • FAA NMS text scan only; not a certified clearance analysis`,
    "",
-   "=== LANDING TOLD ===",
+   "=== 2. EMERGENCY RETURN ===",
+   `Return Airport / Runway: ${textOf("opEmerRunway")}`,
+   `Runway Available / Condition: ${textOf("opEmerAvailable")}`,
+   `Landing Distance Required: ${textOf("opEmerRequired")}`,
+   `Runway Remaining: ${textOf("opEmerMargin")}`,
+   `VREF: ${textOf("opEmerVref")} | Configuration: S+48`,
+   `Return Weight: ${textOf("opEmerWeight")} | Planned Fuel Burn: ${textOf("opEmerBurn")}`,
+   `Wind: ${textOf("opEmerWind")} | Pressure Altitude: ${textOf("opEmerPA")}`,
+   `Source: ${textOf("opEmerSource")}`,
+   `Emergency Return Status: ${textOf("opEmerStatus")}`,
+   "",
+   "=== 3. LANDING — DESTINATION ===",
    `Airport / Runway: ${dest} / ${lr?lr.runway_id:"—"}`,
-   `Runway: ${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} | Condition: ${$("landRunwayCondition")?.value||"—"}`,
+   `Runway Available / Condition: ${textOf("opLandingAvailable")}`,
+   `Landing Distance Required: ${textOf("opLandingRequired")}`,
+   `Runway Remaining: ${textOf("opLandingMargin")}`,
+   `VREF: ${textOf("opLandingVref")} | Landing Weight: ${textOf("opLandingWeight")}`,
+   `Landing Fuel: ${textOf("opLandingFuel")} | Configuration: ${landConfig}`,
    `Wind: HW ${lw.headwind_kt??"—"} / TW ${lw.tailwind_kt??"—"} / XW ${lw.crosswind_kt??"—"} kt`,
    `Pressure Altitude: ${destPA==null?"—":destPA.toLocaleString()+" ft"}`,
    `Weather Source: ${formatWeatherSource("dest")}`,
-   `Configuration: ${landConfig}`,
-   `VREF: ${$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED"}`,
-   `Landing Field Length Required: ${$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"SOURCE LOCKED"}`,
    `Published Runway Length: ${Number.isFinite(runwayPublishedLength())?Math.round(runwayPublishedLength()).toLocaleString()+" ft":"—"}`,
    `Usable Runway Length: ${Number.isFinite(effectiveLandingRunwayAssessment().usable)?Math.round(effectiveLandingRunwayAssessment().usable).toLocaleString()+" ft":"—"}`,
    `NOTAM Status: ${currentNotams.status} | Runway State: ${effectiveLandingRunwayAssessment().state||"—"}`,
    `Max Allowable Landing Weight: ${textOf("landMax")}`,
-   `Runway Margin: ${textOf("landRwyMargin")}`,
    `Landing Status: ${textOf("landStatus")}`,
    "",
-   "=== SAFETY / SOURCE STATUS ===",
+   "=== SUPPORTING DOCUMENTATION ===",
+   "AIRCRAFT / LOAD",
+   `Captain: ${Math.round(num("captWt")).toLocaleString()} lb | First Officer: ${Math.round(num("foWt")).toLocaleString()} lb`,
+   `Passengers seated: ${seatAssignments.filter(Boolean).length} | M ${counts.male||0} / F ${counts.female||0} / C ${counts.child||0}`,
+   `Seat assignments: ${seatText.length?seatText.join(" | "):"None"}`,
+   `Baggage: ${Math.round(bagTotal).toLocaleString()} lb total | I ${Math.round(bagLoads[0]||0)} | II ${Math.round(bagLoads[1]||0)} | III ${Math.round(bagLoads[2]||0)} lb`,
+   "",
+   "FUEL PLAN",
+   `FOB: ${Math.round(fob).toLocaleString()} lb | Verified: ${$("fobVerified")?.checked?"YES":"NO"}`,
+   `Taxi fuel: ${Math.round(taxi).toLocaleString()} lb | Mission required: ${Math.round(missionFuel).toLocaleString()} lb`,
+   `Planned landing fuel: ${Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—"}`,
+   `Landing fuel gate: ${textOf("landingFuelGuardStatus")}`,
+   "",
+   "WEIGHT & BALANCE",
+   `ZFW: ${Number.isFinite(c.zfw)?Math.round(c.zfw).toLocaleString()+" lb":"—"} | Ramp: ${Number.isFinite(c.ramp)?Math.round(c.ramp).toLocaleString()+" lb":"—"}`,
+   `Takeoff Weight: ${Number.isFinite(c.tow)?Math.round(c.tow).toLocaleString()+" lb":"—"} | Landing Weight: ${Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—"}`,
+   `Takeoff CG: ${Number.isFinite(c.takeoffPct)?c.takeoffPct.toFixed(2)+"% MAC":"—"} | Landing CG: ${Number.isFinite(c.landingPct)?c.landingPct.toFixed(2)+"% MAC":"—"}`,
+   `W&B Status: ${c.wbOK?"READY":"CHECK"}`,
+   "",
+   "SAFETY / SOURCE STATUS",
    `FOB verification: ${$("fobVerified")?.checked?"VERIFIED":"NOT VERIFIED"}`,
    `Low landing fuel confirmation: ${textOf("landingFuelGuardStatus")}`,
    `Takeoff performance mode: ${perfIsManual()?"WHAT-IF / HYPOTHETICAL":"LIVE / ACTUAL MISSION"}`,
@@ -2703,6 +2816,65 @@ function updateToldCard(){
  $("toldFuelGate").textContent=textOf("landingFuelGuardStatus");
  $("toldLDGStatus").textContent=textOf("landStatus");
 
+ // Operational TOLD: the three pilot decision sections lead the page.
+ const takeoffWeight=perfIsManual()&&Number.isFinite(perfTakeoffWeightLb())?perfTakeoffWeightLb():c.tow;
+ const takeoffRequired=valueOrNull("perfBFL");
+ $("opTakeoffRunway").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
+ $("opTakeoffAvailable").textContent=`${Number.isFinite(depRunwayEval.usable)?Math.round(depRunwayEval.usable).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?.value||"DRY"}`;
+ $("opTakeoffRequired").textContent=Number.isFinite(takeoffRequired)?`${Math.round(takeoffRequired).toLocaleString()} ft`:"SOURCE LOCKED";
+ $("opTakeoffMargin").textContent=textOf("toRwyMargin");
+ $("opTakeoffStatus").textContent=textOf("toStatus");
+ $("opTakeoffStatus").className=`told-op-status ${textOf("toStatus").includes("PASS")?"ok":textOf("toStatus").includes("NO-GO")?"bad":"warn"}`;
+ $("opV1").textContent=textOf("vsV1");
+ $("opVR").textContent=textOf("vsVR");
+ $("opVfr").textContent=textOf("vsVFT");
+ $("op15Vs").textContent=textOf("vsVFS");
+ $("opTakeoffWeight").textContent=Number.isFinite(takeoffWeight)?`${Math.round(takeoffWeight).toLocaleString()} lb`:"—";
+ $("opTakeoffConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
+ $("opTakeoffWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
+
+ const requestedReturnBurn=Math.max(0,num("emerReturnBurn"));
+ const availableTakeoffFuel=Math.max(0,Math.min(maxFuel,num("fuel"))-Math.max(0,num("taxiFuel")));
+ const appliedReturnBurn=Math.min(requestedReturnBurn,availableTakeoffFuel);
+ const emergencyWeight=Number.isFinite(takeoffWeight)?Math.max(0,takeoffWeight-appliedReturnBurn):null;
+ const emergencyPA=perfTakeoffPA();
+ const emergencyPerf=Number.isFinite(emergencyWeight)&&Number.isFinite(emergencyPA)?fsLanding("S48",emergencyPA,emergencyWeight/1000):null;
+ const emergencyRequired=emergencyPerf&&Number.isFinite(emergencyPerf.lfl)?emergencyPerf.lfl:null;
+ const emergencyAvailable=Number.isFinite(depRunwayEval.usable)?depRunwayEval.usable:null;
+ const emergencyMargin=Number.isFinite(emergencyRequired)&&Number.isFinite(emergencyAvailable)?emergencyAvailable-emergencyRequired:null;
+ let emergencyStatus="PASS";
+ if(!dr)emergencyStatus="RUNWAY REQUIRED";
+ else if(Number.isFinite(emergencyWeight)&&emergencyWeight>maxLand)emergencyStatus="OVER MAX LANDING WEIGHT";
+ else if(!Number.isFinite(emergencyRequired))emergencyStatus="SOURCE LOCKED";
+ else if(!Number.isFinite(emergencyAvailable))emergencyStatus="RUNWAY DATA REQUIRED";
+ else if(emergencyMargin<0)emergencyStatus="NO-GO • INSUFFICIENT RUNWAY";
+ $("opEmerRunway").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
+ $("opEmerAvailable").textContent=`${Number.isFinite(emergencyAvailable)?Math.round(emergencyAvailable).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?.value||"DRY"}`;
+ $("opEmerRequired").textContent=Number.isFinite(emergencyRequired)?`${Math.round(emergencyRequired).toLocaleString()} ft`:"SOURCE LOCKED";
+ $("opEmerMargin").textContent=Number.isFinite(emergencyMargin)?`${Math.round(emergencyMargin).toLocaleString()} ft`:"—";
+ $("opEmerVref").textContent=emergencyPerf&&Number.isFinite(emergencyPerf.speed)?`${emergencyPerf.speed.toFixed(1)} kt`:textOf("vsVREF");
+ $("opEmerWeight").textContent=Number.isFinite(emergencyWeight)?`${Math.round(emergencyWeight).toLocaleString()} lb`:"—";
+ $("opEmerBurn").textContent=`${Math.round(appliedReturnBurn).toLocaleString()} lb`;
+ $("opEmerWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
+ $("opEmerPA").textContent=Number.isFinite(emergencyPA)?`${Math.round(emergencyPA).toLocaleString()} ft`:"—";
+ $("opEmerSource").textContent=emergencyPerf?"FlightSafety S+48 • departure PA":"SOURCE LOCKED";
+ $("opEmerStatus").textContent=emergencyStatus;
+ $("opEmerStatus").className=`told-op-status ${emergencyStatus==="PASS"?"ok":emergencyStatus.includes("NO-GO")||emergencyStatus.includes("OVER MAX")?"bad":"warn"}`;
+
+ $("opLandingRunway").textContent=`${destCode} / ${lr?lr.runway_id:"—"}`;
+ $("opLandingAvailable").textContent=`${Number.isFinite(landAssess.usable)?Math.round(landAssess.usable).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?.value||"DRY"}`;
+ $("opLandingRequired").textContent=$("landFieldLen").value?`${Number($("landFieldLen").value).toLocaleString()} ft`:"SOURCE LOCKED";
+ $("opLandingMargin").textContent=textOf("landRwyMargin");
+ $("opLandingVref").textContent=$("landVref").value?`${Number($("landVref").value).toFixed(1)} kt`:"SOURCE LOCKED";
+ $("opLandingWeight").textContent=Number.isFinite(c.landing)?`${Math.round(c.landing).toLocaleString()} lb`:"—";
+ $("opLandingFuel").textContent=Number.isFinite(c.landingFuel)?`${Math.round(c.landingFuel).toLocaleString()} lb`:"—";
+ $("opLandingConfig").textContent=`${FS_PERF.landing[$("landConfig").value]?.label||"—"} • A/I ${$("landAntiIce")?.value||"OFF"}`;
+ $("opLandingWind").textContent=lr?`HW ${esc(lw.headwind_kt)} • TW ${esc(lw.tailwind_kt)} • XW ${esc(lw.crosswind_kt)} kt`:"—";
+ $("opLandingNotam").textContent=currentNotams.status==="CHECKED"?"CHECKED":(currentNotams.status==="UNAVAILABLE"?"MANUAL VERIFY":"NOT CHECKED");
+ $("opLandingRunwayState").textContent=landAssess.state||"—";
+ $("opLandingStatus").textContent=textOf("landStatus");
+ $("opLandingStatus").className=`told-op-status ${textOf("landStatus").includes("PASS")?"ok":textOf("landStatus").includes("NO-GO")?"bad":"warn"}`;
+
  const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
  const confirmed=$("lowFuelConfirm")?.checked;
  const issues=[];
@@ -2719,7 +2891,7 @@ function updateToldCard(){
  if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push("TAKEOFF PERFORMANCE REVIEW REQUIRED");
  else if(ts.includes("PERFORMANCE PASS")&&obs.status!=="REVIEWED")issues.push("TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE");
  if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
- $("toldOverall").textContent=issues.length?issues.join(" • "):"AIRCRAFT PREP / TOLD SUMMARY CURRENT — review all values before use.";
+ $("toldOverall").textContent=issues.length?issues.join(" • "):"TOLD OPERATIONAL SUMMARY CURRENT — review all values before use.";
  $("toldOverall").className=issues.length?"callout small warn":"callout small ok";
 }
 const esc=x=>x==null?"—":x;
@@ -4548,7 +4720,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.24.0",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.24.1",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(rs){rs.textContent="CHECKING";rs.className="warn"} if(rn)rn.textContent="Checking packaged runway data…";
