@@ -1,0 +1,18 @@
+KUSA FlightOps v5.24.0 — TOLD / Trips / Sharing
+
+CONSOLIDATED OPERATIONAL WORKFLOW
+- Preserves the New Trip → Mission → TOLD → Complete → Archive workflow.
+- Preserves local draft auto-save and recovery, completed-trip archive, reopening,
+  duplication, and deletion controls.
+- Preserves live/current TOLD sharing, archived-trip sharing, read-only snapshot
+  links, clipboard copy, native device sharing, email, and print support.
+- Preserves manual-weather identification, runway/NOTAM integration, NMS,
+  calculation safeguards, and responsive iPhone/iPad presentation.
+
+BUILD INTEGRITY
+- Browser expected-build check, visible build badge, server health/diagnostics,
+  package version, and API user-agent are synchronized at 5.24.0.
+
+This revision carries forward the v5.23.8 build-mismatch hotfix and all prior
+v5.23.x calculation and operational functionality. No Falcon 50 performance,
+weight-and-balance, NMS, runway, or TOLD calculation constants were changed.

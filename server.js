@@ -26,7 +26,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.23.8",
+    build:"5.24.0",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -52,7 +52,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.23.8"
+      "User-Agent":"KUSA-FlightOps/5.24.0"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -265,12 +265,12 @@ function evalLanding(p){
  return{max_allowable_landing_weight_lb:Math.round(max),limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),vref_kt:p.vref_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"};
 }
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.23.8",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT}));
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.24.0",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.23.8",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.24.0",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -340,7 +340,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.23.8"
+      "User-Agent":"KUSA-FlightOps/5.24.0"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
