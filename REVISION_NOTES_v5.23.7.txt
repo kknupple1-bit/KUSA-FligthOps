@@ -1,0 +1,25 @@
+KUSA FlightOps v5.23.7 — iPhone / iPad Responsive UI Pass
+
+Presentation-only revision. No performance, W&B, NMS, runway, draft, or calculation logic changed.
+
+Phone (<700px):
+- Compact two-line brand header
+- Removes duplicate header validation warning; full beta banner retained
+- Fixed bottom five-button app navigation for thumb access
+- Full-width content with reduced side margins
+- Single-column operational cards and input groups
+- Mobile TOLD header/actions stacked; actions in compact two-column grid
+- TOLD takeoff/landing panels stack vertically
+- Key load-summary boxes reflow for phone
+- NOTAM lists, status callouts, long strings wrap safely
+- 44px minimum touch target sizing
+- CG canvas resized for phone viewport
+- Build badge moved above bottom nav
+
+Tablet (701-1100px):
+- Preserves wider multi-column layout where useful
+- Header and TOLD actions wrap cleanly
+- Two-column NOTAM layout
+
+Desktop (>1100px):
+- Existing desktop layout retained.
