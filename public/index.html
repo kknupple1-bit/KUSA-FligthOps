@@ -372,7 +372,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.23.8 — dedicated responsive phone/tablet layout */
+/* v5.24.0 — TOLD / Trips / Sharing consolidated build */
 .brand-suffix::before{content:" - ";}
 @media(max-width:700px){
   html,body{max-width:100%;overflow-x:hidden}
@@ -453,7 +453,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.23.8</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.24.0</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 • Hosted Web / iOS-Ready</div></div>
@@ -4548,7 +4548,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.23.8",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.24.0",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(rs){rs.textContent="CHECKING";rs.className="warn"} if(rn)rn.textContent="Checking packaged runway data…";
