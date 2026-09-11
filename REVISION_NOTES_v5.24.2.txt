@@ -1,0 +1,14 @@
+KUSA FlightOps v5.24.2
+Takeoff Configuration Compare + Refresh
+
+CHANGES
+- Added an explicit Refresh Takeoff button beside the takeoff-configuration selector on the Mission page.
+- Added Slats + Flaps 20 and Slats Only selection buttons directly in the TOLD takeoff section.
+- Added an immediate side-by-side comparison of V1/VR, takeoff distance, runway remaining, and source status.
+- Synchronized the Mission selector and TOLD selector so either control changes the same active configuration.
+- The highlighted active configuration continues to control the full takeoff calculation, saved mission data, archive, and shared TOLD output.
+- Preserved published-source boundaries. Slats Only remains source-locked below its 4,000 ft pressure-altitude data floor, and unsupported wet-runway data remains locked.
+- Retains the v5.24.1 TOLD hierarchy: Takeoff, Emergency Return, Landing at Destination, then Supporting Documentation.
+
+VALIDATION NOTE
+The comparison cards are a field-distance and speed comparison. All other takeoff gates and supporting documentation remain tied to the highlighted active configuration.
