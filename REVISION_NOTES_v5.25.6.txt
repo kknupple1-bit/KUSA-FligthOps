@@ -1,0 +1,10 @@
+5.25.6 — Named Short Editable Trip Links
+
+- Editable trip sharing now creates a short server-backed share token instead of embedding the full trip payload in the URL.
+- Share title/label format: Trip Name | ORIGIN-DESTINATION | MM-DD-YYYY.
+- Native Share sends the human-readable trip label plus the short KUSA FlightOps link.
+- Clipboard fallback copies the same label on the first line and the short link on the second line.
+- Recipient still imports an independent editable Draft; sender original is unchanged.
+- Existing v5.25.3-v5.25.5 long editable links remain supported for backward compatibility.
+- Shared editable trip tokens expire after 30 days.
+- 900B Draft saving, aircraft-safe sharing, and obstacle-review disposition fixes remain in place.

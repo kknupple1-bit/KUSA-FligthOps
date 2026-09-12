@@ -593,7 +593,7 @@ VERSION 5.25.4 - AIRCRAFT-SAFE EDITABLE TRIP SHARING
 - Canonical aircraft identity now follows the active/shared trip record, not a stale Home selector or nested state value.
 - Backward-compatible with affected v5.25.3 links when the top-level shared record still identifies N33AP.
 
-VERSION 5.25.5 - PILOT OBSTACLE REVIEW DISPOSITION PRIORITY
+VERSION 5.25.6 - PILOT OBSTACLE REVIEW DISPOSITION PRIORITY
 - Pilot reviewed / no conflict now resolves an FAA NMS obstacle-NOTAM flag instead of leaving TOLD pending.
 - Flagged obstacle NOTAM count remains visible for audit/information after pilot review.
 - Pilot conflict remains a blocking NO-GO condition.

@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
+const crypto = require("crypto");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -26,7 +27,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.25.5",
+    build:"5.25.6",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -52,7 +53,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.25.5"
+      "User-Agent":"KUSA-FlightOps/5.25.6"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -112,6 +113,27 @@ app.use((req,res,next)=>{
   next();
 });
 app.use(express.static(path.join(__dirname,"public"),{maxAge:0,etag:false}));
+
+// Short editable-trip share links. The token is the secret; trip payload stays server-side.
+const SHARED_TRIPS_FILE = path.join(__dirname,"data","shared_trips.json");
+const SHARED_TRIP_TTL_MS = 30*24*60*60*1000;
+function loadSharedTrips(){
+  try{return JSON.parse(fs.readFileSync(SHARED_TRIPS_FILE,"utf8"))||{}}catch(e){return {}}
+}
+function saveSharedTrips(obj){
+  fs.mkdirSync(path.dirname(SHARED_TRIPS_FILE),{recursive:true});
+  const tmp=SHARED_TRIPS_FILE+".tmp";
+  fs.writeFileSync(tmp,JSON.stringify(obj,null,2));
+  fs.renameSync(tmp,SHARED_TRIPS_FILE);
+}
+function pruneSharedTrips(obj){
+  const now=Date.now();
+  for(const [id,v] of Object.entries(obj||{})){
+    const exp=Date.parse(v?.expires_at||"");
+    if(!Number.isFinite(exp)||exp<now)delete obj[id];
+  }
+  return obj;
+}
 
 const first=x=>Array.isArray(x)?(x[0]||null):x;
 const hpaToInhg=h=>h==null?null:Number(h)*0.0295299830714;
@@ -265,12 +287,40 @@ function evalLanding(p){
  return{max_allowable_landing_weight_lb:Math.round(max),limiting_factor:lim,weight_margin_lb:Math.round(wm),runway_margin_ft:rm==null?null:Math.round(rm),vref_kt:p.vref_kt??null,checks,status:ok&&complete?"GO":!ok?"NO-GO":"INCOMPLETE"};
 }
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.25.5",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02"]}));
+
+app.post("/api/shared-trips",(req,res)=>{
+  try{
+    const record=req.body?.record;
+    if(!record||!record.dep||!record.dest)return res.status(400).json({error:"Valid trip record with origin and destination is required."});
+    const payloadText=JSON.stringify(record);
+    if(payloadText.length>700000)return res.status(413).json({error:"Trip payload is too large to share."});
+    const id=crypto.randomBytes(12).toString("base64url");
+    const now=new Date();
+    const expires=new Date(now.getTime()+SHARED_TRIP_TTL_MS);
+    const db=pruneSharedTrips(loadSharedTrips());
+    db[id]={record,label:String(req.body?.label||"").slice(0,180),created_at:now.toISOString(),expires_at:expires.toISOString()};
+    saveSharedTrips(db);
+    res.json({ok:true,id,expires_at:expires.toISOString()});
+  }catch(e){res.status(500).json({error:"Unable to create shared trip."})}
+});
+app.get("/api/shared-trips/:id",(req,res)=>{
+  try{
+    const id=String(req.params.id||"");
+    if(!/^[A-Za-z0-9_-]{16}$/.test(id))return res.status(404).json({error:"Shared trip not found."});
+    const db=pruneSharedTrips(loadSharedTrips());
+    const item=db[id];
+    if(!item){saveSharedTrips(db);return res.status(404).json({error:"Shared trip not found or expired."});}
+    saveSharedTrips(db);
+    res.json({ok:true,kind:"editable-trip",generated:item.created_at,expires_at:item.expires_at,label:item.label,record:item.record});
+  }catch(e){res.status(500).json({error:"Unable to open shared trip."})}
+});
+
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.25.6",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02"]}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.25.5",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.25.6",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -340,7 +390,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.25.5"
+      "User-Agent":"KUSA-FlightOps/5.25.6"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
