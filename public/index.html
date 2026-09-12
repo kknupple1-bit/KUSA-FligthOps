@@ -410,7 +410,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.25.3 — 900B draft persistence + editable trip transfer */
+/* v5.25.4 — aircraft-safe editable trip transfer */
 .f900b-shell{max-width:1120px;margin:0 auto}
 .f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
 .f900b-titlebar h2{margin:0 0 4px;font-size:24px}
@@ -515,7 +515,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.3</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.4</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -2734,8 +2734,11 @@ async function importSharedEditableTrip(){
  const source=PENDING_SHARED_EDITABLE_TRIP;if(!source)return;
  const copy=transferableTripRecord(source);copy.id=newMissionId();copy.started_at=new Date().toISOString();copy.updated_at=new Date().toISOString();copy.note=(copy.note||copy.state?.note||"")+"";
  copy.state=copy.state||{};copy.state.note=copy.note;
- if(copy.aircraft==="F900B"||copy.state?.aircraft==="F900B"){copy.aircraft="F900B";copy.state.aircraft="F900B";await restoreF900BFlightPlan(copy,{newCopy:false,fromDraft:true});}
+ const sharedAircraft=copy.aircraft||copy.state?.aircraft||"N33AP";
+ if(sharedAircraft==="F900B"){copy.aircraft="F900B";copy.state.aircraft="F900B";await restoreF900BFlightPlan(copy,{newCopy:false,fromDraft:true});}
  else{
+   copy.aircraft=sharedAircraft||"N33AP";copy.state.aircraft=copy.aircraft;
+   if($("homeAircraft"))$("homeAircraft").value=copy.aircraft;
    await restoreArchivedFlightPlan(copy,-1);
    window.currentMissionMeta.id=copy.id;window.currentMissionMeta.reopened_from_archive=false;window.currentMissionMeta.imported_editable_copy=true;
    saveCurrentDraft();showPlatformView("ops");
@@ -2796,7 +2799,7 @@ function captureCurrentPlanState(){
  const savedBagTotal=savedBaggage.reduce((a,b)=>a+b,0);
  return{
    dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
-   aircraft:$("homeAircraft")?.value||"N33AP",
+   aircraft:(window.currentMissionMeta&&window.currentMissionMeta.aircraft)||$("homeAircraft")?.value||"N33AP",
 note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNote")?.value?.trim()||"",
    captain_weight_lb:num("captWt"),fo_weight_lb:num("foWt"),
    fob_lb:num("fuel"),mission_fuel_lb:num("missionFuel"),taxi_fuel_lb:num("taxiFuel"),
@@ -2897,13 +2900,14 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
 
  window.currentMissionMeta={
    id:record.id||newMissionId(),
-   aircraft:s.aircraft||record.aircraft||"N33AP",
+   aircraft:record.aircraft||s.aircraft||"N33AP",
 note:s.note||record.note||"",
    started_at:new Date().toISOString(),
    completed:false,
    reopened_from_archive:true,
    source_archive_index:index
  };
+ if($("homeAircraft"))$("homeAircraft").value=window.currentMissionMeta.aircraft;
 
  showPlatformView("ops");
  try{await loadMission()}catch(e){}
@@ -3058,7 +3062,7 @@ function renderDrafts(){
 }
 async function openDraftFlightPlan(i){
  const arr=getMissionDrafts(),m=arr[i];if(!m)return;
- if(m.aircraft==="F900B"||m.state?.aircraft==="F900B"){await restoreF900BFlightPlan(m,{fromDraft:true});return}
+ if((m.aircraft||m.state?.aircraft)==="F900B"){await restoreF900BFlightPlan(m,{fromDraft:true});return}
  await restoreArchivedFlightPlan(m,i);
  const s=m.state||{};
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
@@ -3121,7 +3125,7 @@ function renderArchive(){
 }
 async function openArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];if(!m)return;
- if(m.aircraft==="F900B"||m.state?.aircraft==="F900B"){await restoreF900BFlightPlan(m,{newCopy:true});return}
+ if((m.aircraft||m.state?.aircraft)==="F900B"){await restoreF900BFlightPlan(m,{newCopy:true});return}
  await restoreArchivedFlightPlan(m,i);
 }
 function duplicateArchiveFlightPlan(i){
@@ -5388,7 +5392,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.3",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.4",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
