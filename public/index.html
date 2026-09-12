@@ -410,7 +410,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.25.2 — Falcon 900B Mission/TOLD separation */
+/* v5.25.3 — 900B draft persistence + editable trip transfer */
 .f900b-shell{max-width:1120px;margin:0 auto}
 .f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
 .f900b-titlebar h2{margin:0 0 4px;font-size:24px}
@@ -515,7 +515,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.2</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.3</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1341,11 +1341,12 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
         <div class="small" id="sharedToldStamp">—</div>
       </div>
       <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap">
-        <button type="button" onclick="window.print()">Print</button>
+        <button type="button" onclick="window.print()" id="sharedPrintBtn">Print</button>
+        <button type="button" onclick="importSharedEditableTrip()" id="sharedImportBtn" style="display:none">Open as Editable Draft</button>
         <button type="button" onclick="showPlatformView('home')">Open FlightOps</button>
       </div>
     </div>
-    <div class="callout small">Read-only shared snapshot. Values reflect the TOLD at the time the link was created and are not automatically refreshed.</div>
+    <div class="callout small" id="sharedModeNote">Read-only shared snapshot. Values reflect the TOLD at the time the link was created and are not automatically refreshed.</div>
     <pre id="sharedToldText" style="white-space:pre-wrap;word-break:break-word;font:inherit;line-height:1.5;margin-top:14px"></pre>
   </div>
 </div>
@@ -1361,7 +1362,8 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
   </div>
   <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap">
     <button type="button" onclick="updateToldCard()">Refresh</button>
-    <button type="button" onclick="shareCurrentMission()">Share</button>
+    <button type="button" onclick="shareCurrentMission()">Share Read-Only TOLD</button>
+    <button type="button" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
     <button type="button" onclick="copyCurrentToldLink()">Copy TOLD Link</button>
     <button type="button" onclick="emailCurrentMission()">Email</button>
     <button type="button" onclick="window.print()">Print</button>
@@ -1605,6 +1607,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     <div class="mission-actionbar">
       <button type="button" onclick="showPlatformView('home')">← Menu</button>
       <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
+      <button type="button" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
       <button type="button" onclick="completeMission()">Complete &amp; Archive Flight Plan</button>
       <span class="small" id="f9mDraftStatus" style="align-self:center;margin-left:6px">Falcon 900B mission planning</span>
     </div>
@@ -1695,7 +1698,11 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <h2>Falcon 900B — PERFORMANCE TOLD</h2>
           <div class="small" id="f9Route">— → —</div>
         </div>
-        <button type="button" style="width:auto" onclick="refreshF900B()">Refresh 900B TOLD</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" style="width:auto" onclick="refreshF900B()">Refresh 900B TOLD</button>
+          <button type="button" style="width:auto" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
+          <button type="button" style="width:auto" onclick="completeMission()">Complete &amp; Archive</button>
+        </div>
       </div>
       <div class="callout small warn"><b>DEVELOPMENT / VALIDATION ONLY.</b> QRH1 Rev02 data are interpolated only inside published pressure-altitude, temperature and weight cells. Wind and runway-slope corrections are not applied. Falcon 900B W&amp;B remains locked until the applicable Loading Manual and aircraft basic-operating-weight record are loaded.</div>
     </div>
@@ -2263,11 +2270,14 @@ async function refreshF900B(){
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
 async function startF900BTrip(dep,dest,alt){
  window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",started_at:new Date().toISOString(),completed:false};
+ if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
  f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
  f9Put("f9mRoute",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
  if($("f9mDep"))$("f9mDep").value=dep;if($("f9mDest"))$("f9mDest").value=dest;if($("f9mAlt"))$("f9mAlt").value=alt||"";if($("f9mNote"))$("f9mNote").value=window.currentMissionMeta.note||"";
  showPlatformView("ops");
- await refreshF900B();
+ saveCurrentDraft();
+ await refreshF900BMission();
+ scheduleDraftSave();
 }
 
 
@@ -2401,8 +2411,57 @@ function getMissionDrafts(){
 function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.stringify(arr));updateHomeDraftCount()}
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
 let draftSaveTimer=null;
+
+function captureF900BPlanState(){
+ syncF900BMissionToTOLD();
+ const val=id=>$(id)?.value??"";
+ const dep=cleanICAO(val("f9mDep")||$("dep")?.value||"");
+ const dest=cleanICAO(val("f9mDest")||$("dest")?.value||"");
+ const alt=cleanICAO(val("f9mAlt")||$("alt")?.value||"");
+ return {
+   dep,dest,alt,aircraft:"F900B",note:val("f9mNote").trim(),
+   f900b:{
+     return_burn_lb:val("f9mReturnBurn"),takeoff_weight_lb:val("f9mToWeight"),landing_weight_lb:val("f9mLdgWeight"),
+     takeoff_config:val("f9mToConfig"),takeoff_anti_ice:val("f9mToAI"),takeoff_surface:val("f9mToSurface"),
+     takeoff_runway_ft:val("f9mToRunway"),takeoff_pa_ft:val("f9mToPA"),takeoff_oat_c:val("f9mToTemp"),
+     landing_anti_ice:val("f9mLdgAI"),landing_pa_ft:val("f9mLdgPA"),landing_oat_c:val("f9mLdgTemp"),
+     landing_runway_ft:val("f9mLdgRunway"),landing_factor:val("f9mLdgFactor"),emergency_anti_ice:val("f9EmerAI")
+   }
+ };
+}
+function applyF900BPlanState(state){
+ const s=state||{},f=s.f900b||{};
+ const set=(id,v)=>{if($(id)&&v!==undefined&&v!==null)$(id).value=v};
+ set("f9mDep",s.dep||"");set("f9mDest",s.dest||"");set("f9mAlt",s.alt||"");set("f9mNote",s.note||"");
+ set("f9mReturnBurn",f.return_burn_lb);set("f9mToWeight",f.takeoff_weight_lb);set("f9mLdgWeight",f.landing_weight_lb);
+ set("f9mToConfig",f.takeoff_config||"20");set("f9mToAI",f.takeoff_anti_ice||"OFF");set("f9mToSurface",f.takeoff_surface||"DRY");
+ set("f9mToRunway",f.takeoff_runway_ft);set("f9mToPA",f.takeoff_pa_ft);set("f9mToTemp",f.takeoff_oat_c);
+ set("f9mLdgAI",f.landing_anti_ice||"OFF");set("f9mLdgPA",f.landing_pa_ft);set("f9mLdgTemp",f.landing_oat_c);
+ set("f9mLdgRunway",f.landing_runway_ft);set("f9mLdgFactor",f.landing_factor||"1.67");set("f9EmerAI",f.emergency_anti_ice||"OFF");
+ if($("dep"))$("dep").value=s.dep||"";if($("dest"))$("dest").value=s.dest||"";if($("alt"))$("alt").value=s.alt||"";
+ f9Put("f9Route",`${s.dep||"—"} → ${s.dest||"—"}${s.alt?` • Alternate ${s.alt}`:""}`);
+ f9Put("f9mRoute",`${s.dep||"—"} → ${s.dest||"—"}${s.alt?` • Alternate ${s.alt}`:""}`);
+ syncF900BMissionToTOLD();
+}
+function f900bDraftRecord(){
+ if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
+ const state=captureF900BPlanState();
+ return {id:window.currentMissionMeta.id,aircraft:"F900B",note:state.note||window.currentMissionMeta.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
+}
+async function restoreF900BFlightPlan(record,opts={}){
+ if(!record)return;
+ const state=record.state||record;
+ applyF900BPlanState(state);
+ const newId=opts.newCopy?newMissionId():(record.id||newMissionId());
+ window.currentMissionMeta={id:newId,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};
+ if($("homeAircraft"))$("homeAircraft").value="F900B";
+ await refreshF900BMission();
+ saveCurrentDraft();
+ showPlatformView("ops");
+}
 function draftRecord(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
+ if((window.currentMissionMeta.aircraft||"")==="F900B")return f900bDraftRecord();
  const state=captureCurrentPlanState();
  state.manual_weather=JSON.parse(JSON.stringify(manualWeather||{}));
  state.fob_verified=!!$("fobVerified")?.checked;
@@ -2414,7 +2473,7 @@ function saveCurrentDraft(){
  const arr=getMissionDrafts();const ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionDrafts(arr.slice(0,50));
  const txt=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
- const e=$("draftSaveStatus");if(e)e.textContent=txt; const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt;
+ const e=$("draftSaveStatus");if(e)e.textContent=txt; const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt; const f9=$("f9mDraftStatus");if(f9&&(window.currentMissionMeta?.aircraft==="F900B"))f9.textContent=txt;
 }
 function scheduleDraftSave(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
@@ -2627,6 +2686,65 @@ function makeToldShareLink(summary=currentMissionSummaryText(),title=null){
  const payload={v:1,title:title||`N33AP TOLD — ${dep||"—"} → ${dest||"—"}`,generated:new Date().toISOString(),summary:String(summary||"")};
  return `${window.location.origin}${window.location.pathname}#told=${b64urlEncodeUtf8(JSON.stringify(payload))}`;
 }
+let PENDING_SHARED_EDITABLE_TRIP=null;
+function transferableTripRecord(record){
+ const copy=JSON.parse(JSON.stringify(record||{}));
+ delete copy.completed_at;delete copy.summary;delete copy.to_status;delete copy.ldg_status;
+ copy.completed=false;copy.transfer_source_id=copy.id||null;
+ return copy;
+}
+function makeEditableTripShareLink(record=null){
+ const rec=transferableTripRecord(record||draftRecord());
+ if(!rec||!rec.dep||!rec.dest)throw new Error("No active trip is available to share.");
+ const payload={v:1,kind:"editable-trip",generated:new Date().toISOString(),record:rec};
+ return `${window.location.origin}${window.location.pathname}#trip=${b64urlEncodeUtf8(JSON.stringify(payload))}`;
+}
+async function shareEditableRecord(record){
+ const url=makeEditableTripShareLink(record);
+ const r=record||draftRecord();
+ const label=`${r?.dep||"—"} → ${r?.dest||"—"} • ${r?.aircraft||"Aircraft"}`;
+ try{
+   if(navigator.share){await navigator.share({title:`KUSA FlightOps Editable Trip — ${label}`,text:"Open this KUSA FlightOps trip as an editable draft. Your copy will not alter the sender's original.",url});return}
+   await navigator.clipboard.writeText(url);alert("Editable FlightOps trip link copied. Recipient can open it and import a working copy into Drafts.");
+ }catch(e){if(e&&e.name!=="AbortError")prompt("Copy this editable FlightOps trip link:",url)}
+}
+async function shareEditableCurrentTrip(){
+ try{await shareEditableRecord(draftRecord())}catch(e){alert(e.message||String(e))}
+}
+async function shareEditableDraft(i){const m=getMissionDrafts()[i];if(m)await shareEditableRecord(m)}
+async function shareEditableArchive(i){const m=getMissionArchive()[i];if(m)await shareEditableRecord(m)}
+function openSharedContentFromHash(){
+ const hash=String(window.location.hash||"");
+ if(hash.startsWith("#trip=")){
+   try{
+     const p=JSON.parse(b64urlDecodeUtf8(hash.slice(6)));if(!p||p.kind!=="editable-trip"||!p.record)return false;
+     PENDING_SHARED_EDITABLE_TRIP=p.record;
+     const r=p.record;
+     if($("sharedToldTitle"))$("sharedToldTitle").textContent=`KUSA FlightOps — Editable Trip Transfer`;
+     if($("sharedToldStamp"))$("sharedToldStamp").textContent=`Shared ${p.generated?new Date(p.generated).toLocaleString():"—"} • ${r.aircraft||"Aircraft"}`;
+     if($("sharedModeNote"))$("sharedModeNote").innerHTML='<b>EDITABLE COPY.</b> Opening this transfer creates a new local Draft on this device. Changes will not modify the sender’s original trip.';
+     if($("sharedToldText"))$("sharedToldText").textContent=`Route: ${r.dep||"—"} → ${r.dest||"—"}${r.alt?` • Alternate ${r.alt}`:""}\nAircraft: ${r.aircraft||"—"}\nNote: ${r.note||r.state?.note||"—"}\n\nSelect “Open as Editable Draft” to import the trip into FlightOps.`;
+     if($("sharedImportBtn"))$("sharedImportBtn").style.display="inline-block";if($("sharedPrintBtn"))$("sharedPrintBtn").style.display="none";
+     showPlatformView("shared");return true;
+   }catch(e){return false}
+ }
+ return openSharedToldFromHash();
+}
+async function importSharedEditableTrip(){
+ const source=PENDING_SHARED_EDITABLE_TRIP;if(!source)return;
+ const copy=transferableTripRecord(source);copy.id=newMissionId();copy.started_at=new Date().toISOString();copy.updated_at=new Date().toISOString();copy.note=(copy.note||copy.state?.note||"")+"";
+ copy.state=copy.state||{};copy.state.note=copy.note;
+ if(copy.aircraft==="F900B"||copy.state?.aircraft==="F900B"){copy.aircraft="F900B";copy.state.aircraft="F900B";await restoreF900BFlightPlan(copy,{newCopy:false,fromDraft:true});}
+ else{
+   await restoreArchivedFlightPlan(copy,-1);
+   window.currentMissionMeta.id=copy.id;window.currentMissionMeta.reopened_from_archive=false;window.currentMissionMeta.imported_editable_copy=true;
+   saveCurrentDraft();showPlatformView("ops");
+ }
+ history.replaceState(null,"",window.location.pathname+window.location.search);
+ PENDING_SHARED_EDITABLE_TRIP=null;
+ alert("Editable trip imported as a new Draft on this device. Your changes will not affect the sender’s original.");
+}
+
 async function copyCurrentToldLink(){
  const link=makeToldShareLink();
  try{await navigator.clipboard.writeText(link);alert("Shareable TOLD snapshot link copied.");}
@@ -2638,6 +2756,9 @@ function openSharedToldFromHash(){
    const p=JSON.parse(b64urlDecodeUtf8(hash.slice(6)));if(!p||!p.summary)return false;
    if($("sharedToldTitle"))$("sharedToldTitle").textContent=p.title||"KUSA FlightOps — Shared TOLD Snapshot";
    if($("sharedToldStamp"))$("sharedToldStamp").textContent=`Snapshot created ${p.generated?new Date(p.generated).toLocaleString():"—"}`;
+   PENDING_SHARED_EDITABLE_TRIP=null;
+   if($("sharedModeNote"))$("sharedModeNote").textContent="Read-only shared snapshot. Values reflect the TOLD at the time the link was created and are not automatically refreshed.";
+   if($("sharedImportBtn"))$("sharedImportBtn").style.display="none";if($("sharedPrintBtn"))$("sharedPrintBtn").style.display="inline-block";
    if($("sharedToldText"))$("sharedToldText").textContent=p.summary;
    showPlatformView("shared");return true;
  }catch(e){return false}
@@ -2799,11 +2920,37 @@ note:s.note||record.note||"",
  },300);
 }
 
+function currentF900BSummaryText(){
+ syncF900BMissionToTOLD();
+ const s=captureF900BPlanState(),f=s.f900b||{};
+ return [
+  "KUSA FLIGHTOPS — FALCON 900B TOLD",
+  `${s.dep||"—"} → ${s.dest||"—"}${s.alt?" | ALTERNATE "+s.alt:""}`,
+  `Generated: ${new Date().toLocaleString()}`,"",
+  "=== TAKEOFF ===",
+  `Configuration: ${f.takeoff_config||"—"}° Flaps + Slats | A/I ${f.takeoff_anti_ice||"—"} | ${f.takeoff_surface||"—"}`,
+  `TOW: ${f.takeoff_weight_lb||"—"} lb | PA: ${f.takeoff_pa_ft||"—"} ft | OAT: ${f.takeoff_oat_c||"—"} °C | Runway: ${f.takeoff_runway_ft||"—"} ft`,
+  `V1: ${textOf("f9V1")} | VR=V2: ${textOf("f9VR")} | BFL: ${textOf("f9BFL")} | Margin: ${textOf("f9ToMargin")}`,
+  `Status: ${textOf("f9ToStatus")}`,"",
+  "=== EMERGENCY RETURN ===",
+  `Return burn: ${f.return_burn_lb||"—"} lb | Return weight: ${textOf("f9EmerWeight")} | VREF: ${textOf("f9EmerVref")}`,
+  `Required: ${textOf("f9EmerRequired")} | Margin: ${textOf("f9EmerMargin")} | Status: ${textOf("f9EmerStatus")}`,"",
+  "=== DESTINATION LANDING ===",
+  `LDW: ${f.landing_weight_lb||"—"} lb | A/I ${f.landing_anti_ice||"—"} | PA: ${f.landing_pa_ft||"—"} ft | OAT: ${f.landing_oat_c||"—"} °C`,
+  `VREF: ${textOf("f9LdgVref")} | Actual LD: ${textOf("f9LdgLD")} | Required: ${textOf("f9LdgRequired")} | Margin: ${textOf("f9LdgMargin")}`,
+  `Status: ${textOf("f9LdgStatus")}`,"",
+  "DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE"
+ ].join("\n");
+}
+function buildF900BArchiveRecord(){
+ const state=captureF900BPlanState(),f=state.f900b||{};
+ return {id:window.currentMissionMeta?.id||newMissionId(),aircraft:"F900B",note:state.note||window.currentMissionMeta?.note||"",started_at:window.currentMissionMeta?.started_at||null,completed_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,tow_lb:Number(f.takeoff_weight_lb)||null,ldw_lb:Number(f.landing_weight_lb)||null,to_status:textOf("f9ToStatus"),ldg_status:textOf("f9LdgStatus"),summary:currentF900BSummaryText(),state};
+}
 function buildArchiveRecord(){
  const c=latestCalc||{},dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest"),state=captureCurrentPlanState();
  return{
    id:(window.currentMissionMeta&&window.currentMissionMeta.id)||newMissionId(),
-   aircraft:"N33AP",
+   aircraft:(window.currentMissionMeta&&window.currentMissionMeta.aircraft)||"N33AP",
 note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||"",
    started_at:(window.currentMissionMeta&&window.currentMissionMeta.started_at)||null,
    completed_at:new Date().toISOString(),
@@ -2825,9 +2972,15 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||""
    state
  };
 }
-function completeMission(){
- const dep=cleanICAO($("dep").value),dest=cleanICAO($("dest").value);
+async function completeMission(){
+ const isF900B=window.currentMissionMeta?.aircraft==="F900B";
+ const dep=isF900B?cleanICAO($("f9mDep")?.value):cleanICAO($("dep").value),dest=isF900B?cleanICAO($("f9mDest")?.value):cleanICAO($("dest").value);
  if(!dep||!dest){alert("Start a flight plan before archiving it.");return}
+ if(isF900B){
+   syncF900BMissionToTOLD();await refreshF900B();
+   const rec=buildF900BArchiveRecord(),arr=getMissionArchive(),ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
+   saveMissionArchive(arr.slice(0,100));window.currentMissionMeta.completed=true;removeMissionDraft(window.currentMissionMeta.id);renderArchive();alert("Falcon 900B flight plan saved to Archive on this device/browser.");showPlatformView("archive");return;
+ }
  const problems=[];
  if(!$("fobVerified")?.checked)problems.push("FOB is not verified");
  if(latestCalc?.lowLandingFuel&&!latestCalc?.lowLandingFuelConfirmed)problems.push("landing fuel below 3,000 lb is not confirmed");
@@ -2901,10 +3054,11 @@ function renderDrafts(){
  const list=$("draftList");if(!list)return;
  const arr=getMissionDrafts();
  if(!arr.length){list.innerHTML='<div class="callout small">No drafts. Start a New Trip and FlightOps will auto-save it here.</div>';return}
- list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—";return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route">${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Draft • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
+ list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—";return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route">${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Draft • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" onclick="shareEditableDraft(${i})">Share Editable</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
 }
 async function openDraftFlightPlan(i){
  const arr=getMissionDrafts(),m=arr[i];if(!m)return;
+ if(m.aircraft==="F900B"||m.state?.aircraft==="F900B"){await restoreF900BFlightPlan(m,{fromDraft:true});return}
  await restoreArchivedFlightPlan(m,i);
  const s=m.state||{};
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
@@ -2954,7 +3108,8 @@ function renderArchive(){
      <div class="archive-actions">
        <button type="button" class="primary-open" onclick="openArchiveFlightPlan(${i})">Open / Edit</button>
        <button type="button" onclick="duplicateArchiveFlightPlan(${i})">Duplicate</button>
-       <button type="button" onclick="shareArchiveMission(${i})">Share</button>
+       <button type="button" onclick="shareArchiveMission(${i})">Share Read-Only</button>
+       <button type="button" onclick="shareEditableArchive(${i})">Share Editable Copy</button>
        <button type="button" onclick="copyArchiveToldLink(${i})">Copy TOLD Link</button>
        <button type="button" onclick="emailArchiveMission(${i})">Email</button>
        <button type="button" onclick="viewArchiveMission(${i})">View TOLD</button>
@@ -2966,6 +3121,7 @@ function renderArchive(){
 }
 async function openArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];if(!m)return;
+ if(m.aircraft==="F900B"||m.state?.aircraft==="F900B"){await restoreF900BFlightPlan(m,{newCopy:true});return}
  await restoreArchivedFlightPlan(m,i);
 }
 function duplicateArchiveFlightPlan(i){
@@ -5232,7 +5388,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.2",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.3",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
@@ -5318,11 +5474,11 @@ window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();}catch(e){console.warn("Menu count refresh failed",e)}
 });
 // A fresh app launch/reload always lands on the MENU. Drafts remain available under Flight Plans.
-window.addEventListener("pageshow",()=>{refreshMenuCounts();if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
-window.addEventListener("load",()=>{refreshMenuCounts();if(!openSharedToldFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("pageshow",()=>{refreshMenuCounts();if(!openSharedContentFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
+window.addEventListener("load",()=>{refreshMenuCounts();if(!openSharedContentFromHash()&&!window.currentMissionMeta)showPlatformView("home")});
 // Debounced local draft persistence for active, incomplete missions.
-document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
-document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&e.target.closest("#opsView"))scheduleDraftSave()});
+document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
+document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
 window.addEventListener("beforeunload",()=>{try{saveCurrentDraft()}catch(e){}});
 startupCheck();
 updateHomeArchiveCount();
