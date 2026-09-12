@@ -592,3 +592,10 @@ VERSION 5.25.4 - AIRCRAFT-SAFE EDITABLE TRIP SHARING
 - Fixes Falcon 50 editable trip shares opening as Falcon 900B on recipient devices.
 - Canonical aircraft identity now follows the active/shared trip record, not a stale Home selector or nested state value.
 - Backward-compatible with affected v5.25.3 links when the top-level shared record still identifies N33AP.
+
+VERSION 5.25.5 - PILOT OBSTACLE REVIEW DISPOSITION PRIORITY
+- Pilot reviewed / no conflict now resolves an FAA NMS obstacle-NOTAM flag instead of leaving TOLD pending.
+- Flagged obstacle NOTAM count remains visible for audit/information after pilot review.
+- Pilot conflict remains a blocking NO-GO condition.
+- TOLD overall status, takeoff status, automated obstacle review card, and text/share output use the same effective review state.
+- FAA NMS obstacle scanning remains a NOTAM text review only and is not a certified obstacle-clearance analysis.

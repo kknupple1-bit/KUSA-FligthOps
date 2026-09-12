@@ -1,0 +1,19 @@
+KUSA FlightOps v5.25.5
+Pilot Obstacle Review Disposition Priority
+
+FIXED
+- Selecting "Pilot reviewed / no conflict identified" now clears the pending obstacle-review gate after takeoff evaluation.
+- A prior FAA NMS obstacle NOTAM flag no longer overrides the recorded pilot disposition.
+- TOLD now reports the completed review instead of continuing to display AUTO OBSTACLE REVIEW FLAGGED.
+- The automated obstacle review card retains the number of flagged obstacle NOTAM items and displays REVIEWED / NO CONFLICT after pilot disposition.
+- Selecting "Pilot conflict / do not use runway" remains a blocking NO-GO condition.
+- Shared/printed TOLD text reflects the effective pilot review disposition.
+
+STATUS PRIORITY
+1. Pilot conflict -> NO-GO / blocking.
+2. Flagged or unavailable automated review with no pilot disposition -> pending review.
+3. Pilot reviewed / no conflict -> review complete; flagged item count retained as informational.
+4. Automated scan with no obstacle NOTAMs -> review complete.
+
+NOTE
+FAA NMS obstacle scanning is a NOTAM text review only. It does not evaluate terrain, surveyed obstacles, departure paths, or certified obstacle clearance.
