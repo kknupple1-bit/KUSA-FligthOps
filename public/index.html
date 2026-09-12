@@ -410,7 +410,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.25.4 — aircraft-safe editable trip transfer */
+/* v5.25.5 — pilot obstacle review disposition priority */
 .f900b-shell{max-width:1120px;margin:0 auto}
 .f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
 .f900b-titlebar h2{margin:0 0 4px;font-size:24px}
@@ -515,7 +515,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.4</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.5</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -2613,7 +2613,7 @@ function currentMissionSummaryText(){
    `Climb-Limited TOW: ${$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
    `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
    `Takeoff Status: ${textOf("toStatus")}`,
-   `Auto Obstacle Review: ${departureObstacleReview?.status||"NOT_CHECKED"} • FAA NMS text scan only; not a certified clearance analysis`,
+   `Obstacle Review: ${effectiveObstacleReview().state==="REVIEWED_NO_CONFLICT"?`PILOT REVIEWED / NO CONFLICT • ${(departureObstacleReview?.items||[]).length} flagged obstacle NOTAM item${(departureObstacleReview?.items||[]).length===1?"":"s"}`:(effectiveObstacleReview().state==="CONFLICT"?"PILOT CONFLICT RECORDED":(departureObstacleReview?.status||"NOT_CHECKED"))} • FAA NMS text scan only; not a certified clearance analysis`,
    "",
    "=== 2. EMERGENCY RETURN ===",
    `Return Airport / Runway: ${textOf("opEmerRunway")}`,
@@ -3490,14 +3490,17 @@ function updateToldCard(){
  if(!dr||!lr)issues.push("RUNWAY SELECTION REQUIRED");
  if(currentNotams.status!=="CHECKED")issues.push("NOTAM VERIFICATION REQUIRED");
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
- if(obs.status==="FLAGGED")issues.push(`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`);
- else if(obs.status!=="REVIEWED")issues.push("AUTO OBSTACLE NOTAM REVIEW REQUIRED");
- if($("perfObs")?.value==="false")issues.push("PILOT OBSTACLE CONFLICT RECORDED");
+ const obsEff=effectiveObstacleReview();
+ if(obsEff.state==="CONFLICT")issues.push("PILOT OBSTACLE CONFLICT RECORDED");
+ else if(!obsEff.cleared){
+   if(obs.status==="FLAGGED")issues.push(`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`);
+   else issues.push("AUTO OBSTACLE NOTAM REVIEW REQUIRED");
+ }
  if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
  if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
  const ts=textOf("toStatus");
  if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push("TAKEOFF PERFORMANCE REVIEW REQUIRED");
- else if(ts.includes("PERFORMANCE PASS")&&obs.status!=="REVIEWED")issues.push("TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE");
+ else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push("TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE");
  if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
  $("toldOverall").textContent=issues.length?issues.join(" • "):"TOLD OPERATIONAL SUMMARY CURRENT — review all values before use.";
  $("toldOverall").className=issues.length?"callout small warn":"callout small ok";
@@ -3906,10 +3909,13 @@ function syncTakeoffSection(){
  if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
  if(climb.pass===false)pending.push("CLIMB FAIL");
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
- if(obs.status==="FLAGGED")pending.push("AUTO OBSTACLE REVIEW FLAGGED");
- else if(obs.status==="UNAVAILABLE")pending.push("AUTO OBSTACLE REVIEW UNAVAILABLE");
- else if(obs.status!=="REVIEWED")pending.push("AUTO OBSTACLE REVIEW PENDING");
- if($("perfObs").value==="false")pending.push("PILOT OBSTACLE CONFLICT");
+ const obsEff=effectiveObstacleReview();
+ if(obsEff.state==="CONFLICT")pending.push("PILOT OBSTACLE CONFLICT");
+ else if(!obsEff.cleared){
+   if(obs.status==="FLAGGED")pending.push("AUTO OBSTACLE REVIEW FLAGGED");
+   else if(obs.status==="UNAVAILABLE")pending.push("AUTO OBSTACLE REVIEW UNAVAILABLE");
+   else pending.push("AUTO OBSTACLE REVIEW PENDING");
+ }
 
  if(climb.pass===false){
    $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
@@ -5055,10 +5061,28 @@ function classifyObstacleNotams(items){
  const rx=/\b(OBST|OBSTACLE|TOWER|CRANE|MAST|STACK|POLE|ANTENNA)\b/;
  return (Array.isArray(items)?items:[]).filter(n=>rx.test(obstacleNotamText(n)));
 }
+function effectiveObstacleReview(){
+ const auto=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
+ const pilot=$("perfObs")?.value||"";
+ if(pilot==="false")return {state:"CONFLICT",auto,pilotReviewed:true,cleared:false};
+ if(pilot==="true")return {state:"REVIEWED_NO_CONFLICT",auto,pilotReviewed:true,cleared:true};
+ if(auto.status==="REVIEWED")return {state:"AUTO_CLEAR",auto,pilotReviewed:false,cleared:true};
+ if(auto.status==="FLAGGED")return {state:"FLAGGED",auto,pilotReviewed:false,cleared:false};
+ if(auto.status==="UNAVAILABLE")return {state:"UNAVAILABLE",auto,pilotReviewed:false,cleared:false};
+ return {state:"PENDING",auto,pilotReviewed:false,cleared:false};
+}
 function renderDepartureObstacleReview(){
  const b=$("autoObstacleReview"),n=$("autoObstacleReviewNote"); if(!b||!n)return;
  const r=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
- if(r.status==="FLAGGED"){
+ const eff=effectiveObstacleReview();
+ if(eff.state==="CONFLICT"){
+   b.textContent="PILOT CONFLICT • DO NOT USE RUNWAY";b.className="bad";
+   n.textContent=`Pilot review identified a conflict. ${r.items?.length||0} obstacle NOTAM item${(r.items?.length||0)===1?"":"s"} remain on record; this is not a certified obstacle-clearance analysis.`;
+ }else if(eff.state==="REVIEWED_NO_CONFLICT"){
+   const count=r.items?.length||0;
+   b.textContent=count?`REVIEWED • NO CONFLICT • ${count} OBSTACLE NOTAM${count===1?"":"S"}`:"REVIEWED • NO CONFLICT";b.className="ok";
+   n.textContent=count?`Pilot reviewed ${count} FAA NMS obstacle-related NOTAM item${count===1?"":"s"} and recorded no conflict. This remains a NOTAM text review, not a certified obstacle-clearance analysis.`:"Pilot review complete; no conflict identified. This remains a NOTAM text review, not a certified obstacle-clearance analysis.";
+ }else if(r.status==="FLAGGED"){
    b.textContent=`ATTENTION • ${r.items.length} OBSTACLE NOTAM${r.items.length===1?"":"S"}`;b.className="warn";
    n.textContent="FAA NMS departure NOTAM scan found obstacle-related text. Pilot review required; this is not a takeoff obstacle-clearance analysis.";
  }else if(r.status==="REVIEWED"){
@@ -5334,15 +5358,21 @@ async function evaluateTakeoff(){
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
    if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
    const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
-   if($("perfObs").value==="false"){
-     $("toStatus").textContent="NO-GO • OBSTACLE CLEARANCE NOT CONFIRMED";$("toStatus").className="bad";return;
+   const obsEff=effectiveObstacleReview();
+   if(obsEff.state==="CONFLICT"){
+     $("toStatus").textContent="NO-GO • PILOT OBSTACLE CONFLICT";$("toStatus").className="bad";renderDepartureObstacleReview();updateToldCard();return;
    }
-   if(obs.status==="FLAGGED")pending.push("AUTO OBSTACLE REVIEW FLAGGED");
-   else if(obs.status==="UNAVAILABLE")pending.push("AUTO OBSTACLE REVIEW UNAVAILABLE");
-   else if(obs.status!=="REVIEWED")pending.push("AUTO OBSTACLE REVIEW PENDING");
+   if(!obsEff.cleared){
+     if(obs.status==="FLAGGED")pending.push("AUTO OBSTACLE REVIEW FLAGGED");
+     else if(obs.status==="UNAVAILABLE")pending.push("AUTO OBSTACLE REVIEW UNAVAILABLE");
+     else pending.push("AUTO OBSTACLE REVIEW PENDING");
+   }
 
    if(j.status==="GO"&&!pending.length){
-     $("toStatus").textContent=climb.noLimitation?"PASS • TAKEOFF PERFORMANCE • AUTO OBSTACLE REVIEW COMPLETE":"PASS • TAKEOFF PERFORMANCE / CLIMB • AUTO OBSTACLE REVIEW COMPLETE";
+     if(obsEff.state==="REVIEWED_NO_CONFLICT")
+       $("toStatus").textContent=climb.noLimitation?"PASS • TAKEOFF PERFORMANCE • PILOT OBSTACLE REVIEW COMPLETE":"PASS • TAKEOFF PERFORMANCE / CLIMB • PILOT OBSTACLE REVIEW COMPLETE";
+     else
+       $("toStatus").textContent=climb.noLimitation?"PASS • TAKEOFF PERFORMANCE • AUTO OBSTACLE REVIEW COMPLETE":"PASS • TAKEOFF PERFORMANCE / CLIMB • AUTO OBSTACLE REVIEW COMPLETE";
      $("toStatus").className="ok";
    }else if(j.status==="GO"&&Number.isFinite(fieldWt)&&Number.isFinite(climb.limit)){
      $("toStatus").textContent=obs.status==="FLAGGED"?"PERFORMANCE PASS • OBSTACLE NOTAM REVIEW REQUIRED":"PERFORMANCE PASS • AUTO OBSTACLE REVIEW INCOMPLETE";
@@ -5355,7 +5385,9 @@ async function evaluateTakeoff(){
    const depGate=effectiveDepartureRunwayAssessment();
    if(Number.isFinite(depGate.usable)&&Number.isFinite(valueOrNull("perfBFL"))&&valueOrNull("perfBFL")>depGate.usable){$("toStatus").textContent="NO-GO • BFL EXCEEDS USABLE DEPARTURE RUNWAY";$("toStatus").className="bad";}
    const gradText=Number.isFinite(climb.gradient)?`QRH REF GCLB2 ${climb.gradient.toFixed(2)}%`:`QRH GRADIENT REFERENCE UNAVAILABLE`;
-   $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • ${gradText} • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • FAA NMS automated obstacle NOTAM review: ${obs.status}; not a certified obstacle-clearance analysis.`;
+   const obsNote=obsEff.state==="REVIEWED_NO_CONFLICT"?`pilot reviewed / no conflict (${obs.items?.length||0} obstacle NOTAM item${(obs.items?.length||0)===1?"":"s"})`:`FAA NMS automated obstacle NOTAM review: ${obs.status}`;
+   $("toConfigNote").textContent=`${FS_PERF.takeoff[a.cfg].label} field data calculated • ${gradText} • climb limit ${Math.round(climb.limit).toLocaleString()} lb • A/I ${climb.ai} • ${obsNote}; not a certified obstacle-clearance analysis.`;
+   renderDepartureObstacleReview();
  }catch(e){
    $("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";
    $("toLimit").textContent=String(e.message||e);
@@ -5392,7 +5424,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.4",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.5",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
@@ -5467,7 +5499,7 @@ $("manualRunwayStatusOverride")?.addEventListener("change",()=>{updateLandingRun
 $("totalBag")?.addEventListener("input",onTotalBagInput);
 ["bagComp0","bagComp1","bagComp2"].forEach(id=>$(id).addEventListener("input",onBaggageCompInput));
 ["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id)?.addEventListener("input",recalculate));
-$("perfObs")?.addEventListener("change",recalculate);
+$("perfObs")?.addEventListener("change",()=>{renderDepartureObstacleReview();recalculate();updateToldCard();});
 
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
