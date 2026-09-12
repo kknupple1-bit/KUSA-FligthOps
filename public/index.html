@@ -410,7 +410,7 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete{background:#7a2323}
 .archive-delete:hover{filter:brightness(1.1)}
 
-/* v5.25.5 — pilot obstacle review disposition priority */
+/* v5.25.6 — pilot obstacle review disposition priority */
 .f900b-shell{max-width:1120px;margin:0 auto}
 .f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
 .f900b-titlebar h2{margin:0 0 4px;font-size:24px}
@@ -515,7 +515,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.5</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.6</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -2693,39 +2693,80 @@ function transferableTripRecord(record){
  copy.completed=false;copy.transfer_source_id=copy.id||null;
  return copy;
 }
-function makeEditableTripShareLink(record=null){
+function editableTripShareLabel(record){
+ const r=record||{};
+ const rawName=String(r.note||r.state?.note||"").trim();
+ const tripName=rawName||String(r.aircraft||"KUSA Trip");
+ const dep=String(r.dep||"—").toUpperCase(),dest=String(r.dest||"—").toUpperCase();
+ const d=new Date(r.started_at||r.updated_at||Date.now());
+ const date=Number.isNaN(d.getTime())?new Date().toLocaleDateString("en-US"):`${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${d.getFullYear()}`;
+ return `${tripName} | ${dep}-${dest} | ${date}`;
+}
+async function makeEditableTripShareLink(record=null){
  const rec=transferableTripRecord(record||draftRecord());
  if(!rec||!rec.dep||!rec.dest)throw new Error("No active trip is available to share.");
- const payload={v:1,kind:"editable-trip",generated:new Date().toISOString(),record:rec};
- return `${window.location.origin}${window.location.pathname}#trip=${b64urlEncodeUtf8(JSON.stringify(payload))}`;
+ const label=editableTripShareLabel(rec);
+ const resp=await fetch("/api/shared-trips",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({record:rec,label})});
+ let data=null;try{data=await resp.json()}catch{}
+ if(!resp.ok||!data?.id)throw new Error(data?.error||"Unable to create editable trip link.");
+ const url=`${window.location.origin}${window.location.pathname}#share=${encodeURIComponent(data.id)}`;
+ return {url,label,expires_at:data.expires_at};
 }
 async function shareEditableRecord(record){
- const url=makeEditableTripShareLink(record);
  const r=record||draftRecord();
- const label=`${r?.dep||"—"} → ${r?.dest||"—"} • ${r?.aircraft||"Aircraft"}`;
+ const {url,label}=await makeEditableTripShareLink(r);
+ const text=`${label}\nOpen in KUSA FlightOps as an editable trip.`;
  try{
-   if(navigator.share){await navigator.share({title:`KUSA FlightOps Editable Trip — ${label}`,text:"Open this KUSA FlightOps trip as an editable draft. Your copy will not alter the sender's original.",url});return}
-   await navigator.clipboard.writeText(url);alert("Editable FlightOps trip link copied. Recipient can open it and import a working copy into Drafts.");
- }catch(e){if(e&&e.name!=="AbortError")prompt("Copy this editable FlightOps trip link:",url)}
+   if(navigator.share){await navigator.share({title:label,text,url});return}
+   await navigator.clipboard.writeText(`${label}\n${url}`);
+   alert(`Editable trip link copied as:\n\n${label}\n\nRecipient can open it and import a working copy into Drafts.`);
+ }catch(e){if(e&&e.name!=="AbortError")prompt(label,url)}
 }
 async function shareEditableCurrentTrip(){
  try{await shareEditableRecord(draftRecord())}catch(e){alert(e.message||String(e))}
 }
 async function shareEditableDraft(i){const m=getMissionDrafts()[i];if(m)await shareEditableRecord(m)}
 async function shareEditableArchive(i){const m=getMissionArchive()[i];if(m)await shareEditableRecord(m)}
+function renderSharedEditableTrip(p){
+ if(!p||!p.record)return false;
+ PENDING_SHARED_EDITABLE_TRIP=p.record;
+ const r=p.record;
+ const label=p.label||editableTripShareLabel(r);
+ if($("sharedToldTitle"))$("sharedToldTitle").textContent=label;
+ if($("sharedToldStamp"))$("sharedToldStamp").textContent=`Shared ${p.generated?new Date(p.generated).toLocaleString():"—"} • ${r.aircraft||"Aircraft"}`;
+ if($("sharedModeNote"))$("sharedModeNote").innerHTML='<b>EDITABLE COPY.</b> Opening this transfer creates a new local Draft on this device. Changes will not modify the sender’s original trip.';
+ if($("sharedToldText"))$("sharedToldText").textContent=`Route: ${r.dep||"—"} → ${r.dest||"—"}${r.alt?` • Alternate ${r.alt}`:""}\nAircraft: ${r.aircraft||"—"}\nTrip: ${r.note||r.state?.note||"—"}\n\nSelect “Open as Editable Draft” to import the trip into FlightOps.`;
+ if($("sharedImportBtn"))$("sharedImportBtn").style.display="inline-block";if($("sharedPrintBtn"))$("sharedPrintBtn").style.display="none";
+ showPlatformView("shared");return true;
+}
+async function loadShortSharedEditableTrip(id){
+ try{
+   if($("sharedToldTitle"))$("sharedToldTitle").textContent="Opening shared KUSA FlightOps trip…";
+   if($("sharedToldText"))$("sharedToldText").textContent="Retrieving editable trip data…";
+   if($("sharedImportBtn"))$("sharedImportBtn").style.display="none";
+   if($("sharedPrintBtn"))$("sharedPrintBtn").style.display="none";
+   showPlatformView("shared");
+   const resp=await fetch(`/api/shared-trips/${encodeURIComponent(id)}`,{cache:"no-store"});
+   let p=null;try{p=await resp.json()}catch{}
+   if(!resp.ok||!p?.record)throw new Error(p?.error||"Shared trip could not be opened.");
+   renderSharedEditableTrip(p);
+ }catch(e){
+   if($("sharedToldTitle"))$("sharedToldTitle").textContent="Shared Trip Unavailable";
+   if($("sharedToldText"))$("sharedToldText").textContent=e.message||String(e);
+ }
+}
 function openSharedContentFromHash(){
  const hash=String(window.location.hash||"");
+ if(hash.startsWith("#share=")){
+   const id=decodeURIComponent(hash.slice(7));
+   loadShortSharedEditableTrip(id);
+   return true;
+ }
+ // Backward compatibility with v5.25.3-v5.25.5 self-contained editable links.
  if(hash.startsWith("#trip=")){
    try{
      const p=JSON.parse(b64urlDecodeUtf8(hash.slice(6)));if(!p||p.kind!=="editable-trip"||!p.record)return false;
-     PENDING_SHARED_EDITABLE_TRIP=p.record;
-     const r=p.record;
-     if($("sharedToldTitle"))$("sharedToldTitle").textContent=`KUSA FlightOps — Editable Trip Transfer`;
-     if($("sharedToldStamp"))$("sharedToldStamp").textContent=`Shared ${p.generated?new Date(p.generated).toLocaleString():"—"} • ${r.aircraft||"Aircraft"}`;
-     if($("sharedModeNote"))$("sharedModeNote").innerHTML='<b>EDITABLE COPY.</b> Opening this transfer creates a new local Draft on this device. Changes will not modify the sender’s original trip.';
-     if($("sharedToldText"))$("sharedToldText").textContent=`Route: ${r.dep||"—"} → ${r.dest||"—"}${r.alt?` • Alternate ${r.alt}`:""}\nAircraft: ${r.aircraft||"—"}\nNote: ${r.note||r.state?.note||"—"}\n\nSelect “Open as Editable Draft” to import the trip into FlightOps.`;
-     if($("sharedImportBtn"))$("sharedImportBtn").style.display="inline-block";if($("sharedPrintBtn"))$("sharedPrintBtn").style.display="none";
-     showPlatformView("shared");return true;
+     return renderSharedEditableTrip(p);
    }catch(e){return false}
  }
  return openSharedToldFromHash();
@@ -5424,7 +5465,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.5",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.6",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
