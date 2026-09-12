@@ -587,3 +587,8 @@ VERSION 5.25.3 - 900B DRAFTS + EDITABLE TRIP SHARING
 - Editable sharing is available from active TOLD/Mission, Drafts, and Archive records.
 - Read-only TOLD snapshot sharing remains available separately.
 - Falcon 900B Complete & Archive now stores a 900B-specific record rather than the Falcon 50 state model.
+
+VERSION 5.25.4 - AIRCRAFT-SAFE EDITABLE TRIP SHARING
+- Fixes Falcon 50 editable trip shares opening as Falcon 900B on recipient devices.
+- Canonical aircraft identity now follows the active/shared trip record, not a stale Home selector or nested state value.
+- Backward-compatible with affected v5.25.3 links when the top-level shared record still identifies N33AP.

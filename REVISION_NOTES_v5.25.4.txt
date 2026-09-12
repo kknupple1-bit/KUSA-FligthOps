@@ -1,0 +1,12 @@
+KUSA FlightOps v5.25.4
+Aircraft-safe Editable Trip Sharing Hotfix
+
+1. Fixes Falcon 50 editable shares being interpreted as Falcon 900B on the recipient device.
+2. The active mission aircraft is now the canonical aircraft value saved inside Falcon 50 trip state; the Home aircraft selector can no longer overwrite it.
+3. Editable import now gives the record-level aircraft identity priority over any stale nested state value.
+4. Draft/Open/Archive routing now uses the same aircraft-priority rule, preserving older v5.25.3 Falcon 50 shares whose nested state may incorrectly say F900B.
+5. Falcon 50 imports force the recipient working copy and aircraft selector back to the shared Falcon 50 aircraft before restoration.
+6. Falcon 900B editable shares continue to restore into the 900B Mission/TOLD workflow.
+7. Frontend/backend/package build advanced to 5.25.4.
+
+Development / validation only — not approved for flight use.
