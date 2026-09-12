@@ -1,0 +1,12 @@
+KUSA FlightOps v5.25.3
+900B Draft Persistence + Editable Trip Sharing
+
+1. Falcon 900B starts as a saved Draft immediately.
+2. Mission and TOLD edits auto-save to the same local draft store used by Falcon 50.
+3. Resume Draft restores route, note, takeoff/landing weights, configuration, anti-ice, runway surface/available distance, PA/OAT, landing factor, return burn, and emergency-return anti-ice.
+4. Added editable-trip transfer links. Recipient selects Open as Editable Draft and receives a new local copy; sender original is not modified.
+5. Editable-share actions are available from active trip, Drafts, and Archive. Existing read-only TOLD sharing remains separate.
+6. Falcon 900B Complete & Archive stores a 900B-specific performance record.
+7. Frontend/backend/package build advanced to 5.25.3.
+
+Development / validation only — not approved for flight use.

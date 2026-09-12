@@ -578,3 +578,12 @@ VERSION 5.25.2 - FALCON 900 PERFORMANCE-SOURCE CORRECTION
 - Removed the incorrect DTM9821/loading-manual reference from the Falcon 900B TOLD source note.
 - DTM9823 is treated as a performance reference/supporting source; the integrated 900B TOLD numerical grids remain sourced from QRH1 Performance Rev02 unless specifically cross-checked and migrated.
 - Falcon 900B W&B remains locked pending applicable aircraft loading data and the aircraft-specific basic-operating-weight record.
+
+
+VERSION 5.25.3 - 900B DRAFTS + EDITABLE TRIP SHARING
+- Falcon 900B trips now save immediately to Drafts and auto-save Mission/TOLD changes.
+- Falcon 900B drafts resume back into the 900B Mission workflow with saved performance inputs intact.
+- Added Share Editable Trip. Recipient imports a new local working Draft; sender original remains unchanged.
+- Editable sharing is available from active TOLD/Mission, Drafts, and Archive records.
+- Read-only TOLD snapshot sharing remains available separately.
+- Falcon 900B Complete & Archive now stores a 900B-specific record rather than the Falcon 50 state model.
