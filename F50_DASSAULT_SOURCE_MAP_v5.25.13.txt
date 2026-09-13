@@ -1,0 +1,27 @@
+KUSA FlightOps Falcon 50 Dassault Source Map — v5.25.13
+
+TAKEOFF — S + FLAPS 20°
+VR=V2 / takeoff attitude ........ DTM813 5.45.8 .... PHASE 1 SOURCE-CONTROLLED
+Vfr transition speed ............ DTM813 performance conditions / transition schedule .... PHASE 1 DERIVED (V2+15)
+Balanced field length ........... DTM813 5.45.6 .... LEGACY GRID, MIGRATION PENDING
+Engine-failure speed / V1 ....... DTM813 5.45.7 .... LEGACY GRID, MIGRATION PENDING
+Climb-limited takeoff weight .... DTM813 5.45.9 .... AFMS/DTM SOURCE CONTROL ALREADY ACTIVE
+Second-segment climb ............ DTM813 5.45.10 ... SOURCE CONTROL ALREADY ACTIVE
+Wet BFL / V1 .................... DTM813 5.46A.2 / 5.46A.3 .... SOURCE LOCKED PENDING DIGITIZATION
+
+TAKEOFF — SLATS
+VR=V2 / takeoff attitude ........ DTM813 5.50.10 ... MIGRATION PENDING
+Vfr transition speed ............ DTM813 performance conditions / transition schedule .... DERIVED V2+25 WHEN VR AVAILABLE
+BFL / V1 ........................ DTM813 5.50.6-5.50.9 .... MIGRATION PENDING
+Wet BFL / V1 .................... DTM813 5.51A.2-5.51A.5 .... SOURCE LOCKED PENDING DIGITIZATION
+
+EMERGENCY RETURN / LANDING — S + FLAPS 48°
+Landing distance ................ DTM813 5.60.4 .... LEGACY GRID, MIGRATION PENDING
+VREF / landing speed ............ DTM813 5.60.5 .... LEGACY GRID, MIGRATION PENDING
+Published validation anchor ..... 28,500 lb -> VREF 112.5 kt (DTM813 Annex example)
+
+LANDING — S + FLAPS 20°
+Landing distance ................ DTM813 5.65.4 .... MIGRATION PENDING
+VREF+5 / landing speed .......... DTM813 5.65.5 .... MIGRATION PENDING
+
+Policy: No numerical table may be labeled Dassault merely because its values appear similar. A block becomes Dassault source-controlled only after direct chart/table digitization or direct derivation and documented validation.

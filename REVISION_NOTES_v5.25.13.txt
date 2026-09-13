@@ -1,0 +1,26 @@
+KUSA FlightOps v5.25.13 — Dassault Source Migration Phase 1
+
+Purpose
+- Begin the direct migration of Falcon 50 operational speed sourcing away from FlightSafety-derived provenance and into Dassault-controlled AFM references without falsely relabeling legacy numerical grids.
+
+Dassault source changes
+- Falcon 50 S+Flaps 20° VR=V2 source control is now DTM813 §5.45.8.
+- Added the published DTM813 AFM example anchor: 35,000 lb -> VR=V2 117.3 kt.
+- Vfr is no longer taken from a separate legacy FlightSafety table. It is derived from the Dassault transition schedule:
+  * S+Flaps 20°: V2 + 15 kt
+  * Slats: V2 + 25 kt
+- Source strings on the V-speed card now distinguish Dassault-controlled items from legacy digitized items still awaiting migration.
+
+Still migration-controlled / NOT silently relabeled
+- V1 and BFL grids remain legacy digitizations pending direct DTM813 §5.45.6/§5.45.7 and §5.50.6-§5.50.9 replacement.
+- 1.5Vs remains legacy digitized pending direct Dassault source replacement.
+- S+Flaps 48° emergency-return VREF and landing-distance numerical grids remain legacy numeric data; the controlling Dassault targets are DTM813 §5.60.5 and §5.60.4.
+- S+Flaps 20° landing numerical grids remain pending DTM813 §5.65.4/§5.65.5 migration.
+
+Validation anchors
+- DTM813 §5.45.5 example: 35,000 lb gives VR=V2 117.3 kt.
+- DTM813 Annex example: 28,500 lb gives S+Flaps 48° VREF 112.5 kt (retained as a migration validation anchor; no source relabel until full direct digitization is complete).
+
+No changes
+- No W&B, runway, weather, NOTAM, sharing, draft/archive, 900B, or server API calculation changes.
+- Development / validation-only status remains in force.
