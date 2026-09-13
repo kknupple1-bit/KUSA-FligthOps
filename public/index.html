@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.12 — emergency-return emphasis + Dassault source migration prep */
+/* v5.25.13 — Dassault source migration phase 1 */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -602,7 +602,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.12</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.13</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1005,8 +1005,8 @@ Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel mom
 <div class="row">
 <div class="wx"><div class="small">V1</div><b id="vsV1">—</b><div class="small" id="vsV1src">Performance data required</div></div>
 <div class="wx"><div class="small">VR=V2</div><b id="vsVR">—</b><div class="small" id="vsVRsrc">Performance data required</div></div>
-<div class="wx"><div class="small">Vfr</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">FlightSafety P-2–P-5 • weight based</div></div>
-<div class="wx"><div class="small">1.5Vs</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">FlightSafety P-2–P-5 • weight based</div></div>
+<div class="wx"><div class="small">Vfr</div><b id="vsVFT">—</b><div class="small" id="vsVFTsrc">Dassault DTM813 transition schedule • derived from VR=V2</div></div>
+<div class="wx"><div class="small">1.5Vs</div><b id="vsVFS">—</b><div class="small" id="vsVFSsrc">Legacy digitization • Dassault source migration pending</div></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF / Emer. Return</div><b id="vsVREF">—</b><div class="small" id="vsVREFsrc">Landing chart data required</div></div>
@@ -1015,7 +1015,7 @@ Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel mom
 <div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-<b>Automatic working data:</b> V1, VR=V2, Vfr and 1.5Vs are interpolated by takeoff weight from the digitized FlightSafety P-2–P-5 tables. VREF / Emer. Return uses the FlightSafety S+48 landing VREF table at the calculated immediate-return weight: takeoff weight minus the entered Emer. Return Fuel Burn. Taxi fuel is already removed in the takeoff-weight calculation. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Automatic working data:</b> S+Flaps 20° VR=V2 is now source-controlled to Dassault DTM813 §5.45.8, with the 35,000 lb / 117.3 kt AFM example retained as a validation anchor. Vfr is derived from the Dassault transition schedule (V2 + 15 kt for S+Flaps 20°, V2 + 25 kt for Slats). V1/BFL, 1.5Vs and landing-distance grids remain legacy digitizations pending direct Dassault replacement. Emergency-return VREF remains migration-controlled pending completion of the DTM813 §5.60.5 digitization. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 </div>
 
@@ -1131,7 +1131,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="card">
 <h2>7. Performance Evaluation</h2>
 <div class="callout small">
-<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. FlightSafety/QRH values are reference-only unless cross-checked to the applicable AFMS chart. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. Legacy digitized values remain reference-only until replaced or cross-checked to the applicable Dassault chart. Phase 1 now sources S+Flaps 20° VR=V2 and the Vfr schedule from DTM813; V1/BFL, 1.5Vs and landing-distance grids remain migration-controlled. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 <div class="callout small" style="margin-top:8px">
 <b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT. Takeoff climb-limit charts §5-18 (S+Flaps 20°) and §5-27 (Slats), plus landing maximum-weight climb charts §5-32 (S+Flaps 48°) and §5-36 (approach Slats / landing S+Flaps 20°), are active for bounded interpolation/source-boundary use only; no extrapolation.
@@ -2158,7 +2158,7 @@ function afmsRevCLandingClimbLimit(cfg,ai,pa,tempC){
 
 const FS_PERF={
  takeoff:{
-  S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,36:119,38:122,40:126,40.7:127},vfr:{24:113,26:116,28:120,30:124,32:127,34:131,36:134,38:137,40:141,40.7:142},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192,40.7:195},tables:{
+  S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,35:117.3,36:119,38:122,40:126,40.7:127},vfr:{24:113,26:116,28:120,30:124,32:127,34:131,36:134,38:137,40:141,40.7:142},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192,40.7:195},tables:{
    0:{24:{0:[91,2750],10:[91,2850],20:[91,2900],30:[91,3150],40:[91,3450]},26:{0:[91,2775],10:[91,2875],20:[91,2925],30:[91,3200],40:[91,3500]},28:{0:[91,2800],10:[91,2900],20:[91,2950],30:[91,3225],40:[91,3600]},30:{0:[91,2850],10:[91,2950],20:[91,3000],30:[92,3300],40:[95,3650]},32:{0:[96,3100],10:[96,3200],20:[96,3300],30:[98,3600],40:[101,4150]},34:{0:[101,3400],10:[101,3550],20:[101,3650],30:[103,4050],40:[106,4750]},36:{0:[106,3800],10:[106,3900],20:[106,4050],30:[108,4500],40:[111,5300]},38:{0:[111,4200],10:[111,4300],20:[111,4450],30:[112,5050],40:[115,6000]},40:{0:[115,4700],10:[115,4800],20:[115,4950],30:[117,5700],40:[118,6700]},40.7:{0:[116,4900],10:[116,5000],20:[116,5200],30:[118,6000],40:[120,7000]}},
    2000:{24:{0:[91,2950],10:[91,2950],20:[91,3150],30:[91,3400],40:[91,3750]},26:{0:[91,3000],10:[91,3000],20:[91,3200],30:[91,3450],40:[91,3800]},28:{0:[91,3025],10:[91,3050],20:[91,3250],30:[91,3500],40:[92,3900]},30:{0:[91,3050],10:[91,3100],20:[92,3300],30:[95,3650],40:[97,4200]},32:{0:[96,3400],10:[96,3500],20:[98,3700],30:[100,4200],40:[103,4800]},34:{0:[101,3800],10:[101,3950],20:[103,4100],30:[105,4750],40:[108,5550]},36:{0:[106,4200],10:[106,4400],20:[108,4600],30:[110,5300],40:[113,6250]},38:{0:[111,4650],10:[111,5000],20:[112,5150],30:[115,6000],40:[118,7000]},40:{0:[115,5200],10:[115,5650],20:[116,5800],30:[119,6700]},40.7:{0:[116,5400],10:[116,5900],20:[117,6100],30:[120,7000]}},
    4000:{24:{0:[91,3050],10:[91,3200],20:[91,3450],30:[91,3800],40:[91,4200]},26:{0:[91,3100],10:[91,3250],20:[91,3500],30:[91,3850],40:[91,4250]},28:{0:[91,3150],10:[91,3300],20:[91,3550],30:[92,3950],40:[94,4300]},30:{0:[91,3200],10:[92,3400],20:[94,3750],30:[97,4225],40:[100,4850]},32:{0:[96,3550],10:[97,3700],20:[100,4250],30:[102,4800],40:[106,5550]},34:{0:[101,4000],10:[102,4150],20:[105,4800],30:[108,5550],40:[111,6350]},36:{0:[106,4500],10:[107,4650],20:[110,5400],30:[113,6300]},38:{0:[111,5050],10:[112,5200],20:[115,6050],30:[117,7000]},40:{0:[115,5700],10:[116,5850],20:[119,6800]},40.7:{0:[116,6000],10:[117,6150],20:[120,7100]}},
@@ -2190,6 +2190,19 @@ const FS_PERF={
   }}
  }
 };
+const F50_DASSAULT_SOURCE={
+ takeoff:{
+  S20:{vr:"DTM813 §5.45.8",vfr:"DTM813 §5.15 / transition schedule",vfrDelta:15,field:"DTM813 §5.45.6/§5.45.7 — migration pending"},
+  SLATS:{vr:"DTM813 §5.50.10 — migration pending",vfr:"DTM813 §5.15 / transition schedule",vfrDelta:25,field:"DTM813 §5.50.6-§5.50.9 — migration pending"}
+ },
+ landing:{S48:{vref:"DTM813 §5.60.5 — migration pending",distance:"DTM813 §5.60.4 — migration pending"},S20:{vref:"DTM813 §5.65.5 — migration pending",distance:"DTM813 §5.65.4 — migration pending"}}
+};
+function f50VfrFromVr(cfg,vr){
+ if(!Number.isFinite(vr))return null;
+ const delta=F50_DASSAULT_SOURCE.takeoff[cfg]?.vfrDelta;
+ return Number.isFinite(delta)?vr+delta:null;
+}
+function f50TakeoffSpeedSource(cfg,key){return F50_DASSAULT_SOURCE.takeoff[cfg]?.[key]||"SOURCE MIGRATION PENDING"}
 function kN(o){return Object.keys(o).map(Number).sort((a,b)=>a-b)}
 function bracketN(a,x){if(x<a[0]||x>a[a.length-1])return null;for(let i=0;i<a.length;i++)if(x===a[i])return[a[i],a[i]];for(let i=0;i<a.length-1;i++)if(x>a[i]&&x<a[i+1])return[a[i],a[i+1]];return null}
 function lerpN(a,b,t){return a+(b-a)*t}
@@ -3679,7 +3692,7 @@ function updateToldCard(){
  $("opEmerBurn").textContent=`${Math.round(appliedReturnBurn).toLocaleString()} lb`;
  $("opEmerWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
  $("opEmerPA").textContent=Number.isFinite(emergencyPA)?`${Math.round(emergencyPA).toLocaleString()} ft`:"—";
- $("opEmerSource").textContent=emergencyPerf?"FlightSafety S+48 • departure PA":"SOURCE LOCKED";
+ $("opEmerSource").textContent=emergencyPerf?"DTM813 §5.60.4/§5.60.5 • LEGACY NUMERIC GRID PENDING DIRECT DASSAULT DIGITIZATION":"SOURCE LOCKED";
  $("opEmerStatus").textContent=emergencyStatus;
  $("opEmerStatus").className=`told-op-status ${emergencyStatus==="PASS"?"ok":emergencyStatus.includes("NO-GO")||emergencyStatus.includes("OVER MAX")?"bad":"warn"}`;
 
@@ -4187,11 +4200,11 @@ function updateVSpeedCard(tow,landing){
  $("vsVFS").textContent=v15vs==null?"—":v15vs.toFixed(1)+" kt";
  $("vsVREF").textContent=emerVref==null?"—":emerVref.toFixed(1)+" kt";
 
- $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5`;
- $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5 • weight based`;
- $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5 • weight based`;
- $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • FlightSafety P-2–P-5 • weight based`;
- $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside S+48 VREF table":"FlightSafety P-18/P-19 • S+48 • weight based";
+ $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • Dassault field-source migration pending`;
+ $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":(toAuto.cfg==="S20"?`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`:`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")}`);
+ $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vfr")} • derived from VR=V2`;
+ $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • Dassault 1.5Vs migration pending`;
+ $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside S+48 VREF table":`${F50_DASSAULT_SOURCE.landing.S48.vref} • legacy numeric table retained pending direct digitization`;
 
  const vals=[v1,vr,vfr,v15vs,emerVref];
  const count=vals.filter(v=>v!=null).length;
@@ -4774,7 +4787,7 @@ function updateWhatIfPlanner(force=false){
    $("whatIfMargin").textContent="—";
    $("whatIfV1").textContent="SOURCE LOCKED";
    const d=FS_PERF.takeoff[cfg],wk=(wt||0)/1000;
-   const vr=d?interpScalarN(d.vr,wk):null,vfr=d?interpScalarN(d.vfr,wk):null,v15=d?interpScalarN(d.v15vs,wk):null;
+   const vr=d?interpScalarN(d.vr,wk):null,vfr=f50VfrFromVr(cfg,vr),v15=d?interpScalarN(d.v15vs,wk):null;
    $("whatIfVR").textContent=vr==null?"—":`${vr.toFixed(1)} kt`;
    $("whatIfVF").textContent=`${vfr==null?"—":vfr.toFixed(1)+" kt"} / ${v15==null?"—":v15.toFixed(1)+" kt"}`;
    $("whatIfOps").textContent="WET DATA PENDING";
@@ -4789,7 +4802,7 @@ function updateWhatIfPlanner(force=false){
  const mw=solveMaxWeightForRunway(cfg,pa,temp,rwy);
  const mt=solveMaxTempForRunway(cfg,pa,wt,rwy);
  const d=FS_PERF.takeoff[cfg],wk=(wt||0)/1000;
- const vr=d?interpScalarN(d.vr,wk):null,vfr=d?interpScalarN(d.vfr,wk):null,v15=d?interpScalarN(d.v15vs,wk):null;
+ const vr=d?interpScalarN(d.vr,wk):null,vfr=f50VfrFromVr(cfg,vr),v15=d?interpScalarN(d.v15vs,wk):null;
 
  $("whatIfBFL").textContent=r?`${Math.round(r.bfl).toLocaleString()} ft`:"SOURCE LOCKED";
  $("whatIfV1").textContent=r?`${r.v1.toFixed(1)} kt`:"SOURCE LOCKED";
@@ -5373,7 +5386,7 @@ function destTempC(){if(!missionData)return null;const m=missionData.destination
 function autoTO(){
  const cfg=$("toConfig").value,d=FS_PERF.takeoff[cfg],weightLb=perfTakeoffWeightLb(),wk=(weightLb||0)/1000;
  const vr=d?interpScalarN(d.vr,wk):null;
- const vfr=d?interpScalarN(d.vfr,wk):null;
+ const vfr=f50VfrFromVr(cfg,vr);
  const v15vs=d?interpScalarN(d.v15vs,wk):null;
  if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
  const runwayCondition=$("toRunwayCondition")?$("toRunwayCondition").value:"DRY";
@@ -5386,7 +5399,7 @@ function autoTO(){
    let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));
    if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
    r=fsTakeoff(cfg,lookupPA,t,wk);
-   if(!r)reason="V1/BFL outside digitized FlightSafety table range";else r.paBasis=paBasis
+   if(!r)reason="V1/BFL outside legacy digitized table range";else r.paBasis=paBasis
  }
  if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
  return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason,pa,temp:t,weightLb}
@@ -5463,7 +5476,7 @@ function autoLDG(){
  let pa=Number(missionData.destination.pressure_altitude_ft),r=null,reason="";
  if(!Number.isFinite(pa))reason="Destination pressure altitude unavailable";else if(d){
    let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
-   r=fsLanding(cfg,lookupPA,wk);if(!r)reason="Landing distance outside digitized FlightSafety table range";else r.paBasis=paBasis
+   r=fsLanding(cfg,lookupPA,wk);if(!r)reason="Landing distance outside legacy digitized table range";else r.paBasis=paBasis
  }
  if(r)$("landFieldLen").value=Math.round(r.lfl);else $("landFieldLen").value="";
  return{ok:vref!=null||!!r,cfg,vref,speed:published,speedLabel:d?.speedLabel||"VREF",ld:r?r.ld:null,lfl:r?r.lfl:null,paBasis:r?r.paBasis:null,msg:reason}
@@ -5647,7 +5660,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.12",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.13",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
