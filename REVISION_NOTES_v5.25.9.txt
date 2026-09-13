@@ -1,0 +1,8 @@
+5.25.9 — iPhone/iPad TOLD Responsive Layout Fix
+
+Changes
+- Corrected TOLD action bar layout on iPhone so Refresh TOLD and More are equal-height, equal-width controls aligned left-to-right.
+- Corrected iPad/tablet TOLD action bar so Refresh TOLD and More stay side-by-side instead of stacking awkwardly.
+- Corrected the iPad More menu anchor so the menu opens inward and remains fully visible on-screen.
+- Mobile More menu remains a fixed bottom popover above the navigation bar and now supports scrolling on shorter screens.
+- No change to TOLD calculation, sharing payload, performance data, scripts, or server share-token behavior.
