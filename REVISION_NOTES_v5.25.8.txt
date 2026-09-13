@@ -1,0 +1,9 @@
+5.25.8 — Reliable Editable Trip Delivery
+
+- Editable trip links now use ?share=TOKEN instead of #share=TOKEN.
+  URL fragments can be dropped by email clients, link-security wrappers, or installed/PWA launches.
+- Sender now performs a server round-trip verification immediately after creating a shared-trip token.
+  A share is not offered/sent unless the recipient endpoint can retrieve the stored trip.
+- Recipient startup checks query-string share tokens first and still accepts older #share links.
+- Import removes the share token from the address bar after creating the local Draft.
+- Existing aircraft-safe import logic and 30-day token expiration remain unchanged.

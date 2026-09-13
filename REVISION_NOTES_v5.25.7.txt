@@ -1,0 +1,18 @@
+5.25.7 — Mission Workflow & TOLD UX
+
+Changes
+- Corrects AWC aviation epoch-second timestamps so TAF validity/FM/TEMPO periods display the proper current UTC calendar date instead of January 1970-style dates. UTC year is now shown for verification.
+- All normal text and textarea entry fields are automatically stored/displayed in uppercase. Numeric, email, password, date/time, checkbox/radio and file controls are excluded.
+- Section 3 Weather Source station selector now shows Departure — ICAO and Destination — ICAO.
+- Adds daily sequential trip numbers in YYYYMMDD-## format. The number is assigned when a trip first becomes a Draft, persists into Archive, and includes a leg_number metadata field for multi-leg grouping.
+- Draft and Archive cards display trip number and leg number.
+- Falcon 50 TOLD adds direct departure and destination runway quick-change selectors. Departure changes also control the emergency-return runway. Runway changes invalidate/reload applicable NOTAM state and recalculate TOLD.
+- TOLD action clutter reduced: Refresh TOLD stays visible; sharing, copy link, email, print and Complete & Archive move under a compact More menu.
+- Refresh TOLD now refreshes current mission/weather/runway/NOTAM data and then recalculates while preserving the pilot-selected runway when it remains available.
+
+Compatibility
+- Existing Drafts/Archive records without a trip number remain readable and receive a number when reopened/saved.
+- Existing editable links remain supported.
+- scripts/extract_f900b_qrh.py is unchanged.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.
