@@ -509,13 +509,25 @@ details summary{cursor:pointer;margin-top:8px}
   .notam-grid{grid-template-columns:1fr 1fr}
 }
 
+
+/* v5.25.8 — Mission Workflow & TOLD UX */
+.told-action-menu{position:relative;display:inline-block}
+.told-action-menu>summary{list-style:none;cursor:pointer;background:#1f5c91;border:1px solid #3879af;border-radius:8px;padding:9px 13px;font-weight:700;color:#fff;user-select:none}
+.told-action-menu>summary::-webkit-details-marker{display:none}
+.told-action-menu[open]>summary{background:#174974}
+.told-menu-panel{position:absolute;right:0;top:calc(100% + 6px);z-index:80;min-width:220px;background:#071b30;border:1px solid #31506f;border-radius:10px;padding:8px;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.told-menu-panel button{display:block;width:100%;margin:5px 0;text-align:left}
+.told-runway-quick{display:grid;grid-template-columns:repeat(2,minmax(220px,1fr));gap:10px;margin:10px 0 12px}
+.told-runway-quick>div{background:#071b30;border:1px solid #31506f;border-radius:10px;padding:9px 10px}
+.trip-number{font-weight:800;letter-spacing:.03em;color:#b9dfff}
+@media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
 <meta name="theme-color" content="#071b33">
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.6</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.8</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -803,7 +815,7 @@ PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplet
 <h2>3. Weather Source / Manual Weather</h2>
 <div class="callout small"><b>Weather source control:</b> LIVE uses the loaded METAR. MANUAL uses pilot-entered values for performance and wind components. If no report is available, select MANUAL and enter OAT, pressure altitude, and wind as applicable. Manual weather is visibly identified on the TOLD. Runway condition remains a separate pilot selection.</div>
 <div class="row" style="margin-top:10px">
-  <div><label>Station</label><select id="manualWxTarget" onchange="loadManualWeatherForm()"><option value="dep">Departure</option><option value="dest">Destination</option></select></div>
+  <div><label>Station</label><select id="manualWxTarget" onchange="loadManualWeatherForm()"><option value="dep" id="manualWxDepOption">Departure —</option><option value="dest" id="manualWxDestOption">Destination —</option></select></div>
   <div><label>Weather Source</label><select id="manualWxMode" onchange="manualWeatherModeChanged()"><option value="LIVE">LIVE / REPORTED</option><option value="MANUAL">MANUAL / PILOT ENTRY</option></select></div>
   <div class="wx"><div class="small">Departure Weather</div><b id="depWxSourceBadge">UNAVAILABLE</b><div class="small" id="depWxSourceTime">—</div></div>
   <div class="wx"><div class="small">Destination Weather</div><b id="destWxSourceBadge">UNAVAILABLE</b><div class="small" id="destWxSourceTime">—</div></div>
@@ -1360,14 +1372,19 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="small">Aircraft Preparation • Weight & Balance • Takeoff & Landing Data</div>
     <div class="told-stamp" id="toldDateTime">Generated —</div>
   </div>
-  <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap">
-    <button type="button" onclick="updateToldCard()">Refresh</button>
-    <button type="button" onclick="shareCurrentMission()">Share Read-Only TOLD</button>
-    <button type="button" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
-    <button type="button" onclick="copyCurrentToldLink()">Copy TOLD Link</button>
-    <button type="button" onclick="emailCurrentMission()">Email</button>
-    <button type="button" onclick="window.print()">Print</button>
-    <button type="button" onclick="completeMission()">Complete & Archive Flight Plan</button>
+  <div class="told-actions" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start">
+    <button type="button" onclick="refreshToldOperationalData()">Refresh TOLD</button>
+    <details class="told-action-menu" id="toldMoreMenu">
+      <summary aria-label="More TOLD actions">⋯ More</summary>
+      <div class="told-menu-panel">
+        <button type="button" onclick="shareCurrentMission();closeToldMoreMenu()">Share Read-Only TOLD</button>
+        <button type="button" onclick="shareEditableCurrentTrip();closeToldMoreMenu()">Share Editable Trip</button>
+        <button type="button" onclick="copyCurrentToldLink();closeToldMoreMenu()">Copy TOLD Link</button>
+        <button type="button" onclick="emailCurrentMission();closeToldMoreMenu()">Email</button>
+        <button type="button" onclick="window.print();closeToldMoreMenu()">Print</button>
+        <button type="button" onclick="completeMission();closeToldMoreMenu()">Complete &amp; Archive Flight Plan</button>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -1388,6 +1405,10 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
         </div>
       </div>
       <button type="button" class="takeoff-config-refresh" onclick="refreshTakeoffConfiguration()">Refresh Takeoff</button>
+    </div>
+    <div class="told-runway-quick">
+      <div><label>Departure Runway — Quick Change</label><select id="toldDepRunwaySelect" onchange="toldRunwayChanged('dep',this.value)"><option value="">Load mission first</option></select></div>
+      <div><span class="small">APPLIES TO TAKEOFF + EMERGENCY RETURN</span><div class="small" style="margin-top:6px">Changing runway here refreshes runway/NOTAM state and recalculates TOLD.</div></div>
     </div>
     <div class="takeoff-compare" aria-label="Takeoff configuration comparison">
       <div class="takeoff-compare-card" id="compareS20Card">
@@ -1457,6 +1478,9 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-op-head">
       <div class="told-op-heading"><span class="told-op-number">3</span><div><div class="told-op-title" id="toldLandingHeading">LANDING — DESTINATION</div><div class="small">Destination runway, VREF, landing distance and available runway</div></div></div>
       <span class="told-op-status" id="opLandingStatus">—</span>
+    </div>
+    <div class="told-runway-quick" style="grid-template-columns:minmax(220px,1fr)">
+      <div><label>Destination Runway — Quick Change</label><select id="toldDestRunwaySelect" onchange="toldRunwayChanged('dest',this.value)"><option value="">Load mission first</option></select></div>
     </div>
     <div class="told-op-metrics">
       <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="opLandingRunway">—</b></div>
@@ -2269,7 +2293,7 @@ async function refreshF900B(){
 }
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
 async function startF900BTrip(dep,dest,alt){
- window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",started_at:new Date().toISOString(),completed:false};
+ window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",started_at:new Date().toISOString(),completed:false}; window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.started_at);
  if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
  f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
  f9Put("f9mRoute",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
@@ -2314,6 +2338,33 @@ function parseWindFromRawMetar(m){
  return{dir:mt[1]==="VRB"?"VRB":Number(mt[1]),spd:Number(mt[2]),gust:mt[3]?Number(mt[3]):null};
 }
 function activeWindValues(m){const raw=parseWindFromRawMetar(m);let dir=firstVal(m||{},["wind_dir","wdir","windDir","wind_direction"]),spd=firstVal(m||{},["wind_kt","wspd","windSpeed","wind_speed_kt"]),gust=firstVal(m||{},["wind_gust_kt","wgst","windGust","wind_gust"]);if(dir==null)dir=raw.dir;if(spd==null)spd=raw.spd;if(gust==null)gust=raw.gust;return{dir,spd,gust}}
+function updateManualWeatherStationLabels(){
+ const dep=cleanICAO($("dep")?.value||""),dest=cleanICAO($("dest")?.value||"");
+ const a=$("manualWxDepOption"),b=$("manualWxDestOption");
+ if(a)a.textContent=`Departure${dep?" — "+dep:""}`;
+ if(b)b.textContent=`Destination${dest?" — "+dest:""}`;
+}
+function enableUppercaseEntry(){
+ const excluded=new Set(["number","date","time","datetime-local","email","password","range","checkbox","radio","file","color"]);
+ const eligible=el=>el&&(el.tagName==="TEXTAREA"||(el.tagName==="INPUT"&&!excluded.has(String(el.type||"text").toLowerCase())));
+ document.querySelectorAll("input,textarea").forEach(el=>{if(eligible(el)){el.setAttribute("autocapitalize","characters");el.setAttribute("spellcheck","false")}});
+ if(document.documentElement.dataset.uppercaseListenerBound)return;document.documentElement.dataset.uppercaseListenerBound="1";
+ document.addEventListener("input",e=>{const el=e.target;if(!eligible(el))return;el.setAttribute("autocapitalize","characters");const start=el.selectionStart,end=el.selectionEnd,up=String(el.value||"").toUpperCase();if(el.value!==up){el.value=up;try{el.setSelectionRange(start,end)}catch{}}},true);
+}
+function syncToldRunwaySelectors(){
+ [["depRunway","toldDepRunwaySelect"],["destRunway","toldDestRunwaySelect"]].forEach(([srcId,dstId])=>{const src=$(srcId),dst=$(dstId);if(!src||!dst)return;dst.innerHTML="";[...src.options].forEach(o=>{const n=document.createElement("option");n.value=o.value;n.textContent=o.textContent;dst.appendChild(n)});dst.value=src.value||"";});
+}
+async function toldRunwayChanged(which,value){
+ const main=$(which==="dep"?"depRunway":"destRunway");if(!main)return;main.value=value;selectedRunwayChanged(which);syncToldRunwaySelectors();scheduleDraftSave();
+ try{if(which==="dep")await refreshDepartureNotams(true);else await refreshNotams();}catch{}
+ recalculate();updateToldCard();
+}
+function closeToldMoreMenu(){const d=$("toldMoreMenu");if(d)d.open=false}
+async function refreshToldOperationalData(){
+ if(window.currentMissionMeta?.aircraft==="F900B"){await refreshF900B();scheduleDraftSave();return;}
+ const depValue=$("depRunway")?.value||"",destValue=$("destRunway")?.value||"";
+ try{await loadMission({preserveManualWeather:true,quiet:true});if(depValue&&$("depRunway")?.querySelector(`option[value="${CSS.escape(depValue)}"]`))$("depRunway").value=depValue;if(destValue&&$("destRunway")?.querySelector(`option[value="${CSS.escape(destValue)}"]`))$("destRunway").value=destValue;selectedRunwayChanged();await Promise.allSettled([refreshDepartureNotams(true),refreshNotams()]);recalculate();updateToldCard();syncToldRunwaySelectors();scheduleDraftSave();}catch(e){alert(`Unable to refresh current TOLD data: ${e.message||e}`)}
+}
 function loadManualWeatherForm(){
  const which=$("manualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
  if($("manualWxMode"))$("manualWxMode").value=st?.applied?"MANUAL":"LIVE";
@@ -2397,6 +2448,24 @@ function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
 
 function cleanICAO(v){return String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4)}
 function newMissionId(){return "M-"+Date.now().toString(36).toUpperCase()}
+function tripDateKey(value=new Date()){
+ const d=value instanceof Date?value:new Date(value);
+ const x=Number.isNaN(d.getTime())?new Date():d;
+ return `${x.getFullYear()}${String(x.getMonth()+1).padStart(2,"0")}${String(x.getDate()).padStart(2,"0")}`;
+}
+function allocateTripNumber(value=new Date()){
+ const key=tripDateKey(value),rx=new RegExp(`^${key}-(\\d+)$`);
+ let max=0;
+ [...getMissionDrafts(),...getMissionArchive()].forEach(r=>{const m=String(r?.trip_number||"").match(rx);if(m)max=Math.max(max,Number(m[1])||0)});
+ try{max=Math.max(max,Number(localStorage.getItem(`kusaFlightOpsTripSeq:${key}`))||0)}catch{}
+ const next=max+1;try{localStorage.setItem(`kusaFlightOpsTripSeq:${key}`,String(next))}catch{}
+ return `${key}-${String(next).padStart(2,"0")}`;
+}
+function currentTripNumber(){
+ if(!window.currentMissionMeta)return "";
+ if(!window.currentMissionMeta.trip_number)window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.started_at||new Date());
+ return window.currentMissionMeta.trip_number;
+}
 function getMissionArchive(){
  try{return JSON.parse(localStorage.getItem("kusaFlightOpsArchive")||"[]")}catch{return[]}
 }
@@ -2446,14 +2515,14 @@ function applyF900BPlanState(state){
 function f900bDraftRecord(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
  const state=captureF900BPlanState();
- return {id:window.currentMissionMeta.id,aircraft:"F900B",note:state.note||window.currentMissionMeta.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
+ return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:"F900B",note:state.note||window.currentMissionMeta.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
 }
 async function restoreF900BFlightPlan(record,opts={}){
  if(!record)return;
  const state=record.state||record;
  applyF900BPlanState(state);
  const newId=opts.newCopy?newMissionId():(record.id||newMissionId());
- window.currentMissionMeta={id:newId,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};
+ window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(opts.newCopy?new Date():(record.started_at||new Date())),leg_number:record.leg_number||1,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  await refreshF900BMission();
  saveCurrentDraft();
@@ -2466,7 +2535,7 @@ function draftRecord(){
  state.manual_weather=JSON.parse(JSON.stringify(manualWeather||{}));
  state.fob_verified=!!$("fobVerified")?.checked;
  state.low_fuel_confirmed=!!$("lowFuelConfirm")?.checked;
- return {id:window.currentMissionMeta.id,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
+ return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
 }
 function saveCurrentDraft(){
  const rec=draftRecord();if(!rec)return;
@@ -2564,6 +2633,7 @@ note:$("homeTripNote").value.trim(),
    started_at:new Date().toISOString(),
    completed:false
  };
+ window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.started_at);
  recalculate();
  showPlatformView("ops");
  saveCurrentDraft();
@@ -2709,7 +2779,14 @@ async function makeEditableTripShareLink(record=null){
  const resp=await fetch("/api/shared-trips",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({record:rec,label})});
  let data=null;try{data=await resp.json()}catch{}
  if(!resp.ok||!data?.id)throw new Error(data?.error||"Unable to create editable trip link.");
- const url=`${window.location.origin}${window.location.pathname}#share=${encodeURIComponent(data.id)}`;
+ // Use a query parameter rather than a URL fragment. Email clients, link scanners,
+ // and installed/PWA launches can drop #fragments before FlightOps sees them.
+ const url=`${window.location.origin}${window.location.pathname}?share=${encodeURIComponent(data.id)}`;
+ // Round-trip the token before offering it to the sender. This catches a server-side
+ // persistence/write problem now instead of sending a link the recipient cannot open.
+ const verify=await fetch(`/api/shared-trips/${encodeURIComponent(data.id)}`,{cache:"no-store"});
+ let verified=null;try{verified=await verify.json()}catch{}
+ if(!verify.ok||!verified?.record)throw new Error(verified?.error||"Editable trip was created but could not be verified on the server.");
  return {url,label,expires_at:data.expires_at};
 }
 async function shareEditableRecord(record){
@@ -2756,6 +2833,13 @@ async function loadShortSharedEditableTrip(id){
  }
 }
 function openSharedContentFromHash(){
+ // v5.25.8+: query-string share tokens survive email/security-link rewriting and PWA launches.
+ const queryId=new URLSearchParams(window.location.search||"").get("share");
+ if(queryId){
+   loadShortSharedEditableTrip(queryId);
+   return true;
+ }
+ // Backward compatibility with v5.25.6-v5.25.7 #share links.
  const hash=String(window.location.hash||"");
  if(hash.startsWith("#share=")){
    const id=decodeURIComponent(hash.slice(7));
@@ -2784,7 +2868,10 @@ async function importSharedEditableTrip(){
    window.currentMissionMeta.id=copy.id;window.currentMissionMeta.reopened_from_archive=false;window.currentMissionMeta.imported_editable_copy=true;
    saveCurrentDraft();showPlatformView("ops");
  }
- history.replaceState(null,"",window.location.pathname+window.location.search);
+ const cleanUrl=new URL(window.location.href);
+ cleanUrl.searchParams.delete("share");
+ cleanUrl.hash="";
+ history.replaceState(null,"",cleanUrl.pathname+(cleanUrl.searchParams.toString()?`?${cleanUrl.searchParams.toString()}`:""));
  PENDING_SHARED_EDITABLE_TRIP=null;
  alert("Editable trip imported as a new Draft on this device. Your changes will not affect the sender’s original.");
 }
@@ -2941,6 +3028,8 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
 
  window.currentMissionMeta={
    id:record.id||newMissionId(),
+   trip_number:record.trip_number||allocateTripNumber(record.started_at||new Date()),
+   leg_number:record.leg_number||1,
    aircraft:record.aircraft||s.aircraft||"N33AP",
 note:s.note||record.note||"",
    started_at:new Date().toISOString(),
@@ -2989,12 +3078,13 @@ function currentF900BSummaryText(){
 }
 function buildF900BArchiveRecord(){
  const state=captureF900BPlanState(),f=state.f900b||{};
- return {id:window.currentMissionMeta?.id||newMissionId(),aircraft:"F900B",note:state.note||window.currentMissionMeta?.note||"",started_at:window.currentMissionMeta?.started_at||null,completed_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,tow_lb:Number(f.takeoff_weight_lb)||null,ldw_lb:Number(f.landing_weight_lb)||null,to_status:textOf("f9ToStatus"),ldg_status:textOf("f9LdgStatus"),summary:currentF900BSummaryText(),state};
+ return {id:window.currentMissionMeta?.id||newMissionId(),trip_number:currentTripNumber(),leg_number:window.currentMissionMeta?.leg_number||1,aircraft:"F900B",note:state.note||window.currentMissionMeta?.note||"",started_at:window.currentMissionMeta?.started_at||null,completed_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,tow_lb:Number(f.takeoff_weight_lb)||null,ldw_lb:Number(f.landing_weight_lb)||null,to_status:textOf("f9ToStatus"),ldg_status:textOf("f9LdgStatus"),summary:currentF900BSummaryText(),state};
 }
 function buildArchiveRecord(){
  const c=latestCalc||{},dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest"),state=captureCurrentPlanState();
  return{
    id:(window.currentMissionMeta&&window.currentMissionMeta.id)||newMissionId(),
+   trip_number:currentTripNumber(),leg_number:window.currentMissionMeta?.leg_number||1,
    aircraft:(window.currentMissionMeta&&window.currentMissionMeta.aircraft)||"N33AP",
 note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||"",
    started_at:(window.currentMissionMeta&&window.currentMissionMeta.started_at)||null,
@@ -3099,7 +3189,7 @@ function renderDrafts(){
  const list=$("draftList");if(!list)return;
  const arr=getMissionDrafts();
  if(!arr.length){list.innerHTML='<div class="callout small">No drafts. Start a New Trip and FlightOps will auto-save it here.</div>';return}
- list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—";return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route">${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Draft • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" onclick="shareEditableDraft(${i})">Share Editable</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
+ list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—";return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route"><span class="trip-number">${esc(m.trip_number||"UNNUMBERED")}</span> • ${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Draft • Leg ${esc(m.leg_number||1)} • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" onclick="shareEditableDraft(${i})">Share Editable</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
 }
 async function openDraftFlightPlan(i){
  const arr=getMissionDrafts(),m=arr[i];if(!m)return;
@@ -3109,7 +3199,7 @@ async function openDraftFlightPlan(i){
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
  if($("fobVerified"))$("fobVerified").checked=!!s.fob_verified;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=!!s.low_fuel_confirmed;
- window.currentMissionMeta={id:m.id||newMissionId(),aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};
+ window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.started_at||new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};
  updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
 }
 function deleteDraftFlightPlan(i){const arr=getMissionDrafts(),m=arr[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"}?`))return;arr.splice(i,1);saveMissionDrafts(arr);renderDrafts()}
@@ -3139,8 +3229,8 @@ function renderArchive(){
      </div>
      <div class="archive-head">
        <div>
-         <div class="archive-route">${m.dep||"—"} → ${m.dest||"—"}</div>
-         <div class="archive-meta">${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div>
+         <div class="archive-route"><span class="trip-number">${esc(m.trip_number||"UNNUMBERED")}</span> • ${m.dep||"—"} → ${m.dest||"—"}</div>
+         <div class="archive-meta">Leg ${esc(m.leg_number||1)} • ${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div>
        </div>
        <div class="status ${String(m.to_status).includes("NO-GO")||String(m.ldg_status).includes("NO-GO")?"bad":"warn"}">${esc(m.to_status||"—")}</div>
      </div>
@@ -3173,6 +3263,7 @@ function duplicateArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];if(!m)return;
  const copy=JSON.parse(JSON.stringify(m));
  copy.id=newMissionId();
+ copy.trip_number=allocateTripNumber(new Date());copy.leg_number=1;
 copy.completed_at=new Date().toISOString();
  arr.unshift(copy);
  saveMissionArchive(arr.slice(0,100));
@@ -3343,7 +3434,7 @@ function updateToldCard(){
  const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
  const dw=dr&&dr.wind_components||{},lw=lr&&lr.wind_components||{};
  const temp=perfIsManual()?perfTakeoffTemp():depTempC();
- $("toldRoute").textContent=`${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
+ $("toldRoute").textContent=`Trip ${currentTripNumber()||"—"} • ${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
  $("toldDateTime").textContent=`Generated ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
  const altCode=$("alt").value.toUpperCase().trim();
  let bagLoads=baggageLoadsFromUI();
@@ -4175,13 +4266,18 @@ function recalculate(){
  updateToldCard();
 }
 function airportName(x){const a=x.airport||{};return a.name||a.siteName||a.nameFull||x.icao}
-function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(v);if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
+function normalizeAviationTime(v){
+ if(v==null||v==="")return null;
+ if(typeof v==="number"||(typeof v==="string"&&/^\d{9,11}$/.test(v.trim()))){const n=Number(v);if(Number.isFinite(n))return n<1e12?n*1000:n;}
+ return v;
+}
+function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(normalizeAviationTime(v));if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
 function firstVal(o,ks){for(const k of ks){if(o&&o[k]!=null&&o[k]!=="")return o[k]}return null}
 function windTextObj(o){const dir=firstVal(o,["wind_dir","wdir","windDir","wind_direction"]);const spd=Number(firstVal(o,["wind_kt","wspd","windSpeed","wind_speed_kt"]));const gust=Number(firstVal(o,["wind_gust_kt","wgst","windGust","wind_gust"]));if(!Number.isFinite(spd)||spd===0)return"Wind calm";let d="variable";if(dir!=null&&String(dir).toUpperCase()!=="VRB"&&Number.isFinite(Number(dir)))d=`${String(Math.round(Number(dir))).padStart(3,"0")}°`;return`Wind ${d} at ${Math.round(spd)} kt${Number.isFinite(gust)&&gust>0?`, gusting ${Math.round(gust)} kt`:""}`}
 function visibilityText(v){if(v==null||v==="")return"Visibility not reported";const n=Number(v);return Number.isFinite(n)?`Visibility ${n} statute mile${n===1?"":"s"}`:`Visibility ${v}`}
 function cloudText(c){if(!Array.isArray(c)||!c.length)return"Clouds not reported";const n={SKC:"clear",CLR:"clear",FEW:"few",SCT:"scattered",BKN:"broken",OVC:"overcast",VV:"vertical visibility"};return c.map(x=>{const cov=firstVal(x,["cover","coverage","skyCover","amount"])||"";const base=firstVal(x,["base","base_ft_agl","baseFtAgl","altitude"]);const label=n[String(cov).toUpperCase()]||String(cov).toLowerCase();return base!=null?`${label} at ${Number(base).toLocaleString()} ft AGL`:label}).join(", ")}
 function formatMetarDecoded(m,altInHg){if(!m)return'<span class="warn">METAR unavailable</span>';const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);const cat=firstVal(m,["flight_category","fltCat","category"])||"METAR";const vis=firstVal(m,["visibility_sm","visib","visibility"]);const wx=firstVal(m,["wx","wxString","weather"]);const t=Number(firstVal(m,["temp_c","temp","temperature"]));const d=Number(firstVal(m,["dewpoint_c","dewp","dewpoint"]));const clouds=firstVal(m,["clouds","sky"])||[];const alt=altInHg??firstVal(m,["altimeter_inhg","altimeter"]);const lines=[];lines.push(`<div class="decoded-line"><b>${cat}</b> • observed ${fmtUtc(obs)}</div>`);lines.push(`<div class="decoded-line">${windTextObj(m)}</div>`);lines.push(`<div class="decoded-line">${visibilityText(vis)}</div>`);if(wx)lines.push(`<div class="decoded-line">Weather: ${wx}</div>`);lines.push(`<div class="decoded-line">${cloudText(clouds)}</div>`);if(Number.isFinite(t)||Number.isFinite(d))lines.push(`<div class="decoded-line">Temperature ${Number.isFinite(t)?t+"°C":"—"} • Dew point ${Number.isFinite(d)?d+"°C":"—"}</div>`);if(alt!=null&&Number.isFinite(Number(alt)))lines.push(`<div class="decoded-line">Altimeter ${Number(alt).toFixed(2)} inHg</div>`);return lines.join("")}
-function formatTafDecoded(t){if(!t)return'<span class="warn">TAF unavailable</span>';const vf=firstVal(t,["valid_from","validTimeFrom","fcstTimeFrom","startTime"]);const vt=firstVal(t,["valid_to","validTimeTo","fcstTimeTo","endTime"]);let out=`<div class="decoded-line"><b>Valid</b> ${fmtUtc(vf)} to ${fmtUtc(vt)}</div>`;const fc=firstVal(t,["forecast","forecasts","fcsts","periods"]);if(!Array.isArray(fc)||!fc.length)return out+'<div class="decoded-line">Forecast periods unavailable from decoded feed; raw TAF retained below.</div>';out+=fc.map(f=>{const from=firstVal(f,["timeFrom","validTimeFrom","valid_from","fcstTimeFrom","startTime"]);const to=firstVal(f,["timeTo","validTimeTo","valid_to","fcstTimeTo","endTime"]);const ch=firstVal(f,["changeIndicator","change_indicator","fcstChange","change"])||"Forecast";const vis=firstVal(f,["visib","visibility","visibility_sm"]);const wx=firstVal(f,["wxString","wx","weather"]);const clouds=firstVal(f,["clouds","sky"])||[];const bits=[windTextObj(f),visibilityText(vis)];if(wx)bits.push(`Weather: ${wx}`);bits.push(cloudText(clouds));return`<div class="decoded-period"><b>${ch}</b> • ${fmtUtc(from)} to ${fmtUtc(to)}<br>${bits.join(" • ")}</div>`}).join("");return out}
+function formatTafDecoded(t){if(!t)return'<span class="warn">TAF unavailable</span>';const issued=firstVal(t,["issue_time","issueTime","issue_time_utc","reportTime"]);const vf=firstVal(t,["valid_from","validTimeFrom","fcstTimeFrom","startTime"]);const vt=firstVal(t,["valid_to","validTimeTo","fcstTimeTo","endTime"]);let out=issued?`<div class="decoded-line"><b>Issued</b> ${fmtUtc(issued)}</div>`:"";out+=`<div class="decoded-line"><b>Valid</b> ${fmtUtc(vf)} to ${fmtUtc(vt)}</div>`;const fc=firstVal(t,["forecast","forecasts","fcsts","periods"]);if(!Array.isArray(fc)||!fc.length)return out+'<div class="decoded-line">Forecast periods unavailable from decoded feed; raw TAF retained below.</div>';out+=fc.map(f=>{const from=firstVal(f,["timeFrom","validTimeFrom","valid_from","fcstTimeFrom","startTime"]);const to=firstVal(f,["timeTo","validTimeTo","valid_to","fcstTimeTo","endTime"]);const ch=firstVal(f,["changeIndicator","change_indicator","fcstChange","change"])||"Forecast";const vis=firstVal(f,["visib","visibility","visibility_sm"]);const wx=firstVal(f,["wxString","wx","weather"]);const clouds=firstVal(f,["clouds","sky"])||[];const bits=[windTextObj(f),visibilityText(vis)];if(wx)bits.push(`Weather: ${wx}`);bits.push(cloudText(clouds));return`<div class="decoded-period"><b>${ch}</b> • ${fmtUtc(from)} to ${fmtUtc(to)}<br>${bits.join(" • ")}</div>`}).join("");return out}
 
 
 
@@ -4273,6 +4369,7 @@ function fillRunwaySelect(id,runways){
    sel.appendChild(opt);
  });
  syncAssessmentRunwaySelectors();
+ syncToldRunwaySelectors();
 }
 function syncAssessmentRunwaySelectors(){
  [["depRunway","depNotamRunwaySelect"],["destRunway","destNotamRunwaySelect"]].forEach(([srcId,dstId])=>{
@@ -4317,6 +4414,7 @@ function selectedRunwayChanged(whichChanged=null){
  }
  updateDepartureRunwayAssessment();
  updateLandingRunwayAssessment();
+ syncToldRunwaySelectors();
  updateToldCard();
 }
 
@@ -4332,7 +4430,7 @@ async function loadMission(options={}){
    if(savedManual){
      ["dep","dest"].forEach(which=>{const p=which==="dep"?missionData.departure:missionData.destination,st=manualWeather[which];st.live={metar:p?.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p?.pressure_altitude_ft??null,density_altitude_ft:p?.density_altitude_ft??null,altimeter_inhg:p?.altimeter_inhg??null};st.mode="LIVE";st.applied=false;});
    }
-   $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;$("depWxIdent").textContent=dep;$("depWxIdent2").textContent=dep;$("destWxIdent").textContent=dest;$("destWxIdent2").textContent=dest;
+   $("depTitle").textContent=dep;$("destTitle").textContent=dest;$("sumDep").textContent=dep;$("sumDest").textContent=dest;$("depWxIdent").textContent=dep;$("depWxIdent2").textContent=dep;$("destWxIdent").textContent=dest;$("destWxIdent2").textContent=dest;updateManualWeatherStationLabels();
    populatePoint("dep",missionData.departure);populatePoint("dest",missionData.destination);
    if(alt&&missionData.alternate){
      $("altMetarPanel").style.display="block";$("altTafPanel").style.display="block";
@@ -5465,7 +5563,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.6",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.8",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
@@ -5574,5 +5672,7 @@ if ("serviceWorker" in navigator) {
     } catch(e) {}
   });
 }
+
+try{enableUppercaseEntry();updateManualWeatherStationLabels();syncToldRunwaySelectors();}catch(e){}
 </script>
 </body></html>
