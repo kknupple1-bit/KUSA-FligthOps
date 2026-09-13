@@ -1,0 +1,6 @@
+5.25.10 — TOLD Action Row Exact Alignment Fix
+
+- Corrects the vertical offset between Refresh TOLD and … More on iPhone and iPad.
+- Root cause: the global details summary rule added an 8 px top margin to the More control.
+- Sets the TOLD More summary and Refresh button vertical margins to zero while preserving equal responsive sizing.
+- No performance, sharing, weather, runway, or flight-data logic changed.
