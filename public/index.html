@@ -523,6 +523,18 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
+/* v5.25.11 — active takeoff configuration + operational V-speed emphasis */
+.takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
+.takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
+.takeoff-compare-details>summary::-webkit-details-marker{display:none}
+.takeoff-compare-details>summary::after{content:" +";color:#6fb6ee}
+.takeoff-compare-details[open]>summary::after{content:" −"}
+.takeoff-compare-details .takeoff-compare{padding:0 10px 10px}
+.takeoff-compare-details .compare-note{padding:0 12px 12px;color:#9db6cf}
+.told-vspeed{color:inherit}
+.told-vspeed.valid{color:#55e38b!important;text-shadow:0 0 10px rgba(85,227,139,.12)}
+@media print{.told-vspeed.valid{color:#111!important;text-shadow:none}}
+
 /* v5.25.10 — exact TOLD action-row alignment fix */
 .told-action-menu>summary{margin-top:0!important;margin-bottom:0!important}
 .told-actions>button{margin-top:0!important;margin-bottom:0!important}
@@ -588,7 +600,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.10</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.11</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1471,27 +1483,30 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <div><label>Departure Runway — Quick Change</label><select id="toldDepRunwaySelect" onchange="toldRunwayChanged('dep',this.value)"><option value="">Load mission first</option></select></div>
       <div><span class="small">APPLIES TO TAKEOFF + EMERGENCY RETURN</span><div class="small" style="margin-top:6px">Changing runway here refreshes runway/NOTAM state and recalculates TOLD.</div></div>
     </div>
-    <div class="takeoff-compare" aria-label="Takeoff configuration comparison">
-      <div class="takeoff-compare-card" id="compareS20Card">
-        <div class="takeoff-compare-head"><b>SLATS + FLAPS 20°</b><span class="takeoff-compare-status" id="compareS20Status">—</span></div>
-        <div class="takeoff-compare-values">
-          <div class="takeoff-compare-value"><span>V1 / VR</span><b id="compareS20Speeds">—</b></div>
-          <div class="takeoff-compare-value"><span>Takeoff Distance</span><b id="compareS20Distance">—</b></div>
-          <div class="takeoff-compare-value"><span>Runway Remaining</span><b id="compareS20Margin">—</b></div>
-          <div class="takeoff-compare-value"><span>Source</span><b id="compareS20Source">—</b></div>
+    <details class="takeoff-compare-details">
+      <summary>Compare Configurations</summary>
+      <div class="takeoff-compare" aria-label="Takeoff configuration comparison">
+        <div class="takeoff-compare-card" id="compareS20Card">
+          <div class="takeoff-compare-head"><b>SLATS + FLAPS 20°</b><span class="takeoff-compare-status" id="compareS20Status">—</span></div>
+          <div class="takeoff-compare-values">
+            <div class="takeoff-compare-value"><span>V1 / VR</span><b id="compareS20Speeds">—</b></div>
+            <div class="takeoff-compare-value"><span>Takeoff Distance</span><b id="compareS20Distance">—</b></div>
+            <div class="takeoff-compare-value"><span>Runway Remaining</span><b id="compareS20Margin">—</b></div>
+            <div class="takeoff-compare-value"><span>Source</span><b id="compareS20Source">—</b></div>
+          </div>
+        </div>
+        <div class="takeoff-compare-card" id="compareSlatsCard">
+          <div class="takeoff-compare-head"><b>SLATS ONLY</b><span class="takeoff-compare-status" id="compareSlatsStatus">—</span></div>
+          <div class="takeoff-compare-values">
+            <div class="takeoff-compare-value"><span>V1 / VR</span><b id="compareSlatsSpeeds">—</b></div>
+            <div class="takeoff-compare-value"><span>Takeoff Distance</span><b id="compareSlatsDistance">—</b></div>
+            <div class="takeoff-compare-value"><span>Runway Remaining</span><b id="compareSlatsMargin">—</b></div>
+            <div class="takeoff-compare-value"><span>Source</span><b id="compareSlatsSource">—</b></div>
+          </div>
         </div>
       </div>
-      <div class="takeoff-compare-card" id="compareSlatsCard">
-        <div class="takeoff-compare-head"><b>SLATS ONLY</b><span class="takeoff-compare-status" id="compareSlatsStatus">—</span></div>
-        <div class="takeoff-compare-values">
-          <div class="takeoff-compare-value"><span>V1 / VR</span><b id="compareSlatsSpeeds">—</b></div>
-          <div class="takeoff-compare-value"><span>Takeoff Distance</span><b id="compareSlatsDistance">—</b></div>
-          <div class="takeoff-compare-value"><span>Runway Remaining</span><b id="compareSlatsMargin">—</b></div>
-          <div class="takeoff-compare-value"><span>Source</span><b id="compareSlatsSource">—</b></div>
-        </div>
-      </div>
-    </div>
-    <div class="small" style="margin:-3px 0 12px">Immediate field and speed comparison only. The highlighted configuration controls the full takeoff TOLD calculation. Published-source limits remain enforced; no extrapolation.</div>
+      <div class="small compare-note">Comparison view only. The selected configuration controls the operational TOLD calculation. Published-source limits remain enforced; no extrapolation.</div>
+    </details>
     <div class="told-op-metrics">
       <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="opTakeoffRunway">—</b></div>
       <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="opTakeoffAvailable">—</b></div>
@@ -1499,10 +1514,10 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="opTakeoffMargin">—</b></div>
     </div>
     <div class="told-speeds">
-      <div class="told-speed"><span class="small">V1</span><b id="opV1">—</b></div>
-      <div class="told-speed"><span class="small">VR = V2</span><b id="opVR">—</b></div>
-      <div class="told-speed"><span class="small">Vfr</span><b id="opVfr">—</b></div>
-      <div class="told-speed"><span class="small">1.5Vs</span><b id="op15Vs">—</b></div>
+      <div class="told-speed"><span class="small">V1</span><b id="opV1" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">VR = V2</span><b id="opVR" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">Vfr</span><b id="opVfr" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">1.5Vs</span><b id="op15Vs" class="told-vspeed">—</b></div>
     </div>
     <div class="told-op-details">
       <div class="told-op-detail"><span>Takeoff Weight</span><span id="opTakeoffWeight">—</span></div>
@@ -1523,7 +1538,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="opEmerMargin">—</b></div>
     </div>
     <div class="told-speeds">
-      <div class="told-speed"><span class="small">VREF</span><b id="opEmerVref">—</b></div>
+      <div class="told-speed"><span class="small">VREF</span><b id="opEmerVref" class="told-vspeed">—</b></div>
       <div class="told-speed"><span class="small">Return Weight</span><b id="opEmerWeight">—</b></div>
       <div class="told-speed"><span class="small">Planned Fuel Burn</span><b id="opEmerBurn">—</b></div>
       <div class="told-speed"><span class="small">Configuration</span><b>S+48</b></div>
@@ -1550,7 +1565,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="opLandingMargin">—</b></div>
     </div>
     <div class="told-speeds">
-      <div class="told-speed"><span class="small">VREF</span><b id="opLandingVref">—</b></div>
+      <div class="told-speed"><span class="small">VREF</span><b id="opLandingVref" class="told-vspeed">—</b></div>
       <div class="told-speed"><span class="small">Landing Weight</span><b id="opLandingWeight">—</b></div>
       <div class="told-speed"><span class="small">Landing Fuel</span><b id="opLandingFuel">—</b></div>
       <div class="told-speed"><span class="small">Configuration</span><b id="opLandingConfig">—</b></div>
@@ -1644,11 +1659,11 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>OEI 2nd Segment Gross Gradient</span><span id="toldSecondSegment">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
     <div class="told-speeds">
-      <div class="told-speed"><span class="small">V1</span><b id="toldV1">—</b></div>
-      <div class="told-speed"><span class="small">VR=V2</span><b id="toldVR">—</b></div>
-      <div class="told-speed"><span class="small">Vfr</span><b id="toldVfr">—</b></div>
-      <div class="told-speed"><span class="small">1.5Vs</span><b id="told15Vs">—</b></div>
-      <div class="told-speed"><span class="small">Emer VREF</span><b id="toldEmerVref">—</b></div>
+      <div class="told-speed"><span class="small">V1</span><b id="toldV1" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">VR=V2</span><b id="toldVR" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">Vfr</span><b id="toldVfr" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">1.5Vs</span><b id="told15Vs" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">Emer VREF</span><b id="toldEmerVref" class="told-vspeed">—</b></div>
     </div>
   </div>
 
@@ -3489,6 +3504,12 @@ function hotMaxTakeoffReference(){
  return out;
 }
 
+function setToldVspeed(id,value){
+ const el=$(id);if(!el)return;
+ const text=String(value??"—");
+ el.textContent=text;
+ el.classList.toggle("valid",/^\s*\d+(?:\.\d+)?\s*kt\s*$/i.test(text));
+}
 function updateToldCard(){
  const c=latestCalc||{};
  const depCode=$("dep").value.toUpperCase().trim()||"—",destCode=$("dest").value.toUpperCase().trim()||"—";
@@ -3588,11 +3609,11 @@ function updateToldCard(){
  if($("toldClimbTOW"))$("toldClimbTOW").textContent=$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED";
  if($("toldSecondSegment")){const g=valueOrNull("perfGrad");$("toldSecondSegment").textContent=Number.isFinite(g)?`${g.toFixed(2)}% • OEI • QRH REFERENCE`:"SOURCE LOCKED";}
  $("toldTOStatus").textContent=textOf("toStatus");
- $("toldV1").textContent=textOf("vsV1");
- $("toldVR").textContent=textOf("vsVR");
- $("toldVfr").textContent=textOf("vsVFT");
- $("told15Vs").textContent=textOf("vsVFS");
- $("toldEmerVref").textContent=textOf("vsVREF");
+ setToldVspeed("toldV1",textOf("vsV1"));
+ setToldVspeed("toldVR",textOf("vsVR"));
+ setToldVspeed("toldVfr",textOf("vsVFT"));
+ setToldVspeed("told15Vs",textOf("vsVFS"));
+ setToldVspeed("toldEmerVref",textOf("vsVREF"));
 
  $("toldDestRwy").textContent=`${destCode} / ${lr?lr.runway_id:"—"}`;
  $("toldDestSurface").textContent=`${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?$("landRunwayCondition").value:"DRY"}`;
@@ -3603,7 +3624,7 @@ function updateToldCard(){
  $("toldLandingFuel").textContent=Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—";
  $("toldLDGCG").textContent=Number.isFinite(c.landingPct)?`${c.landingPct.toFixed(2)}% MAC`:"—";
  $("toldLDGConfig").textContent=`${FS_PERF.landing[$("landConfig").value]?.label||"—"} • A/I ${$("landAntiIce")?.value||"OFF"}`;
- $("toldVref").textContent=$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED";
+ setToldVspeed("toldVref",$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED");
  $("toldLFL").textContent=$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"SOURCE LOCKED";
  const landAssess=effectiveLandingRunwayAssessment();
  $("toldPublishedLDA").textContent=Number.isFinite(landAssess.published)?`${Math.round(landAssess.published).toLocaleString()} ft`:"—";
@@ -3624,10 +3645,10 @@ function updateToldCard(){
  $("opTakeoffMargin").textContent=textOf("toRwyMargin");
  $("opTakeoffStatus").textContent=textOf("toStatus");
  $("opTakeoffStatus").className=`told-op-status ${textOf("toStatus").includes("PASS")?"ok":textOf("toStatus").includes("NO-GO")?"bad":"warn"}`;
- $("opV1").textContent=textOf("vsV1");
- $("opVR").textContent=textOf("vsVR");
- $("opVfr").textContent=textOf("vsVFT");
- $("op15Vs").textContent=textOf("vsVFS");
+ setToldVspeed("opV1",textOf("vsV1"));
+ setToldVspeed("opVR",textOf("vsVR"));
+ setToldVspeed("opVfr",textOf("vsVFT"));
+ setToldVspeed("op15Vs",textOf("vsVFS"));
  $("opTakeoffWeight").textContent=Number.isFinite(takeoffWeight)?`${Math.round(takeoffWeight).toLocaleString()} lb`:"—";
  $("opTakeoffConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  $("opTakeoffWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
@@ -3651,7 +3672,7 @@ function updateToldCard(){
  $("opEmerAvailable").textContent=`${Number.isFinite(emergencyAvailable)?Math.round(emergencyAvailable).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?.value||"DRY"}`;
  $("opEmerRequired").textContent=Number.isFinite(emergencyRequired)?`${Math.round(emergencyRequired).toLocaleString()} ft`:"SOURCE LOCKED";
  $("opEmerMargin").textContent=Number.isFinite(emergencyMargin)?`${Math.round(emergencyMargin).toLocaleString()} ft`:"—";
- $("opEmerVref").textContent=emergencyPerf&&Number.isFinite(emergencyPerf.speed)?`${emergencyPerf.speed.toFixed(1)} kt`:textOf("vsVREF");
+ setToldVspeed("opEmerVref",emergencyPerf&&Number.isFinite(emergencyPerf.speed)?`${emergencyPerf.speed.toFixed(1)} kt`:textOf("vsVREF"));
  $("opEmerWeight").textContent=Number.isFinite(emergencyWeight)?`${Math.round(emergencyWeight).toLocaleString()} lb`:"—";
  $("opEmerBurn").textContent=`${Math.round(appliedReturnBurn).toLocaleString()} lb`;
  $("opEmerWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
@@ -3664,7 +3685,7 @@ function updateToldCard(){
  $("opLandingAvailable").textContent=`${Number.isFinite(landAssess.usable)?Math.round(landAssess.usable).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?.value||"DRY"}`;
  $("opLandingRequired").textContent=$("landFieldLen").value?`${Number($("landFieldLen").value).toLocaleString()} ft`:"SOURCE LOCKED";
  $("opLandingMargin").textContent=textOf("landRwyMargin");
- $("opLandingVref").textContent=$("landVref").value?`${Number($("landVref").value).toFixed(1)} kt`:"SOURCE LOCKED";
+ setToldVspeed("opLandingVref",$("landVref").value?`${Number($("landVref").value).toFixed(1)} kt`:"SOURCE LOCKED");
  $("opLandingWeight").textContent=Number.isFinite(c.landing)?`${Math.round(c.landing).toLocaleString()} lb`:"—";
  $("opLandingFuel").textContent=Number.isFinite(c.landingFuel)?`${Math.round(c.landingFuel).toLocaleString()} lb`:"—";
  $("opLandingConfig").textContent=`${FS_PERF.landing[$("landConfig").value]?.label||"—"} • A/I ${$("landAntiIce")?.value||"OFF"}`;
@@ -5624,7 +5645,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.10",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.11",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
