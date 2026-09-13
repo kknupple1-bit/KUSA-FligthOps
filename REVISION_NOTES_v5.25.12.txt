@@ -1,0 +1,13 @@
+KUSA FlightOps v5.25.12 — Emergency Return Emphasis + Dassault Source Migration Prep
+
+UI changes
+- Section 2 EMERGENCY RETURN title is red on Falcon 50 and Falcon 900B TOLD views.
+- Emergency-return VREF is red when a valid speed is present.
+- Normal takeoff and destination-landing operational V-speeds remain green.
+
+Source-data policy
+- No FlightSafety-derived numerical table was silently relabeled as Dassault data in this build.
+- Existing legacy numerical tables remain unchanged pending direct re-digitization and validation against Dassault source documents.
+- Dassault source migration target: Falcon 50 AFM DTM813 Section 5 and Falcon 50 Performance Manual DTM912, with exact chart/revision traceability and validation before replacing legacy values.
+
+No changes to runway, weather, sharing, W&B, interpolation, or 900B QRH numerical logic.
