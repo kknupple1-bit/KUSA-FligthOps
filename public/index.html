@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.11 — active takeoff configuration + operational V-speed emphasis */
+/* v5.25.12 — emergency-return emphasis + Dassault source migration prep */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -533,6 +533,8 @@ details summary{cursor:pointer;margin-top:8px}
 .takeoff-compare-details .compare-note{padding:0 12px 12px;color:#9db6cf}
 .told-vspeed{color:inherit}
 .told-vspeed.valid{color:#55e38b!important;text-shadow:0 0 10px rgba(85,227,139,.12)}
+.told-op-panel.emergency .told-op-title{color:#ff4d4f!important;text-shadow:0 0 10px rgba(255,77,79,.14)}
+.told-op-panel.emergency #opEmerVref.valid,.told-op-panel.emergency #f9EmerVref.valid{color:#ff4d4f!important;text-shadow:0 0 10px rgba(255,77,79,.14)}
 @media print{.told-vspeed.valid{color:#111!important;text-shadow:none}}
 
 /* v5.25.10 — exact TOLD action-row alignment fix */
@@ -600,7 +602,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.11</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.12</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1850,7 +1852,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         </div>
         <div class="f900b-results">
           <div class="f900b-result"><span>Return Weight</span><b id="f9EmerWeight">—</b></div>
-          <div class="f900b-result"><span>VREF</span><b id="f9EmerVref">—</b></div>
+          <div class="f900b-result"><span>VREF</span><b id="f9EmerVref" class="told-vspeed valid">—</b></div>
           <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9EmerLD">—</b></div>
           <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9EmerRequired">—</b></div>
           <div class="f900b-result"><span>Runway Available</span><b id="f9EmerAvailable">—</b></div>
@@ -5645,7 +5647,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.11",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.12",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
