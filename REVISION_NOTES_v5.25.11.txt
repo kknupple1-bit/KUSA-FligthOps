@@ -1,0 +1,11 @@
+5.25.11 — Falcon 50 Active Takeoff Configuration + V-Speed Emphasis
+
+- Falcon 50 TOLD continues to default to Slats + Flaps 20°.
+- Normal TOLD view now shows the active takeoff configuration results only.
+- The former always-visible Slats + Flaps 20° / Slats Only comparison is moved under a collapsed Compare Configurations control.
+- Slats Only remains manually selectable and becomes the active calculation when selected.
+- Valid operational takeoff speeds V1, VR=V2, Vfr, and 1.5Vs are displayed in green on the TOLD card.
+- Valid Emergency Return VREF is displayed in green.
+- Valid destination Landing VREF is displayed in green.
+- Source-locked, unavailable, or non-numeric speed values remain normal warning/text color and are never shown green.
+- No Falcon 50 performance tables, interpolation logic, source limits, runway logic, weather logic, sharing behavior, or 900B performance logic changed in this revision.
