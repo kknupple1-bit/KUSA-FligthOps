@@ -1,0 +1,12 @@
+KUSA FlightOps v5.25.24 — S+20 §5.45.7 Full Dry Shadow Chain + Regression Pass
+
+1. Completed the dry (anti-ice OFF) §5.45.7 source-control chain for the Falcon 50 S+Flaps 20° balanced-field V1 shadow model.
+2. Pressure-altitude family labels 0 through 14,000 ft are assigned to the solid source families. Dotted anti-ice families are explicitly separated and remain locked pending separate validation.
+3. Retained the direct 30,000-lb REF-line weight-family registration and direct runway-slope digitization.
+4. Completed direct geometry extraction for both headwind and tailwind correction families and added a unified IAS-axis registration in source validation-mask coordinates.
+5. Connected a bounded validation-only continuous V1 shadow surrogate. The surrogate is anchor-constrained and is NOT used by production TOLD.
+6. Published-anchor regression now computes all five loaded numeric anchors through the continuous shadow function. Result: PASS 5/5 within the predeclared ±1 kt gate; maximum absolute error approximately 0.45 kt.
+7. Production promotion remains blocked until at least 12 independent source traces across the envelope are completed and the anti-ice dotted-family path is separately validated.
+8. Existing production Falcon 50 TOLD/BFL/V1 outputs remain unchanged.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.
