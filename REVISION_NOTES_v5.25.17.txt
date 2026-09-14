@@ -1,0 +1,13 @@
+KUSA FlightOps v5.25.17 — Approved-Source Digitization Phase 4
+
+Falcon 50 / N33AP source migration:
+- Balanced-field accelerate-stop is now displayed numerically whenever BFL and balanced-field V1/VR are available.
+- Basis: DTM813 Section 5 definition of Balanced Field Length: BFL is obtained by selecting V1 so takeoff distance and accelerate-stop distance are equal. Therefore, at the balanced-field V1, ASD = BFL.
+- This DOES NOT claim completion of the independent AFMS §5-14 / §5-22 custom-V1 accelerate-stop nomograph digitization. Those remain source-locked for non-balanced/custom-V1 cases.
+- BFL/V1 numerical grids remain under direct-approved-source migration and are not relabeled as Dassault-approved until direct nomograph digitization and validation are completed.
+- Added clearer source-control wording in TOLD and support/source detail.
+
+Validation anchor retained from DTM813 §5.45 worked example:
+PA 4,000 ft; SAT 37 C; headwind 30 kt; runway slope 1% downhill -> BFL 5,200 ft at 35,000 lb; V1 112 kt; VR=V2 117.3 kt; second-segment gross gradient 2.9%.
+
+Development / validation only — not approved for flight use.

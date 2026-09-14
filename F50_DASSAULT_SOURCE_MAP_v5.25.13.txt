@@ -25,3 +25,16 @@ Landing distance ................ DTM813 5.65.4 .... MIGRATION PENDING
 VREF+5 / landing speed .......... DTM813 5.65.5 .... MIGRATION PENDING
 
 Policy: No numerical table may be labeled Dassault merely because its values appear similar. A block becomes Dassault source-controlled only after direct chart/table digitization or direct derivation and documented validation.
+
+v5.25.15 PHASE 2 UPDATE
+- DTM813 §5.60.5 S+Flaps 48° VREF: direct digitization complete; AFM validation anchor 28,500 lb = 112.5 kt.
+- FTA-PA-001019 §5-14 S+20 accelerate-stop: identified, direct nomograph digitization pending; SOURCE LOCKED.
+- FTA-PA-001019 §5-22 Slats accelerate-stop: identified, direct nomograph digitization pending; SOURCE LOCKED.
+- DTM813 §5.60.4 S+48 landing distance: direct digitization pending.
+- DTM813 §5.30.2 clean 1.5Vs source: identified, direct digitization pending.
+
+v5.25.16 PHASE 3 UPDATE
+- DTM813 §5.50.10 Slats VR=V2: direct digitization complete; AFM anchors 32,200/122.5, 33,400/125.7, 34,400/127.5, 38,800/136.0 retained.
+- DTM813 §5.65.5 S+Flaps 20° landing VREF+5: direct digitization complete; bounded 24,000-35,700 lb.
+- DTM813 §5.30 clean 1.5Vs: source identified, but N33AP probe/SB F50-197 applicability must be confirmed before operational migration.
+- Accelerate-stop and landing-distance nomographs remain locked / legacy-reference-only as applicable pending direct digitization.

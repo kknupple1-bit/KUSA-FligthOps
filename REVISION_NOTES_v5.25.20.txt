@@ -1,0 +1,14 @@
+KUSA FlightOps v5.25.20 — S+20 Expanded BFL Regression + §5.45.7 V1 Source Control
+
+1. Expanded the direct DTM813 §5.45.6 BFL shadow regression from 3 to 4 published anchors.
+2. Added DTM813 §5.45.12 obstacle-clearance example: same §5.45.5 conditions at 34,000 lb, published BFL 4,850 ft, V1 109.2 kt, VR/V2 115.6 kt.
+3. The expanded regression exposed a +521 ft miss at the 34,000 lb point. This invalidates the previous 3/3 release-gate pass and places the direct §5.45.6 nomograph solver on VALIDATION HOLD.
+4. Production TOLD calculation remains unchanged; no shadow data has been promoted to operational use.
+5. Added source-controlled DTM813 §5.45.7 V1 dataset with direct IAS-axis registration and published source anchors:
+   - 35,000 lb worked example: V1 112.0 kt
+   - 34,000 lb obstacle-clearance example: V1 109.2 kt
+   - 38,000 lb Annex 4 pre-reduction balanced-field V1: 114.8 kt
+6. §5.45.7 continuous panel solver remains shadow-only pending direct correction-panel tracing across PA/temperature, weight, slope, and wind.
+7. Next correction target: re-digitize/re-register the §5.45.6 weight-family panel, then rerun all four published BFL anchors before adding more independent points.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.

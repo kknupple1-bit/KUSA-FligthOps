@@ -1,0 +1,59 @@
+KUSA FlightOps v5.25.19 — S+Flaps 20° Nomograph Panel Digitization + Shadow Regression
+
+STATUS
+Development / validation only. Not approved for flight use.
+
+PURPOSE
+Continue the Falcon 50 / N33AP migration from legacy/FlightSafety-derived performance grids to direct Dassault source data without silently relabeling unvalidated data.
+
+DIRECT SOURCE DIGITIZATION COMPLETED IN THIS PHASE
+Source: Dassault DTM813, Section 5, §5.45.6 — Balanced Field Length, S + Flaps 20°.
+
+The following nomograph panels are directly digitized into:
+  public/data/f50_s20_nomograph_rev31.json
+
+  • Pressure-altitude / ambient-temperature panel — solid anti-ice-OFF curves
+  • Takeoff-weight family / crossing panel
+  • Runway-slope correction panel
+  • Wind correction panel
+  • Field-length axis calibration
+
+The dataset is intentionally tagged SHADOW_VALIDATION_ONLY. It does not replace the current production BFL/V1 grid in this revision.
+
+RUNTIME SHADOW ENGINE
+A separate browser-side solver loads the source-controlled JSON and computes S+Flaps 20° dry balanced-field length from the directly digitized panel coordinates. It is used only for source migration and regression testing.
+
+PUBLISHED DASSAULT REGRESSION ANCHORS
+1) DTM813 §5.45.5 worked example
+   PA 4,000 ft; SAT 37°C; 35,000 lb; runway slope 1% downhill; 30 kt headwind
+   Published BFL: 5,200 ft
+   Shadow result: approximately 5,175 ft
+   Error: -25 ft
+
+2) DTM813 Annex 4 antiskid example / §5.45.6 lookup
+   PA 2,000 ft; SAT 30°C; 37,000 lb; slope 0%; wind 0
+   Published/fictitious BFL lookup: 5,500 ft
+   Shadow result: approximately 5,621 ft
+   Error: +121 ft
+
+3) DTM813 Annex 4 antiskid example / §5.45.6 lookup
+   PA 2,000 ft; SAT 30°C; 38,600 lb; slope 0%; wind 0
+   Published/fictitious BFL lookup: 6,000 ft
+   Shadow result: approximately 6,107 ft
+   Error: +107 ft
+
+Current regression gate: ±250 ft for chart-reading/digitization validation.
+Published-anchor regression: PASS 3/3; maximum absolute error approximately 121 ft.
+
+IMPORTANT RELEASE LIMIT
+Three published numeric anchors are not sufficient to release a continuous nomograph engine for operational TOLD. The current TOLD BFL/V1 grid therefore remains migration-controlled and unchanged. The direct §5.45.6 shadow engine must pass an expanded independent hand-read regression set across pressure altitude, temperature, weight, slope and wind before production activation.
+
+NEXT MIGRATION WORK
+  1. Expand independent §5.45.6 regression points across the chart envelope.
+  2. Extend PA/temperature digitization above the current shadow validation range and digitize anti-ice dotted curves.
+  3. Activate direct §5.45.6 dry BFL only after the predeclared regression gate is satisfied.
+  4. Direct-digitize §5.45.7 balanced-field V1 and regression-check V1.
+  5. Continue with Slats §5.50.6/5.50.7 BFL, §5.50.8 VMBE, and §5.50.9 V1.
+  6. Separately digitize custom-V1 accelerate-stop §5.45.2 / §5.50.2.
+
+NO OPERATIONAL PERFORMANCE OUTPUT WAS CHANGED BY THIS PHASE.

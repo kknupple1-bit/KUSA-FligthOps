@@ -1,0 +1,25 @@
+KUSA FlightOps v5.25.16 — Approved-Source Digitization Phase 3
+
+DIRECT SOURCE MIGRATION COMPLETED
+1. SLATS takeoff VR=V2 migrated from legacy values to direct Dassault DTM813 §5.50.10 chart digitization.
+   AFM validation anchors retained in code:
+   - 32,200 lb -> 122.5 kt
+   - 33,400 lb -> 125.7 kt
+   - 34,400 lb -> 127.5 kt
+   - 38,800 lb -> 136.0 kt
+   Vfr remains the published DTM813 transition relationship: V2 + 25 kt.
+
+2. S+FLAPS 20° landing speed migrated from legacy values to direct DTM813 §5.65.5 digitization.
+   The published curve is VREF + 5 kt; FlightOps stores that curve and derives displayed VREF by subtracting 5 kt.
+   Coverage is bounded to 24,000 through 35,700 lb; no extrapolation.
+
+SOURCE CONTROL / VALIDATION
+- S+FLAPS 48° emergency-return VREF remains direct DTM813 §5.60.5.
+- S+FLAPS 20° takeoff VR=V2 remains direct DTM813 §5.45.8.
+- 1.5Vs remains migration-controlled. DTM813 §5.30 has different indicated-stall-speed curves by pitot probe / SB F50-197 applicability; N33AP applicability must be confirmed before replacing the legacy schedule.
+- Accelerate-stop remains source locked pending direct AFMS §5-14 (S+20) and §5-22 (Slats) nomograph digitization.
+- Landing-distance grids remain legacy/reference-only pending direct DTM813 §5.60.4 and §5.65.4 replacement.
+
+NO PERFORMANCE TABLE WAS RELABELED WITHOUT A DIRECT SOURCE MIGRATION.
+No extrapolation.
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.

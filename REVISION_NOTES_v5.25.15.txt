@@ -1,0 +1,24 @@
+KUSA FlightOps v5.25.15 — Approved-Source Digitization Phase 2
+
+CHANGES
+- Directly digitized Falcon 50 S+Flaps 48° VREF from Dassault DTM813 §5.60.5.
+- Retains the DTM813 worked-example anchor: 28,500 lb = VREF 112.5 kt.
+- Emergency Return VREF and normal S+48 VREF now use that DTM813 table instead of the legacy FlightSafety-derived speed grid.
+- Emergency Return source detail now distinguishes the completed VREF migration from the still-pending DTM813 §5.60.4 landing-distance migration.
+- Accelerate-stop remains SOURCE LOCKED; source is explicitly controlled to FTA-PA-001019 §5-14 (S+20) and §5-22 (Slats). No legacy value is substituted.
+- Added a digitization inventory in code documenting completed and pending approved-source blocks.
+
+PENDING DIRECT DIGITIZATION
+1. FTA-PA-001019 §5-14 S+Flaps 20 accelerate-stop.
+2. FTA-PA-001019 §5-22 Slats accelerate-stop.
+3. FTA-PA-001019 §5-17 and related V1 relation for S+20 BFL/V1.
+4. FTA-PA-001019 §5-25 through §5-28 for Slats BFL/V1/VMBE/climb.
+5. DTM813 §5.30.2 clean stall schedule / 1.5Vs.
+6. DTM813 §5.60.4 S+48 landing distance.
+7. DTM813 §5.65.4/§5.65.5 S+20 landing distance/speeds.
+8. DTM813 §5.46A / §5.51A wet-runway BFL/V1.
+9. Applicable landing anti-ice climb contours.
+
+CONTROL
+- No extrapolation.
+- DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.

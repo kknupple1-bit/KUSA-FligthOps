@@ -1,0 +1,20 @@
+KUSA FlightOps v5.25.18 — Dassault BFL/V1 Source Control Phase 5
+
+Purpose
+Continue Falcon 50 approved-source migration without falsely relabeling legacy interpolation as direct Dassault data.
+
+Changes
+- Added controlled DTM813 BFL/V1 validation anchors from published worked examples.
+- S+Flaps 20 source map now points to DTM813 5.45.6 BFL and 5.45.7 balanced-field V1.
+- Slats source map now points to DTM813 5.50.6/5.50.7 BFL, 5.50.8 VMBE and 5.50.9 balanced-field V1.
+- Source-detail displays now identify direct nomograph migration status instead of generic legacy wording.
+- Existing continuous BFL/V1 interpolation remains migration-controlled; it is NOT relabeled as direct Dassault data until the nomographs are fully digitized and regression-tested.
+- Balanced-field accelerate-stop display continues to use the approved definition ASD = BFL at balanced V1.
+
+Published validation anchors loaded
+1) S+Flaps 20 dry worked example: PA 4,000 ft; SAT 37 C; runway 5,200 ft; 30 kt headwind; 1% downhill; field-limited weight 35,000 lb; VR=V2 117.3 kt; V1 112 kt.
+2) S+Flaps 20 zero-wind Annex example: PA 6,000 ft; SAT -5 C; runway 5,200 ft; slope 0%; no wind; field-length limited weight 37,600 lb (actual 35,000 lb).
+3) Slats dry worked example: PA 4,000 ft; SAT 20 C; runway 6,200 ft; 5 kt tailwind; 1% downhill; field-limited weight 34,400 lb; V1 116 kt; VMBE 134 kt.
+
+Validation status
+DEVELOPMENT / VALIDATION ONLY. The next phase is direct nomograph digitization of the continuous BFL/V1 curves and correction panels (temperature/PA, weight, slope and wind), followed by regression against these anchors.

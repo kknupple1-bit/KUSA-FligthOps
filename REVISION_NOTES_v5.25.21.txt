@@ -1,0 +1,17 @@
+KUSA FlightOps v5.25.21 — S+20 BFL REF-Line Traversal Correction + 4/4 Regression Pass
+
+1. Re-reviewed the approved Dassault DTM813 §5.45.6 balanced-field nomograph and corrected the weight-panel traversal model.
+2. Root cause of the v5.25.20 34,000-lb miss: the shadow solver incorrectly indexed weight-family identity at the upper 22,000-lb boundary. The chart enters the weight-family panel at the printed 30,000-lb REF line after the PA/temperature panel, then follows the interpolated family to actual takeoff weight.
+3. Re-digitized the family crossings at the printed REF line and at 24,000 through 40,000 lb, excluding example-arrow overlays.
+4. Removed the v1 fixed panel x-shift from the v2 shadow traversal. Whole-page source x-coordinates are now used directly.
+5. Expanded published-anchor regression result after the correction:
+   - S20-BFL-001: expected 5,200 ft; shadow 5,285 ft; error +85 ft — PASS
+   - S20-BFL-002: expected 5,500 ft; shadow 5,364 ft; error -136 ft — PASS
+   - S20-BFL-003: expected 6,000 ft; shadow 5,838 ft; error -162 ft — PASS
+   - S20-BFL-004: expected 4,850 ft; shadow 4,981 ft; error +131 ft — PASS
+   Maximum absolute error: 162 ft against the predeclared ±250-ft digitization gate.
+6. §5.45.6 shadow status is now PASS 4/4 published anchors, but it remains NON-OPERATIONAL. We still require broader independent hand-read coverage across cold/hot temperature, PA, weight, uphill/downhill slope, headwind/tailwind, plus paired §5.45.7 V1 validation before promotion.
+7. Production TOLD calculation remains unchanged in this revision.
+8. Next target: complete the continuous §5.45.7 balanced-field V1 shadow solver and pair every BFL regression point with V1/VR/V2 checks where the AFM publishes them.
+
+DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE.
