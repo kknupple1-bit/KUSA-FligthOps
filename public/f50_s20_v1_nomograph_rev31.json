@@ -1,0 +1,87 @@
+{
+  "schema": "kusa.f50.s20.v1.nomograph.v1",
+  "status": "SHADOW_VALIDATION_ONLY",
+  "aircraft": "Falcon 50 / N33AP",
+  "configuration": "SLATS_PLUS_FLAPS_20",
+  "source": {
+    "document": "Dassault DTM813 Airplane Flight Manual",
+    "revision": "31",
+    "section": "5.45",
+    "chart": "5.45.7 Engine Failure Speed Associated With Balanced Field Length \u2014 S + Flaps 20\u00b0",
+    "source_page_pdf": 427,
+    "note": "Phase 7 source-control dataset. IAS output-axis registration and published end-to-end chart traces are digitized directly from DTM813. Continuous correction-panel solver remains shadow-only pending expanded hand-read trace set."
+  },
+  "ias_axis": {
+    "points_px_kt": [
+      [
+        160,
+        90
+      ],
+      [
+        300,
+        100
+      ],
+      [
+        439,
+        110
+      ],
+      [
+        579,
+        120
+      ]
+    ],
+    "linear_fit": {
+      "kt_per_px": 0.0716330908,
+      "kt_intercept": 78.531573
+    },
+    "bounded_kt": [
+      90,
+      122
+    ],
+    "note": "Direct registration of the printed indicated-airspeed axis."
+  },
+  "published_trace_anchors": [
+    {
+      "id": "S20-V1-001",
+      "pa_ft": 4000,
+      "sat_c": 37,
+      "weight_lb": 35000,
+      "slope_pct": -1,
+      "wind_kt": 30,
+      "wind_type": "HEADWIND",
+      "expected_v1_kt": 112.0,
+      "endpoint_x_px": 467.25,
+      "source": "DTM813 \u00a75.45.5 worked example / \u00a75.45.7"
+    },
+    {
+      "id": "S20-V1-002",
+      "pa_ft": 4000,
+      "sat_c": 37,
+      "weight_lb": 34000,
+      "slope_pct": -1,
+      "wind_kt": 30,
+      "wind_type": "HEADWIND",
+      "expected_v1_kt": 109.2,
+      "endpoint_x_px": 428.16,
+      "source": "DTM813 \u00a75.45.12 obstacle-clearance example / \u00a75.45.7"
+    },
+    {
+      "id": "S20-V1-003",
+      "pa_ft": 2000,
+      "sat_c": 30,
+      "weight_lb": 38000,
+      "slope_pct": 0,
+      "wind_kt": 0,
+      "wind_type": "CALM",
+      "expected_v1_kt": 114.8,
+      "endpoint_x_px": 506.33,
+      "source": "DTM813 Annex 4 antiskid example / \u00a75.45.7 pre-reduction balanced-field V1"
+    }
+  ],
+  "release_gate": {
+    "operational_engine_active": false,
+    "target_speed_tolerance_kt": 1.0,
+    "minimum_independent_trace_points": 12,
+    "reason": "Three published end-to-end anchors are insufficient to release a continuous \u00a75.45.7 solver. Additional direct traces across PA/temperature/weight/slope/wind are required."
+  }
+}

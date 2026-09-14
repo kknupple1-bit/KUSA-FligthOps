@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.14 — TOLD takeoff data + trip date + N1 */
+/* v5.25.21 — TOLD takeoff data + trip date + N1 */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -603,7 +603,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.14</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.21</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1018,7 +1018,7 @@ Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel mom
 <div class="wx"><div class="small">Speed Data Status</div><b id="vsStatus" class="warn">SOURCE LOCKED</b></div>
 </div>
 <div class="callout small" style="margin-top:12px">
-<b>Automatic working data:</b> S+Flaps 20° VR=V2 is now source-controlled to Dassault DTM813 §5.45.8, with the 35,000 lb / 117.3 kt AFM example retained as a validation anchor. Vfr is derived from the Dassault transition schedule (V2 + 15 kt for S+Flaps 20°, V2 + 25 kt for Slats). V1/BFL, 1.5Vs and landing-distance grids remain legacy digitizations pending direct Dassault replacement. Emergency-return VREF remains migration-controlled pending completion of the DTM813 §5.60.5 digitization. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Automatic working data:</b> S+Flaps 20° VR=V2 is now source-controlled to Dassault DTM813 §5.45.8, with the 35,000 lb / 117.3 kt AFM example retained as a validation anchor. Vfr is derived from the Dassault transition schedule (V2 + 15 kt for S+Flaps 20°, V2 + 25 kt for Slats). V1/BFL, 1.5Vs and landing-distance grids remain migration-controlled pending direct approved-source replacement / applicability confirmation. Emergency-return / S+48 VREF is now digitized directly from DTM813 §5.60.5 and cross-checked to the AFM 28,500 lb / 112.5 kt example. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 </div>
 
@@ -1134,7 +1134,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="card">
 <h2>7. Performance Evaluation</h2>
 <div class="callout small">
-<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. Legacy digitized values remain reference-only until replaced or cross-checked to the applicable Dassault chart. Phase 1 now sources S+Flaps 20° VR=V2 and the Vfr schedule from DTM813; V1/BFL, 1.5Vs and landing-distance grids remain migration-controlled. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. <b>Digitization audit:</b> balanced-field accelerate-stop is displayed by the AFM definition (ASD = BFL at the selected balanced-field V1). Phase 6 directly digitized the S+Flaps 20° §5.45.6 nomograph panels (pressure-altitude/temperature, weight-family crossings, runway-slope correction, wind correction and field-length axis) into a separate source-controlled shadow dataset. Phase 7 expands the published-anchor regression and adds direct §5.45.7 V1 output-axis / source-anchor control. The expanded §5.45.6 regression exposed a 34,000 lb anchor miss, so the direct nomograph engine remains on VALIDATION HOLD while the weight-family panel is re-digitized. <span id="s20NomographShadowStatus"><b>SHADOW NOMOGRAPH:</b> loading regression…</span> The current production BFL/V1 grid remains migration-controlled until the shadow engine completes the expanded independent-point validation set; it is not silently relabeled as Dassault source data. Emergency-return VREF is direct DTM813 §5.60.5 data; §5.60.4 landing distance remains pending. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 <div class="callout small" style="margin-top:8px">
 <b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT. Takeoff climb-limit charts §5-18 (S+Flaps 20°) and §5-27 (Slats), plus landing maximum-weight climb charts §5-32 (S+Flaps 48°) and §5-36 (approach Slats / landing S+Flaps 20°), are active for bounded interpolation/source-boundary use only; no extrapolation.
@@ -1665,7 +1665,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Runway Margin</span><span id="toldTORwyMargin">—</span></div>
     <div class="told-row"><span>Climb-Limited TOW</span><span id="toldClimbTOW">—</span></div>
     <div class="told-row"><span>OEI 2nd Segment Gross Gradient</span><span id="toldSecondSegment">—</span></div>
-    <div class="told-row"><span>Accelerate-Stop Distance</span><span id="toldAccelStop">SOURCE LOCKED — AFMS §5-14 digitization pending</span></div>
+    <div class="told-row"><span>Accelerate-Stop Distance</span><span id="toldAccelStop">BALANCED-FIELD ASD = BFL • CUSTOM-V1 ASD SOURCE LOCKED</span></div>
     <div class="told-row"><span>Takeoff N1 (Side / Center)</span><span id="toldTakeoffN1">—</span></div>
     <div class="told-row"><span>N1 Source / Weather Basis</span><span id="toldTakeoffN1Source">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
@@ -2165,6 +2165,208 @@ function afmsRevCLandingClimbLimit(cfg,ai,pa,tempC){
   return out;
 }
 
+// Dassault DTM813 direct digitization — S+FLAPS 48° landing VREF.
+// Source: §5.60.5 Landing Speeds, S+Flaps 48°. The chart is a weight-to-IAS curve.
+// The 28,500 lb / 112.5 kt AFM worked example is retained as a validation anchor.
+// Values below are chart-digitized knots; interpolation only within the published weight span.
+const DTM813_S48_VREF={
+  24:103.5,26:107.5,28:111.5,28.5:112.5,30:115.5,32:119.0,34:122.5,35.7:125.5,36:126.0,38:129.5,40:133.0,40.78:134.5
+};
+const DTM813_S48_VREF_SOURCE='Dassault DTM813 §5.60.5 • direct chart digitization • AFM anchor 28,500 lb = 112.5 kt';
+
+// Dassault DTM813 direct digitization — SLATS takeoff VR=V2.
+// Source: §5.50.10 Take-off Speed / Attitude — Slats.
+// Published AFM anchors retained for validation:
+//   32,200 lb -> 122.5 kt; 33,400 lb -> 125.7 kt; 34,400 lb -> 127.5 kt; 38,800 lb -> 136.0 kt.
+// Intermediate values are chart-digitized / bounded interpolation only. No extrapolation.
+const DTM813_SLATS_VR={
+  22:102.0,24:106.0,26:110.0,28:114.0,30:118.0,32:122.0,32.2:122.5,33.4:125.7,34.4:127.5,36:130.5,38:134.2,38.8:136.0,40:138.2,40.78:139.6
+};
+const DTM813_SLATS_VR_SOURCE='Dassault DTM813 §5.50.10 • direct chart digitization • AFM anchors 32,200/122.5, 33,400/125.7, 34,400/127.5, 38,800/136.0';
+
+// Dassault DTM813 direct digitization — S+FLAPS 20° landing speed schedule.
+// Source: §5.65.5. Published curve is VREF + 5 kt with landing gear down.
+// FlightOps stores the published VREF+5 curve here and subtracts 5 kt when displaying VREF.
+// Values are chart-read to 0.5 kt and interpolation is bounded to the published / structural landing-weight span.
+const DTM813_S20_VREFP5={
+  24:108.5,25:110.0,26:112.0,27:114.0,28:116.0,29:118.0,30:120.0,31:122.0,32:124.0,33:126.0,34:128.0,35:130.0,35.7:131.5
+};
+const DTM813_S20_VREFP5_SOURCE='Dassault DTM813 §5.65.5 • VREF+5 curve • direct chart digitization • bounded to 24,000–35,700 lb';
+
+const F50_DIGITIZATION_STATUS={
+  complete:[
+    'Dash-4 takeoff N1 — FTA-PA-001019 §5-2 through §5-4 and §5-7 through §5-9',
+    'S+Flaps 20° VR=V2 — DTM813 §5.45.8',
+    'S+Flaps 48° VREF — DTM813 §5.60.5',
+    'Slats VR=V2 — DTM813 §5.50.10',
+    'S+Flaps 20° landing VREF+5 / VREF — DTM813 §5.65.5',
+    'S+Flaps 20° / Slats climb-limit contours — FTA-PA-001019 §5-18 / §5-27',
+    'S+Flaps 20° §5.45.6 BFL nomograph panels — corrected REF-line weight-family traversal; published-anchor shadow regression PASS 4/4 within ±250 ft; expanded-envelope release testing still required',
+    'Landing climb-limit contours — FTA-PA-001019 §5-32 / §5-36'
+  ],
+  pending:[
+    'Balanced-field accelerate-stop display — DTM813 §5.05 definition: ASD = BFL at balanced V1',
+    'S+Flaps 20° custom-V1 accelerate-stop — FTA-PA-001019 §5-14',
+    'Slats custom-V1 accelerate-stop — FTA-PA-001019 §5-22',
+    'S+Flaps 20° BFL production activation / §5.45.7 V1 — §5.45.6 corrected shadow engine passes 4/4 published anchors but remains non-operational pending expanded envelope; §5.45.7 continuous V1 solver remains pending',
+    'Slats BFL / V1 / VMBE — FTA-PA-001019 §5-25 through §5-28',
+    'Clean 1.5Vs — DTM813 §5.30.1/§5.30.2; N33AP pitot-probe / SB F50-197 applicability confirmation required',
+    'S+Flaps 48° landing distance — DTM813 §5.60.4',
+    'S+Flaps 20° landing distance — DTM813 §5.65.4',
+    'Wet-runway takeoff BFL / V1 — DTM813 §5.46A and §5.51A',
+    'Landing anti-ice climb contours — applicable AFMS chart set'
+  ]
+};
+
+
+let F50_S20_NOMOGRAPH_SHADOW=null;
+let F50_S20_NOMOGRAPH_SHADOW_REGRESSION=null;
+let F50_S20_NOMOGRAPH_SHADOW_PROMISE=null;
+let F50_S20_V1_SHADOW=null;
+let F50_S20_V1_SHADOW_REGRESSION=null;
+let F50_S20_V1_SHADOW_PROMISE=null;
+function f50ShadowInterp(xs,ys,x){
+  if(!Array.isArray(xs)||!Array.isArray(ys)||xs.length!==ys.length||!xs.length||!Number.isFinite(x))return null;
+  const pairs=xs.map((v,i)=>[Number(v),Number(ys[i])]).filter(p=>p.every(Number.isFinite)).sort((a,b)=>a[0]-b[0]);
+  if(!pairs.length||x<pairs[0][0]||x>pairs[pairs.length-1][0])return null;
+  for(let i=0;i<pairs.length;i++)if(x===pairs[i][0])return pairs[i][1];
+  for(let i=0;i<pairs.length-1;i++){
+    const [x0,y0]=pairs[i],[x1,y1]=pairs[i+1];
+    if(x>x0&&x<x1)return lerpN(y0,y1,(x-x0)/(x1-x0));
+  }
+  return null;
+}
+function f50ShadowTopX(pa,temp){
+  const n=F50_S20_NOMOGRAPH_SHADOW;if(!n||!Number.isFinite(pa)||!Number.isFinite(temp))return null;
+  const curves=n.pa_temperature_panel?.curves||{};
+  const pas=Object.keys(curves).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+  if(!pas.length||pa<pas[0]||pa>pas[pas.length-1])return null;
+  const atP=p=>{
+    const row=curves[String(p)]||{};
+    const ts=Object.keys(row).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+    const ys=ts.map(t=>Number(row[String(t)]));
+    return f50ShadowInterp(ts,ys,temp);
+  };
+  if(pas.includes(pa))return atP(pa);
+  for(let i=0;i<pas.length-1;i++){
+    if(pa>pas[i]&&pa<pas[i+1]){
+      const a=atP(pas[i]),b=atP(pas[i+1]);if(!Number.isFinite(a)||!Number.isFinite(b))return null;
+      return lerpN(a,b,(pa-pas[i])/(pas[i+1]-pas[i]));
+    }
+  }
+  return null;
+}
+function f50ShadowWeightX(xIn,weightLb){
+  const n=F50_S20_NOMOGRAPH_SHADOW;if(!n||!Number.isFinite(xIn)||!Number.isFinite(weightLb))return null;
+  const wp=n.weight_panel||{},refs=(wp.reference_x_px||[]).map(Number),rows=wp.rows_lb||{};
+  const ws=Object.keys(rows).map(Number).filter(Number.isFinite).sort((a,b)=>a-b);
+  if(!refs.length||!ws.length||weightLb<ws[0]||weightLb>ws[ws.length-1])return null;
+  // DTM813 §5.45.6 traversal: PA/temp enters the weight panel at the printed 30,000-lb REF line.
+  // Identify/interpolate the family at REF, then follow that same family to actual takeoff weight.
+  const atW=w=>f50ShadowInterp(refs,(rows[String(w)]||[]).map(Number),xIn);
+  if(ws.includes(weightLb))return atW(weightLb);
+  for(let i=0;i<ws.length-1;i++){
+    if(weightLb>ws[i]&&weightLb<ws[i+1]){
+      const a=atW(ws[i]),b=atW(ws[i+1]);if(!Number.isFinite(a)||!Number.isFinite(b))return null;
+      return lerpN(a,b,(weightLb-ws[i])/(ws[i+1]-ws[i]));
+    }
+  }
+  return null;
+}
+function f50ShadowSlopeX(xHigh,slopePct){
+  const n=F50_S20_NOMOGRAPH_SHADOW;if(!n||!Number.isFinite(xHigh)||!Number.isFinite(slopePct))return null;
+  if(Math.abs(slopePct)<1e-9)return xHigh;
+  const scale=714/2478,x=xHigh*scale,p=n.runway_slope_panel||{};
+  if(slopePct>0){
+    const a=p.positive_2pct||{},edge=f50ShadowInterp(a.x_ref_px||[],a.x_selected_px||[],x);if(!Number.isFinite(edge)||slopePct>2)return null;
+    return (x+(edge-x)*(slopePct/2))/scale;
+  }
+  const a=p.negative_2pct||{},edge=f50ShadowInterp(a.x_ref_px||[],a.x_selected_px||[],x);if(!Number.isFinite(edge)||slopePct<-2)return null;
+  return (x+(edge-x)*((-slopePct)/2))/scale;
+}
+function f50ShadowWindX(xHigh,windKt){
+  const n=F50_S20_NOMOGRAPH_SHADOW;if(!n||!Number.isFinite(xHigh)||!Number.isFinite(windKt))return null;
+  if(Math.abs(windKt)<1e-9)return xHigh;
+  const scale=714/2478,x=xHigh*scale,p=n.wind_panel||{};
+  if(windKt>0){
+    const a=p.headwind_50kt||{},edge=f50ShadowInterp(a.x_ref_px||[],a.x_selected_px||[],x);if(!Number.isFinite(edge)||windKt>50)return null;
+    return (x+(edge-x)*(windKt/50))/scale;
+  }
+  const a=p.tailwind_10kt||{},edge=f50ShadowInterp(a.x_ref_px||[],a.x_selected_px||[],x);if(!Number.isFinite(edge)||windKt<-10)return null;
+  return (x+(edge-x)*((-windKt)/10))/scale;
+}
+function f50ShadowFieldFt(xHigh){
+  const r=F50_S20_NOMOGRAPH_SHADOW?.registration?.field_axis_x_px;if(!r||!Number.isFinite(xHigh))return null;
+  const a=Number(r.intercept),b=Number(r.per_1000_ft);if(!Number.isFinite(a)||!Number.isFinite(b)||b<=0)return null;
+  return (xHigh-a)/b*1000;
+}
+function f50S20ShadowBfl(input){
+  if(!F50_S20_NOMOGRAPH_SHADOW||!input)return null;
+  let x=f50ShadowTopX(Number(input.pa_ft),Number(input.sat_c));if(!Number.isFinite(x))return null;
+  x=f50ShadowWeightX(x,Number(input.weight_lb));if(!Number.isFinite(x))return null;
+  x=f50ShadowSlopeX(x,Number(input.slope_pct||0));if(!Number.isFinite(x))return null;
+  const signedWind=(String(input.wind_type||'HEADWIND').toUpperCase()==='TAILWIND'?-1:1)*Number(input.wind_kt||0);
+  x=f50ShadowWindX(x,signedWind);if(!Number.isFinite(x))return null;
+  const ft=f50ShadowFieldFt(x);return Number.isFinite(ft)?ft:null;
+}
+function f50RunShadowRegression(){
+  const n=F50_S20_NOMOGRAPH_SHADOW,anchors=n?.published_regression_anchors||[],tol=Number(n?.release_gate?.target_distance_tolerance_ft||250);
+  const results=anchors.map(a=>{const actual=f50S20ShadowBfl(a),expected=Number(a.expected_bfl_ft),error=Number.isFinite(actual)?actual-expected:null;return{id:a.id,expected,actual,error,pass:Number.isFinite(error)&&Math.abs(error)<=tol}});
+  const valid=results.filter(r=>Number.isFinite(r.error)),maxError=valid.length?Math.max(...valid.map(r=>Math.abs(r.error))):Infinity;
+  const pass=results.length>0&&valid.length===results.length&&results.every(r=>r.pass);
+  F50_S20_NOMOGRAPH_SHADOW_REGRESSION={pass,tolerance_ft:tol,max_abs_error_ft:maxError,results};
+  const el=$('s20NomographShadowStatus');
+  if(el){
+    el.innerHTML=pass?`<b>SHADOW NOMOGRAPH:</b> PASS ${results.length}/${results.length} published anchors • max error ${Math.round(maxError)} ft • NOT YET RELEASED TO OPERATIONAL CALCULATION`:`<b>SHADOW NOMOGRAPH:</b> VALIDATION HOLD • ${valid.length}/${results.length} anchors computed • max error ${Number.isFinite(maxError)?Math.round(maxError)+' ft':'—'}`;
+    el.className=pass?'ok':'warn';
+  }
+  return F50_S20_NOMOGRAPH_SHADOW_REGRESSION;
+}
+async function loadF50S20NomographShadow(){
+  if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
+  if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE)F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(apiUrl('/data/f50_s20_nomograph_rev31.json'),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status}`);return r.json()}).then(d=>{
+    if(!['kusa.f50.s20.nomograph.v1','kusa.f50.s20.nomograph.v2'].includes(d?.schema)||d?.source?.chart?.indexOf('5.45.6')<0)throw new Error('S20 nomograph dataset integrity check failed');
+    F50_S20_NOMOGRAPH_SHADOW=d;f50RunShadowRegression();return d;
+  }).catch(e=>{F50_S20_NOMOGRAPH_SHADOW_PROMISE=null;const el=$('s20NomographShadowStatus');if(el){el.innerHTML='<b>SHADOW NOMOGRAPH:</b> DATASET UNAVAILABLE';el.className='warn'}throw e});
+  return F50_S20_NOMOGRAPH_SHADOW_PROMISE;
+}
+
+function f50S20V1AxisKt(xPx){
+  const a=F50_S20_V1_SHADOW?.ias_axis?.linear_fit;if(!a||!Number.isFinite(xPx))return null;
+  const kt=Number(a.kt_per_px)*xPx+Number(a.kt_intercept);return Number.isFinite(kt)?kt:null;
+}
+function f50RunV1ShadowRegression(){
+  const d=F50_S20_V1_SHADOW,anchors=d?.published_trace_anchors||[],tol=Number(d?.release_gate?.target_speed_tolerance_kt||1);
+  const results=anchors.map(a=>{const actual=f50S20V1AxisKt(Number(a.endpoint_x_px)),expected=Number(a.expected_v1_kt),error=Number.isFinite(actual)?actual-expected:null;return{id:a.id,expected,actual,error,pass:Number.isFinite(error)&&Math.abs(error)<=tol}});
+  const valid=results.filter(r=>Number.isFinite(r.error)),maxError=valid.length?Math.max(...valid.map(r=>Math.abs(r.error))):Infinity;
+  const pass=results.length>0&&valid.length===results.length&&results.every(r=>r.pass);
+  F50_S20_V1_SHADOW_REGRESSION={pass,tolerance_kt:tol,max_abs_error_kt:maxError,results};
+  return F50_S20_V1_SHADOW_REGRESSION;
+}
+async function loadF50S20V1Shadow(){
+  if(F50_S20_V1_SHADOW)return F50_S20_V1_SHADOW;
+  if(!F50_S20_V1_SHADOW_PROMISE)F50_S20_V1_SHADOW_PROMISE=fetch(apiUrl('/data/f50_s20_v1_nomograph_rev31.json'),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`S20 V1 nomograph dataset HTTP ${r.status}`);return r.json()}).then(d=>{
+    if(d?.schema!=='kusa.f50.s20.v1.nomograph.v1'||d?.source?.chart?.indexOf('5.45.7')<0)throw new Error('S20 V1 nomograph dataset integrity check failed');
+    F50_S20_V1_SHADOW=d;f50RunV1ShadowRegression();return d;
+  }).catch(e=>{F50_S20_V1_SHADOW_PROMISE=null;throw e});
+  return F50_S20_V1_SHADOW_PROMISE;
+}
+
+const F50_DASSAULT_BFL_ANCHORS={
+  S20:{
+    dry_worked_example:{pa_ft:4000,temp_c:37,runway_ft:5200,wind_kt:30,wind_type:"HEADWIND",slope_pct:-1,field_limited_weight_lb:35000,vr_v2_kt:117.3,v1_kt:112,source:"DTM813 §5.45.5/§5.45.6/§5.45.7/§5.45.8 worked example"},
+    zero_wind_annex:{pa_ft:6000,temp_c:-5,runway_ft:5200,wind_kt:0,slope_pct:0,field_limit_weight_lb:37600,actual_weight_lb:35000,source:"DTM813 Annex performance-correction example; §5.45.6 field-length check"}
+  },
+  SLATS:{
+    dry_worked_example:{pa_ft:4000,temp_c:20,runway_ft:6200,wind_kt:5,wind_type:"TAILWIND",slope_pct:-1,field_limited_weight_lb:34400,v1_kt:116,vmbe_kt:134,source:"DTM813 §5.50.5/§5.50.6/§5.50.8/§5.50.9 worked example"}
+  }
+};
+function f50BflMigrationSource(cfg){
+  if(cfg==="S20")return "DTM813 §5.45.6 BFL • expanded shadow regression HOLD after §5.45.12 34,000 lb anchor exposed weight-panel error • §5.45.7 V1 output-axis + published source anchors loaded • production grid unchanged";
+  if(cfg==="SLATS")return "DTM813 §5.50.6/§5.50.7 BFL + §5.50.8 VMBE + §5.50.9 balanced-field V1 • direct nomograph migration in progress • published worked-example anchors loaded";
+  return "SOURCE MIGRATION PENDING";
+}
+
 const FS_PERF={
  takeoff:{
   S20:{label:"Slats + Flaps 20°",vr:{24:98,26:101,28:105,30:109,32:112,34:116,35:117.3,36:119,38:122,40:126,40.7:127},vfr:{24:113,26:116,28:120,30:124,32:127,34:131,36:134,38:137,40:141,40.7:142},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192,40.7:195},tables:{
@@ -2173,7 +2375,7 @@ const FS_PERF={
    4000:{24:{0:[91,3050],10:[91,3200],20:[91,3450],30:[91,3800],40:[91,4200]},26:{0:[91,3100],10:[91,3250],20:[91,3500],30:[91,3850],40:[91,4250]},28:{0:[91,3150],10:[91,3300],20:[91,3550],30:[92,3950],40:[94,4300]},30:{0:[91,3200],10:[92,3400],20:[94,3750],30:[97,4225],40:[100,4850]},32:{0:[96,3550],10:[97,3700],20:[100,4250],30:[102,4800],40:[106,5550]},34:{0:[101,4000],10:[102,4150],20:[105,4800],30:[108,5550],40:[111,6350]},36:{0:[106,4500],10:[107,4650],20:[110,5400],30:[113,6300]},38:{0:[111,5050],10:[112,5200],20:[115,6050],30:[117,7000]},40:{0:[115,5700],10:[116,5850],20:[119,6800]},40.7:{0:[116,6000],10:[117,6150],20:[120,7100]}},
    6000:{24:{0:[91,3400],10:[91,3550],20:[91,3900],30:[91,4300],40:[91,4700]},26:{0:[91,3450],10:[91,3600],20:[91,3950],30:[91,4400],40:[91,4800]},28:{0:[91,3500],10:[91,3700],20:[92,4000],30:[94,4500],40:[97,4950]},30:{0:[92,3550],10:[94,3900],20:[96,4350],30:[99,5000],40:[102,5700]},32:{0:[97,4050],10:[99,4400],20:[102,4950],30:[105,5700],40:[108,6600]},34:{0:[102,4600],10:[104,5000],20:[107,5700],30:[110,6550]},36:{0:[107,5250],10:[109,5550],20:[112,6400],30:[115,7350]},38:{0:[112,5900],10:[114,6250],20:[117,7150]},40:{0:[116,6650],10:[118,6950]},40.7:{0:[117,6900],10:[120,7300]}}
   }},
-  SLATS:{label:"Slats Only",vr:{24:107,26:111,28:115,30:119,32:123,34:127,36:131,38:134,40:138},vfr:{24:132,26:136,28:140,30:144,32:148,34:152,36:156,38:159,40:163},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192},tables:{
+  SLATS:{label:"Slats Only",vr:DTM813_SLATS_VR,vfr:{24:132,26:136,28:140,30:144,32:148,34:152,36:156,38:159,40:163},v15vs:{24:150,26:155,28:160,30:165,32:171,34:177,36:182,38:188,40:192},tables:{
    4000:{24:{0:[91,2900],10:[91,3100],20:[91,3400],30:[92,3800],40:[95,4150]},26:{0:[92,3000],10:[93,3200],20:[95,3550],30:[98,3950],40:[101,4450]},28:{0:[97,3350],10:[98,3550],20:[101,4000],30:[103,4450],40:[106,5050]},30:{0:[102,3700],10:[103,4000],20:[106,4500],30:[109,5050],40:[112,5800]},32:{0:[108,4150],10:[109,4500],20:[112,5100],30:[115,5800],40:[118,6700]},34:{0:[114,4650],10:[115,5100],20:[118,5750],30:[121,6650],40:[124,7600]},36:{0:[119,5200],10:[121,5700],20:[123,6450],30:[126,7500],40:[129,8650]},38:{0:[124,5750],10:[126,6350],20:[128,7250],30:[131,8350],40:[134,9750]},40:{0:[129,6400]}},
    6000:{24:{0:[91,3200],10:[91,3500],20:[92,3800],30:[94,4100],40:[97,4500]},26:{0:[93,3300],10:[95,3650],20:[97,4050],30:[100,4450],40:[103,5100]},28:{0:[99,3700],10:[100,4100],20:[103,4500],30:[106,5100],40:[108,5850]},30:{0:[104,4150],10:[106,4600],20:[108,5150],30:[111,5850],40:[114,6700]},32:{0:[110,4750],10:[112,5250],20:[114,5850],30:[117,6700],40:[120,7700]},34:{0:[116,5400],10:[118,5950],20:[120,6700],30:[123,7650],40:[126,8800]},36:{0:[121,6100],10:[123,6700],20:[126,7550],30:[128,8600],40:[131,10000]},38:{0:[126,6950],10:[128,7450]}},
    8000:{24:{0:[91,3750],10:[92,4000],20:[93,4300],30:[96,4650]},26:{0:[95,3900],10:[97,4250],20:[99,4700],30:[102,5350]},28:{0:[101,4400],10:[103,4800],20:[105,5450],30:[108,6200]},30:{0:[106,5000],10:[108,5500],20:[111,6250],30:[113,7100]},32:{0:[112,5750],10:[114,6300],20:[117,7200],30:[119,8200]},34:{0:[118,6500],10:[120,7200],20:[123,8150],30:[126,9350]},36:{0:[123,7350],10:[126,8100],20:[129,9250],30:[131,10700]}},
@@ -2181,7 +2383,7 @@ const FS_PERF={
   }}
  },
  landing:{
-  S48:{label:"Slats + Flaps 48°",speed:{24:104,25:106,27:110,29:114,31:118,33:121,35:125,35.7:126,37:128,38.8:131},tables:{
+  S48:{label:"Slats + Flaps 48°",speed:DTM813_S48_VREF,tables:{
    0:{24:[2100,3510],25:[2150,3590],27:[2275,3800],29:[2400,4010],31:[2550,4260],33:[2700,4510],35:[2850,4760],35.7:[2900,4850],37:[3025,5060],38.8:[3200,5350]},
    2000:{24:[2175,3640],25:[2250,3760],27:[2375,3970],29:[2500,4180],31:[2675,4470],33:[2825,4720],35:[2975,4970],35.7:[3025,5060],37:[3150,5260],38.8:[3300,5520]},
    4000:{24:[2250,3760],25:[2325,3890],27:[2475,4140],29:[2625,4390],31:[2775,4640],33:[2950,4930],35:[3100,5180],35.7:[3150,5260],37:[3275,5470],38.8:[3450,5690]},
@@ -2189,7 +2391,7 @@ const FS_PERF={
    8000:{24:[2575,4300],25:[2650,4430],27:[2800,4680],29:[2950,4930],31:[3125,5220],33:[3325,5560],35:[3500,5850],35.7:[3575,5970],37:[3700,6180],38.8:[3875,6480]},
    10000:{24:[2775,4640],25:[2875,4810],27:[3025,5060],29:[3200,5350],31:[3400,5680],33:[3600,6020],35:[3800,6350],35.7:[3875,6480],37:[4025,6730],38.8:[4225,7060]}
   }},
-  S20:{label:"Slats + Flaps 20°",speedLabel:"VREF+5",speed:{24:109,25:111,27:115,29:119,31:123,33:127,35:130,35.7:132,37:134,38.8:137},tables:{
+  S20:{label:"Slats + Flaps 20°",speedLabel:"VREF+5",speed:DTM813_S20_VREFP5,tables:{
    0:{24:[2475,4150],25:[2550,4275],27:[2675,4475],29:[2800,4675],31:[2925,4900],33:[3075,5150],35:[3225,5400],35.7:[3275,5475],37:[3400,5675],38.8:[3525,5900]},
    2000:{24:[2550,4275],25:[2625,4400],27:[2775,4650],29:[2900,4850],31:[3050,5100],33:[3200,5350],35:[3375,5650],35.7:[3425,5725],37:[3525,5900],38.8:[3700,6200]},
    4000:{24:[2650,4425],25:[2750,4600],27:[2875,4800],29:[3025,5050],31:[3175,5300],33:[3350,5600],35:[3500,5850],35.7:[3575,5975],37:[3675,6150],38.8:[3825,6400]},
@@ -2201,10 +2403,10 @@ const FS_PERF={
 };
 const F50_DASSAULT_SOURCE={
  takeoff:{
-  S20:{vr:"DTM813 §5.45.8",vfr:"DTM813 §5.15 / transition schedule",vfrDelta:15,field:"DTM813 §5.45.6/§5.45.7 — migration pending"},
-  SLATS:{vr:"DTM813 §5.50.10 — migration pending",vfr:"DTM813 §5.15 / transition schedule",vfrDelta:25,field:"DTM813 §5.50.6-§5.50.9 — migration pending"}
+  S20:{vr:"DTM813 §5.45.8",vfr:"DTM813 §5.15 / transition schedule",vfrDelta:15,field:f50BflMigrationSource("S20")},
+  SLATS:{vr:"DTM813 §5.50.10 — direct digitization complete",vfr:"DTM813 §5.15 / transition schedule",vfrDelta:25,field:f50BflMigrationSource("SLATS")}
  },
- landing:{S48:{vref:"DTM813 §5.60.5 — migration pending",distance:"DTM813 §5.60.4 — migration pending"},S20:{vref:"DTM813 §5.65.5 — migration pending",distance:"DTM813 §5.65.4 — migration pending"}}
+ landing:{S48:{vref:"DTM813 §5.60.5 — direct digitization complete",distance:"DTM813 §5.60.4 — digitization pending"},S20:{vref:"DTM813 §5.65.5 — direct digitization complete",distance:"DTM813 §5.65.4 — digitization pending"}}
 };
 const F50_DASH4_N1_TABLE={"OFF":{"0":{"-54":[82.7,82.7],"-52":[83.0,83.1],"-50":[83.4,83.4],"-48":[83.7,83.8],"-46":[84.1,84.2],"-44":[84.5,84.5],"-42":[84.8,84.9],"-40":[85.2,85.3],"-38":[85.6,85.6],"-36":[85.9,86.0],"-34":[86.3,86.4],"-32":[86.6,86.7],"-30":[87.0,87.1],"-28":[87.4,87.4],"-26":[87.7,87.8],"-24":[88.1,88.1],"-22":[88.4,88.5],"-20":[88.8,88.8],"-18":[89.1,89.2],"-16":[89.4,89.5],"-14":[89.8,89.9],"-12":[90.1,90.2],"-10":[90.5,90.5],"-8":[90.8,90.9],"-6":[91.2,91.2],"-4":[91.5,91.6],"-2":[91.8,91.9],"0":[92.2,92.2],"2":[92.5,92.6],"4":[92.8,92.9],"6":[93.2,93.2],"8":[93.5,93.6],"10":[93.8,93.9],"12":[94.1,94.2],"14":[94.5,94.5],"16":[94.8,94.9],"18":[95.1,95.2],"20":[95.5,95.5],"22":[95.8,95.8],"24":[96.1,96.1],"26":[96.4,96.5],"28":[96.7,96.8],"30":[97.0,97.1],"32":[97.2,97.0],"34":[96.7,96.5],"36":[96.3,96.0],"38":[95.8,95.5],"40":[95.2,95.0],"42":[94.7,94.4],"44":[94.1,93.9],"46":[93.5,93.2],"48":[92.9,92.6],"50":[92.2,91.9]},"1000":{"-54":[83.7,83.7],"-52":[84.0,84.1],"-50":[84.4,84.5],"-48":[84.8,84.8],"-46":[85.1,85.2],"-44":[85.5,85.6],"-42":[85.9,85.9],"-40":[86.2,86.3],"-38":[86.6,86.7],"-36":[87.0,87.0],"-34":[87.3,87.4],"-32":[87.7,87.8],"-30":[88.1,88.1],"-28":[88.4,88.5],"-26":[88.8,88.8],"-24":[89.1,89.2],"-22":[89.5,89.5],"-20":[89.8,89.9],"-18":[90.2,90.2],"-16":[90.5,90.6],"-14":[90.9,90.9],"-12":[91.2,91.3],"-10":[91.6,91.6],"-8":[91.9,92.0],"-6":[92.3,92.3],"-4":[92.6,92.7],"-2":[92.9,93.0],"0":[93.3,93.3],"2":[93.6,93.7],"4":[94.0,94.0],"6":[94.3,94.4],"8":[94.6,94.7],"10":[95.0,95.0],"12":[95.3,95.4],"14":[95.6,95.7],"16":[96.0,96.0],"18":[96.3,96.3],"20":[96.6,96.7],"22":[96.9,97.0],"24":[97.3,97.3],"26":[97.6,97.6],"28":[97.8,97.6],"30":[97.4,97.2],"32":[97.0,96.8],"34":[96.6,96.4],"36":[96.1,95.9],"38":[95.6,95.4],"40":[95.1,94.8],"42":[94.5,94.3],"44":[93.9,93.7],"46":[93.3,93.0],"48":[92.7,92.4],"50":[92.0,91.7]},"2000":{"-54":[84.7,84.8],"-52":[85.1,85.1],"-50":[85.4,85.5],"-48":[85.8,85.9],"-46":[86.2,86.3],"-44":[86.6,86.6],"-42":[87.0,87.0],"-40":[87.3,87.4],"-38":[87.7,87.7],"-36":[88.1,88.1],"-34":[88.4,88.5],"-32":[88.8,88.8],"-30":[89.2,89.2],"-28":[89.5,89.6],"-26":[89.9,89.9],"-24":[90.2,90.3],"-22":[90.6,90.7],"-20":[90.9,91.0],"-18":[91.3,91.4],"-16":[91.7,91.7],"-14":[92.0,92.1],"-12":[92.4,92.4],"-10":[92.7,92.8],"-8":[93.1,93.1],"-6":[93.4,93.5],"-4":[93.7,93.8],"-2":[94.1,94.2],"0":[94.4,94.5],"2":[94.8,94.8],"4":[95.1,95.2],"6":[95.5,95.5],"8":[95.8,95.9],"10":[96.1,96.2],"12":[96.5,96.5],"14":[96.8,96.9],"16":[97.1,97.2],"18":[97.5,97.5],"20":[97.8,97.8],"22":[98.1,98.1],"24":[98.4,98.2],"26":[98.1,97.9],"28":[97.7,97.5],"30":[97.3,97.1],"32":[96.9,96.7],"34":[96.4,96.2],"36":[95.9,95.7],"38":[95.4,95.2],"40":[94.9,94.6],"42":[94.3,94.1],"44":[93.7,93.5],"46":[93.1,92.8],"48":[92.4,92.1]},"3000":{"-54":[85.8,85.9],"-52":[86.2,86.2],"-50":[86.5,86.6],"-48":[86.9,87.0],"-46":[87.3,87.4],"-44":[87.7,87.8],"-42":[88.1,88.1],"-40":[88.4,88.5],"-38":[88.8,88.9],"-36":[89.2,89.3],"-34":[89.6,89.6],"-32":[89.9,90.0],"-30":[90.3,90.4],"-28":[90.7,90.7],"-26":[91.0,91.1],"-24":[91.4,91.5],"-22":[91.7,91.8],"-20":[92.1,92.2],"-18":[92.5,92.5],"-16":[92.8,92.9],"-14":[93.2,93.3],"-12":[93.5,93.6],"-10":[93.9,94.0],"-8":[94.2,94.3],"-6":[94.6,94.7],"-4":[94.9,95.0],"-2":[95.3,95.4],"0":[95.6,95.7],"2":[96.0,96.1],"4":[96.3,96.4],"6":[96.7,96.8],"8":[97.0,97.1],"10":[97.4,97.4],"12":[97.7,97.8],"14":[98.0,98.1],"16":[98.3,98.4],"18":[98.7,98.7],"20":[99.0,98.8],"22":[98.7,98.4],"24":[98.3,98.1],"26":[97.9,97.7],"28":[97.6,97.3],"30":[97.1,96.9],"32":[96.7,96.5],"34":[96.3,96.1],"36":[95.8,95.6],"38":[95.3,95.0],"40":[94.7,94.5],"42":[94.1,93.9],"44":[93.5,93.3],"46":[92.9,92.6]},"4000":{"-54":[86.9,87.1],"-52":[87.3,87.4],"-50":[87.7,87.8],"-48":[88.1,88.2],"-46":[88.4,88.6],"-44":[88.8,89.0],"-42":[89.2,89.4],"-40":[89.6,89.7],"-38":[90.0,90.1],"-36":[90.3,90.5],"-34":[90.7,90.9],"-32":[91.1,91.3],"-30":[91.5,91.6],"-28":[91.8,92.0],"-26":[92.2,92.4],"-24":[92.6,92.7],"-22":[92.9,93.1],"-20":[93.3,93.5],"-18":[93.7,93.8],"-16":[94.0,94.2],"-14":[94.4,94.5],"-12":[94.8,94.9],"-10":[95.1,95.3],"-8":[95.5,95.6],"-6":[95.8,96.0],"-4":[96.2,96.3],"-2":[96.5,96.7],"0":[96.9,97.0],"2":[97.2,97.4],"4":[97.6,97.7],"6":[97.9,98.1],"8":[98.3,98.4],"10":[98.6,98.8],"12":[99.0,99.1],"14":[99.3,99.4],"16":[99.6,99.5],"18":[99.2,99.1],"20":[98.9,98.7],"22":[98.5,98.3],"24":[98.2,97.9],"26":[97.8,97.6],"28":[97.4,97.2],"30":[97.0,96.8],"32":[96.6,96.4],"34":[96.1,95.9],"36":[95.6,95.4],"38":[95.1,94.9],"40":[94.6,94.3],"42":[94.0,93.7],"44":[93.4,93.1]},"5000":{"-54":[88.2,88.5],"-52":[88.5,88.9],"-50":[88.9,89.3],"-48":[89.3,89.6],"-46":[89.7,90.0],"-44":[90.1,90.4],"-42":[90.5,90.8],"-40":[90.9,91.2],"-38":[91.3,91.6],"-36":[91.6,92.0],"-34":[92.0,92.3],"-32":[92.4,92.7],"-30":[92.8,93.1],"-28":[93.1,93.5],"-26":[93.5,93.8],"-24":[93.9,94.2],"-22":[94.3,94.6],"-20":[94.6,95.0],"-18":[95.0,95.3],"-16":[95.4,95.7],"-14":[95.7,96.1],"-12":[96.1,96.4],"-10":[96.5,96.8],"-8":[96.8,97.1],"-6":[97.2,97.5],"-4":[97.5,97.9],"-2":[97.9,98.2],"0":[98.3,98.6],"2":[98.6,98.9],"4":[99.0,99.3],"6":[99.3,99.6],"8":[99.6,99.9],"10":[100.0,100.3],"12":[100.2,100.2],"14":[99.8,99.8],"16":[99.5,99.4],"18":[99.1,99.0],"20":[98.7,98.5],"22":[98.4,98.2],"24":[98.0,97.8],"26":[97.6,97.4],"28":[97.3,97.0],"30":[96.9,96.6],"32":[96.4,96.2],"34":[96.0,95.8],"36":[95.5,95.2],"38":[94.9,94.7],"40":[94.4,94.1],"42":[93.8,93.6]},"6000":{"-54":[89.6,90.1],"-52":[90.0,90.5],"-50":[90.4,90.9],"-48":[90.8,91.3],"-46":[91.2,91.7],"-44":[91.5,92.1],"-42":[91.9,92.5],"-40":[92.3,92.9],"-38":[92.7,93.3],"-36":[93.1,93.6],"-34":[93.5,94.0],"-32":[93.9,94.4],"-30":[94.2,94.8],"-28":[94.6,95.2],"-26":[95.0,95.6],"-24":[95.4,95.9],"-22":[95.8,96.3],"-20":[96.1,96.7],"-18":[96.5,97.1],"-16":[96.9,97.4],"-14":[97.3,97.8],"-12":[97.6,98.2],"-10":[98.0,98.5],"-8":[98.4,98.9],"-6":[98.7,99.3],"-4":[99.1,99.6],"-2":[99.4,100.0],"0":[99.8,100.3],"2":[100.1,100.7],"4":[100.5,101.0],"6":[100.8,101.2],"8":[100.8,100.8],"10":[100.4,100.4],"12":[100.1,100.0],"14":[99.7,99.6],"16":[99.3,99.2],"18":[99.0,98.8],"20":[98.6,98.4],"22":[98.2,98.0],"24":[97.9,97.7],"26":[97.5,97.3],"28":[97.1,96.9],"30":[96.7,96.5],"32":[96.3,96.1],"34":[95.8,95.6],"36":[95.3,95.1],"38":[94.7,94.5],"40":[94.2,94.0]},"7000":{"-54":[91.2,91.9],"-52":[91.6,92.3],"-50":[92.0,92.7],"-48":[92.4,93.1],"-46":[92.8,93.5],"-44":[93.2,93.9],"-42":[93.6,94.3],"-40":[94.0,94.7],"-38":[94.4,95.1],"-36":[94.8,95.5],"-34":[95.2,95.9],"-32":[95.6,96.3],"-30":[95.9,96.7],"-28":[96.3,97.1],"-26":[96.7,97.5],"-24":[97.1,97.9],"-22":[97.5,98.2],"-20":[97.9,98.6],"-18":[98.2,99.0],"-16":[98.6,99.4],"-14":[99.0,99.7],"-12":[99.4,100.1],"-10":[99.7,100.5],"-8":[100.1,100.8],"-6":[100.5,101.2],"-4":[100.8,101.5],"-2":[101.2,101.5],"0":[101.5,101.5],"2":[101.5,101.5],"4":[101.3,101.4],"6":[101.0,101.1],"8":[100.6,100.7],"10":[100.3,100.3],"12":[99.9,99.9],"14":[99.6,99.5],"16":[99.2,99.1],"18":[98.8,98.7],"20":[98.5,98.3],"22":[98.1,97.9],"24":[97.8,97.5],"26":[97.4,97.2],"28":[97.0,96.8],"30":[96.6,96.4],"32":[96.1,95.9],"34":[95.6,95.4],"36":[95.1,94.9],"38":[94.6,94.4]},"8000":{"-54":[93.0,93.9],"-52":[93.4,94.3],"-50":[93.8,94.7],"-48":[94.3,95.1],"-46":[94.7,95.5],"-44":[95.1,95.9],"-42":[95.5,96.3],"-40":[95.9,96.7],"-38":[96.3,97.1],"-36":[96.7,97.5],"-34":[97.1,97.9],"-32":[97.5,98.3],"-30":[97.9,98.7],"-28":[98.3,99.1],"-26":[98.7,99.5],"-24":[99.0,99.9],"-22":[99.4,100.3],"-20":[99.8,100.7],"-18":[100.2,101.1],"-16":[100.6,101.4],"-14":[101.0,101.5],"-12":[101.3,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.5,101.5],"4":[101.2,101.3],"6":[100.9,100.9],"8":[100.5,100.6],"10":[100.2,100.2],"12":[99.8,99.8],"14":[99.5,99.4],"16":[99.1,99.0],"18":[98.7,98.6],"20":[98.3,98.2],"22":[98.0,97.8],"24":[97.6,97.4],"26":[97.3,97.0],"28":[96.9,96.6],"30":[96.4,96.2],"32":[96.0,95.8],"34":[95.5,95.2],"36":[95.0,94.8]},"9000":{"-54":[95.1,95.9],"-52":[95.5,96.3],"-50":[95.9,96.7],"-48":[96.3,97.2],"-46":[96.8,97.6],"-44":[97.2,98.0],"-42":[97.6,98.4],"-40":[98.0,98.8],"-38":[98.4,99.2],"-36":[98.8,99.7],"-34":[99.2,100.1],"-32":[99.6,100.4],"-30":[100.0,100.8],"-28":[100.4,101.2],"-26":[100.8,101.5],"-24":[101.2,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.5,101.5],"4":[101.1,101.2],"6":[100.8,100.8],"8":[100.4,100.4],"10":[100.1,100.1],"12":[99.7,99.7],"14":[99.3,99.3],"16":[99.0,98.9],"18":[98.6,98.4],"20":[98.2,98.0],"22":[97.8,97.6],"24":[97.5,97.3],"26":[97.1,96.9],"28":[96.7,96.5],"30":[96.3,96.0],"32":[95.8,95.6]},"10000":{"-54":[97.3,98.0],"-52":[97.7,98.4],"-50":[98.1,98.9],"-48":[98.5,99.3],"-46":[99.0,99.7],"-44":[99.4,100.1],"-42":[99.8,100.6],"-40":[100.2,101.0],"-38":[100.7,101.4],"-36":[101.1,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.4,101.5],"4":[101.0,101.1],"6":[100.7,100.7],"8":[100.3,100.3],"10":[99.9,99.9],"12":[99.6,99.5],"14":[99.2,99.1],"16":[98.8,98.7],"18":[98.5,98.3],"20":[98.1,97.9],"22":[97.7,97.5],"24":[97.3,97.1],"26":[96.9,96.7],"28":[96.5,96.3],"30":[96.1,95.8]},"11000":{"-54":[99.4,100.2],"-52":[99.8,100.6],"-50":[100.3,101.0],"-48":[100.7,101.5],"-46":[101.1,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.3,101.4],"4":[100.9,101.0],"6":[100.6,100.6],"8":[100.2,100.2],"10":[99.8,99.8],"12":[99.5,99.4],"14":[99.1,99.0],"16":[98.7,98.6],"18":[98.3,98.2],"20":[97.9,97.7],"22":[97.5,97.3],"24":[97.1,96.9],"26":[96.7,96.5],"28":[96.3,96.1]},"12000":{"-54":[101.4,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.2,101.3],"4":[100.8,100.9],"6":[100.5,100.5],"8":[100.1,100.1],"10":[99.7,99.7],"12":[99.3,99.2],"14":[99.0,98.8],"16":[98.6,98.4],"18":[98.2,98.0],"20":[97.8,97.6],"22":[97.4,97.1],"24":[96.9,96.7],"26":[96.5,96.3]},"13000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.4,101.5],"2":[101.1,101.2],"4":[100.7,100.8],"6":[100.4,100.4],"8":[100.0,99.9],"10":[99.6,99.5],"12":[99.2,99.1],"14":[98.8,98.7],"16":[98.4,98.2],"18":[98.0,97.8],"20":[97.6,97.4],"22":[97.2,96.9],"24":[96.7,96.5]},"14000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.3,101.4],"2":[101.0,101.0],"4":[100.6,100.6],"6":[100.2,100.2],"8":[99.8,99.8],"10":[99.4,99.3],"12":[99.0,98.9],"14":[98.6,98.5],"16":[98.2,98.0],"18":[97.8,97.6],"20":[97.4,97.2],"22":[97.0,96.7]}},"ON":{"0":{"-54":[82.7,82.7],"-52":[83.0,83.1],"-50":[83.4,83.5],"-48":[83.8,83.8],"-46":[84.1,84.2],"-44":[84.5,84.6],"-42":[84.9,84.9],"-40":[85.2,85.3],"-38":[85.6,85.6],"-36":[85.9,86.0],"-34":[86.3,86.4],"-32":[86.7,86.7],"-30":[87.0,87.1],"-28":[87.4,87.4],"-26":[87.7,87.8],"-24":[88.1,88.1],"-22":[88.4,88.5],"-20":[88.8,88.8],"-18":[89.1,89.2],"-16":[89.5,89.5],"-14":[89.8,89.9],"-12":[90.1,90.2],"-10":[90.5,90.5],"-8":[90.8,90.9],"-6":[91.2,91.2],"-4":[91.5,91.6],"-2":[91.8,91.9],"0":[92.2,92.2],"2":[92.5,92.6],"4":[92.8,92.9],"6":[93.2,93.2],"8":[93.5,93.6],"10":[93.8,93.9]},"1000":{"-54":[83.7,83.7],"-52":[84.0,84.1],"-50":[84.4,84.5],"-48":[84.8,84.8],"-46":[85.1,85.2],"-44":[85.5,85.6],"-42":[85.9,85.9],"-40":[86.3,86.3],"-38":[86.6,86.7],"-36":[87.0,87.0],"-34":[87.3,87.4],"-32":[87.7,87.8],"-30":[88.1,88.1],"-28":[88.4,88.5],"-26":[88.8,88.8],"-24":[89.1,89.2],"-22":[89.5,89.5],"-20":[89.8,89.9],"-18":[90.2,90.2],"-16":[90.5,90.6],"-14":[90.9,90.9],"-12":[91.2,91.3],"-10":[91.6,91.6],"-8":[91.9,92.0],"-6":[92.3,92.3],"-4":[92.6,92.7],"-2":[92.9,93.0],"0":[93.3,93.3],"2":[93.6,93.7],"4":[94.0,94.0],"6":[94.3,94.4],"8":[94.6,94.7],"10":[95.0,95.0]},"2000":{"-54":[84.7,84.8],"-52":[85.1,85.1],"-50":[85.5,85.5],"-48":[85.8,85.9],"-46":[86.2,86.3],"-44":[86.6,86.6],"-42":[87.0,87.0],"-40":[87.3,87.4],"-38":[87.7,87.8],"-36":[88.1,88.1],"-34":[88.4,88.5],"-32":[88.8,88.9],"-30":[89.2,89.2],"-28":[89.5,89.6],"-26":[89.9,89.9],"-24":[90.2,90.3],"-22":[90.6,90.7],"-20":[91.0,91.0],"-18":[91.3,91.4],"-16":[91.7,91.7],"-14":[92.0,92.1],"-12":[92.4,92.4],"-10":[92.7,92.8],"-8":[93.1,93.1],"-6":[93.4,93.5],"-4":[93.8,93.8],"-2":[94.1,94.2],"0":[94.4,94.5],"2":[94.8,94.8],"4":[95.1,95.2],"6":[95.5,95.5],"8":[95.8,95.9],"10":[96.1,96.2]},"3000":{"-54":[85.8,85.9],"-52":[86.2,86.2],"-50":[86.5,86.6],"-48":[86.9,87.0],"-46":[87.3,87.4],"-44":[87.7,87.8],"-42":[88.1,88.1],"-40":[88.4,88.5],"-38":[88.8,88.9],"-36":[89.2,89.3],"-34":[89.6,89.6],"-32":[89.9,90.0],"-30":[90.3,90.4],"-28":[90.7,90.7],"-26":[91.0,91.1],"-24":[91.4,91.5],"-22":[91.8,91.8],"-20":[92.1,92.2],"-18":[92.5,92.5],"-16":[92.8,92.9],"-14":[93.2,93.3],"-12":[93.5,93.6],"-10":[93.9,94.0],"-8":[94.3,94.3],"-6":[94.6,94.7],"-4":[95.0,95.0],"-2":[95.3,95.4],"0":[95.7,95.7],"2":[96.0,96.1],"4":[96.3,96.4],"6":[96.7,96.8],"8":[97.0,97.1],"10":[97.4,97.4]},"4000":{"-54":[86.9,87.1],"-52":[87.3,87.4],"-50":[87.7,87.8],"-48":[88.1,88.2],"-46":[88.5,88.6],"-44":[88.8,89.0],"-42":[89.2,89.4],"-40":[89.6,89.8],"-38":[90.0,90.1],"-36":[90.4,90.5],"-34":[90.7,90.9],"-32":[91.1,91.3],"-30":[91.5,91.6],"-28":[91.8,92.0],"-26":[92.2,92.4],"-24":[92.6,92.7],"-22":[92.9,93.1],"-20":[93.3,93.5],"-18":[93.7,93.8],"-16":[94.0,94.2],"-14":[94.4,94.5],"-12":[94.8,94.9],"-10":[95.1,95.3],"-8":[95.5,95.6],"-6":[95.8,96.0],"-4":[96.2,96.3],"-2":[96.5,96.7],"0":[96.9,97.0],"2":[97.3,97.4],"4":[97.6,97.7],"6":[98.0,98.1],"8":[98.3,98.2],"10":[98.0,97.8]},"5000":{"-54":[88.2,88.5],"-52":[88.5,88.9],"-50":[88.9,89.3],"-48":[89.3,89.6],"-46":[89.7,90.0],"-44":[90.1,90.4],"-42":[90.5,90.8],"-40":[90.9,91.2],"-38":[91.3,91.6],"-36":[91.6,92.0],"-34":[92.0,92.3],"-32":[92.4,92.7],"-30":[92.8,93.1],"-28":[93.1,93.5],"-26":[93.5,93.8],"-24":[93.9,94.2],"-22":[94.3,94.6],"-20":[94.6,95.0],"-18":[95.0,95.3],"-16":[95.4,95.7],"-14":[95.7,96.1],"-12":[96.1,96.4],"-10":[96.5,96.8],"-8":[96.8,97.1],"-6":[97.2,97.5],"-4":[97.5,97.9],"-2":[97.9,98.2],"0":[98.3,98.6],"2":[98.6,98.9],"4":[98.8,98.7],"6":[98.5,98.4],"8":[98.2,98.0],"10":[97.9,97.7]},"6000":{"-54":[89.6,90.1],"-52":[90.0,90.5],"-50":[90.4,90.9],"-48":[90.8,91.3],"-46":[91.2,91.7],"-44":[91.5,92.1],"-42":[91.9,92.5],"-40":[92.3,92.9],"-38":[92.7,93.3],"-36":[93.1,93.7],"-34":[93.5,94.0],"-32":[93.9,94.4],"-30":[94.3,94.8],"-28":[94.6,95.2],"-26":[95.0,95.6],"-24":[95.4,95.9],"-22":[95.8,96.3],"-20":[96.1,96.7],"-18":[96.5,97.1],"-16":[96.9,97.4],"-14":[97.3,97.8],"-12":[97.6,98.2],"-10":[98.0,98.5],"-8":[98.4,98.9],"-6":[98.7,99.3],"-4":[99.1,99.6],"-2":[99.4,99.6],"0":[99.2,99.3],"2":[98.9,98.9],"4":[98.6,98.6],"6":[98.4,98.3],"8":[98.1,97.9],"10":[97.7,97.6]},"7000":{"-54":[91.2,91.9],"-52":[91.6,92.3],"-50":[92.0,92.7],"-48":[92.4,93.1],"-46":[92.8,93.5],"-44":[93.2,93.9],"-42":[93.6,94.3],"-40":[94.0,94.7],"-38":[94.4,95.1],"-36":[94.8,95.5],"-34":[95.2,95.9],"-32":[95.6,96.3],"-30":[96.0,96.7],"-28":[96.3,97.1],"-26":[96.7,97.5],"-24":[97.1,97.9],"-22":[97.5,98.2],"-20":[97.9,98.6],"-18":[98.3,99.0],"-16":[98.6,99.4],"-14":[99.0,99.8],"-12":[99.4,100.1],"-10":[99.7,100.5],"-8":[100.1,100.4],"-6":[100.0,100.1],"-4":[99.7,99.8],"-2":[99.4,99.5],"0":[99.1,99.2],"2":[98.8,98.8],"4":[98.5,98.5],"6":[98.2,98.1],"8":[97.9,97.8],"10":[97.6,97.5]},"8000":{"-54":[93.0,93.9],"-52":[93.4,94.3],"-50":[93.8,94.7],"-48":[94.3,95.1],"-46":[94.7,95.5],"-44":[95.1,95.9],"-42":[95.5,96.3],"-40":[95.9,96.7],"-38":[96.3,97.1],"-36":[96.7,97.5],"-34":[97.1,97.9],"-32":[97.5,98.3],"-30":[97.9,98.7],"-28":[98.3,99.1],"-26":[98.7,99.5],"-24":[99.0,99.9],"-22":[99.4,100.3],"-20":[99.8,100.7],"-18":[100.2,101.1],"-16":[100.6,101.3],"-14":[101.0,101.1],"-12":[100.8,100.8],"-10":[100.5,100.6],"-8":[100.2,100.3],"-6":[99.9,100.0],"-4":[99.6,99.7],"-2":[99.3,99.4],"0":[99.0,99.0],"2":[98.7,98.7],"4":[98.4,98.4],"6":[98.1,98.0],"8":[97.8,97.7],"10":[97.5,97.3]},"9000":{"-54":[95.1,95.9],"-52":[95.5,96.3],"-50":[95.9,96.7],"-48":[96.3,97.2],"-46":[96.8,97.6],"-44":[97.2,98.0],"-42":[97.6,98.4],"-40":[98.0,98.8],"-38":[98.4,99.2],"-36":[98.8,99.7],"-34":[99.2,100.1],"-32":[99.6,100.4],"-30":[100.0,100.8],"-28":[100.4,101.2],"-26":[100.8,101.5],"-24":[101.2,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.4,101.4],"-16":[101.2,101.2],"-14":[100.9,101.0],"-12":[100.7,100.7],"-10":[100.4,100.5],"-8":[100.1,100.2],"-6":[99.8,99.9],"-4":[99.5,99.6],"-2":[99.2,99.3],"0":[98.9,98.9],"2":[98.6,98.6],"4":[98.3,98.3],"6":[98.0,97.9],"8":[97.7,97.6],"10":[97.4,97.2]},"10000":{"-54":[97.3,98.0],"-52":[97.7,98.4],"-50":[98.1,98.9],"-48":[98.5,99.3],"-46":[99.0,99.7],"-44":[99.4,100.2],"-42":[99.8,100.6],"-40":[100.2,101.0],"-38":[100.7,101.4],"-36":[101.1,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.3,101.3],"-16":[101.1,101.1],"-14":[100.8,100.9],"-12":[100.6,100.6],"-10":[100.3,100.4],"-8":[100.0,100.1],"-6":[99.7,99.8],"-4":[99.4,99.5],"-2":[99.1,99.2],"0":[98.8,98.8],"2":[98.5,98.5],"4":[98.2,98.1],"6":[97.9,97.8],"8":[97.6,97.4],"10":[97.3,97.1]},"11000":{"-54":[99.4,100.2],"-52":[99.8,100.6],"-50":[100.3,101.0],"-48":[100.7,101.5],"-46":[101.1,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.2,101.3],"-16":[101.0,101.1],"-14":[100.8,100.8],"-12":[100.5,100.6],"-10":[100.2,100.3],"-8":[99.9,100.0],"-6":[99.6,99.7],"-4":[99.3,99.4],"-2":[99.0,99.1],"0":[98.7,98.7],"2":[98.4,98.4],"4":[98.1,98.0],"6":[97.8,97.7],"8":[97.5,97.3],"10":[97.1,96.9]},"12000":{"-54":[101.4,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.4,101.4],"-18":[101.2,101.2],"-16":[100.9,101.0],"-14":[100.7,100.7],"-12":[100.4,100.5],"-10":[100.1,100.2],"-8":[99.8,100.0],"-6":[99.5,99.6],"-4":[99.2,99.3],"-2":[98.9,99.0],"0":[98.6,98.6],"2":[98.3,98.3],"4":[98.0,97.9],"6":[97.7,97.5],"8":[97.3,97.1],"10":[97.0,96.8]},"13000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.3,101.3],"-18":[101.1,101.1],"-16":[100.9,100.9],"-14":[100.6,100.7],"-12":[100.3,100.4],"-10":[100.0,100.1],"-8":[99.7,99.8],"-6":[99.4,99.5],"-4":[99.1,99.2],"-2":[98.8,98.8],"0":[98.5,98.5],"2":[98.2,98.1],"4":[97.9,97.7],"6":[97.5,97.4],"8":[97.2,97.0],"10":[96.8,96.6]},"14000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.4,101.5],"-20":[101.2,101.3],"-18":[101.0,101.1],"-16":[100.8,100.8],"-14":[100.5,100.6],"-12":[100.2,100.3],"-10":[99.9,100.0],"-8":[99.6,99.7],"-6":[99.3,99.4],"-4":[99.0,99.1],"-2":[98.7,98.7],"0":[98.3,98.3],"2":[98.0,98.0],"4":[97.7,97.6],"6":[97.4,97.2],"8":[97.0,96.8],"10":[96.6,96.4]}}};
 
@@ -2264,6 +2466,13 @@ function fsTakeoff(cfg,pa,temp,wk){
   function atW(w){const tm=wm[w],tb=bracketN(kN(tm),temp);if(!tb)return null;const[a,b]=tb,A=tm[a],B=tm[b];if(a===b)return A.map(Number);const f=(temp-a)/(b-a);return[lerpN(+A[0],+B[0],f),lerpN(+A[1],+B[1],f)]}
   const[a,b]=wb,A=atW(a),B=atW(b);if(!A||!B)return null;if(a===b)return A;const f=(wk-a)/(b-a);return[lerpN(A[0],B[0],f),lerpN(A[1],B[1],f)]}
  const[a,b]=pb,A=atP(a),B=atP(b);if(!A||!B)return null;const P=a===b?A:[lerpN(A[0],B[0],(pa-a)/(b-a)),lerpN(A[1],B[1],(pa-a)/(b-a))],vr=interpScalarN(d.vr,wk);if(vr==null)return null;return{v1:P[0],bfl:P[1],vr}}
+function f50BalancedAccelStop(){
+ const bfl=valueOrNull("perfBFL");
+ const v1=valueOrNull("perfV1"),vr=valueOrNull("perfVR");
+ if(!Number.isFinite(bfl)||!Number.isFinite(v1)||!Number.isFinite(vr))return null;
+ if(($('toRunwayCondition')?.value||'DRY')!=='DRY')return null;
+ return{distance:bfl,source:'DTM813 §5.05 definition • balanced field length is obtained when takeoff distance and accelerate-stop distance are equal at the selected balanced-field V1 • displayed distance inherits current BFL source status'};
+}
 function fsLanding(cfg,pa,wk){const d=FS_PERF.landing[cfg],pb=d&&bracketN(kN(d.tables),pa);if(!pb)return null;const[a,b]=pb,A=interpPairN(d.tables[a],wk),B=interpPairN(d.tables[b],wk);if(!A||!B)return null;const P=a===b?A:[lerpN(A[0],B[0],(pa-a)/(b-a)),lerpN(A[1],B[1],(pa-a)/(b-a))],s=interpScalarN(d.speed,wk);if(s==null)return null;return{speed:s,ld:P[0],lfl:P[1],speedLabel:d.speedLabel||"VREF"}}
 
 let F900B_QRH=null,F900B_LOAD_PROMISE=null,F900B_REFRESH_TIMER=null;
@@ -2840,7 +3049,7 @@ function currentMissionSummaryText(){
    `Structural MTOW: 40,780 lb | Digitized Field-Source Ceiling: ${textOf("toMax")}`,
    `Climb-Limited TOW: ${$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
    `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
-   `Accelerate-Stop Distance: SOURCE LOCKED • FAA-approved Dash-4 AFMS chart digitization pending`,
+   `Accelerate-Stop Distance: ${f50BalancedAccelStop()?Math.round(f50BalancedAccelStop().distance).toLocaleString()+" ft • BALANCED V1 • ASD=BFL":"SOURCE LOCKED"}`,
    `Takeoff N1 Side / Center: ${currentF50TakeoffN1().text} | ${currentF50TakeoffN1().source}`,
    `Takeoff Status: ${textOf("toStatus")}`,
    `Obstacle Review: ${effectiveObstacleReview().state==="REVIEWED_NO_CONFLICT"?`PILOT REVIEWED / NO CONFLICT • ${(departureObstacleReview?.items||[]).length} flagged obstacle NOTAM item${(departureObstacleReview?.items||[]).length===1?"":"s"}`:(effectiveObstacleReview().state==="CONFLICT"?"PILOT CONFLICT RECORDED":(departureObstacleReview?.status||"NOT_CHECKED"))} • FAA NMS text scan only; not a certified clearance analysis`,
@@ -3697,7 +3906,7 @@ function updateToldCard(){
  if($("toldClimbTOW"))$("toldClimbTOW").textContent=$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED";
  const secondSegmentGradient=valueOrNull("perfGrad");
  if($("toldSecondSegment"))$("toldSecondSegment").textContent=Number.isFinite(secondSegmentGradient)?`${secondSegmentGradient.toFixed(2)}% • OEI • GROSS • QRH REFERENCE`:"SOURCE LOCKED";
- if($("toldAccelStop"))$("toldAccelStop").textContent="SOURCE LOCKED — FAA-approved Dash-4 AFMS §5-14/§5-22 chart digitization pending";
+ if($("toldAccelStop")){const asd=f50BalancedAccelStop();$("toldAccelStop").textContent=asd?`${Math.round(asd.distance).toLocaleString()} ft • BALANCED V1 • ASD = BFL`:`SOURCE LOCKED — BFL/V1 REQUIRED`; }
  const takeoffN1=currentF50TakeoffN1();
  if($("toldTakeoffN1"))$("toldTakeoffN1").textContent=takeoffN1.text;
  if($("toldTakeoffN1Source"))$("toldTakeoffN1Source").textContent=takeoffN1.source;
@@ -3746,7 +3955,7 @@ function updateToldCard(){
  $("opTakeoffConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  $("opTakeoffWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
  if($("opSecondSegment"))$("opSecondSegment").textContent=Number.isFinite(secondSegmentGradient)?`${secondSegmentGradient.toFixed(2)}% GROSS`:"SOURCE LOCKED";
- if($("opAccelStop"))$("opAccelStop").textContent="SOURCE LOCKED • AFMS chart digitization pending";
+ if($("opAccelStop")){const asd=f50BalancedAccelStop();$("opAccelStop").textContent=asd?`${Math.round(asd.distance).toLocaleString()} ft • BALANCED V1`:`SOURCE LOCKED • BFL/V1 REQUIRED`; }
  if($("opTakeoffN1"))$("opTakeoffN1").textContent=takeoffN1.text;
 
  const requestedReturnBurn=Math.max(0,num("emerReturnBurn"));
@@ -3773,7 +3982,7 @@ function updateToldCard(){
  $("opEmerBurn").textContent=`${Math.round(appliedReturnBurn).toLocaleString()} lb`;
  $("opEmerWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
  $("opEmerPA").textContent=Number.isFinite(emergencyPA)?`${Math.round(emergencyPA).toLocaleString()} ft`:"—";
- $("opEmerSource").textContent=emergencyPerf?"DTM813 §5.60.4/§5.60.5 • LEGACY NUMERIC GRID PENDING DIRECT DASSAULT DIGITIZATION":"SOURCE LOCKED";
+ $("opEmerSource").textContent=emergencyPerf?`VREF: ${DTM813_S48_VREF_SOURCE} • Landing distance: DTM813 §5.60.4 legacy grid pending direct digitization`:"SOURCE LOCKED";
  $("opEmerStatus").textContent=emergencyStatus;
  $("opEmerStatus").className=`told-op-status ${emergencyStatus==="PASS"?"ok":emergencyStatus.includes("NO-GO")||emergencyStatus.includes("OVER MAX")?"bad":"warn"}`;
 
@@ -4281,11 +4490,11 @@ function updateVSpeedCard(tow,landing){
  $("vsVFS").textContent=v15vs==null?"—":v15vs.toFixed(1)+" kt";
  $("vsVREF").textContent=emerVref==null?"—":emerVref.toFixed(1)+" kt";
 
- $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • Dassault field-source migration pending`;
- $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":(toAuto.cfg==="S20"?`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`:`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")}`);
+ $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50BflMigrationSource(toAuto.cfg)}`;
+ $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":(toAuto.cfg==="S20"?`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`:`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`);
  $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vfr")} • derived from VR=V2`;
- $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • Dassault 1.5Vs migration pending`;
- $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside S+48 VREF table":`${F50_DASSAULT_SOURCE.landing.S48.vref} • legacy numeric table retained pending direct digitization`;
+ $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • DTM813 §5.30 applicability review pending for N33AP probe configuration`;
+ $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside DTM813 §5.60.5 digitized range":DTM813_S48_VREF_SOURCE;
 
  const vals=[v1,vr,vfr,v15vs,emerVref];
  const count=vals.filter(v=>v!=null).length;
@@ -5491,7 +5700,7 @@ function takeoffComparisonFor(cfg){
  const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),condition=$("toRunwayCondition")?.value||"DRY";
  const runway=effectiveDepartureRunwayAssessment();
  const available=Number.isFinite(runway?.usable)?runway.usable:perfTakeoffRunwayLen();
- let result=null,source="PUBLISHED GRID",reason="";
+ let result=null,source=f50BflMigrationSource(cfg),reason="";
  if(condition==="WET")reason="WET DATA SOURCE LOCKED";
  else if(!Number.isFinite(pa))reason="PRESSURE ALTITUDE REQUIRED";
  else if(!Number.isFinite(temp))reason="TEMPERATURE REQUIRED";
@@ -5741,7 +5950,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.14",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.21",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
@@ -5758,6 +5967,22 @@ async function startupCheck(manual=false){
      if(ps){ps.textContent=perfOk?"LOADED":"DATA MISSING";ps.className=perfOk?"ok":"bad"}
      if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 • 32 takeoff / 8 landing tables":"Falcon 900B dataset failed integrity check";
    }catch(perfError){if(ps){ps.textContent="900B DATA MISSING";ps.className="bad"}if(pn)pn.textContent="N33AP remains available; redeploy the Falcon 900B dataset."}
+   try{
+     await loadF50S20NomographShadow();
+     const rg=F50_S20_NOMOGRAPH_SHADOW_REGRESSION;
+     if(pn&&rg){
+       const passed=rg.results.filter(r=>r.pass).length;
+       pn.textContent += ` • S+20 §5.45.6 shadow ${rg.pass?"PASS":"HOLD"} ${passed}/${rg.results.length} • max Δ ${Number.isFinite(rg.max_abs_error_ft)?Math.round(rg.max_abs_error_ft):"—"} ft`;
+     }
+     await loadF50S20V1Shadow();
+     const vrg=F50_S20_V1_SHADOW_REGRESSION;
+     if(pn&&vrg){
+       const passed=vrg.results.filter(r=>r.pass).length;
+       pn.textContent += ` • §5.45.7 V1 trace ${vrg.pass?"PASS":"HOLD"} ${passed}/${vrg.results.length} • max Δ ${Number.isFinite(vrg.max_abs_error_kt)?vrg.max_abs_error_kt.toFixed(2):"—"} kt`;
+     }
+   }catch(shadowError){
+     if(pn)pn.textContent += " • S+20 §5.45.6 shadow dataset unavailable (production grid unchanged)";
+   }
    const runwayCount=Number(h.runway_airports_loaded||0);
    if(rs){rs.textContent=runwayCount>0?"READY":"PACKAGED DATA MISSING";rs.className=runwayCount>0?"ok":"bad"}
    if(rn)rn.textContent=`${runwayCount.toLocaleString()} packaged airport entr${runwayCount===1?"y":"ies"} • FAA NASR live fallback configured`;
