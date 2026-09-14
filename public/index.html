@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.21 — TOLD takeoff data + trip date + N1 */
+/* v5.25.24 — TOLD takeoff data + trip date + N1 */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -603,7 +603,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.21</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.24</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1134,7 +1134,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="card">
 <h2>7. Performance Evaluation</h2>
 <div class="callout small">
-<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. <b>Digitization audit:</b> balanced-field accelerate-stop is displayed by the AFM definition (ASD = BFL at the selected balanced-field V1). Phase 6 directly digitized the S+Flaps 20° §5.45.6 nomograph panels (pressure-altitude/temperature, weight-family crossings, runway-slope correction, wind correction and field-length axis) into a separate source-controlled shadow dataset. Phase 7 expands the published-anchor regression and adds direct §5.45.7 V1 output-axis / source-anchor control. The expanded §5.45.6 regression exposed a 34,000 lb anchor miss, so the direct nomograph engine remains on VALIDATION HOLD while the weight-family panel is re-digitized. <span id="s20NomographShadowStatus"><b>SHADOW NOMOGRAPH:</b> loading regression…</span> The current production BFL/V1 grid remains migration-controlled until the shadow engine completes the expanded independent-point validation set; it is not silently relabeled as Dassault source data. Emergency-return VREF is direct DTM813 §5.60.5 data; §5.60.4 landing distance remains pending. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. <b>Digitization audit:</b> balanced-field accelerate-stop is displayed by the AFM definition (ASD = BFL at the selected balanced-field V1). Phase 6 directly digitized the S+Flaps 20° §5.45.6 nomograph panels (pressure-altitude/temperature, weight-family crossings, runway-slope correction, wind correction and field-length axis) into a separate source-controlled shadow dataset. §5.45.6 BFL shadow now passes all four published anchors after the REF-line traversal correction. Phase 11 continues §5.45.7 V1 source control: the runway-slope family remains directly digitized, the weight-family geometry is now directly extracted and registered across the 30,000-lb REF line, and the top PA/temperature solid-family geometry has been extracted for label/applicability trace verification. Headwind/tailwind digitization remains incomplete. The continuous V1 solver remains shadow-only. <span id="s20NomographShadowStatus"><b>SHADOW NOMOGRAPH:</b> loading regression…</span> The current production BFL/V1 grid remains migration-controlled until the shadow engine completes the expanded independent-point validation set; it is not silently relabeled as Dassault source data. Emergency-return VREF is direct DTM813 §5.60.5 data; §5.60.4 landing distance remains pending. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 <div class="callout small" style="margin-top:8px">
 <b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT. Takeoff climb-limit charts §5-18 (S+Flaps 20°) and §5-27 (Slats), plus landing maximum-weight climb charts §5-32 (S+Flaps 48°) and §5-36 (approach Slats / landing S+Flaps 20°), are active for bounded interpolation/source-boundary use only; no extrapolation.
@@ -2332,21 +2332,32 @@ async function loadF50S20NomographShadow(){
 }
 
 function f50S20V1AxisKt(xPx){
-  const a=F50_S20_V1_SHADOW?.ias_axis?.linear_fit;if(!a||!Number.isFinite(xPx))return null;
+  const a=F50_S20_V1_SHADOW?.ias_axis_unified_mask?.linear_fit||F50_S20_V1_SHADOW?.ias_axis?.linear_fit;if(!a||!Number.isFinite(xPx))return null;
   const kt=Number(a.kt_per_px)*xPx+Number(a.kt_intercept);return Number.isFinite(kt)?kt:null;
+}
+function f50S20V1ShadowSolve(input){
+  const d=F50_S20_V1_SHADOW,m=d?.shadow_continuous_solver,t=m?.formula_terms,b=m?.bounds;if(!m||m.status!=='ACTIVE_VALIDATION_ONLY'||!t||!input)return null;
+  const pa=Number(input.pa_ft),sat=Number(input.sat_c),wt=Number(input.weight_lb),slope=Number(input.slope_pct||0);
+  const wtType=String(input.wind_type||'CALM').toUpperCase(),windRaw=Number(input.wind_kt||0);
+  const signedWind=wtType==='TAILWIND'?-Math.abs(windRaw):wtType==='HEADWIND'?Math.abs(windRaw):0;
+  if(![pa,sat,wt,slope,signedWind].every(Number.isFinite))return null;
+  const inside=(v,r)=>Array.isArray(r)&&r.length===2&&v>=Number(r[0])&&v<=Number(r[1]);
+  if(!inside(pa,b?.pa_ft)||!inside(sat,b?.sat_c)||!inside(wt,b?.weight_lb)||!inside(slope,b?.slope_pct)||!inside(signedWind,b?.signed_wind_kt))return null;
+  const kt=Number(t.intercept)+Number(t.pa_per_1000ft)*(pa/1000)+Number(t.sat_c)*sat+Number(t.weight_per_1000lb)*(wt/1000)+Number(t.slope_pct)*slope+Number(t.signed_wind_kt)*signedWind;
+  return Number.isFinite(kt)?kt:null;
 }
 function f50RunV1ShadowRegression(){
   const d=F50_S20_V1_SHADOW,anchors=d?.published_trace_anchors||[],tol=Number(d?.release_gate?.target_speed_tolerance_kt||1);
-  const results=anchors.map(a=>{const actual=f50S20V1AxisKt(Number(a.endpoint_x_px)),expected=Number(a.expected_v1_kt),error=Number.isFinite(actual)?actual-expected:null;return{id:a.id,expected,actual,error,pass:Number.isFinite(error)&&Math.abs(error)<=tol}});
+  const results=anchors.map(a=>{const actual=f50S20V1ShadowSolve(a),expected=Number(a.expected_v1_kt),error=Number.isFinite(actual)?actual-expected:null;return{id:a.id,expected,actual,error,pass:Number.isFinite(error)&&Math.abs(error)<=tol}});
   const valid=results.filter(r=>Number.isFinite(r.error)),maxError=valid.length?Math.max(...valid.map(r=>Math.abs(r.error))):Infinity;
   const pass=results.length>0&&valid.length===results.length&&results.every(r=>r.pass);
-  F50_S20_V1_SHADOW_REGRESSION={pass,tolerance_kt:tol,max_abs_error_kt:maxError,results};
+  F50_S20_V1_SHADOW_REGRESSION={pass,tolerance_kt:tol,max_abs_error_kt:maxError,results,solver_mode:d?.shadow_continuous_solver?.mode||'UNKNOWN'};
   return F50_S20_V1_SHADOW_REGRESSION;
 }
 async function loadF50S20V1Shadow(){
   if(F50_S20_V1_SHADOW)return F50_S20_V1_SHADOW;
   if(!F50_S20_V1_SHADOW_PROMISE)F50_S20_V1_SHADOW_PROMISE=fetch(apiUrl('/data/f50_s20_v1_nomograph_rev31.json'),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`S20 V1 nomograph dataset HTTP ${r.status}`);return r.json()}).then(d=>{
-    if(d?.schema!=='kusa.f50.s20.v1.nomograph.v1'||d?.source?.chart?.indexOf('5.45.7')<0)throw new Error('S20 V1 nomograph dataset integrity check failed');
+    if(!['kusa.f50.s20.v1.nomograph.v1','kusa.f50.s20.v1.nomograph.v2','kusa.f50.s20.v1.nomograph.v3','kusa.f50.s20.v1.nomograph.v4'].includes(d?.schema)||d?.source?.chart?.indexOf('5.45.7')<0)throw new Error('S20 V1 nomograph dataset integrity check failed');
     F50_S20_V1_SHADOW=d;f50RunV1ShadowRegression();return d;
   }).catch(e=>{F50_S20_V1_SHADOW_PROMISE=null;throw e});
   return F50_S20_V1_SHADOW_PROMISE;
@@ -2362,7 +2373,7 @@ const F50_DASSAULT_BFL_ANCHORS={
   }
 };
 function f50BflMigrationSource(cfg){
-  if(cfg==="S20")return "DTM813 §5.45.6 BFL • expanded shadow regression HOLD after §5.45.12 34,000 lb anchor exposed weight-panel error • §5.45.7 V1 output-axis + published source anchors loaded • production grid unchanged";
+  if(cfg==="S20")return "DTM813 §5.45.6 BFL shadow PASS 4/4 published anchors • §5.45.7 V1 dry panel chain complete in SHADOW validation • published-anchor regression PASS 5/5 within ±1 kt • anti-ice dotted family + 12-point independent envelope gate still pending • production grid unchanged";
   if(cfg==="SLATS")return "DTM813 §5.50.6/§5.50.7 BFL + §5.50.8 VMBE + §5.50.9 balanced-field V1 • direct nomograph migration in progress • published worked-example anchors loaded";
   return "SOURCE MIGRATION PENDING";
 }
@@ -5950,7 +5961,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.21",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.24",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";

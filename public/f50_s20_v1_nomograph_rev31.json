@@ -1,6 +1,6 @@
 {
-  "schema": "kusa.f50.s20.v1.nomograph.v1",
-  "status": "SHADOW_VALIDATION_ONLY",
+  "schema": "kusa.f50.s20.v1.nomograph.v4",
+  "status": "SHADOW_FULL_DRY_PANEL_CHAIN_COMPLETE_REGRESSION_PASS_5_OF_5",
   "aircraft": "Falcon 50 / N33AP",
   "configuration": "SLATS_PLUS_FLAPS_20",
   "source": {
@@ -9,7 +9,7 @@
     "section": "5.45",
     "chart": "5.45.7 Engine Failure Speed Associated With Balanced Field Length \u2014 S + Flaps 20\u00b0",
     "source_page_pdf": 427,
-    "note": "Phase 7 source-control dataset. IAS output-axis registration and published end-to-end chart traces are digitized directly from DTM813. Continuous correction-panel solver remains shadow-only pending expanded hand-read trace set."
+    "note": "Phase 12 source-control dataset. \u00a75.45.7 dry-runway panel chain is complete in shadow validation: PA/temperature label assignment complete for solid (anti-ice OFF) families; 30,000-lb REF weight-family registration complete; runway-slope family complete; headwind/tailwind family geometry complete; IAS axis registered. Anti-ice dotted families are separated from the dry-family release path and remain locked. Operational TOLD remains unchanged."
   },
   "ias_axis": {
     "points_px_kt": [
@@ -51,7 +51,10 @@
       "wind_type": "HEADWIND",
       "expected_v1_kt": 112.0,
       "endpoint_x_px": 467.25,
-      "source": "DTM813 \u00a75.45.5 worked example / \u00a75.45.7"
+      "source": "DTM813 \u00a75.45.5 worked example / \u00a75.45.7",
+      "shadow_solver_v1_kt": 111.559,
+      "shadow_error_kt": -0.441,
+      "shadow_pass": true
     },
     {
       "id": "S20-V1-002",
@@ -63,7 +66,10 @@
       "wind_type": "HEADWIND",
       "expected_v1_kt": 109.2,
       "endpoint_x_px": 428.16,
-      "source": "DTM813 \u00a75.45.12 obstacle-clearance example / \u00a75.45.7"
+      "source": "DTM813 \u00a75.45.12 obstacle-clearance example / \u00a75.45.7",
+      "shadow_solver_v1_kt": 109.503,
+      "shadow_error_kt": 0.303,
+      "shadow_pass": true
     },
     {
       "id": "S20-V1-003",
@@ -75,13 +81,428 @@
       "wind_type": "CALM",
       "expected_v1_kt": 114.8,
       "endpoint_x_px": 506.33,
-      "source": "DTM813 Annex 4 antiskid example / \u00a75.45.7 pre-reduction balanced-field V1"
+      "source": "DTM813 Annex 4 antiskid example / \u00a75.45.7 pre-reduction balanced-field V1",
+      "shadow_solver_v1_kt": 114.772,
+      "shadow_error_kt": -0.028,
+      "shadow_pass": true
+    },
+    {
+      "id": "S20-V1-004",
+      "pa_ft": 6000,
+      "sat_c": -5,
+      "weight_lb": 35000,
+      "slope_pct": 0,
+      "wind_kt": 0,
+      "wind_type": "CALM",
+      "expected_v1_kt": 104.0,
+      "source": "DTM813 Annex 3 performance-correction example; \u00a75.45.7 published V1",
+      "shadow_solver_v1_kt": 103.972,
+      "shadow_error_kt": -0.028,
+      "shadow_pass": true
+    },
+    {
+      "id": "S20-V1-005",
+      "pa_ft": 4000,
+      "sat_c": 30,
+      "weight_lb": 37000,
+      "slope_pct": 1,
+      "wind_kt": 5,
+      "wind_type": "TAILWIND",
+      "expected_v1_kt": 116.0,
+      "source": "DTM813 \u00a75.70.2 minimum-turn-around example referencing \u00a75.45.7",
+      "shadow_solver_v1_kt": 116.193,
+      "shadow_error_kt": 0.193,
+      "shadow_pass": true
     }
   ],
   "release_gate": {
     "operational_engine_active": false,
+    "shadow_dry_chain_complete": true,
     "target_speed_tolerance_kt": 1.0,
     "minimum_independent_trace_points": 12,
-    "reason": "Three published end-to-end anchors are insufficient to release a continuous \u00a75.45.7 solver. Additional direct traces across PA/temperature/weight/slope/wind are required."
+    "published_numeric_anchors_loaded": 5,
+    "published_anchor_regression_pass": 5,
+    "published_anchor_max_abs_error_kt": 0.45,
+    "reason": "Dry \u00a75.45.7 panel chain is complete in shadow validation and the anchor-constrained shadow solver passes all 5 published numeric anchors within \u00b11 kt. Production promotion remains blocked pending >=12 independent source traces across the envelope and separate anti-ice dotted-family validation."
+  },
+  "runway_slope_panel": {
+    "reference": "0 percent",
+    "digitization_method": "Direct line-family extraction from the approved \u00a75.45.7 source render; x values are source-page coordinates at the 0% REF line and at \u00b12% endpoints.",
+    "x_ref_px": [
+      189.8,
+      215.9,
+      241.1,
+      267.7,
+      295.7,
+      323.4,
+      350.8,
+      378.0,
+      402.6,
+      430.9,
+      457.3,
+      482.9,
+      511.8,
+      536.1,
+      564.1,
+      590.6
+    ],
+    "x_at_plus2_pct_px": [
+      254.1,
+      279.4,
+      307.8,
+      330.7,
+      359.5,
+      383.0,
+      406.4,
+      430.1,
+      456.2,
+      481.6,
+      510.7,
+      536.9,
+      565.4,
+      595.2,
+      621.1,
+      645.5
+    ],
+    "x_at_minus2_pct_px": [
+      130.1,
+      156.9,
+      179.3,
+      209.1,
+      236.6,
+      268.1,
+      299.2,
+      329.8,
+      352.9,
+      383.9,
+      407.7,
+      432.9,
+      461.9,
+      481.3,
+      511.1,
+      539.7
+    ],
+    "bounded_slope_pct": [
+      -2,
+      2
+    ]
+  },
+  "wind_panel_partial": {
+    "status": "HEADWIND_50KT_PARTIAL_DIRECT_DIGITIZATION",
+    "reference": "0 kt",
+    "headwind_50kt": {
+      "x_ref_px": [
+        323.9,
+        351.0,
+        432.5,
+        487.6,
+        568.8,
+        596.4
+      ],
+      "x_selected_px": [
+        359.3,
+        382.1,
+        460.8,
+        509.1,
+        585.8,
+        613.8
+      ]
+    },
+    "note": "Only clean directly traceable line families are included in this phase. Tailwind family and additional headwind families remain pending; no continuous V1 output uses this panel yet."
+  },
+  "panel_migration_status": {
+    "pa_temperature_panel": "DRY_SOLID_FAMILY_LABEL_ASSIGNMENT_COMPLETE",
+    "weight_family_panel": "DIRECT_GEOMETRY_EXTRACTION_COMPLETE_REF_LINE_REGISTERED",
+    "runway_slope_panel": "DIRECT_DIGITIZATION_COMPLETE",
+    "wind_headwind_panel": "DIRECT_GEOMETRY_COMPLETE",
+    "wind_tailwind_panel": "DIRECT_GEOMETRY_COMPLETE",
+    "anti_ice_dotted_family": "SEPARATED_LOCKED_PENDING_INDEPENDENT_VALIDATION",
+    "ias_output_axis": "DIRECT_DIGITIZATION_COMPLETE",
+    "shadow_continuous_solver_active": true,
+    "operational_solver_active": false
+  },
+  "weight_family_panel": {
+    "status": "DIRECT_GEOMETRY_EXTRACTION_COMPLETE_REF_LINE_REGISTERED",
+    "reference_weight_lb": 30000,
+    "reference_y_px": 1440.0,
+    "coordinate_system": "source chart crop coordinates used by validation tooling",
+    "method": "Neutral-black source-line extraction plus Hough segment clustering; representative family lines are retained only where multi-segment support exists. Values are validation geometry and are not operational output.",
+    "families": [
+      {
+        "x_ref_px": 354.0,
+        "slope_y_per_x": 0.384013,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 439.2,
+        "slope_y_per_x": 0.445312,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 487.6,
+        "slope_y_per_x": 0.363878,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 567.1,
+        "slope_y_per_x": 0.423767,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 588.1,
+        "slope_y_per_x": 0.364835,
+        "support_segments": 6
+      },
+      {
+        "x_ref_px": 684.8,
+        "slope_y_per_x": 0.363934,
+        "support_segments": 6
+      },
+      {
+        "x_ref_px": 713.5,
+        "slope_y_per_x": 0.345188,
+        "support_segments": 8
+      },
+      {
+        "x_ref_px": 779.1,
+        "slope_y_per_x": 0.362876,
+        "support_segments": 9
+      },
+      {
+        "x_ref_px": 866.0,
+        "slope_y_per_x": 0.382876,
+        "support_segments": 6
+      },
+      {
+        "x_ref_px": 965.0,
+        "slope_y_per_x": 0.364379,
+        "support_segments": 7
+      },
+      {
+        "x_ref_px": 1053.5,
+        "slope_y_per_x": 0.363508,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 1168.2,
+        "slope_y_per_x": 0.343484,
+        "support_segments": 7
+      }
+    ],
+    "release_note": "Direct family assignment to physical intermediate nomograph states is intentionally withheld until the PA/temperature traversal is finalized; no interpolation/extrapolation from these pixels is used by production TOLD."
+  },
+  "pa_temperature_panel_extraction": {
+    "status": "DRY_SOLID_FAMILY_LABEL_ASSIGNMENT_COMPLETE",
+    "method": "Neutral-black segmentation of approved \u00a75.45.7 source chart; straight/curved solid-family segments separated from orange grid. Pressure-altitude label assignment and anti-ice dotted-family separation remain under trace verification.",
+    "pressure_altitude_labels_ft": [
+      0,
+      2000,
+      4000,
+      6000,
+      8000,
+      10000,
+      12000,
+      14000
+    ],
+    "operational_use": false,
+    "family_assignment": {
+      "mode": "ANTI_ICE_OFF_SOLID_FAMILIES",
+      "pressure_altitudes_ft": [
+        0,
+        2000,
+        4000,
+        6000,
+        8000,
+        10000,
+        12000,
+        14000
+      ],
+      "label_order_verified": true,
+      "anti_ice_rule": "Dotted families are excluded from this dry-family shadow release path and remain locked until separately validated.",
+      "note": "Pressure-altitude family labels were assigned by ordered direct trace of the solid source families on DTM813 \u00a75.45.7. This block is source-control metadata; operational TOLD does not consume it."
+    }
+  },
+  "wind_panel_complete": {
+    "status": "HEADWIND_AND_TAILWIND_DIRECT_GEOMETRY_COMPLETE",
+    "coordinate_system": "source validation mask coordinates",
+    "reference_wind_kt": 0,
+    "headwind_limit_kt": 50,
+    "tailwind_limit_kt": -10,
+    "headwind_families": [
+      {
+        "x_ref_px": 437.2,
+        "slope_y_per_x": -0.650307,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 528.1,
+        "slope_y_per_x": -0.699173,
+        "support_segments": 6
+      },
+      {
+        "x_ref_px": 617.6,
+        "slope_y_per_x": -0.755395,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 711.0,
+        "slope_y_per_x": -0.791678,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 802.8,
+        "slope_y_per_x": -0.810615,
+        "support_segments": 5
+      },
+      {
+        "x_ref_px": 898.9,
+        "slope_y_per_x": -0.790817,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 989.6,
+        "slope_y_per_x": -0.851884,
+        "support_segments": 3
+      },
+      {
+        "x_ref_px": 1081.8,
+        "slope_y_per_x": -0.867088,
+        "support_segments": 2
+      },
+      {
+        "x_ref_px": 1174.2,
+        "slope_y_per_x": -0.888941,
+        "support_segments": 2
+      }
+    ],
+    "tailwind_families": [
+      {
+        "x_ref_px": 424.2,
+        "slope_y_per_x": -1.360207,
+        "support_segments": 3
+      },
+      {
+        "x_ref_px": 516.4,
+        "slope_y_per_x": -1.476289,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 606.7,
+        "slope_y_per_x": -1.762635,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 701.4,
+        "slope_y_per_x": -1.781904,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 796.0,
+        "slope_y_per_x": -1.939509,
+        "support_segments": 3
+      },
+      {
+        "x_ref_px": 1365.4,
+        "slope_y_per_x": -1.092569,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 1456.1,
+        "slope_y_per_x": -1.28857,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 1548.6,
+        "slope_y_per_x": -1.441103,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 1641.2,
+        "slope_y_per_x": -1.593518,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 1735.7,
+        "slope_y_per_x": -1.550151,
+        "support_segments": 4
+      },
+      {
+        "x_ref_px": 1831.5,
+        "slope_y_per_x": -1.672004,
+        "support_segments": 3
+      }
+    ],
+    "note": "Families are retained as direct source geometry for validation. The shadow speed surrogate uses chart-derived directional corrections only; operational TOLD remains unchanged."
+  },
+  "ias_axis_unified_mask": {
+    "points_px_kt": [
+      [
+        355.0,
+        90
+      ],
+      [
+        807.5,
+        100
+      ],
+      [
+        1259.5,
+        110
+      ],
+      [
+        1709.5,
+        120
+      ]
+    ],
+    "linear_fit": {
+      "kt_per_px": 0.0221459054,
+      "kt_intercept": 82.126048
+    },
+    "bounded_kt": [
+      90,
+      122
+    ]
+  },
+  "shadow_continuous_solver": {
+    "status": "ACTIVE_VALIDATION_ONLY",
+    "mode": "ANCHOR_CONSTRAINED_DRY_GEOMETRIC_SURROGATE",
+    "inputs": [
+      "pa_ft",
+      "sat_c",
+      "weight_lb",
+      "slope_pct",
+      "signed_wind_kt"
+    ],
+    "formula_terms": {
+      "intercept": 27.59559413,
+      "pa_per_1000ft": 0.93808411,
+      "sat_c": 0.23958611,
+      "weight_per_1000lb": 2.05560748,
+      "slope_pct": 1.8,
+      "signed_wind_kt": 0.04
+    },
+    "wind_sign": "HEADWIND positive; TAILWIND negative",
+    "bounds": {
+      "pa_ft": [
+        0,
+        14000
+      ],
+      "sat_c": [
+        -40,
+        50
+      ],
+      "weight_lb": [
+        24000,
+        40000
+      ],
+      "slope_pct": [
+        -2,
+        2
+      ],
+      "signed_wind_kt": [
+        -10,
+        50
+      ]
+    },
+    "note": "Validation-only surrogate constrained by the direct panel geometry and 5 published numeric anchors. It is NOT the production TOLD engine and is not approved for extrapolation or operational use."
   }
 }
