@@ -1,0 +1,24 @@
+KUSA FlightOps Falcon 50-4 Source Map — v5.25.14
+
+AIRCRAFT: N33AP / Falcon 50-4
+
+TAKEOFF N1
+Controlling source: FAA-approved AFM Supplement FTA-PA-001019 Rev I/R (TFE 731-4-1C / N1 DEEC)
+- §5-2 to §5-4: Takeoff N1 without ice protection — takeoff run / first segment climb
+- §5-7 to §5-9: Takeoff N1 with engine ice protection — takeoff run / first segment climb
+Inputs used by FlightOps: departure SAT and pressure altitude.
+Interpolation: bounded linear interpolation only between published table points; no extrapolation.
+Display: Side engine N1 / Center engine N1.
+Future-dated trip rule: day-of-current weather required before N1 is displayed.
+
+SECOND SEGMENT CLIMB
+- AFMS climb-limited takeoff weight remains controlled by FTA-PA-001019 Rev C digitized climb-limit contours already in FlightOps.
+- Displayed gross gradient remains QRH reference pending direct digitization of the AFMS second-segment chart.
+
+ACCELERATE-STOP DISTANCE
+- Controlling Dash-4 AFMS graphical source identified (§5-14 S+Flaps 20°, §5-22 Slats).
+- Numeric output remains SOURCE LOCKED pending direct chart digitization/validation.
+
+V-SPEED / LANDING MIGRATION
+- Prior v5.25.13 Dassault source-map controls remain in effect for migrated/pending DTM813 items.
+- Emergency-return VREF source status unchanged; only visual emphasis changed to red in source-detail display.

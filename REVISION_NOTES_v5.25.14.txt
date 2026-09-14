@@ -1,0 +1,23 @@
+KUSA FlightOps v5.25.14 — TOLD Takeoff Data / Trip Date / N1
+
+Falcon 50-4 / N33AP
+- Added Trip Date entry to New Trip. Trip numbering now uses the selected trip date (YYYYMMDD-##), not the draft creation timestamp.
+- Trip Date persists through Drafts, Archive, editable sharing, and restored trips. Draft and Archive cards display the trip date.
+- TOLD Section 1 TAKEOFF now displays OEI second-segment gross climb gradient.
+- Added Accelerate-Stop Distance line to Section 1 and source detail. It remains SOURCE LOCKED until the FAA-approved Dash-4 AFMS §5-14 / §5-22 graphical charts are directly digitized and validated. No substitute or fabricated value is shown.
+- Added Takeoff N1 Side / Center to Section 1 and Takeoff Support / Source Detail.
+- N1 is calculated by bounded interpolation from the FAA-approved Falcon 50-4 AFM Supplement FTA-PA-001019 Rev I/R takeoff N1 tables:
+  * §5-2 through §5-4 without ice protection
+  * §5-7 through §5-9 with engine ice protection
+  * Source variables: departure SAT/OAT and pressure altitude.
+  * No extrapolation outside the digitized AFMS table envelope.
+- For future-dated trips, N1 intentionally displays DAY-OF WX REQUIRED rather than using today's METAR as if it applied to the future trip.
+- Emergency-return VREF in TAKEOFF SUPPORT / SOURCE DETAIL is now red when a valid speed is present, matching the red Emergency Return operational cue.
+
+Source / validation note
+- N33AP is a Falcon 50-4. For takeoff N1, the aircraft-specific FAA-approved Dash-4 AFM Supplement is controlling over generic basic-Falcon engine-power tables.
+- Existing second-segment gradient remains clearly marked as QRH REFERENCE until direct AFMS graph digitization is completed.
+
+Deployment
+- Replace public/index.html, server.js, and package.json.
+- scripts folder is unchanged.
