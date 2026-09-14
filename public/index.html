@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.13 — Dassault source migration phase 1 */
+/* v5.25.14 — TOLD takeoff data + trip date + N1 */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -535,6 +535,7 @@ details summary{cursor:pointer;margin-top:8px}
 .told-vspeed.valid{color:#55e38b!important;text-shadow:0 0 10px rgba(85,227,139,.12)}
 .told-op-panel.emergency .told-op-title{color:#ff4d4f!important;text-shadow:0 0 10px rgba(255,77,79,.14)}
 .told-op-panel.emergency #opEmerVref.valid,.told-op-panel.emergency #f9EmerVref.valid{color:#ff4d4f!important;text-shadow:0 0 10px rgba(255,77,79,.14)}
+.told-vspeed.emergency-value.valid{color:#ff4d4f!important;text-shadow:0 0 10px rgba(255,77,79,.14)}
 @media print{.told-vspeed.valid{color:#111!important;text-shadow:none}}
 
 /* v5.25.10 — exact TOLD action-row alignment fix */
@@ -602,7 +603,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.13</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.14</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -690,8 +691,10 @@ details summary{cursor:pointer;margin-top:8px}
             <div><label>Destination ICAO</label><input id="homeDest" maxlength="4" placeholder="e.g. KHII"></div>
           </div>
           <div class="row" style="margin-top:10px">
+            <div><label>Trip Date</label><input id="homeTripDate" type="date"></div>
             <div><label>Alternate ICAO</label><input id="homeAlt" maxlength="4" placeholder="optional"></div>
-<div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
+            <div><label>Trip / Tail Note</label><input id="homeTripNote" placeholder="optional"></div>
+            <div class="wx"><div class="small">Trip Labeling</div><b id="homeTripDateNote">DATE REQUIRED</b><div class="small">Draft/archive number uses this trip date.</div></div>
           </div>
 
           <div class="newtrip-fuel">
@@ -1525,6 +1528,9 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
       <div class="told-op-detail"><span>Takeoff Weight</span><span id="opTakeoffWeight">—</span></div>
       <div class="told-op-detail"><span>Configuration</span><span id="opTakeoffConfig">—</span></div>
       <div class="told-op-detail"><span>Wind</span><span id="opTakeoffWind">—</span></div>
+      <div class="told-op-detail"><span>OEI 2nd Segment Gross Gradient</span><span id="opSecondSegment">—</span></div>
+      <div class="told-op-detail"><span>Accelerate-Stop Distance</span><span id="opAccelStop">SOURCE LOCKED</span></div>
+      <div class="told-op-detail"><span>Takeoff N1 (Side / Center)</span><span id="opTakeoffN1">—</span></div>
     </div>
   </section>
 
@@ -1659,13 +1665,16 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
     <div class="told-row"><span>Runway Margin</span><span id="toldTORwyMargin">—</span></div>
     <div class="told-row"><span>Climb-Limited TOW</span><span id="toldClimbTOW">—</span></div>
     <div class="told-row"><span>OEI 2nd Segment Gross Gradient</span><span id="toldSecondSegment">—</span></div>
+    <div class="told-row"><span>Accelerate-Stop Distance</span><span id="toldAccelStop">SOURCE LOCKED — AFMS §5-14 digitization pending</span></div>
+    <div class="told-row"><span>Takeoff N1 (Side / Center)</span><span id="toldTakeoffN1">—</span></div>
+    <div class="told-row"><span>N1 Source / Weather Basis</span><span id="toldTakeoffN1Source">—</span></div>
     <div class="told-row"><span>Status</span><span id="toldTOStatus">—</span></div>
     <div class="told-speeds">
       <div class="told-speed"><span class="small">V1</span><b id="toldV1" class="told-vspeed">—</b></div>
       <div class="told-speed"><span class="small">VR=V2</span><b id="toldVR" class="told-vspeed">—</b></div>
       <div class="told-speed"><span class="small">Vfr</span><b id="toldVfr" class="told-vspeed">—</b></div>
       <div class="told-speed"><span class="small">1.5Vs</span><b id="told15Vs" class="told-vspeed">—</b></div>
-      <div class="told-speed"><span class="small">Emer VREF</span><b id="toldEmerVref" class="told-vspeed">—</b></div>
+      <div class="told-speed"><span class="small">Emer VREF</span><b id="toldEmerVref" class="told-vspeed emergency-value">—</b></div>
     </div>
   </div>
 
@@ -2197,6 +2206,47 @@ const F50_DASSAULT_SOURCE={
  },
  landing:{S48:{vref:"DTM813 §5.60.5 — migration pending",distance:"DTM813 §5.60.4 — migration pending"},S20:{vref:"DTM813 §5.65.5 — migration pending",distance:"DTM813 §5.65.4 — migration pending"}}
 };
+const F50_DASH4_N1_TABLE={"OFF":{"0":{"-54":[82.7,82.7],"-52":[83.0,83.1],"-50":[83.4,83.4],"-48":[83.7,83.8],"-46":[84.1,84.2],"-44":[84.5,84.5],"-42":[84.8,84.9],"-40":[85.2,85.3],"-38":[85.6,85.6],"-36":[85.9,86.0],"-34":[86.3,86.4],"-32":[86.6,86.7],"-30":[87.0,87.1],"-28":[87.4,87.4],"-26":[87.7,87.8],"-24":[88.1,88.1],"-22":[88.4,88.5],"-20":[88.8,88.8],"-18":[89.1,89.2],"-16":[89.4,89.5],"-14":[89.8,89.9],"-12":[90.1,90.2],"-10":[90.5,90.5],"-8":[90.8,90.9],"-6":[91.2,91.2],"-4":[91.5,91.6],"-2":[91.8,91.9],"0":[92.2,92.2],"2":[92.5,92.6],"4":[92.8,92.9],"6":[93.2,93.2],"8":[93.5,93.6],"10":[93.8,93.9],"12":[94.1,94.2],"14":[94.5,94.5],"16":[94.8,94.9],"18":[95.1,95.2],"20":[95.5,95.5],"22":[95.8,95.8],"24":[96.1,96.1],"26":[96.4,96.5],"28":[96.7,96.8],"30":[97.0,97.1],"32":[97.2,97.0],"34":[96.7,96.5],"36":[96.3,96.0],"38":[95.8,95.5],"40":[95.2,95.0],"42":[94.7,94.4],"44":[94.1,93.9],"46":[93.5,93.2],"48":[92.9,92.6],"50":[92.2,91.9]},"1000":{"-54":[83.7,83.7],"-52":[84.0,84.1],"-50":[84.4,84.5],"-48":[84.8,84.8],"-46":[85.1,85.2],"-44":[85.5,85.6],"-42":[85.9,85.9],"-40":[86.2,86.3],"-38":[86.6,86.7],"-36":[87.0,87.0],"-34":[87.3,87.4],"-32":[87.7,87.8],"-30":[88.1,88.1],"-28":[88.4,88.5],"-26":[88.8,88.8],"-24":[89.1,89.2],"-22":[89.5,89.5],"-20":[89.8,89.9],"-18":[90.2,90.2],"-16":[90.5,90.6],"-14":[90.9,90.9],"-12":[91.2,91.3],"-10":[91.6,91.6],"-8":[91.9,92.0],"-6":[92.3,92.3],"-4":[92.6,92.7],"-2":[92.9,93.0],"0":[93.3,93.3],"2":[93.6,93.7],"4":[94.0,94.0],"6":[94.3,94.4],"8":[94.6,94.7],"10":[95.0,95.0],"12":[95.3,95.4],"14":[95.6,95.7],"16":[96.0,96.0],"18":[96.3,96.3],"20":[96.6,96.7],"22":[96.9,97.0],"24":[97.3,97.3],"26":[97.6,97.6],"28":[97.8,97.6],"30":[97.4,97.2],"32":[97.0,96.8],"34":[96.6,96.4],"36":[96.1,95.9],"38":[95.6,95.4],"40":[95.1,94.8],"42":[94.5,94.3],"44":[93.9,93.7],"46":[93.3,93.0],"48":[92.7,92.4],"50":[92.0,91.7]},"2000":{"-54":[84.7,84.8],"-52":[85.1,85.1],"-50":[85.4,85.5],"-48":[85.8,85.9],"-46":[86.2,86.3],"-44":[86.6,86.6],"-42":[87.0,87.0],"-40":[87.3,87.4],"-38":[87.7,87.7],"-36":[88.1,88.1],"-34":[88.4,88.5],"-32":[88.8,88.8],"-30":[89.2,89.2],"-28":[89.5,89.6],"-26":[89.9,89.9],"-24":[90.2,90.3],"-22":[90.6,90.7],"-20":[90.9,91.0],"-18":[91.3,91.4],"-16":[91.7,91.7],"-14":[92.0,92.1],"-12":[92.4,92.4],"-10":[92.7,92.8],"-8":[93.1,93.1],"-6":[93.4,93.5],"-4":[93.7,93.8],"-2":[94.1,94.2],"0":[94.4,94.5],"2":[94.8,94.8],"4":[95.1,95.2],"6":[95.5,95.5],"8":[95.8,95.9],"10":[96.1,96.2],"12":[96.5,96.5],"14":[96.8,96.9],"16":[97.1,97.2],"18":[97.5,97.5],"20":[97.8,97.8],"22":[98.1,98.1],"24":[98.4,98.2],"26":[98.1,97.9],"28":[97.7,97.5],"30":[97.3,97.1],"32":[96.9,96.7],"34":[96.4,96.2],"36":[95.9,95.7],"38":[95.4,95.2],"40":[94.9,94.6],"42":[94.3,94.1],"44":[93.7,93.5],"46":[93.1,92.8],"48":[92.4,92.1]},"3000":{"-54":[85.8,85.9],"-52":[86.2,86.2],"-50":[86.5,86.6],"-48":[86.9,87.0],"-46":[87.3,87.4],"-44":[87.7,87.8],"-42":[88.1,88.1],"-40":[88.4,88.5],"-38":[88.8,88.9],"-36":[89.2,89.3],"-34":[89.6,89.6],"-32":[89.9,90.0],"-30":[90.3,90.4],"-28":[90.7,90.7],"-26":[91.0,91.1],"-24":[91.4,91.5],"-22":[91.7,91.8],"-20":[92.1,92.2],"-18":[92.5,92.5],"-16":[92.8,92.9],"-14":[93.2,93.3],"-12":[93.5,93.6],"-10":[93.9,94.0],"-8":[94.2,94.3],"-6":[94.6,94.7],"-4":[94.9,95.0],"-2":[95.3,95.4],"0":[95.6,95.7],"2":[96.0,96.1],"4":[96.3,96.4],"6":[96.7,96.8],"8":[97.0,97.1],"10":[97.4,97.4],"12":[97.7,97.8],"14":[98.0,98.1],"16":[98.3,98.4],"18":[98.7,98.7],"20":[99.0,98.8],"22":[98.7,98.4],"24":[98.3,98.1],"26":[97.9,97.7],"28":[97.6,97.3],"30":[97.1,96.9],"32":[96.7,96.5],"34":[96.3,96.1],"36":[95.8,95.6],"38":[95.3,95.0],"40":[94.7,94.5],"42":[94.1,93.9],"44":[93.5,93.3],"46":[92.9,92.6]},"4000":{"-54":[86.9,87.1],"-52":[87.3,87.4],"-50":[87.7,87.8],"-48":[88.1,88.2],"-46":[88.4,88.6],"-44":[88.8,89.0],"-42":[89.2,89.4],"-40":[89.6,89.7],"-38":[90.0,90.1],"-36":[90.3,90.5],"-34":[90.7,90.9],"-32":[91.1,91.3],"-30":[91.5,91.6],"-28":[91.8,92.0],"-26":[92.2,92.4],"-24":[92.6,92.7],"-22":[92.9,93.1],"-20":[93.3,93.5],"-18":[93.7,93.8],"-16":[94.0,94.2],"-14":[94.4,94.5],"-12":[94.8,94.9],"-10":[95.1,95.3],"-8":[95.5,95.6],"-6":[95.8,96.0],"-4":[96.2,96.3],"-2":[96.5,96.7],"0":[96.9,97.0],"2":[97.2,97.4],"4":[97.6,97.7],"6":[97.9,98.1],"8":[98.3,98.4],"10":[98.6,98.8],"12":[99.0,99.1],"14":[99.3,99.4],"16":[99.6,99.5],"18":[99.2,99.1],"20":[98.9,98.7],"22":[98.5,98.3],"24":[98.2,97.9],"26":[97.8,97.6],"28":[97.4,97.2],"30":[97.0,96.8],"32":[96.6,96.4],"34":[96.1,95.9],"36":[95.6,95.4],"38":[95.1,94.9],"40":[94.6,94.3],"42":[94.0,93.7],"44":[93.4,93.1]},"5000":{"-54":[88.2,88.5],"-52":[88.5,88.9],"-50":[88.9,89.3],"-48":[89.3,89.6],"-46":[89.7,90.0],"-44":[90.1,90.4],"-42":[90.5,90.8],"-40":[90.9,91.2],"-38":[91.3,91.6],"-36":[91.6,92.0],"-34":[92.0,92.3],"-32":[92.4,92.7],"-30":[92.8,93.1],"-28":[93.1,93.5],"-26":[93.5,93.8],"-24":[93.9,94.2],"-22":[94.3,94.6],"-20":[94.6,95.0],"-18":[95.0,95.3],"-16":[95.4,95.7],"-14":[95.7,96.1],"-12":[96.1,96.4],"-10":[96.5,96.8],"-8":[96.8,97.1],"-6":[97.2,97.5],"-4":[97.5,97.9],"-2":[97.9,98.2],"0":[98.3,98.6],"2":[98.6,98.9],"4":[99.0,99.3],"6":[99.3,99.6],"8":[99.6,99.9],"10":[100.0,100.3],"12":[100.2,100.2],"14":[99.8,99.8],"16":[99.5,99.4],"18":[99.1,99.0],"20":[98.7,98.5],"22":[98.4,98.2],"24":[98.0,97.8],"26":[97.6,97.4],"28":[97.3,97.0],"30":[96.9,96.6],"32":[96.4,96.2],"34":[96.0,95.8],"36":[95.5,95.2],"38":[94.9,94.7],"40":[94.4,94.1],"42":[93.8,93.6]},"6000":{"-54":[89.6,90.1],"-52":[90.0,90.5],"-50":[90.4,90.9],"-48":[90.8,91.3],"-46":[91.2,91.7],"-44":[91.5,92.1],"-42":[91.9,92.5],"-40":[92.3,92.9],"-38":[92.7,93.3],"-36":[93.1,93.6],"-34":[93.5,94.0],"-32":[93.9,94.4],"-30":[94.2,94.8],"-28":[94.6,95.2],"-26":[95.0,95.6],"-24":[95.4,95.9],"-22":[95.8,96.3],"-20":[96.1,96.7],"-18":[96.5,97.1],"-16":[96.9,97.4],"-14":[97.3,97.8],"-12":[97.6,98.2],"-10":[98.0,98.5],"-8":[98.4,98.9],"-6":[98.7,99.3],"-4":[99.1,99.6],"-2":[99.4,100.0],"0":[99.8,100.3],"2":[100.1,100.7],"4":[100.5,101.0],"6":[100.8,101.2],"8":[100.8,100.8],"10":[100.4,100.4],"12":[100.1,100.0],"14":[99.7,99.6],"16":[99.3,99.2],"18":[99.0,98.8],"20":[98.6,98.4],"22":[98.2,98.0],"24":[97.9,97.7],"26":[97.5,97.3],"28":[97.1,96.9],"30":[96.7,96.5],"32":[96.3,96.1],"34":[95.8,95.6],"36":[95.3,95.1],"38":[94.7,94.5],"40":[94.2,94.0]},"7000":{"-54":[91.2,91.9],"-52":[91.6,92.3],"-50":[92.0,92.7],"-48":[92.4,93.1],"-46":[92.8,93.5],"-44":[93.2,93.9],"-42":[93.6,94.3],"-40":[94.0,94.7],"-38":[94.4,95.1],"-36":[94.8,95.5],"-34":[95.2,95.9],"-32":[95.6,96.3],"-30":[95.9,96.7],"-28":[96.3,97.1],"-26":[96.7,97.5],"-24":[97.1,97.9],"-22":[97.5,98.2],"-20":[97.9,98.6],"-18":[98.2,99.0],"-16":[98.6,99.4],"-14":[99.0,99.7],"-12":[99.4,100.1],"-10":[99.7,100.5],"-8":[100.1,100.8],"-6":[100.5,101.2],"-4":[100.8,101.5],"-2":[101.2,101.5],"0":[101.5,101.5],"2":[101.5,101.5],"4":[101.3,101.4],"6":[101.0,101.1],"8":[100.6,100.7],"10":[100.3,100.3],"12":[99.9,99.9],"14":[99.6,99.5],"16":[99.2,99.1],"18":[98.8,98.7],"20":[98.5,98.3],"22":[98.1,97.9],"24":[97.8,97.5],"26":[97.4,97.2],"28":[97.0,96.8],"30":[96.6,96.4],"32":[96.1,95.9],"34":[95.6,95.4],"36":[95.1,94.9],"38":[94.6,94.4]},"8000":{"-54":[93.0,93.9],"-52":[93.4,94.3],"-50":[93.8,94.7],"-48":[94.3,95.1],"-46":[94.7,95.5],"-44":[95.1,95.9],"-42":[95.5,96.3],"-40":[95.9,96.7],"-38":[96.3,97.1],"-36":[96.7,97.5],"-34":[97.1,97.9],"-32":[97.5,98.3],"-30":[97.9,98.7],"-28":[98.3,99.1],"-26":[98.7,99.5],"-24":[99.0,99.9],"-22":[99.4,100.3],"-20":[99.8,100.7],"-18":[100.2,101.1],"-16":[100.6,101.4],"-14":[101.0,101.5],"-12":[101.3,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.5,101.5],"4":[101.2,101.3],"6":[100.9,100.9],"8":[100.5,100.6],"10":[100.2,100.2],"12":[99.8,99.8],"14":[99.5,99.4],"16":[99.1,99.0],"18":[98.7,98.6],"20":[98.3,98.2],"22":[98.0,97.8],"24":[97.6,97.4],"26":[97.3,97.0],"28":[96.9,96.6],"30":[96.4,96.2],"32":[96.0,95.8],"34":[95.5,95.2],"36":[95.0,94.8]},"9000":{"-54":[95.1,95.9],"-52":[95.5,96.3],"-50":[95.9,96.7],"-48":[96.3,97.2],"-46":[96.8,97.6],"-44":[97.2,98.0],"-42":[97.6,98.4],"-40":[98.0,98.8],"-38":[98.4,99.2],"-36":[98.8,99.7],"-34":[99.2,100.1],"-32":[99.6,100.4],"-30":[100.0,100.8],"-28":[100.4,101.2],"-26":[100.8,101.5],"-24":[101.2,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.5,101.5],"4":[101.1,101.2],"6":[100.8,100.8],"8":[100.4,100.4],"10":[100.1,100.1],"12":[99.7,99.7],"14":[99.3,99.3],"16":[99.0,98.9],"18":[98.6,98.4],"20":[98.2,98.0],"22":[97.8,97.6],"24":[97.5,97.3],"26":[97.1,96.9],"28":[96.7,96.5],"30":[96.3,96.0],"32":[95.8,95.6]},"10000":{"-54":[97.3,98.0],"-52":[97.7,98.4],"-50":[98.1,98.9],"-48":[98.5,99.3],"-46":[99.0,99.7],"-44":[99.4,100.1],"-42":[99.8,100.6],"-40":[100.2,101.0],"-38":[100.7,101.4],"-36":[101.1,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.4,101.5],"4":[101.0,101.1],"6":[100.7,100.7],"8":[100.3,100.3],"10":[99.9,99.9],"12":[99.6,99.5],"14":[99.2,99.1],"16":[98.8,98.7],"18":[98.5,98.3],"20":[98.1,97.9],"22":[97.7,97.5],"24":[97.3,97.1],"26":[96.9,96.7],"28":[96.5,96.3],"30":[96.1,95.8]},"11000":{"-54":[99.4,100.2],"-52":[99.8,100.6],"-50":[100.3,101.0],"-48":[100.7,101.5],"-46":[101.1,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.3,101.4],"4":[100.9,101.0],"6":[100.6,100.6],"8":[100.2,100.2],"10":[99.8,99.8],"12":[99.5,99.4],"14":[99.1,99.0],"16":[98.7,98.6],"18":[98.3,98.2],"20":[97.9,97.7],"22":[97.5,97.3],"24":[97.1,96.9],"26":[96.7,96.5],"28":[96.3,96.1]},"12000":{"-54":[101.4,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.5,101.5],"2":[101.2,101.3],"4":[100.8,100.9],"6":[100.5,100.5],"8":[100.1,100.1],"10":[99.7,99.7],"12":[99.3,99.2],"14":[99.0,98.8],"16":[98.6,98.4],"18":[98.2,98.0],"20":[97.8,97.6],"22":[97.4,97.1],"24":[96.9,96.7],"26":[96.5,96.3]},"13000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.4,101.5],"2":[101.1,101.2],"4":[100.7,100.8],"6":[100.4,100.4],"8":[100.0,99.9],"10":[99.6,99.5],"12":[99.2,99.1],"14":[98.8,98.7],"16":[98.4,98.2],"18":[98.0,97.8],"20":[97.6,97.4],"22":[97.2,96.9],"24":[96.7,96.5]},"14000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.5,101.5],"-16":[101.5,101.5],"-14":[101.5,101.5],"-12":[101.5,101.5],"-10":[101.5,101.5],"-8":[101.5,101.5],"-6":[101.5,101.5],"-4":[101.5,101.5],"-2":[101.5,101.5],"0":[101.3,101.4],"2":[101.0,101.0],"4":[100.6,100.6],"6":[100.2,100.2],"8":[99.8,99.8],"10":[99.4,99.3],"12":[99.0,98.9],"14":[98.6,98.5],"16":[98.2,98.0],"18":[97.8,97.6],"20":[97.4,97.2],"22":[97.0,96.7]}},"ON":{"0":{"-54":[82.7,82.7],"-52":[83.0,83.1],"-50":[83.4,83.5],"-48":[83.8,83.8],"-46":[84.1,84.2],"-44":[84.5,84.6],"-42":[84.9,84.9],"-40":[85.2,85.3],"-38":[85.6,85.6],"-36":[85.9,86.0],"-34":[86.3,86.4],"-32":[86.7,86.7],"-30":[87.0,87.1],"-28":[87.4,87.4],"-26":[87.7,87.8],"-24":[88.1,88.1],"-22":[88.4,88.5],"-20":[88.8,88.8],"-18":[89.1,89.2],"-16":[89.5,89.5],"-14":[89.8,89.9],"-12":[90.1,90.2],"-10":[90.5,90.5],"-8":[90.8,90.9],"-6":[91.2,91.2],"-4":[91.5,91.6],"-2":[91.8,91.9],"0":[92.2,92.2],"2":[92.5,92.6],"4":[92.8,92.9],"6":[93.2,93.2],"8":[93.5,93.6],"10":[93.8,93.9]},"1000":{"-54":[83.7,83.7],"-52":[84.0,84.1],"-50":[84.4,84.5],"-48":[84.8,84.8],"-46":[85.1,85.2],"-44":[85.5,85.6],"-42":[85.9,85.9],"-40":[86.3,86.3],"-38":[86.6,86.7],"-36":[87.0,87.0],"-34":[87.3,87.4],"-32":[87.7,87.8],"-30":[88.1,88.1],"-28":[88.4,88.5],"-26":[88.8,88.8],"-24":[89.1,89.2],"-22":[89.5,89.5],"-20":[89.8,89.9],"-18":[90.2,90.2],"-16":[90.5,90.6],"-14":[90.9,90.9],"-12":[91.2,91.3],"-10":[91.6,91.6],"-8":[91.9,92.0],"-6":[92.3,92.3],"-4":[92.6,92.7],"-2":[92.9,93.0],"0":[93.3,93.3],"2":[93.6,93.7],"4":[94.0,94.0],"6":[94.3,94.4],"8":[94.6,94.7],"10":[95.0,95.0]},"2000":{"-54":[84.7,84.8],"-52":[85.1,85.1],"-50":[85.5,85.5],"-48":[85.8,85.9],"-46":[86.2,86.3],"-44":[86.6,86.6],"-42":[87.0,87.0],"-40":[87.3,87.4],"-38":[87.7,87.8],"-36":[88.1,88.1],"-34":[88.4,88.5],"-32":[88.8,88.9],"-30":[89.2,89.2],"-28":[89.5,89.6],"-26":[89.9,89.9],"-24":[90.2,90.3],"-22":[90.6,90.7],"-20":[91.0,91.0],"-18":[91.3,91.4],"-16":[91.7,91.7],"-14":[92.0,92.1],"-12":[92.4,92.4],"-10":[92.7,92.8],"-8":[93.1,93.1],"-6":[93.4,93.5],"-4":[93.8,93.8],"-2":[94.1,94.2],"0":[94.4,94.5],"2":[94.8,94.8],"4":[95.1,95.2],"6":[95.5,95.5],"8":[95.8,95.9],"10":[96.1,96.2]},"3000":{"-54":[85.8,85.9],"-52":[86.2,86.2],"-50":[86.5,86.6],"-48":[86.9,87.0],"-46":[87.3,87.4],"-44":[87.7,87.8],"-42":[88.1,88.1],"-40":[88.4,88.5],"-38":[88.8,88.9],"-36":[89.2,89.3],"-34":[89.6,89.6],"-32":[89.9,90.0],"-30":[90.3,90.4],"-28":[90.7,90.7],"-26":[91.0,91.1],"-24":[91.4,91.5],"-22":[91.8,91.8],"-20":[92.1,92.2],"-18":[92.5,92.5],"-16":[92.8,92.9],"-14":[93.2,93.3],"-12":[93.5,93.6],"-10":[93.9,94.0],"-8":[94.3,94.3],"-6":[94.6,94.7],"-4":[95.0,95.0],"-2":[95.3,95.4],"0":[95.7,95.7],"2":[96.0,96.1],"4":[96.3,96.4],"6":[96.7,96.8],"8":[97.0,97.1],"10":[97.4,97.4]},"4000":{"-54":[86.9,87.1],"-52":[87.3,87.4],"-50":[87.7,87.8],"-48":[88.1,88.2],"-46":[88.5,88.6],"-44":[88.8,89.0],"-42":[89.2,89.4],"-40":[89.6,89.8],"-38":[90.0,90.1],"-36":[90.4,90.5],"-34":[90.7,90.9],"-32":[91.1,91.3],"-30":[91.5,91.6],"-28":[91.8,92.0],"-26":[92.2,92.4],"-24":[92.6,92.7],"-22":[92.9,93.1],"-20":[93.3,93.5],"-18":[93.7,93.8],"-16":[94.0,94.2],"-14":[94.4,94.5],"-12":[94.8,94.9],"-10":[95.1,95.3],"-8":[95.5,95.6],"-6":[95.8,96.0],"-4":[96.2,96.3],"-2":[96.5,96.7],"0":[96.9,97.0],"2":[97.3,97.4],"4":[97.6,97.7],"6":[98.0,98.1],"8":[98.3,98.2],"10":[98.0,97.8]},"5000":{"-54":[88.2,88.5],"-52":[88.5,88.9],"-50":[88.9,89.3],"-48":[89.3,89.6],"-46":[89.7,90.0],"-44":[90.1,90.4],"-42":[90.5,90.8],"-40":[90.9,91.2],"-38":[91.3,91.6],"-36":[91.6,92.0],"-34":[92.0,92.3],"-32":[92.4,92.7],"-30":[92.8,93.1],"-28":[93.1,93.5],"-26":[93.5,93.8],"-24":[93.9,94.2],"-22":[94.3,94.6],"-20":[94.6,95.0],"-18":[95.0,95.3],"-16":[95.4,95.7],"-14":[95.7,96.1],"-12":[96.1,96.4],"-10":[96.5,96.8],"-8":[96.8,97.1],"-6":[97.2,97.5],"-4":[97.5,97.9],"-2":[97.9,98.2],"0":[98.3,98.6],"2":[98.6,98.9],"4":[98.8,98.7],"6":[98.5,98.4],"8":[98.2,98.0],"10":[97.9,97.7]},"6000":{"-54":[89.6,90.1],"-52":[90.0,90.5],"-50":[90.4,90.9],"-48":[90.8,91.3],"-46":[91.2,91.7],"-44":[91.5,92.1],"-42":[91.9,92.5],"-40":[92.3,92.9],"-38":[92.7,93.3],"-36":[93.1,93.7],"-34":[93.5,94.0],"-32":[93.9,94.4],"-30":[94.3,94.8],"-28":[94.6,95.2],"-26":[95.0,95.6],"-24":[95.4,95.9],"-22":[95.8,96.3],"-20":[96.1,96.7],"-18":[96.5,97.1],"-16":[96.9,97.4],"-14":[97.3,97.8],"-12":[97.6,98.2],"-10":[98.0,98.5],"-8":[98.4,98.9],"-6":[98.7,99.3],"-4":[99.1,99.6],"-2":[99.4,99.6],"0":[99.2,99.3],"2":[98.9,98.9],"4":[98.6,98.6],"6":[98.4,98.3],"8":[98.1,97.9],"10":[97.7,97.6]},"7000":{"-54":[91.2,91.9],"-52":[91.6,92.3],"-50":[92.0,92.7],"-48":[92.4,93.1],"-46":[92.8,93.5],"-44":[93.2,93.9],"-42":[93.6,94.3],"-40":[94.0,94.7],"-38":[94.4,95.1],"-36":[94.8,95.5],"-34":[95.2,95.9],"-32":[95.6,96.3],"-30":[96.0,96.7],"-28":[96.3,97.1],"-26":[96.7,97.5],"-24":[97.1,97.9],"-22":[97.5,98.2],"-20":[97.9,98.6],"-18":[98.3,99.0],"-16":[98.6,99.4],"-14":[99.0,99.8],"-12":[99.4,100.1],"-10":[99.7,100.5],"-8":[100.1,100.4],"-6":[100.0,100.1],"-4":[99.7,99.8],"-2":[99.4,99.5],"0":[99.1,99.2],"2":[98.8,98.8],"4":[98.5,98.5],"6":[98.2,98.1],"8":[97.9,97.8],"10":[97.6,97.5]},"8000":{"-54":[93.0,93.9],"-52":[93.4,94.3],"-50":[93.8,94.7],"-48":[94.3,95.1],"-46":[94.7,95.5],"-44":[95.1,95.9],"-42":[95.5,96.3],"-40":[95.9,96.7],"-38":[96.3,97.1],"-36":[96.7,97.5],"-34":[97.1,97.9],"-32":[97.5,98.3],"-30":[97.9,98.7],"-28":[98.3,99.1],"-26":[98.7,99.5],"-24":[99.0,99.9],"-22":[99.4,100.3],"-20":[99.8,100.7],"-18":[100.2,101.1],"-16":[100.6,101.3],"-14":[101.0,101.1],"-12":[100.8,100.8],"-10":[100.5,100.6],"-8":[100.2,100.3],"-6":[99.9,100.0],"-4":[99.6,99.7],"-2":[99.3,99.4],"0":[99.0,99.0],"2":[98.7,98.7],"4":[98.4,98.4],"6":[98.1,98.0],"8":[97.8,97.7],"10":[97.5,97.3]},"9000":{"-54":[95.1,95.9],"-52":[95.5,96.3],"-50":[95.9,96.7],"-48":[96.3,97.2],"-46":[96.8,97.6],"-44":[97.2,98.0],"-42":[97.6,98.4],"-40":[98.0,98.8],"-38":[98.4,99.2],"-36":[98.8,99.7],"-34":[99.2,100.1],"-32":[99.6,100.4],"-30":[100.0,100.8],"-28":[100.4,101.2],"-26":[100.8,101.5],"-24":[101.2,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.4,101.4],"-16":[101.2,101.2],"-14":[100.9,101.0],"-12":[100.7,100.7],"-10":[100.4,100.5],"-8":[100.1,100.2],"-6":[99.8,99.9],"-4":[99.5,99.6],"-2":[99.2,99.3],"0":[98.9,98.9],"2":[98.6,98.6],"4":[98.3,98.3],"6":[98.0,97.9],"8":[97.7,97.6],"10":[97.4,97.2]},"10000":{"-54":[97.3,98.0],"-52":[97.7,98.4],"-50":[98.1,98.9],"-48":[98.5,99.3],"-46":[99.0,99.7],"-44":[99.4,100.2],"-42":[99.8,100.6],"-40":[100.2,101.0],"-38":[100.7,101.4],"-36":[101.1,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.3,101.3],"-16":[101.1,101.1],"-14":[100.8,100.9],"-12":[100.6,100.6],"-10":[100.3,100.4],"-8":[100.0,100.1],"-6":[99.7,99.8],"-4":[99.4,99.5],"-2":[99.1,99.2],"0":[98.8,98.8],"2":[98.5,98.5],"4":[98.2,98.1],"6":[97.9,97.8],"8":[97.6,97.4],"10":[97.3,97.1]},"11000":{"-54":[99.4,100.2],"-52":[99.8,100.6],"-50":[100.3,101.0],"-48":[100.7,101.5],"-46":[101.1,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.5,101.5],"-18":[101.2,101.3],"-16":[101.0,101.1],"-14":[100.8,100.8],"-12":[100.5,100.6],"-10":[100.2,100.3],"-8":[99.9,100.0],"-6":[99.6,99.7],"-4":[99.3,99.4],"-2":[99.0,99.1],"0":[98.7,98.7],"2":[98.4,98.4],"4":[98.1,98.0],"6":[97.8,97.7],"8":[97.5,97.3],"10":[97.1,96.9]},"12000":{"-54":[101.4,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.4,101.4],"-18":[101.2,101.2],"-16":[100.9,101.0],"-14":[100.7,100.7],"-12":[100.4,100.5],"-10":[100.1,100.2],"-8":[99.8,100.0],"-6":[99.5,99.6],"-4":[99.2,99.3],"-2":[98.9,99.0],"0":[98.6,98.6],"2":[98.3,98.3],"4":[98.0,97.9],"6":[97.7,97.5],"8":[97.3,97.1],"10":[97.0,96.8]},"13000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.5,101.5],"-20":[101.3,101.3],"-18":[101.1,101.1],"-16":[100.9,100.9],"-14":[100.6,100.7],"-12":[100.3,100.4],"-10":[100.0,100.1],"-8":[99.7,99.8],"-6":[99.4,99.5],"-4":[99.1,99.2],"-2":[98.8,98.8],"0":[98.5,98.5],"2":[98.2,98.1],"4":[97.9,97.7],"6":[97.5,97.4],"8":[97.2,97.0],"10":[96.8,96.6]},"14000":{"-54":[101.5,101.5],"-52":[101.5,101.5],"-50":[101.5,101.5],"-48":[101.5,101.5],"-46":[101.5,101.5],"-44":[101.5,101.5],"-42":[101.5,101.5],"-40":[101.5,101.5],"-38":[101.5,101.5],"-36":[101.5,101.5],"-34":[101.5,101.5],"-32":[101.5,101.5],"-30":[101.5,101.5],"-28":[101.5,101.5],"-26":[101.5,101.5],"-24":[101.5,101.5],"-22":[101.4,101.5],"-20":[101.2,101.3],"-18":[101.0,101.1],"-16":[100.8,100.8],"-14":[100.5,100.6],"-12":[100.2,100.3],"-10":[99.9,100.0],"-8":[99.6,99.7],"-6":[99.3,99.4],"-4":[99.0,99.1],"-2":[98.7,98.7],"0":[98.3,98.3],"2":[98.0,98.0],"4":[97.7,97.6],"6":[97.4,97.2],"8":[97.0,96.8],"10":[96.6,96.4]}}};
+
+const F50_DASH4_N1_SOURCE={
+  OFF:"FAA-approved Falcon 50-4 AFMS FTA-PA-001019 Rev I/R §5-2 through §5-4 — Takeoff N1 without ice protection",
+  ON:"FAA-approved Falcon 50-4 AFMS FTA-PA-001019 Rev I/R §5-7 through §5-9 — Takeoff N1 with engine ice protection"
+};
+function f50Dash4TakeoffN1(pa,tempC,antiIce="OFF"){
+ const mode=antiIce==="ON"?"ON":"OFF",tab=F50_DASH4_N1_TABLE[mode];
+ if(!tab||![pa,tempC].every(Number.isFinite))return null;
+ const pas=kN(tab),pb=bracketN(pas,pa);if(!pb)return null;
+ function atPA(p){
+   const tm=tab[p],tb=bracketN(kN(tm),tempC);if(!tb)return null;
+   const[a,b]=tb,A=tm[a],B=tm[b];if(!A||!B)return null;
+   if(a===b)return{side:+A[0],center:+A[1]};
+   const f=(tempC-a)/(b-a);
+   return{side:lerpN(+A[0],+B[0],f),center:lerpN(+A[1],+B[1],f)};
+ }
+ const[a,b]=pb,A=atPA(a),B=atPA(b);if(!A||!B)return null;
+ if(a===b)return{...A,pa1:a,pa2:b,mode,source:F50_DASH4_N1_SOURCE[mode]};
+ const f=(pa-a)/(b-a);
+ return{side:lerpN(A.side,B.side,f),center:lerpN(A.center,B.center,f),pa1:a,pa2:b,mode,source:F50_DASH4_N1_SOURCE[mode]};
+}
+
+
+function currentF50TakeoffN1(){
+ const ai=$("toAntiIce")?.value||"OFF";
+ if(!isCurrentTripToday()){
+   return{ok:false,text:"DAY-OF WX REQUIRED",source:`Trip ${tripDateDisplay(currentTripDate())} • refresh current departure METAR on day of flight before using N1`};
+ }
+ const pa=perfTakeoffPA(),temp=perfTakeoffTemp();
+ if(![pa,temp].every(Number.isFinite)){
+   return{ok:false,text:"WEATHER REQUIRED",source:"Departure SAT and pressure altitude required"};
+ }
+ const n=f50Dash4TakeoffN1(pa,temp,ai);
+ if(!n){
+   return{ok:false,text:"SOURCE LOCKED",source:`${F50_DASH4_N1_SOURCE[ai==="ON"?"ON":"OFF"]} • PA/OAT outside bounded digitized table coverage • no extrapolation`};
+ }
+ const wxSource=formatWeatherSource("dep");
+ return{ok:true,text:`${n.side.toFixed(1)} / ${n.center.toFixed(1)}%`,side:n.side,center:n.center,source:`${n.source} • ${wxSource} • SAT ${temp.toFixed(1)}°C • PA ${Math.round(pa).toLocaleString()} ft`};
+}
+
 function f50VfrFromVr(cfg,vr){
  if(!Number.isFinite(vr))return null;
  const delta=F50_DASSAULT_SOURCE.takeoff[cfg]?.vfrDelta;
@@ -2383,8 +2433,8 @@ async function refreshF900B(){
  f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}`);
 }
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
-async function startF900BTrip(dep,dest,alt){
- window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",started_at:new Date().toISOString(),completed:false}; window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.started_at);
+async function startF900BTrip(dep,dest,alt,tripDate=localISODate(new Date())){
+ window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",trip_date:tripDate,started_at:new Date().toISOString(),completed:false}; window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.trip_date);
  if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
  f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
  f9Put("f9mRoute",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
@@ -2539,11 +2589,19 @@ function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
 
 function cleanICAO(v){return String(v||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4)}
 function newMissionId(){return "M-"+Date.now().toString(36).toUpperCase()}
-function tripDateKey(value=new Date()){
+function localISODate(value=new Date()){
+ if(typeof value==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(value))return value;
  const d=value instanceof Date?value:new Date(value);
  const x=Number.isNaN(d.getTime())?new Date():d;
- return `${x.getFullYear()}${String(x.getMonth()+1).padStart(2,"0")}${String(x.getDate()).padStart(2,"0")}`;
+ return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,"0")}-${String(x.getDate()).padStart(2,"0")}`;
 }
+function tripDateKey(value=new Date()){return localISODate(value).replace(/-/g,"")}
+function currentTripDate(){return window.currentMissionMeta?.trip_date||localISODate(new Date())}
+function tripDateDisplay(value){
+ const iso=localISODate(value),[y,m,d]=iso.split("-");
+ return `${m}/${d}/${y}`;
+}
+function isCurrentTripToday(){return currentTripDate()===localISODate(new Date())}
 function allocateTripNumber(value=new Date()){
  const key=tripDateKey(value),rx=new RegExp(`^${key}-(\\d+)$`);
  let max=0;
@@ -2554,7 +2612,7 @@ function allocateTripNumber(value=new Date()){
 }
 function currentTripNumber(){
  if(!window.currentMissionMeta)return "";
- if(!window.currentMissionMeta.trip_number)window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.started_at||new Date());
+ if(!window.currentMissionMeta.trip_number)window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.trip_date||window.currentMissionMeta.started_at||new Date());
  return window.currentMissionMeta.trip_number;
 }
 function getMissionArchive(){
@@ -2579,7 +2637,7 @@ function captureF900BPlanState(){
  const dest=cleanICAO(val("f9mDest")||$("dest")?.value||"");
  const alt=cleanICAO(val("f9mAlt")||$("alt")?.value||"");
  return {
-   dep,dest,alt,aircraft:"F900B",note:val("f9mNote").trim(),
+   dep,dest,alt,aircraft:"F900B",note:val("f9mNote").trim(),trip_date:currentTripDate(),
    f900b:{
      return_burn_lb:val("f9mReturnBurn"),takeoff_weight_lb:val("f9mToWeight"),landing_weight_lb:val("f9mLdgWeight"),
      takeoff_config:val("f9mToConfig"),takeoff_anti_ice:val("f9mToAI"),takeoff_surface:val("f9mToSurface"),
@@ -2606,14 +2664,14 @@ function applyF900BPlanState(state){
 function f900bDraftRecord(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
  const state=captureF900BPlanState();
- return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:"F900B",note:state.note||window.currentMissionMeta.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
+ return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),trip_date:currentTripDate(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:"F900B",note:state.note||window.currentMissionMeta.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
 }
 async function restoreF900BFlightPlan(record,opts={}){
  if(!record)return;
  const state=record.state||record;
  applyF900BPlanState(state);
  const newId=opts.newCopy?newMissionId():(record.id||newMissionId());
- window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(opts.newCopy?new Date():(record.started_at||new Date())),leg_number:record.leg_number||1,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};
+ window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(record.trip_date||state.trip_date||(opts.newCopy?localISODate(new Date()):(record.started_at||new Date()))),trip_date:record.trip_date||state.trip_date||localISODate(new Date()),leg_number:record.leg_number||1,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  await refreshF900BMission();
  saveCurrentDraft();
@@ -2626,7 +2684,7 @@ function draftRecord(){
  state.manual_weather=JSON.parse(JSON.stringify(manualWeather||{}));
  state.fob_verified=!!$("fobVerified")?.checked;
  state.low_fuel_confirmed=!!$("lowFuelConfirm")?.checked;
- return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
+ return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),trip_date:currentTripDate(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
 }
 function saveCurrentDraft(){
  const rec=draftRecord();if(!rec)return;
@@ -2667,6 +2725,8 @@ function selectFuelEntry(el){
 
 function clearNewTripForm(){
  ["homeDep","homeDest","homeAlt","homeTripNote"].forEach(id=>{if($(id))$(id).value=""});
+ if($("homeTripDate"))$("homeTripDate").value=localISODate(new Date());
+ if($("homeTripDateNote"))$("homeTripDateNote").textContent=`DEFAULT ${tripDateDisplay(localISODate(new Date()))}`;
  if($("homeFOB"))$("homeFOB").value="0000";
  if($("homeMissionFuel"))$("homeMissionFuel").value="0000";
 }
@@ -2686,6 +2746,7 @@ function initializeMenuLanding(){
 
 function startNewTrip(){
  const dep=cleanICAO($("homeDep").value),dest=cleanICAO($("homeDest").value),alt=cleanICAO($("homeAlt").value);
+ const tripDate=$("homeTripDate")?.value||localISODate(new Date());
  const aircraft=$("homeAircraft").value||"N33AP";
  const fob=Number($("homeFOB").value);
  const missionFuel=Number($("homeMissionFuel").value);
@@ -2693,8 +2754,12 @@ function startNewTrip(){
    alert("Enter departure and destination ICAO identifiers.");
    return;
  }
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(tripDate)){
+   alert("Enter a valid Trip Date.");
+   return;
+ }
  if(aircraft==="F900B"){
-   startF900BTrip(dep,dest,alt).catch(e=>alert(`Falcon 900B dataset could not be loaded: ${e.message||e}`));
+   startF900BTrip(dep,dest,alt,tripDate).catch(e=>alert(`Falcon 900B dataset could not be loaded: ${e.message||e}`));
    return;
  }
  if(!Number.isFinite(fob)||fob<=0){
@@ -2721,10 +2786,11 @@ function startNewTrip(){
 note:$("homeTripNote").value.trim(),
    initial_fob_lb:Math.round(fob),
    planned_mission_fuel_lb:Math.round(missionFuel),
+   trip_date:tripDate,
    started_at:new Date().toISOString(),
    completed:false
  };
- window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.started_at);
+ window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.trip_date);
  recalculate();
  showPlatformView("ops");
  saveCurrentDraft();
@@ -2757,6 +2823,7 @@ function currentMissionSummaryText(){
    "KUSA FLIGHTOPS — TOLD",
    "N33AP — FALCON 50-4",
    `${dep} → ${dest}${alt!=="—"?" | ALTERNATE "+alt:""}`,
+   `Trip Date: ${tripDateDisplay(currentTripDate())} | Trip Number: ${currentTripNumber()||"—"}`,
    `Generated: ${new Date().toLocaleString()}`,
    "",
    "=== 1. TAKEOFF ===",
@@ -2773,6 +2840,8 @@ function currentMissionSummaryText(){
    `Structural MTOW: 40,780 lb | Digitized Field-Source Ceiling: ${textOf("toMax")}`,
    `Climb-Limited TOW: ${$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED"}`,
    `OEI 2nd Segment Gross Gradient: ${Number.isFinite(valueOrNull("perfGrad"))?valueOrNull("perfGrad").toFixed(2)+"% • QRH REFERENCE":"SOURCE LOCKED"}`,
+   `Accelerate-Stop Distance: SOURCE LOCKED • FAA-approved Dash-4 AFMS chart digitization pending`,
+   `Takeoff N1 Side / Center: ${currentF50TakeoffN1().text} | ${currentF50TakeoffN1().source}`,
    `Takeoff Status: ${textOf("toStatus")}`,
    `Obstacle Review: ${effectiveObstacleReview().state==="REVIEWED_NO_CONFLICT"?`PILOT REVIEWED / NO CONFLICT • ${(departureObstacleReview?.items||[]).length} flagged obstacle NOTAM item${(departureObstacleReview?.items||[]).length===1?"":"s"}`:(effectiveObstacleReview().state==="CONFLICT"?"PILOT CONFLICT RECORDED":(departureObstacleReview?.status||"NOT_CHECKED"))} • FAA NMS text scan only; not a certified clearance analysis`,
    "",
@@ -2859,8 +2928,7 @@ function editableTripShareLabel(record){
  const rawName=String(r.note||r.state?.note||"").trim();
  const tripName=rawName||String(r.aircraft||"KUSA Trip");
  const dep=String(r.dep||"—").toUpperCase(),dest=String(r.dest||"—").toUpperCase();
- const d=new Date(r.started_at||r.updated_at||Date.now());
- const date=Number.isNaN(d.getTime())?new Date().toLocaleDateString("en-US"):`${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${d.getFullYear()}`;
+ const date=(r.trip_date||r.state?.trip_date)?tripDateDisplay(r.trip_date||r.state?.trip_date).replace(/\//g,"-"):(()=>{const d=new Date(r.started_at||r.updated_at||Date.now());return Number.isNaN(d.getTime())?new Date().toLocaleDateString("en-US").replace(/\//g,"-"):`${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}-${d.getFullYear()}`})();
  return `${tripName} | ${dep}-${dest} | ${date}`;
 }
 async function makeEditableTripShareLink(record=null){
@@ -3017,7 +3085,7 @@ function captureCurrentPlanState(){
  }
  const savedBagTotal=savedBaggage.reduce((a,b)=>a+b,0);
  return{
-   dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),
+   dep:cleanICAO($("dep").value),dest:cleanICAO($("dest").value),alt:cleanICAO($("alt").value),trip_date:currentTripDate(),
    aircraft:(window.currentMissionMeta&&window.currentMissionMeta.aircraft)||$("homeAircraft")?.value||"N33AP",
 note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNote")?.value?.trim()||"",
    captain_weight_lb:num("captWt"),fo_weight_lb:num("foWt"),
@@ -3119,7 +3187,8 @@ if($("homeTripNote"))$("homeTripNote").value=s.note||record.note||"";
 
  window.currentMissionMeta={
    id:record.id||newMissionId(),
-   trip_number:record.trip_number||allocateTripNumber(record.started_at||new Date()),
+   trip_number:record.trip_number||allocateTripNumber(record.trip_date||s.trip_date||record.started_at||new Date()),
+   trip_date:record.trip_date||s.trip_date||localISODate(new Date()),
    leg_number:record.leg_number||1,
    aircraft:record.aircraft||s.aircraft||"N33AP",
 note:s.note||record.note||"",
@@ -3151,6 +3220,7 @@ function currentF900BSummaryText(){
  return [
   "KUSA FLIGHTOPS — FALCON 900B TOLD",
   `${s.dep||"—"} → ${s.dest||"—"}${s.alt?" | ALTERNATE "+s.alt:""}`,
+  `Trip Date: ${tripDateDisplay(s.trip_date||currentTripDate())} | Trip Number: ${currentTripNumber()||"—"}`,
   `Generated: ${new Date().toLocaleString()}`,"",
   "=== TAKEOFF ===",
   `Configuration: ${f.takeoff_config||"—"}° Flaps + Slats | A/I ${f.takeoff_anti_ice||"—"} | ${f.takeoff_surface||"—"}`,
@@ -3169,13 +3239,13 @@ function currentF900BSummaryText(){
 }
 function buildF900BArchiveRecord(){
  const state=captureF900BPlanState(),f=state.f900b||{};
- return {id:window.currentMissionMeta?.id||newMissionId(),trip_number:currentTripNumber(),leg_number:window.currentMissionMeta?.leg_number||1,aircraft:"F900B",note:state.note||window.currentMissionMeta?.note||"",started_at:window.currentMissionMeta?.started_at||null,completed_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,tow_lb:Number(f.takeoff_weight_lb)||null,ldw_lb:Number(f.landing_weight_lb)||null,to_status:textOf("f9ToStatus"),ldg_status:textOf("f9LdgStatus"),summary:currentF900BSummaryText(),state};
+ return {id:window.currentMissionMeta?.id||newMissionId(),trip_number:currentTripNumber(),trip_date:currentTripDate(),leg_number:window.currentMissionMeta?.leg_number||1,aircraft:"F900B",note:state.note||window.currentMissionMeta?.note||"",started_at:window.currentMissionMeta?.started_at||null,completed_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,tow_lb:Number(f.takeoff_weight_lb)||null,ldw_lb:Number(f.landing_weight_lb)||null,to_status:textOf("f9ToStatus"),ldg_status:textOf("f9LdgStatus"),summary:currentF900BSummaryText(),state};
 }
 function buildArchiveRecord(){
  const c=latestCalc||{},dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest"),state=captureCurrentPlanState();
  return{
    id:(window.currentMissionMeta&&window.currentMissionMeta.id)||newMissionId(),
-   trip_number:currentTripNumber(),leg_number:window.currentMissionMeta?.leg_number||1,
+   trip_number:currentTripNumber(),trip_date:currentTripDate(),leg_number:window.currentMissionMeta?.leg_number||1,
    aircraft:(window.currentMissionMeta&&window.currentMissionMeta.aircraft)||"N33AP",
 note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||"",
    started_at:(window.currentMissionMeta&&window.currentMissionMeta.started_at)||null,
@@ -3280,7 +3350,7 @@ function renderDrafts(){
  const list=$("draftList");if(!list)return;
  const arr=getMissionDrafts();
  if(!arr.length){list.innerHTML='<div class="callout small">No drafts. Start a New Trip and FlightOps will auto-save it here.</div>';return}
- list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—";return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route"><span class="trip-number">${esc(m.trip_number||"UNNUMBERED")}</span> • ${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Draft • Leg ${esc(m.leg_number||1)} • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" onclick="shareEditableDraft(${i})">Share Editable</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
+ list.innerHTML=arr.map((m,i)=>{const dt=m.updated_at?new Date(m.updated_at).toLocaleString():"—",td=tripDateDisplay(m.trip_date||m.state?.trip_date||m.started_at||new Date());return `<div class="archive-item"><div class="archive-head"><div><div class="archive-route"><span class="trip-number">${esc(m.trip_number||"UNNUMBERED")}</span> • ${esc(m.dep||"—")} → ${esc(m.dest||"—")}</div><div class="archive-meta">Trip ${td} • Draft • Leg ${esc(m.leg_number||1)} • updated ${dt} • ${esc(m.aircraft||"N33AP")}${m.note?" • "+esc(m.note):""}</div></div><div class="status warn">DRAFT</div></div><div class="archive-actions"><button type="button" class="primary-open" onclick="openDraftFlightPlan(${i})">Resume Draft</button><button type="button" onclick="shareEditableDraft(${i})">Share Editable</button><button type="button" class="archive-delete" onclick="deleteDraftFlightPlan(${i})">Delete Draft</button></div></div>`}).join("");
 }
 async function openDraftFlightPlan(i){
  const arr=getMissionDrafts(),m=arr[i];if(!m)return;
@@ -3290,7 +3360,7 @@ async function openDraftFlightPlan(i){
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
  if($("fobVerified"))$("fobVerified").checked=!!s.fob_verified;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=!!s.low_fuel_confirmed;
- window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.started_at||new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};
+ window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};
  updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
 }
 function deleteDraftFlightPlan(i){const arr=getMissionDrafts(),m=arr[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"}?`))return;arr.splice(i,1);saveMissionDrafts(arr);renderDrafts()}
@@ -3312,6 +3382,7 @@ function renderArchive(){
 
  list.innerHTML=arr.map((m,i)=>{
    const dt=m.completed_at?new Date(m.completed_at).toLocaleString():"—";
+   const td=tripDateDisplay(m.trip_date||m.state?.trip_date||m.started_at||new Date());
    const checked=selectedArchiveFlightPlanIds.has(m.id)?"checked":"";
    return `<div class="archive-item">
      <div class="archive-select">
@@ -3321,7 +3392,7 @@ function renderArchive(){
      <div class="archive-head">
        <div>
          <div class="archive-route"><span class="trip-number">${esc(m.trip_number||"UNNUMBERED")}</span> • ${m.dep||"—"} → ${m.dest||"—"}</div>
-         <div class="archive-meta">Leg ${esc(m.leg_number||1)} • ${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div>
+         <div class="archive-meta">Trip ${td} • Leg ${esc(m.leg_number||1)} • archived ${dt} • ${m.aircraft||"N33AP"}${m.note?" • "+esc(m.note):""}</div>
        </div>
        <div class="status ${String(m.to_status).includes("NO-GO")||String(m.ldg_status).includes("NO-GO")?"bad":"warn"}">${esc(m.to_status||"—")}</div>
      </div>
@@ -3354,8 +3425,10 @@ function duplicateArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];if(!m)return;
  const copy=JSON.parse(JSON.stringify(m));
  copy.id=newMissionId();
- copy.trip_number=allocateTripNumber(new Date());copy.leg_number=1;
-copy.completed_at=new Date().toISOString();
+ copy.trip_date=localISODate(new Date());
+ if(copy.state)copy.state.trip_date=copy.trip_date;
+ copy.trip_number=allocateTripNumber(copy.trip_date);copy.leg_number=1;
+ copy.completed_at=new Date().toISOString();
  arr.unshift(copy);
  saveMissionArchive(arr.slice(0,100));
  renderArchive();
@@ -3531,7 +3604,7 @@ function updateToldCard(){
  const dr=selectedRunwayObj("dep"),lr=selectedRunwayObj("dest");
  const dw=dr&&dr.wind_components||{},lw=lr&&lr.wind_components||{};
  const temp=perfIsManual()?perfTakeoffTemp():depTempC();
- $("toldRoute").textContent=`Trip ${currentTripNumber()||"—"} • ${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
+ $("toldRoute").textContent=`Trip ${currentTripNumber()||"—"} • ${tripDateDisplay(currentTripDate())} • ${depCode} → ${destCode}${perfIsManual()?" • MANUAL PERFORMANCE PLAN":""}`;
  $("toldDateTime").textContent=`Generated ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"})}`;
  const altCode=$("alt").value.toUpperCase().trim();
  let bagLoads=baggageLoadsFromUI();
@@ -3622,7 +3695,12 @@ function updateToldCard(){
  $("toldMaxTOW").textContent=textOf("toMax");
  $("toldTORwyMargin").textContent=textOf("toRwyMargin");
  if($("toldClimbTOW"))$("toldClimbTOW").textContent=$("perfClimbWt")?.value?Number($("perfClimbWt").value).toLocaleString()+" lb":"SOURCE LOCKED";
- if($("toldSecondSegment")){const g=valueOrNull("perfGrad");$("toldSecondSegment").textContent=Number.isFinite(g)?`${g.toFixed(2)}% • OEI • QRH REFERENCE`:"SOURCE LOCKED";}
+ const secondSegmentGradient=valueOrNull("perfGrad");
+ if($("toldSecondSegment"))$("toldSecondSegment").textContent=Number.isFinite(secondSegmentGradient)?`${secondSegmentGradient.toFixed(2)}% • OEI • GROSS • QRH REFERENCE`:"SOURCE LOCKED";
+ if($("toldAccelStop"))$("toldAccelStop").textContent="SOURCE LOCKED — FAA-approved Dash-4 AFMS §5-14/§5-22 chart digitization pending";
+ const takeoffN1=currentF50TakeoffN1();
+ if($("toldTakeoffN1"))$("toldTakeoffN1").textContent=takeoffN1.text;
+ if($("toldTakeoffN1Source"))$("toldTakeoffN1Source").textContent=takeoffN1.source;
  $("toldTOStatus").textContent=textOf("toStatus");
  setToldVspeed("toldV1",textOf("vsV1"));
  setToldVspeed("toldVR",textOf("vsVR"));
@@ -3667,6 +3745,9 @@ function updateToldCard(){
  $("opTakeoffWeight").textContent=Number.isFinite(takeoffWeight)?`${Math.round(takeoffWeight).toLocaleString()} lb`:"—";
  $("opTakeoffConfig").textContent=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  $("opTakeoffWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
+ if($("opSecondSegment"))$("opSecondSegment").textContent=Number.isFinite(secondSegmentGradient)?`${secondSegmentGradient.toFixed(2)}% GROSS`:"SOURCE LOCKED";
+ if($("opAccelStop"))$("opAccelStop").textContent="SOURCE LOCKED • AFMS chart digitization pending";
+ if($("opTakeoffN1"))$("opTakeoffN1").textContent=takeoffN1.text;
 
  const requestedReturnBurn=Math.max(0,num("emerReturnBurn"));
  const availableTakeoffFuel=Math.max(0,Math.min(maxFuel,num("fuel"))-Math.max(0,num("taxiFuel")));
@@ -5660,7 +5741,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.13",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.14",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
