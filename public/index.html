@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.24 — TOLD takeoff data + trip date + N1 */
+/* v5.25.27 — N1 validation + anti-ice source guard */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -603,7 +603,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.24</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.27</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1134,7 +1134,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="card">
 <h2>7. Performance Evaluation</h2>
 <div class="callout small">
-<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. <b>Digitization audit:</b> balanced-field accelerate-stop is displayed by the AFM definition (ASD = BFL at the selected balanced-field V1). Phase 6 directly digitized the S+Flaps 20° §5.45.6 nomograph panels (pressure-altitude/temperature, weight-family crossings, runway-slope correction, wind correction and field-length axis) into a separate source-controlled shadow dataset. §5.45.6 BFL shadow now passes all four published anchors after the REF-line traversal correction. Phase 11 continues §5.45.7 V1 source control: the runway-slope family remains directly digitized, the weight-family geometry is now directly extracted and registered across the 30,000-lb REF line, and the top PA/temperature solid-family geometry has been extracted for label/applicability trace verification. Headwind/tailwind digitization remains incomplete. The continuous V1 solver remains shadow-only. <span id="s20NomographShadowStatus"><b>SHADOW NOMOGRAPH:</b> loading regression…</span> The current production BFL/V1 grid remains migration-controlled until the shadow engine completes the expanded independent-point validation set; it is not silently relabeled as Dassault source data. Emergency-return VREF is direct DTM813 §5.60.5 data; §5.60.4 landing distance remains pending. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
+<b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. <b>Digitization audit:</b> balanced-field accelerate-stop is displayed by the AFM definition (ASD = BFL at the selected balanced-field V1). Phase 6 directly digitized the S+Flaps 20° §5.45.6 nomograph panels (pressure-altitude/temperature, weight-family crossings, runway-slope correction, wind correction and field-length axis) into a separate source-controlled shadow dataset. §5.45.6 BFL shadow now passes all four published anchors after the REF-line traversal correction. Phase 11 continues §5.45.7 V1 source control: the runway-slope family remains directly digitized, the weight-family geometry is now directly extracted and registered across the 30,000-lb REF line, and the top PA/temperature solid-family geometry has been extracted for label/applicability trace verification. Headwind/tailwind digitization remains incomplete. The continuous V1 solver remains shadow-only. <span id="s20NomographShadowStatus"><b>SHADOW NOMOGRAPH:</b> loading regression…</span> The S+Flaps 20° dry BFL/V1 shadow engine has completed the controlled 12-point software-regression gate; operator/human trace signoff and the anti-ice BFL/V1 family remain pending, so the production grid is not yet promoted or relabeled. Dash-4 takeoff N1 is now formally regression-checked against FTA-PA-001019 Rev I/R for both ice-protection OFF and engine ice-protection ON, including bounded interpolation. Emergency-return VREF is direct DTM813 §5.60.5 data; §5.60.4 landing distance remains pending. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
 <div class="callout small" style="margin-top:8px">
 <b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT. Takeoff climb-limit charts §5-18 (S+Flaps 20°) and §5-27 (Slats), plus landing maximum-weight climb charts §5-32 (S+Flaps 48°) and §5-36 (approach Slats / landing S+Flaps 20°), are active for bounded interpolation/source-boundary use only; no extrapolation.
@@ -2373,7 +2373,7 @@ const F50_DASSAULT_BFL_ANCHORS={
   }
 };
 function f50BflMigrationSource(cfg){
-  if(cfg==="S20")return "DTM813 §5.45.6 BFL shadow PASS 4/4 published anchors • §5.45.7 V1 dry panel chain complete in SHADOW validation • published-anchor regression PASS 5/5 within ±1 kt • anti-ice dotted family + 12-point independent envelope gate still pending • production grid unchanged";
+  if(cfg==="S20")return "DTM813 §5.45.6 BFL shadow PASS 4/4 published anchors • §5.45.7 V1 dry panel chain complete in SHADOW validation • published-anchor regression PASS 5/5 within ±1 kt • anti-ice dotted family pending • controlled 12-point dry validation gate COMPLETE (5 published + 7 independent source-raster traces) • operator/human trace signoff + anti-ice validation pending • production grid unchanged";
   if(cfg==="SLATS")return "DTM813 §5.50.6/§5.50.7 BFL + §5.50.8 VMBE + §5.50.9 balanced-field V1 • direct nomograph migration in progress • published worked-example anchors loaded";
   return "SOURCE MIGRATION PENDING";
 }
@@ -2451,6 +2451,9 @@ function currentF50TakeoffN1(){
  const pa=perfTakeoffPA(),temp=perfTakeoffTemp();
  if(![pa,temp].every(Number.isFinite)){
    return{ok:false,text:"WEATHER REQUIRED",source:"Departure SAT and pressure altitude required"};
+ }
+ if(ai==="ON" && temp>10){
+   return{ok:false,text:"A/I NOT PERMITTED",source:"DTM813 §1.20: engine anti-ice must not be used above +10°C • select A/I OFF or verify conditions"};
  }
  const n=f50Dash4TakeoffN1(pa,temp,ai);
  if(!n){
@@ -3707,6 +3710,11 @@ function hotMaxTakeoffReference(){
    status:"NOT EVALUATED",limiting:"",note:""
  };
 
+ if(ai==="ON"){
+   out.status="SOURCE LOCKED";
+   out.note="Engine A/I ON BFL/V1 family is still under direct validation; OFF-data substitution is prohibited.";
+   return out;
+ }
  if(runwayCondition!=="DRY"){
    out.status="SOURCE LOCKED";
    out.note="Wet-runway 40°C reference is not available from the validated source set.";
@@ -4372,8 +4380,10 @@ function takeoffFieldSourceCeilingLb(cfg,pa,temp){
 
 function autoFieldLimitedWeight(){
  const cfg=$("toConfig").value;
+ const ai=$("toAntiIce")?.value||"OFF";
  const runwayCondition=$("toRunwayCondition")?.value||"DRY";
  const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),rwy=perfTakeoffRunwayLen();
+ if(ai==="ON"){ $("perfFieldWt").value=""; return null; }
  if(runwayCondition!=="DRY"||!Number.isFinite(pa)||!Number.isFinite(temp)||!Number.isFinite(rwy)||rwy<=0){
    $("perfFieldWt").value="";
    return null;
@@ -4418,6 +4428,13 @@ function syncTakeoffSection(){
    $("toStatus").textContent="WET SELECTED • BFL/V1 SOURCE LOCKED";$("toStatus").className="warn";
    $("toLimit").textContent=`WET RUNWAY • ${d.label} • ${a.msg}`;
    $("toConfigNote").textContent=`WET runway confirmed • ${d.label}. Wet BFL/V1 remains source locked until an applicable wet method is validated; Dash-4 climb remains AFMS-controlled.`;
+   return a;
+ }
+
+ if(($('toAntiIce')?.value||'OFF')==='ON'){
+   $("toStatus").textContent="A/I ON • BFL/V1 SOURCE LOCKED";$("toStatus").className="warn";
+   $("toLimit").textContent=`${d.label} • Engine A/I ON • BFL/V1 anti-ice family validation pending`;
+   $("toConfigNote").textContent=`Takeoff N1 with engine ice protection is AFMS-controlled and validated. BFL/V1 is intentionally locked until the anti-ice performance family completes direct validation; AFMS climb remains active.`;
    return a;
  }
 
@@ -5691,8 +5708,11 @@ function autoTO(){
  const v15vs=d?interpScalarN(d.v15vs,wk):null;
  if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
  const runwayCondition=$("toRunwayCondition")?$("toRunwayCondition").value:"DRY";
+ const ai=$("toAntiIce")?.value||"OFF";
  let pa=perfTakeoffPA(),t=perfTakeoffTemp(),r=null,reason="";
- if(runwayCondition==="WET"){
+ if(ai==="ON"){
+   reason="Engine anti-ice ON — S+Flaps 20°/Slats BFL and balanced-field V1 anti-ice source family is still under direct validation; no OFF-data substitution permitted";
+ }else if(runwayCondition==="WET"){
    reason=cfg==="S20"?"Wet runway selected — DTM813 5.46A wet BFL/V1 curves identified but not yet digitized/validated":"Wet runway selected — DTM813 5.51A wet BFL/V1 curves identified but not yet digitized/validated";
  }else if(!Number.isFinite(pa))reason=perfIsManual()?"Enter manual pressure altitude":"Departure pressure altitude unavailable";
  else if(t==null||!Number.isFinite(t))reason=perfIsManual()?"Enter manual temperature":"Departure temperature unavailable";
@@ -5709,10 +5729,12 @@ function takeoffComparisonFor(cfg){
  const d=FS_PERF.takeoff[cfg],weightLb=perfTakeoffWeightLb(),wk=(weightLb||0)/1000;
  const vr=d?interpScalarN(d.vr,wk):null;
  const pa=perfTakeoffPA(),temp=perfTakeoffTemp(),condition=$("toRunwayCondition")?.value||"DRY";
+ const ai=$("toAntiIce")?.value||"OFF";
  const runway=effectiveDepartureRunwayAssessment();
  const available=Number.isFinite(runway?.usable)?runway.usable:perfTakeoffRunwayLen();
  let result=null,source=f50BflMigrationSource(cfg),reason="";
- if(condition==="WET")reason="WET DATA SOURCE LOCKED";
+ if(ai==="ON")reason="A/I ON BFL/V1 SOURCE LOCKED";
+ else if(condition==="WET")reason="WET DATA SOURCE LOCKED";
  else if(!Number.isFinite(pa))reason="PRESSURE ALTITUDE REQUIRED";
  else if(!Number.isFinite(temp))reason="TEMPERATURE REQUIRED";
  else if(!d)reason="CONFIGURATION SOURCE MISSING";
@@ -5961,7 +5983,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.24",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.27",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
