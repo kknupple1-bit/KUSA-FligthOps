@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.32 — Falcon 50 Slats/Landing source-raster engineering trace closure */
+/* v5.25.33 — Falcon 50 data-loader + landing PA boundary + editable trip date */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -603,7 +603,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.32</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.33</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -738,7 +738,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Origin</label><input id="dep" value="" maxlength="4"></div>
 <div><label>Destination</label><input id="dest" value="" maxlength="4"></div>
 <div><label>Alternate</label><input id="alt" value="" maxlength="4" placeholder="Optional"></div>
-<div></div>
+<div><label>Trip Date</label><input id="activeTripDate" type="date" onchange="activeTripDateChanged('activeTripDate')"><div class="small" id="activeTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 
 <div class="row" style="margin-top:10px">
@@ -1743,6 +1743,9 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div><label>Trip / Tail Note</label><input id="f9mNote" placeholder="optional"></div>
       </div>
       <div class="row" style="margin-top:10px">
+        <div><label>Trip Date</label><input id="f9mTripDate" type="date" onchange="activeTripDateChanged('f9mTripDate')"><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
+      </div>
+      <div class="row" style="margin-top:10px">
         <div><label>Emergency Return Fuel Burn lb</label><input id="f9mReturnBurn" type="number" min="0" step="10" value="500"></div>
         <div><label>Takeoff Weight lb</label><input id="f9mToWeight" type="number" min="0" step="10" placeholder="28,000 to 45,500"></div>
         <div><label>Landing Weight lb</label><input id="f9mLdgWeight" type="number" min="0" step="10" placeholder="28,000 to 42,000"></div>
@@ -2147,21 +2150,25 @@ function afmsRevCLandingClimbLimit(cfg,ai,pa,tempC){
   const lines=AFMS_REVC_LDG_CLIMB_OFF[cfg];
   if(!lines||![pa,tempC].every(Number.isFinite)){out.coverageLimited=true;out.basis='Landing PA/OAT unavailable';return out;}
   const minPA=lines[0].pa,maxPA=lines[lines.length-1].pa;
-  if(pa<minPA||pa>maxPA){out.coverageLimited=true;out.basis=`PA ${Math.round(pa)} ft outside digitized ${minPA.toLocaleString()}-${maxPA.toLocaleString()} ft contours`;return out;}
+  let evalPA=pa,paBoundaryApplied=false;
+  // The AFMS lowest published contour is 0 ft. For ordinary below-sea-level pressure altitudes
+  // down to -1,000 ft, use the published 0-ft boundary rather than extrapolating below the chart.
+  if(pa<minPA&&minPA===0&&pa>=-1000){evalPA=0;paBoundaryApplied=true;}
+  if(evalPA<minPA||evalPA>maxPA){out.coverageLimited=true;out.basis=`PA ${Math.round(pa)} ft outside digitized ${minPA.toLocaleString()}-${maxPA.toLocaleString()} ft contours`;return out;}
   let lo=lines[0],hi=lines[lines.length-1];
-  for(let i=0;i<lines.length-1;i++)if(pa>=lines[i].pa&&pa<=lines[i+1].pa){lo=lines[i];hi=lines[i+1];break;}
-  if(pa===maxPA)lo=hi=lines[lines.length-1];
+  for(let i=0;i<lines.length-1;i++)if(evalPA>=lines[i].pa&&evalPA<=lines[i+1].pa){lo=lines[i];hi=lines[i+1];break;}
+  if(evalPA===maxPA)lo=hi=lines[lines.length-1];
   const w1=afmsLandingContourWeight(lo,tempC,maxStruct),w2=afmsLandingContourWeight(hi,tempC,maxStruct);
   if(!Number.isFinite(w1)||!Number.isFinite(w2)){
     out.coverageLimited=true;
     out.basis='Point falls outside source-drawn landing climb contour segment; no extrapolation';
     return out;
   }
-  const f=lo.pa===hi.pa?0:(pa-lo.pa)/(hi.pa-lo.pa);
+  const f=lo.pa===hi.pa?0:(evalPA-lo.pa)/(hi.pa-lo.pa);
   const raw=w1+(w2-w1)*f;
   out.noLimitation=raw>=maxStruct;
   out.limit=out.noLimitation?maxStruct:Math.floor(raw/100)*100;
-  out.basis=`bounded interpolation ${lo.pa.toLocaleString()}-${hi.pa.toLocaleString()} ft contours; rounded down 100 lb`;
+  out.basis=paBoundaryApplied?`PA ${Math.round(pa)} ft uses published 0-ft AFMS boundary; rounded down 100 lb`:`bounded interpolation ${lo.pa.toLocaleString()}-${hi.pa.toLocaleString()} ft contours; rounded down 100 lb`;
   return out;
 }
 
@@ -2209,10 +2216,10 @@ const F50_DIGITIZATION_STATUS={
     'S+Flaps 20° custom-V1 accelerate-stop — FTA-PA-001019 §5-14',
     'Slats custom-V1 accelerate-stop — FTA-PA-001019 §5-22',
     'S+Flaps 20° dry BFL/V1 production activation — 12-point software gate complete; human/pilot trace signoff and anti-ice family validation still required',
-    'Slats BFL / V1 / VMBE — DTM813 §5.50.6 through §5.50.9; direct source pixel geometry and panel families assigned; 8-point source-raster engineering trace-band program registered in v5.25.32; pilot second-read + continuous solver regression required before promotion',
+    'Slats BFL / V1 / VMBE — DTM813 §5.50.6 through §5.50.9; direct source pixel geometry and panel families assigned; 8-point source-raster engineering trace-band program registered in v5.25.33; pilot second-read + continuous solver regression required before promotion',
     'Clean 1.5Vs — DTM813 §5.30.1/§5.30.2; N33AP pitot-probe / SB F50-197 applicability confirmation required',
-    'S+Flaps 48° landing distance — DTM813 §5.60.4; §5.60.4 geometry + panel flow assigned; exact 28,500 lb published anchor retained; additional source-raster engineering trace bands registered in v5.25.32; pilot second-read + continuous traversal/regression pending',
-    'S+Flaps 20° landing distance — DTM813 §5.65.4; §5.65.4 geometry + panel flow assigned; source-raster engineering trace bands registered in v5.25.32; pilot second-read + continuous traversal/regression pending',
+    'S+Flaps 48° landing distance — DTM813 §5.60.4; §5.60.4 geometry + panel flow assigned; exact 28,500 lb published anchor retained; additional source-raster engineering trace bands registered in v5.25.33; pilot second-read + continuous traversal/regression pending',
+    'S+Flaps 20° landing distance — DTM813 §5.65.4; §5.65.4 geometry + panel flow assigned; source-raster engineering trace bands registered in v5.25.33; pilot second-read + continuous traversal/regression pending',
     'Wet-runway takeoff BFL / V1 — current DTM813 §5.46A and §5.51A pages are marked UK registered A/C; N33AP source applicability unresolved, therefore operationally locked',
     'Landing anti-ice climb contours — applicable AFMS chart set'
   ]
@@ -2324,10 +2331,24 @@ function f50RunShadowRegression(){
 }
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
-  if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE)F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(apiUrl('/data/f50_s20_nomograph_rev31.json'),{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status}`);return r.json()}).then(d=>{
-    if(!['kusa.f50.s20.nomograph.v1','kusa.f50.s20.nomograph.v2'].includes(d?.schema)||d?.source?.chart?.indexOf('5.45.6')<0)throw new Error('S20 nomograph dataset integrity check failed');
-    F50_S20_NOMOGRAPH_SHADOW=d;f50RunShadowRegression();return d;
-  }).catch(e=>{F50_S20_NOMOGRAPH_SHADOW_PROMISE=null;const el=$('s20NomographShadowStatus');if(el){el.innerHTML='<b>SHADOW NOMOGRAPH:</b> DATASET UNAVAILABLE';el.className='warn'}throw e});
+  if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
+    const url=apiUrl('/data/f50_s20_nomograph_rev31.json')+`?build=5.25.33&t=${Date.now()}`;
+    F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
+      if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
+      const ct=String(r.headers.get('content-type')||'');
+      const txt=await r.text();
+      let d;try{d=JSON.parse(txt)}catch{throw new Error(`S20 nomograph returned non-JSON (${ct||'unknown content type'})`)}
+      return d;
+    }).then(d=>{
+      if(!['kusa.f50.s20.nomograph.v1','kusa.f50.s20.nomograph.v2'].includes(d?.schema)||String(d?.source?.chart||'').indexOf('5.45.6')<0)throw new Error(`S20 nomograph integrity check failed (schema ${d?.schema||'missing'})`);
+      F50_S20_NOMOGRAPH_SHADOW=d;f50RunShadowRegression();return d;
+    }).catch(e=>{
+      F50_S20_NOMOGRAPH_SHADOW_PROMISE=null;
+      const el=$('s20NomographShadowStatus');
+      if(el){el.innerHTML=`<b>SHADOW NOMOGRAPH:</b> DATASET LOAD ERROR • ${esc(String(e?.message||e))}`;el.className='warn'}
+      console.error('S20 nomograph load failed',e);throw e;
+    });
+  }
   return F50_S20_NOMOGRAPH_SHADOW_PROMISE;
 }
 
@@ -2657,7 +2678,7 @@ async function refreshF900B(){
 }
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
 async function startF900BTrip(dep,dest,alt,tripDate=localISODate(new Date())){
- window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",trip_date:tripDate,started_at:new Date().toISOString(),completed:false}; window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.trip_date);
+ window.currentMissionMeta={id:newMissionId(),aircraft:"F900B",note:$("homeTripNote")?.value?.trim()||"",trip_date:tripDate,started_at:new Date().toISOString(),completed:false}; window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.trip_date);syncActiveTripDateInputs();
  if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
  f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
  f9Put("f9mRoute",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
@@ -2820,6 +2841,25 @@ function localISODate(value=new Date()){
 }
 function tripDateKey(value=new Date()){return localISODate(value).replace(/-/g,"")}
 function currentTripDate(){return window.currentMissionMeta?.trip_date||localISODate(new Date())}
+function syncActiveTripDateInputs(){
+ const d=currentTripDate();
+ ["activeTripDate","f9mTripDate"].forEach(id=>{const e=$(id);if(e&&e.value!==d)e.value=d});
+ const n=currentTripNumber()||"—";
+ const note=`Trip ${n} • date changes auto-save and renumber this active draft.`;
+ if($("activeTripDateNote"))$("activeTripDateNote").textContent=note;
+ if($("f9mTripDateNote"))$("f9mTripDateNote").textContent=note;
+}
+function activeTripDateChanged(sourceId){
+ if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
+ const e=$(sourceId),next=e?.value||"";
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(next)){alert("Enter a valid Trip Date.");syncActiveTripDateInputs();return;}
+ const prev=currentTripDate();
+ if(next===prev){syncActiveTripDateInputs();return;}
+ window.currentMissionMeta.trip_date=next;
+ window.currentMissionMeta.trip_number=allocateTripNumber(next);
+ syncActiveTripDateInputs();
+ recalculate();updateToldCard();scheduleDraftSave();
+}
 function tripDateDisplay(value){
  const iso=localISODate(value),[y,m,d]=iso.split("-");
  return `${m}/${d}/${y}`;
@@ -2894,7 +2934,7 @@ async function restoreF900BFlightPlan(record,opts={}){
  const state=record.state||record;
  applyF900BPlanState(state);
  const newId=opts.newCopy?newMissionId():(record.id||newMissionId());
- window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(record.trip_date||state.trip_date||(opts.newCopy?localISODate(new Date()):(record.started_at||new Date()))),trip_date:record.trip_date||state.trip_date||localISODate(new Date()),leg_number:record.leg_number||1,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};
+ window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(record.trip_date||state.trip_date||(opts.newCopy?localISODate(new Date()):(record.started_at||new Date()))),trip_date:record.trip_date||state.trip_date||localISODate(new Date()),leg_number:record.leg_number||1,aircraft:"F900B",note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};syncActiveTripDateInputs();
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  await refreshF900BMission();
  saveCurrentDraft();
@@ -3014,6 +3054,7 @@ note:$("homeTripNote").value.trim(),
    completed:false
  };
  window.currentMissionMeta.trip_number=allocateTripNumber(window.currentMissionMeta.trip_date);
+ syncActiveTripDateInputs();
  recalculate();
  showPlatformView("ops");
  saveCurrentDraft();
@@ -3583,7 +3624,7 @@ async function openDraftFlightPlan(i){
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
  if($("fobVerified"))$("fobVerified").checked=!!s.fob_verified;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=!!s.low_fuel_confirmed;
- window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};
+ window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};syncActiveTripDateInputs();
  updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
 }
 function deleteDraftFlightPlan(i){const arr=getMissionDrafts(),m=arr[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"}?`))return;arr.splice(i,1);saveMissionDrafts(arr);renderDrafts()}
@@ -5983,7 +6024,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.32",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.33",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
