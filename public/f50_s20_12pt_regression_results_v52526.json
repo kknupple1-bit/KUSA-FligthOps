@@ -1,0 +1,157 @@
+{
+  "build": "5.25.26",
+  "scope": "S+Flaps 20 dry anti-ice OFF",
+  "tolerances": {
+    "bfl_ft": 250,
+    "v1_kt": 1.0
+  },
+  "results": [
+    {
+      "id": "VAL-01",
+      "expected_bfl_ft": 5200,
+      "shadow_bfl_ft": 5284.6,
+      "delta_bfl_ft": 84.6,
+      "bfl_pass": true,
+      "expected_v1_kt": 112.0,
+      "shadow_v1_kt": 111.56,
+      "delta_v1_kt": -0.44,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-02",
+      "expected_bfl_ft": 4850,
+      "shadow_bfl_ft": 4980.5,
+      "delta_bfl_ft": 130.5,
+      "bfl_pass": true,
+      "expected_v1_kt": 109.2,
+      "shadow_v1_kt": 109.5,
+      "delta_v1_kt": 0.3,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-03",
+      "expected_bfl_ft": null,
+      "shadow_bfl_ft": 5658.5,
+      "delta_bfl_ft": null,
+      "bfl_pass": true,
+      "expected_v1_kt": 114.8,
+      "shadow_v1_kt": 114.77,
+      "delta_v1_kt": -0.03,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-04",
+      "expected_bfl_ft": null,
+      "shadow_bfl_ft": 4232.8,
+      "delta_bfl_ft": null,
+      "bfl_pass": true,
+      "expected_v1_kt": 104.0,
+      "shadow_v1_kt": 103.97,
+      "delta_v1_kt": -0.03,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-05",
+      "expected_bfl_ft": null,
+      "shadow_bfl_ft": 7854.6,
+      "delta_bfl_ft": null,
+      "bfl_pass": true,
+      "expected_v1_kt": 116.0,
+      "shadow_v1_kt": 116.19,
+      "delta_v1_kt": 0.19,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-06",
+      "expected_bfl_ft": 3500,
+      "shadow_bfl_ft": 3507.1,
+      "delta_bfl_ft": 7.1,
+      "bfl_pass": true,
+      "expected_v1_kt": 92.5,
+      "shadow_v1_kt": 92.49,
+      "delta_v1_kt": -0.01,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-07",
+      "expected_bfl_ft": 4700,
+      "shadow_bfl_ft": 4683.9,
+      "delta_bfl_ft": -16.1,
+      "bfl_pass": true,
+      "expected_v1_kt": 115.0,
+      "shadow_v1_kt": 115.1,
+      "delta_v1_kt": 0.1,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-08",
+      "expected_bfl_ft": 5600,
+      "shadow_bfl_ft": 5578.5,
+      "delta_bfl_ft": -21.5,
+      "bfl_pass": true,
+      "expected_v1_kt": 108.5,
+      "shadow_v1_kt": 108.66,
+      "delta_v1_kt": 0.16,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-09",
+      "expected_bfl_ft": 4650,
+      "shadow_bfl_ft": 4665.2,
+      "delta_bfl_ft": 15.2,
+      "bfl_pass": true,
+      "expected_v1_kt": 110.5,
+      "shadow_v1_kt": 110.74,
+      "delta_v1_kt": 0.24,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-10",
+      "expected_bfl_ft": 6100,
+      "shadow_bfl_ft": 6102.0,
+      "delta_bfl_ft": 2.0,
+      "bfl_pass": true,
+      "expected_v1_kt": 113.5,
+      "shadow_v1_kt": 113.73,
+      "delta_v1_kt": 0.23,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-11",
+      "expected_bfl_ft": 4450,
+      "shadow_bfl_ft": 4438.8,
+      "delta_bfl_ft": -11.2,
+      "bfl_pass": true,
+      "expected_v1_kt": 113.5,
+      "shadow_v1_kt": 113.57,
+      "delta_v1_kt": 0.07,
+      "v1_pass": true,
+      "pass": true
+    },
+    {
+      "id": "VAL-12",
+      "expected_bfl_ft": 5200,
+      "shadow_bfl_ft": 5217.1,
+      "delta_bfl_ft": 17.1,
+      "bfl_pass": true,
+      "expected_v1_kt": 113.5,
+      "shadow_v1_kt": 113.37,
+      "delta_v1_kt": -0.13,
+      "v1_pass": true,
+      "pass": true
+    }
+  ],
+  "passed": 12,
+  "total": 12,
+  "gate_pass": true
+}

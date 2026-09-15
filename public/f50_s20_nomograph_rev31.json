@@ -1,6 +1,6 @@
 {
   "schema": "kusa.f50.s20.nomograph.v2",
-  "status": "SHADOW_VALIDATION_PASS_PENDING_EXPANDED_ENVELOPE",
+  "status": "SHADOW_DRY_12POINT_GATE_COMPLETE_PENDING_OPERATOR_SIGNOFF",
   "aircraft": "Falcon 50 / N33AP",
   "configuration": "SLATS_PLUS_FLAPS_20",
   "source": {
@@ -348,7 +348,7 @@
   ],
   "release_gate": {
     "operational_engine_active": false,
-    "reason": "Corrected \u00a75.45.6 weight-panel traversal now passes all 4 published end-to-end anchors within the predeclared \u00b1250 ft gate. Operational activation remains blocked pending additional independent points across the envelope and paired \u00a75.45.7 V1 validation.",
+    "reason": "\u00a75.45.6 dry shadow has completed the controlled 12-point dry regression program. Operational activation remains blocked pending human/pilot trace verification, anti-ice validation, and controlled-build signoff.",
     "target_distance_tolerance_ft": 250,
     "target_speed_tolerance_kt": 1.0
   },

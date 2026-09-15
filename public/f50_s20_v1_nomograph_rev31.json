@@ -1,6 +1,6 @@
 {
   "schema": "kusa.f50.s20.v1.nomograph.v4",
-  "status": "SHADOW_FULL_DRY_PANEL_CHAIN_COMPLETE_REGRESSION_PASS_5_OF_5",
+  "status": "SHADOW_FULL_DRY_12POINT_GATE_COMPLETE_PENDING_OPERATOR_SIGNOFF",
   "aircraft": "Falcon 50 / N33AP",
   "configuration": "SLATS_PLUS_FLAPS_20",
   "source": {
@@ -121,9 +121,11 @@
     "target_speed_tolerance_kt": 1.0,
     "minimum_independent_trace_points": 12,
     "published_numeric_anchors_loaded": 5,
-    "published_anchor_regression_pass": 5,
+    "published_anchor_regression_pass": true,
     "published_anchor_max_abs_error_kt": 0.45,
-    "reason": "Dry \u00a75.45.7 panel chain is complete in shadow validation and the anchor-constrained shadow solver passes all 5 published numeric anchors within \u00b11 kt. Production promotion remains blocked pending >=12 independent source traces across the envelope and separate anti-ice dotted-family validation."
+    "reason": "\u00a75.45.7 dry chain has completed the controlled 12-point dry regression program. Operational activation remains blocked pending human/pilot trace verification, anti-ice dotted-family validation, and controlled-build signoff.",
+    "independent_trace_points_complete": 7,
+    "controlled_12_point_gate_complete": true
   },
   "runway_slope_panel": {
     "reference": "0 percent",
