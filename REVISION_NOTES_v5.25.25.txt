@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.25 — S+20 Dry 12-Point Independent Validation Gate
+
+- Creates the controlled 12-point dry / anti-ice OFF validation set for DTM813 §5.45.6 BFL and §5.45.7 balanced-field V1.
+- Locks 5 Dassault-published numeric V1/BFL anchors already independently stated in DTM813 examples.
+- Selects 7 additional cases across low/mid/high PA, cold/hot SAT, weight, slope, headwind/calm/tailwind for independent direct chart tracing.
+- DOES NOT populate the 7 pending reference values from the shadow solver. This prevents circular validation.
+- Production TOLD engine remains unchanged and legacy/migration-controlled.
+- Operational promotion remains blocked until all 12 independent references are completed and within ±250 ft BFL / ±1 kt V1 gates, plus separate anti-ice validation.

@@ -1,0 +1,15 @@
+KUSA FlightOps v5.25.27 — Falcon 50-4 N1 Validation + Anti-Ice Source Guard
+
+1. Formalized N33AP / Falcon 50-4 takeoff N1 validation against FAA-approved AFMS FTA-PA-001019 Rev I/R Section 5.
+   - 8 direct table-cell checks across PA/SAT envelope.
+   - 4 bounded interpolation checks.
+   - Ice protection OFF and engine ice protection ON both covered.
+   - Result: PASS 12/12.
+2. Added explicit engine anti-ice applicability guard: A/I ON is not permitted above +10 C per DTM813 anti-ice limitation.
+3. Safety correction: when Takeoff A/I = ON, BFL / balanced-field V1 / field-limited-weight output is now SOURCE LOCKED until the direct anti-ice performance family is validated.
+   - The app no longer silently substitutes A/I OFF BFL/V1 data when A/I ON is selected.
+   - AFMS climb and AFMS N1 remain available where source coverage permits.
+4. Dry S+Flaps 20 BFL/V1 12-point software regression remains complete; operator/human trace signoff and anti-ice BFL/V1 validation remain pending.
+5. Production TOLD promotion of the Dassault dry shadow BFL/V1 engine remains blocked pending final validation signoff.
+
+Development / validation only — not approved for flight use.

@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.26 — S+20 12-Point Dry Validation Gate Closure
+
+1. Completes all 12 controlled DRY / ANTI-ICE OFF validation references for DTM813 §5.45.6 BFL and §5.45.7 balanced-field V1.
+2. Keeps the five published Dassault numeric anchors unchanged.
+3. Completes VAL-06 through VAL-12 using an independent approved-source-raster geometry traversal, separate from the application shadow solver. Reference reads are rounded to chart-reading resolution (BFL nearest 50 ft; V1 nearest 0.5 kt).
+4. Acceptance gates remain ±250 ft BFL and ±1.0 kt V1.
+5. This closes the 12-point SOFTWARE REGRESSION gate for the dry S+20 path. It does NOT by itself authorize flight use.
+6. Production TOLD remains on the existing migration-controlled engine. Operational promotion remains blocked pending documented human/pilot verification of the trace sheet, anti-ice dotted-family validation, and final controlled-build signoff.
+7. No Falcon 900B performance logic was changed in this revision.
