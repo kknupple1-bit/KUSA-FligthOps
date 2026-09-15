@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.33 — Data Loader / Landing PA Boundary / Editable Trip Date
+
+- Corrects Falcon 50 S+20 shadow nomograph loader with cache-busting, JSON/content diagnostics, and explicit load-error text.
+- Landing-climb AFMS coverage now uses the published 0-ft contour for ordinary below-sea-level pressure altitudes from 0 to -1,000 ft; this is a boundary application, not extrapolation.
+- Adds an editable Trip Date field to the active Falcon 50 Mission Setup and Falcon 900B Mission Setup pages.
+- Changing the active trip date automatically assigns a trip number for the new date and saves the draft.
+- Existing 14,000-ft upper AFMS coverage guard and anti-ice source locks remain unchanged.
+- DEVELOPMENT / VALIDATION ONLY.
