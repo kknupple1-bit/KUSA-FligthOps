@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.32 — Falcon 50 Slats/Landing Source-Raster Engineering Trace Closure
+
+- Carries forward v5.25.31 direct source geometry/panel assignment.
+- Registers eight dry Slats engineering source-raster trace bands across lower/higher BFL, V1 and VMBE coverage.
+- Retains three exact published Dassault Slats anchors separately from engineering read bands.
+- Registers six landing-distance engineering source-raster trace bands plus the exact DTM813 Annex 3 S+48 anchor.
+- Keeps raw landing distance separate from 1.67/1.92 operating-factor layers.
+- Wet-runway UK-only applicability guard remains active.
+- IMPORTANT: engineering trace bands are validation aids, not operational values. Slats and landing direct continuous solvers remain source-locked pending pilot/operator second-read and final controlled regression.
+- No production performance values were relabeled as Dassault merely because they fall within an engineering trace band.

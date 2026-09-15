@@ -1,0 +1,23 @@
+KUSA FlightOps v5.25.31 — Falcon 50 Slats/Landing Panel Assignment + Independent Trace Matrix
+
+1. Slats direct-source geometry assignment
+- Preserved direct DTM813 source pages §5.50.6/.7/.8/.9 and worked example §5.50.5.
+- Assigned the physical nomograph panel flow for BFL, VMBE and balanced-field V1.
+- Assigned source-family labels for pressure altitude, takeoff weight, runway slope, wind and output axes.
+- Preserved lower-weight versus higher-weight BFL split and anti-ice solid/dotted-family separation.
+
+2. Slats independent dry regression matrix
+- Replaced vague envelope placeholders with eight fixed dry / A-I OFF source-trace cases.
+- Cases span lower/higher BFL charts, low/high altitude, cold/hot conditions, headwind/calm/tailwind, and a VMBE-proximity case.
+- Expected outputs remain blank until direct independent source-raster tracing. FlightOps is not allowed to self-populate reference answers.
+
+3. Landing-distance panel assignment
+- Registered §5.60.4 S+48 and §5.65.4 S+20 nomograph flow.
+- Explicitly separated raw AFM landing distance from operating-regulation landing-field-length factors.
+- Verified the published Annex 3 S+48 anchor: 2,900 ft raw × 1.67 = 4,843 ft, consistent with the AFM published 4,850-ft rounded field length.
+- Added an eight-case independent landing trace matrix across S+48 and S+20.
+
+4. Operational safeguards
+- No new Slats BFL/V1/VMBE or landing-distance engine is promoted in this revision.
+- Wet-runway N33AP applicability remains source locked.
+- Existing production grids remain migration-controlled pending continuous direct-source shadow traversal, independent trace closure, and operator signoff.

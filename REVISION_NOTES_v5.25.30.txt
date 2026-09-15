@@ -1,0 +1,24 @@
+KUSA FlightOps v5.25.30 — Falcon 50 Slats/Landing Direct Geometry Phase 2
+
+1. Direct Dassault geometry extraction
+- Extracted source-raster geometry from DTM813 §5.50.6 lower-weight Slats BFL.
+- Extracted source-raster geometry from §5.50.7 higher-weight Slats BFL.
+- Extracted source-raster geometry from §5.50.8 Slats VMBE.
+- Extracted source-raster geometry from §5.50.9 Slats balanced-field V1.
+- Geometry is stored as source pixel line segments by panel and remains SHADOW ONLY.
+
+2. Independent Slats dry regression started
+- Four published Dassault numeric cases are registered.
+- Four additional independent raster-trace cases are defined across lower/higher weight and environmental envelope.
+- Expected values for independent cases remain intentionally blank until direct chart tracing; the application under test is not allowed to create its own reference values.
+
+3. Landing-distance source digitization started
+- Located and registered DTM813 §5.60.4 at PDF page 474 (S+Flaps 48, Rev 32).
+- Located and registered DTM813 §5.65.4 at PDF page 480 (S+Flaps 20, Rev 23).
+- Direct source-raster geometry extracted for altitude/weight, wind, raw-distance and field-length-factor panels.
+- Annex 3 published S+48 anchor remains 28,500 lb / PA 8,000 / SAT +10C -> 2,900 ft raw landing distance / 4,850 ft field length / VREF 112.5 kt.
+
+4. Operational safeguards
+- No Slats BFL/V1/VMBE or landing-distance direct-source engine is promoted by this revision.
+- Existing production calculations remain migration-controlled until continuous traversal and independent regression gates are closed.
+- Wet-runway N33AP applicability remains source locked.
