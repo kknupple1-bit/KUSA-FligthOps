@@ -1,0 +1,109 @@
+{
+  "schema": "kusa.f50.slats.source_control.v1",
+  "build": "5.25.28",
+  "aircraft": "Falcon 50 / N33AP",
+  "configuration": "SLATS_ONLY",
+  "status": "DIRECT_SOURCE_REGISTERED_VALIDATION_IN_PROGRESS",
+  "source": {
+    "document": "Dassault DTM813 Airplane Flight Manual",
+    "revision_context": "Base Section 5 charts as present in current AFM; individual chart page revisions retained below",
+    "charts": [
+      {
+        "section": "5.50.6",
+        "title": "Balanced Field Length \u2014 Slats \u2014 Lower Weights",
+        "pdf_page": 448,
+        "page_revision": 29,
+        "anti_ice_note": "With anti-icing on use dotted lines."
+      },
+      {
+        "section": "5.50.7",
+        "title": "Balanced Field Length \u2014 Slats \u2014 Higher Weights",
+        "pdf_page": 449,
+        "page_revision": 23,
+        "anti_ice_note": "With anti-icing on use dotted lines."
+      },
+      {
+        "section": "5.50.8",
+        "title": "Maximum Brake Energy Speed (VMBE) \u2014 Slats",
+        "pdf_page": 450,
+        "page_revision": 23
+      },
+      {
+        "section": "5.50.9",
+        "title": "Engine Failure Speed Associated With Balanced Field Length \u2014 Slats",
+        "pdf_page": 451,
+        "page_revision": 23,
+        "anti_ice_note": "With anti-icing on increase V1 by 1 kt at 0/2,000/4,000 ft and by 2 kt at 6,000/8,000/10,000 ft. V1 must not be lower than 91 kt."
+      }
+    ]
+  },
+  "published_anchors": [
+    {
+      "id": "SLATS-DRY-001",
+      "basis": "DTM813 \u00a75.50.5 balanced-field worked example",
+      "pa_ft": 4000,
+      "sat_c": 20,
+      "weight_lb": 34400,
+      "runway_slope_pct": -1.0,
+      "wind_type": "TAILWIND",
+      "wind_kt": 5,
+      "runway_ft": 6200,
+      "expected_bfl_ft": 6200,
+      "expected_v1_kt": 116.0,
+      "expected_vmbe_kt": 134.0,
+      "expected_vr_v2_kt": 127.5
+    },
+    {
+      "id": "SLATS-VMBE-002",
+      "basis": "DTM813 \u00a75.50.1 stopway/clearway worked example",
+      "pa_ft": 4000,
+      "sat_c": 35,
+      "weight_lb": 38800,
+      "runway_slope_pct": -1.5,
+      "wind_type": "TAILWIND",
+      "wind_kt": 5,
+      "runway_ft": 8900,
+      "stopway_ft": 100,
+      "clearway_ft": 600,
+      "expected_vmbe_kt": 123.5,
+      "selected_v1_kt": 123.5,
+      "expected_vr_v2_kt": 136.0,
+      "note": "Selected V1 is VMBE-limited in the worked example; do not use this as a \u00a75.50.9 balanced-field V1 anchor."
+    },
+    {
+      "id": "SLATS-V1-003",
+      "basis": "DTM813 \u00a75.70.2 cooling-time example referencing \u00a75.50.9",
+      "pa_ft": 4000,
+      "sat_c": 20,
+      "weight_lb": 39200,
+      "runway_slope_pct": 1.0,
+      "wind_type": "TAILWIND",
+      "wind_kt": 5,
+      "expected_v1_kt": 132.0
+    },
+    {
+      "id": "SLATS-V1-004",
+      "basis": "DTM813 \u00a75.70.2 cooling-time example referencing \u00a75.50.9",
+      "pa_ft": 4000,
+      "sat_c": 20,
+      "weight_lb": 38000,
+      "runway_slope_pct": 1.0,
+      "wind_type": "TAILWIND",
+      "wind_kt": 5,
+      "expected_v1_kt": 130.0
+    }
+  ],
+  "release_gate": {
+    "operational_engine_active": false,
+    "required_before_promotion": [
+      "Direct digitization of \u00a75.50.6 lower-weight panel",
+      "Direct digitization of \u00a75.50.7 higher-weight panel",
+      "Direct VMBE solver from \u00a75.50.8",
+      "Direct balanced-field V1 solver from \u00a75.50.9",
+      "Dry independent regression set across lower/higher weights",
+      "Anti-ice applicability and correction verification",
+      "Operator/human chart-trace signoff"
+    ],
+    "reason": "Published anchors and source pages are registered, but the legacy production grid is not relabeled as Dassault and is not considered the direct-source engine."
+  }
+}

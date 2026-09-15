@@ -1,0 +1,47 @@
+{
+  "schema": "kusa.f50.wet_source_applicability.v1",
+  "build": "5.25.28",
+  "aircraft": "N33AP / Falcon 50",
+  "status": "SOURCE_LOCKED_APPLICABILITY_MISMATCH",
+  "source_document": "Dassault DTM813 Airplane Flight Manual",
+  "findings": [
+    {
+      "section": "5.46A",
+      "configuration": "S+FLAPS 20",
+      "title": "Takeoff \u2014 Wet Runway",
+      "source_applicability": "UK registered A/C",
+      "operational_for_n33ap": false,
+      "worked_example": {
+        "pa_ft": 4000,
+        "sat_c": 37,
+        "runway_ft": 5200,
+        "headwind_kt": 30,
+        "slope_pct": -1,
+        "wet_field_limited_weight_lb": 34100,
+        "dry_field_limited_weight_lb": 35000,
+        "vr_v2_kt": 116,
+        "wet_v1_kt": 96
+      }
+    },
+    {
+      "section": "5.51A",
+      "configuration": "SLATS",
+      "title": "Takeoff \u2014 Wet Runway",
+      "source_applicability": "UK registered A/C",
+      "operational_for_n33ap": false,
+      "worked_example": {
+        "pa_ft": 4000,
+        "sat_c": 20,
+        "runway_ft": 6200,
+        "tailwind_kt": 5,
+        "slope_pct": -1,
+        "wet_field_limited_weight_lb": 32200,
+        "dry_field_limited_weight_lb": 34400,
+        "vr_v2_kt": 122.5,
+        "wet_v1_kt": 94
+      }
+    }
+  ],
+  "application_rule": "Do not calculate or display operational wet BFL/V1 for N33AP from \u00a75.46A/\u00a75.51A until an aircraft-applicable approved source is established.",
+  "note": "This revision corrects the previous generic statement that wet charts were merely pending digitization. The source applicability itself is a blocking item for N33AP."
+}
