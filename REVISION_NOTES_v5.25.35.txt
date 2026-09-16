@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.35
+TOLD Status Semantics + Runway Selection Persistence
+
+- TAKEOFF operational header now renders TABLE DATA READY / CLIMB NOT LIMITING as green/OK instead of amber.
+- Mission-selected departure and destination runway ends are now remembered as authoritative pilot selections.
+- Mission/weather refresh restores the exact runway selector value when still available; it falls back to runway-end ID matching, then auto-selects only when no prior selection can be restored.
+- TOLD quick-change runway selector continues to write back to Mission, so Mission and TOLD remain synchronized.
+- Prevents a selected runway such as 17R from being silently replaced by automatic best-runway selection during refresh/navigation.

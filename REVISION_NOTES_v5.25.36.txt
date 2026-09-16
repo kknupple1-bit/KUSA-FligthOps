@@ -1,0 +1,11 @@
+KUSA FlightOps v5.25.36
+Landing GO Status Semantic Color Consistency
+
+Changes
+- Section 3 Landing operational status now renders green for positive completed results, including:
+  - GO • AFMS CLIMB NOT LIMITING
+  - GO • AFMS LANDING CLIMB PASS
+  - other PASS states
+- Amber remains reserved for pending, incomplete, source-locked, or review-required landing states.
+- Red remains reserved for NO-GO / exceeded-limit states.
+- Retains all v5.25.35 runway-selection persistence and prior source-control fixes.

@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.34 — S+20 Nomograph Delivery Hardening
+
+- Fixes S+20 shadow nomograph DATASET LOAD ERROR caused when hosted static JSON requests fall through to SPA index.html and return text/html.
+- Adds explicit /api/data/f50_s20_nomograph_rev31 JSON endpoint.
+- Endpoint reads the packaged public/data JSON first and serves a verified embedded fallback if that file is unavailable at runtime.
+- Browser loader now uses the explicit JSON API endpoint with no-store cache control.
+- Retains v5.25.33 landing-climb pressure-altitude boundary handling: -1000 ft through 0 ft uses the published 0-ft AFMS source row; no extrapolation above source coverage.
+- No operational performance tables or validation gates were promoted/relabeled in this revision.
