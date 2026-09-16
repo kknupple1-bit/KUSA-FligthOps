@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.37
+TOLD Attention-to-Mission Navigation
+
+- TOLD operational-summary attention items are now selectable buttons.
+- Selecting an attention item opens the Mission view, scrolls to the relevant review/gate section, highlights it, and focuses the control when applicable.
+- Takeoff warning/NO-GO status badge is actionable for obstacle-review and takeoff-performance gates.
+- Landing warning/NO-GO status badge is actionable for landing-performance gates.
+- Added direct navigation targets for passenger seating, runway selection, NOTAM verification, obstacle review, FOB verification, low-fuel confirmation, takeoff performance, and landing performance.
+- Positive PASS/GO status badges remain informational and non-clickable.
+- No performance calculation source or numeric data changed in this revision.

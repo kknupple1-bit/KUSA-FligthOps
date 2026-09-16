@@ -1,6 +1,6 @@
 {
   "name": "kusa-flightops",
-  "version": "5.25.36",
+  "version": "5.25.37",
   "private": true,
   "main": "server.js",
   "engines": {
