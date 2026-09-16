@@ -523,7 +523,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.told-runway-quick{grid-template-columns:1fr}.told-menu-panel{position:fixed;left:12px;right:12px;top:auto;bottom:76px;min-width:0}}
 
 
-/* v5.25.33 — Falcon 50 data-loader + landing PA boundary + editable trip date */
+/* v5.25.36 — Landing GO status semantic color consistency */
 .takeoff-compare-details{margin:10px 0 12px;border:1px solid #31506f;border-radius:10px;background:#071b30}
 .takeoff-compare-details>summary{cursor:pointer;list-style:none;padding:10px 12px;font-weight:800;color:#b9dfff;user-select:none}
 .takeoff-compare-details>summary::-webkit-details-marker{display:none}
@@ -603,7 +603,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.33</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.36</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -2216,10 +2216,10 @@ const F50_DIGITIZATION_STATUS={
     'S+Flaps 20° custom-V1 accelerate-stop — FTA-PA-001019 §5-14',
     'Slats custom-V1 accelerate-stop — FTA-PA-001019 §5-22',
     'S+Flaps 20° dry BFL/V1 production activation — 12-point software gate complete; human/pilot trace signoff and anti-ice family validation still required',
-    'Slats BFL / V1 / VMBE — DTM813 §5.50.6 through §5.50.9; direct source pixel geometry and panel families assigned; 8-point source-raster engineering trace-band program registered in v5.25.33; pilot second-read + continuous solver regression required before promotion',
+    'Slats BFL / V1 / VMBE — DTM813 §5.50.6 through §5.50.9; direct source pixel geometry and panel families assigned; 8-point source-raster engineering trace-band program registered in v5.25.36; pilot second-read + continuous solver regression required before promotion',
     'Clean 1.5Vs — DTM813 §5.30.1/§5.30.2; N33AP pitot-probe / SB F50-197 applicability confirmation required',
-    'S+Flaps 48° landing distance — DTM813 §5.60.4; §5.60.4 geometry + panel flow assigned; exact 28,500 lb published anchor retained; additional source-raster engineering trace bands registered in v5.25.33; pilot second-read + continuous traversal/regression pending',
-    'S+Flaps 20° landing distance — DTM813 §5.65.4; §5.65.4 geometry + panel flow assigned; source-raster engineering trace bands registered in v5.25.33; pilot second-read + continuous traversal/regression pending',
+    'S+Flaps 48° landing distance — DTM813 §5.60.4; §5.60.4 geometry + panel flow assigned; exact 28,500 lb published anchor retained; additional source-raster engineering trace bands registered in v5.25.36; pilot second-read + continuous traversal/regression pending',
+    'S+Flaps 20° landing distance — DTM813 §5.65.4; §5.65.4 geometry + panel flow assigned; source-raster engineering trace bands registered in v5.25.36; pilot second-read + continuous traversal/regression pending',
     'Wet-runway takeoff BFL / V1 — current DTM813 §5.46A and §5.51A pages are marked UK registered A/C; N33AP source applicability unresolved, therefore operationally locked',
     'Landing anti-ice climb contours — applicable AFMS chart set'
   ]
@@ -2332,7 +2332,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/data/f50_s20_nomograph_rev31.json')+`?build=5.25.33&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.36&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2735,6 +2735,21 @@ function enableUppercaseEntry(){
  document.querySelectorAll("input,textarea").forEach(el=>{if(eligible(el)){el.setAttribute("autocapitalize","characters");el.setAttribute("spellcheck","false")}});
  if(document.documentElement.dataset.uppercaseListenerBound)return;document.documentElement.dataset.uppercaseListenerBound="1";
  document.addEventListener("input",e=>{const el=e.target;if(!eligible(el))return;el.setAttribute("autocapitalize","characters");const start=el.selectionStart,end=el.selectionEnd,up=String(el.value||"").toUpperCase();if(el.value!==up){el.value=up;try{el.setSelectionRange(start,end)}catch{}}},true);
+}
+function rememberRunwaySelection(which){
+ const id=which==="dep"?"depRunway":"destRunway",sel=$(id);if(!sel)return;
+ const rw=selectedRunwayObj(which);
+ if(!window.currentMissionMeta)window.currentMissionMeta={};
+ if(which==="dep"){window.currentMissionMeta.dep_runway_selector=sel.value||"";window.currentMissionMeta.dep_runway_id=rw?.runway_id||null;}
+ else{window.currentMissionMeta.dest_runway_selector=sel.value||"";window.currentMissionMeta.dest_runway_id=rw?.runway_id||null;}
+}
+function restorePreferredRunway(which,priorValue,priorId){
+ const sel=$(which==="dep"?"depRunway":"destRunway");if(!sel||!sel.options.length)return false;
+ const candidates=[priorValue,which==="dep"?window.currentMissionMeta?.dep_runway_selector:window.currentMissionMeta?.dest_runway_selector].filter(Boolean);
+ for(const v of candidates){if([...sel.options].some(o=>o.value===v)){sel.value=v;return true;}}
+ const target=String(priorId||(which==="dep"?window.currentMissionMeta?.dep_runway_id:window.currentMissionMeta?.dest_runway_id)||"").trim().toUpperCase();
+ if(target){const opt=[...sel.options].find(o=>String(o.textContent||"").trim().toUpperCase().startsWith(target+" ")||String(o.textContent||"").trim().toUpperCase().startsWith(target+" •"));if(opt){sel.value=opt.value;return true;}}
+ return false;
 }
 function syncToldRunwaySelectors(){
  [["depRunway","toldDepRunwaySelect"],["destRunway","toldDestRunwaySelect"]].forEach(([srcId,dstId])=>{const src=$(srcId),dst=$(dstId);if(!src||!dst)return;dst.innerHTML="";[...src.options].forEach(o=>{const n=document.createElement("option");n.value=o.value;n.textContent=o.textContent;dst.appendChild(n)});dst.value=src.value||"";});
@@ -4006,7 +4021,11 @@ function updateToldCard(){
  $("opTakeoffRequired").textContent=Number.isFinite(takeoffRequired)?`${Math.round(takeoffRequired).toLocaleString()} ft`:"SOURCE LOCKED";
  $("opTakeoffMargin").textContent=textOf("toRwyMargin");
  $("opTakeoffStatus").textContent=textOf("toStatus");
- $("opTakeoffStatus").className=`told-op-status ${textOf("toStatus").includes("PASS")?"ok":textOf("toStatus").includes("NO-GO")?"bad":"warn"}`;
+ {
+ const takeoffStatusText=textOf("toStatus");
+ const takeoffStatusOk=takeoffStatusText.includes("PASS")||takeoffStatusText.includes("TABLE DATA READY")||takeoffStatusText.includes("CLIMB NOT LIMITING");
+ $("opTakeoffStatus").className=`told-op-status ${takeoffStatusOk?"ok":takeoffStatusText.includes("NO-GO")?"bad":"warn"}`;
+}
  setToldVspeed("opV1",textOf("vsV1"));
  setToldVspeed("opVR",textOf("vsVR"));
  setToldVspeed("opVfr",textOf("vsVFT"));
@@ -4058,7 +4077,11 @@ function updateToldCard(){
  $("opLandingNotam").textContent=currentNotams.status==="CHECKED"?"CHECKED":(currentNotams.status==="UNAVAILABLE"?"MANUAL VERIFY":"NOT CHECKED");
  $("opLandingRunwayState").textContent=landAssess.state||"—";
  $("opLandingStatus").textContent=textOf("landStatus");
- $("opLandingStatus").className=`told-op-status ${textOf("landStatus").includes("PASS")?"ok":textOf("landStatus").includes("NO-GO")?"bad":"warn"}`;
+ {
+ const landingStatusText=textOf("landStatus");
+ const landingStatusOk=landingStatusText.includes("PASS")||landingStatusText.includes("GO")||landingStatusText.includes("CLIMB NOT LIMITING");
+ $("opLandingStatus").className=`told-op-status ${landingStatusOk?"ok":landingStatusText.includes("NO-GO")?"bad":"warn"}`;
+}
 
  updateTakeoffComparison();
 
@@ -4848,6 +4871,7 @@ function selectedRunwayChanged(whichChanged=null){
    departureObstacleReview={status:"NOT_CHECKED",airport:null,items:[],checked_at:null,message:"FAA NMS departure NOTAM scan only — not a clearance analysis."};
  }
  if(!missionData)return;
+ if(whichChanged==="dep"||whichChanged==="dest")rememberRunwaySelection(whichChanged);
  const depRw=selectedRunwayObj("dep"),destRw=selectedRunwayObj("dest");
  if(depRw){
    $("depRwySummary").textContent=`RWY ${depRw.runway_id} • ${esc(depRw.length_ft)} ft`;
@@ -4875,6 +4899,9 @@ function selectedRunwayChanged(whichChanged=null){
 }
 
 async function loadMission(options={}){
+ const priorDepRunwayValue=$("depRunway")?.value||"",priorDestRunwayValue=$("destRunway")?.value||"";
+ const priorDepRunwayId=selectedRunwayObj("dep")?.runway_id||window.currentMissionMeta?.dep_runway_id||null;
+ const priorDestRunwayId=selectedRunwayObj("dest")?.runway_id||window.currentMissionMeta?.dest_runway_id||null;
  const dep=$("dep").value.toUpperCase().trim(),dest=$("dest").value.toUpperCase().trim(),alt=$("alt").value.toUpperCase().trim();
  const preserveManualWeather=!!options.preserveManualWeather,quiet=!!options.quiet;
  const savedManual=preserveManualWeather?JSON.parse(JSON.stringify(manualWeather)):null;
@@ -4901,8 +4928,11 @@ async function loadMission(options={}){
      $("altMetar").innerHTML="—";$("altTaf").innerHTML="—";$("altMetarRaw").textContent="—";$("altTafRaw").textContent="—";
    }
    fillRunwaySelect("depRunway",missionData.departure.runways);fillRunwaySelect("destRunway",missionData.destination.runways);
-   if((missionData.departure.runways||[]).length)autoSelectBestRunwayEnd("depRunway",missionData.departure);
-   if((missionData.destination.runways||[]).length)autoSelectBestRunwayEnd("destRunway",missionData.destination);
+   const depRestored=restorePreferredRunway("dep",priorDepRunwayValue,priorDepRunwayId);
+   const destRestored=restorePreferredRunway("dest",priorDestRunwayValue,priorDestRunwayId);
+   if((missionData.departure.runways||[]).length&&!depRestored)autoSelectBestRunwayEnd("depRunway",missionData.departure);
+   if((missionData.destination.runways||[]).length&&!destRestored)autoSelectBestRunwayEnd("destRunway",missionData.destination);
+   rememberRunwaySelection("dep");rememberRunwaySelection("dest");
    const tb=$("runways");tb.innerHTML="";
    for(const [code,x] of [[dep,missionData.departure],[dest,missionData.destination]]){
      for(const d of directionalRunwayOptions(x.runways||[],x)){
@@ -4920,7 +4950,7 @@ async function loadMission(options={}){
    $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
    selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();updateWeatherSourceBadges();loadManualWeatherForm();
    setTimeout(()=>{refreshDepartureNotams(true).catch(()=>{});refreshNotams().catch(()=>{});},150);
-   if(!quiet)$("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). First available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
+   if(!quiet)$("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). Pilot-selected runway preserved when available; otherwise best available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
  }catch(e){if(!quiet)$("missionStatus").innerHTML='<span class="bad">'+e+'</span>';throw e}
 }
 
@@ -6024,7 +6054,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.33",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.36",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
