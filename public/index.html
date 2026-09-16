@@ -259,6 +259,14 @@ details summary{cursor:pointer;margin-top:8px}
 .told-op-panel.landing .told-op-number{background:#23794e}
 .told-op-title{font-size:20px;font-weight:900;letter-spacing:.035em}
 .told-op-status{border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900;text-align:right}
+.told-attention-list{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.told-attention-link{appearance:none;background:rgba(255,187,51,.08);border:1px solid #9b7623;color:#ffd05b;border-radius:999px;padding:7px 10px;font:800 12px Arial;cursor:pointer;text-align:left;line-height:1.2}
+.told-attention-link:hover,.told-attention-link:focus{background:rgba(255,187,51,.18);border-color:#ffc247;outline:none}
+.told-attention-link::after{content:"  →";font-weight:900}
+.told-op-status.told-nav-link{cursor:pointer;transition:filter .15s ease,transform .15s ease}
+.told-op-status.told-nav-link:hover,.told-op-status.told-nav-link:focus{filter:brightness(1.18);transform:translateY(-1px);outline:2px solid rgba(255,255,255,.16);outline-offset:2px}
+.mission-attention-flash{animation:kusaAttentionFlash 1.8s ease}
+@keyframes kusaAttentionFlash{0%,100%{box-shadow:none}20%,70%{box-shadow:0 0 0 3px rgba(255,193,58,.9),0 0 22px rgba(255,193,58,.35)}}
 .told-op-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .told-op-metric{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:10px;min-height:72px}
 .told-op-metric .small{display:block}
@@ -603,7 +611,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.36</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.37</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -732,7 +740,7 @@ details summary{cursor:pointer;margin-top:8px}
   <span class="small" id="draftSaveStatus" style="align-self:center;margin-left:6px">Draft not started</span>
 </div>
 
-<div class="card">
+<div class="card" id="missionSetupSection">
 <h2>1. Mission Setup</h2>
 <div class="row">
 <div><label>Origin</label><input id="dep" value="" maxlength="4"></div>
@@ -774,7 +782,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="missionStatus" class="small" style="margin-top:10px">Ready.</div>
 </div>
 
-<div class="card">
+<div class="card" id="missionPassengerSection">
 <h2>2. Passenger Seating — Tap to Move</h2>
 <div class="small" style="margin-bottom:12px">
 FlightOps preloads the entered passenger count beginning with Seat 1 and defaults each passenger to Adult Male. Select Male, Female, or Child directly at each occupied seat. Tap an occupied seat to move that passenger; tap an empty seat to place the next unseated passenger.
@@ -1140,7 +1148,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <b>Dash-4 AFMS:</b> FTA-PA-001019 Rev C • CURRENT. Takeoff climb-limit charts §5-18 (S+Flaps 20°) and §5-27 (Slats), plus landing maximum-weight climb charts §5-32 (S+Flaps 48°) and §5-36 (approach Slats / landing S+Flaps 20°), are active for bounded interpolation/source-boundary use only; no extrapolation.
 </div>
 
-<h3 style="font-size:14px">Takeoff</h3>
+<h3 id="missionTakeoffPerformanceSection" style="font-size:14px">Takeoff</h3>
 
 <div class="whatif-controls">
   <div class="row">
@@ -1229,7 +1237,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div></div><div></div>
 </div>
 
-<div class="notam-panel">
+<div class="notam-panel" id="missionDepartureRunwayReview">
   <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
     <div>
       <h3 style="margin:0">Departure Runway / NOTAM Assessment</h3>
@@ -1257,13 +1265,13 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div><label>Climb-Limited Weight lb — AUTO</label><input id="perfClimbWt" type="number" readonly></div>
 <div><label>Field-Limited Weight lb — AUTO</label><input id="perfFieldWt" type="number" readonly></div>
 </div>
-<div class="row" style="margin-top:10px">
+<div class="row" id="missionTakeoffResultGate" style="margin-top:10px">
 <div><label>Balanced Field Length ft</label><input id="perfBFL" type="number" readonly></div>
 <div><label>V1 kt</label><input id="perfV1" type="number" step=".1" readonly></div>
 <div><label>VR = V2 kt</label><input id="perfVR" type="number" step=".1" readonly></div>
 <div><label>2nd Segment Gross Gradient % — AUTO</label><input id="perfGrad" type="number" step=".1" readonly></div>
 </div>
-<div class="row" style="margin-top:10px">
+<div class="row" id="missionObstacleReview" style="margin-top:10px">
 <div><label>Pilot Obstacle Review — Optional</label><select id="perfObs"><option value="">No pilot override</option><option value="true">Pilot reviewed / no conflict identified</option><option value="false">Pilot conflict / do not use runway</option></select></div>
 <div class="wx"><div class="small">Automated Obstacle Review</div><b id="autoObstacleReview">NOT CHECKED</b><div class="small" id="autoObstacleReviewNote">FAA NMS departure NOTAM scan only — not a clearance analysis.</div></div>
 <div><label>Evaluate</label><button onclick="evaluateTakeoff()">Evaluate Takeoff</button></div>
@@ -1277,7 +1285,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Speeds</td><td id="toSpeeds">—</td></tr>
 </table>
 
-<h3 style="font-size:14px;margin-top:18px">Landing</h3>
+<h3 id="missionLandingPerformanceSection" style="font-size:14px;margin-top:18px">Landing</h3>
 <div class="row">
 <div><label>Landing Configuration</label><select id="landConfig"><option value="S48">Slats + Flaps 48°</option><option value="S20">Slats + Flaps 20°</option></select></div>
 <div><label>Landing Anti-Ice</label><select id="landAntiIce"><option value="OFF">OFF</option><option value="ON">ON — source locked</option></select></div>
@@ -1290,7 +1298,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div></div><div></div>
 </div>
 
-<div class="notam-panel">
+<div class="notam-panel" id="missionDestinationRunwayReview">
   <div style="display:flex;justify-content:space-between;gap:10px;align-items:center">
     <div>
       <h3 style="margin:0">Destination Runway / NOTAM Assessment</h3>
@@ -2332,7 +2340,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.36&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.37&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2825,6 +2833,39 @@ function updateFOBVerifyLabel(){
  else{e.textContent="FOB NOT VERIFIED";e.className="warn";}
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
+function missionAttentionNavigate(targetId,focusId){
+ showPlatformView("ops");
+ setTimeout(()=>{
+   const target=$(targetId); if(!target)return;
+   target.scrollIntoView({behavior:"smooth",block:"center"});
+   target.classList.remove("mission-attention-flash"); void target.offsetWidth; target.classList.add("mission-attention-flash");
+   setTimeout(()=>target.classList.remove("mission-attention-flash"),1900);
+   const focus=focusId?$(focusId):(target.matches("input,select,button")?target:target.querySelector("input,select,button"));
+   if(focus&&typeof focus.focus==="function")setTimeout(()=>focus.focus({preventScroll:true}),280);
+ },220);
+}
+function setToldActionableStatus(el,targetId,focusId){
+ if(!el)return;
+ const actionable=!!targetId;
+ el.classList.toggle("told-nav-link",actionable);
+ el.tabIndex=actionable?0:-1;
+ el.setAttribute("role",actionable?"button":"status");
+ el.title=actionable?"Open the Mission section where this item can be reviewed or satisfied":"";
+ el.onclick=actionable?(()=>missionAttentionNavigate(targetId,focusId)):null;
+ el.onkeydown=actionable?((e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();missionAttentionNavigate(targetId,focusId)}}):null;
+}
+function renderToldAttentionIssues(items){
+ const box=$("toldOverall"); if(!box)return;
+ if(!items.length){box.textContent="TOLD OPERATIONAL SUMMARY CURRENT — review all values before use.";box.className="callout small ok";return;}
+ box.className="callout small warn";
+ box.innerHTML='<div class="told-attention-list"></div>';
+ const list=box.firstElementChild;
+ items.forEach(item=>{
+   const b=document.createElement("button"); b.type="button"; b.className="told-attention-link"; b.textContent=item.label;
+   b.title="Open Mission review / gate"; b.onclick=()=>missionAttentionNavigate(item.target,item.focus); list.appendChild(b);
+ });
+}
+
 function showPlatformView(view){
  const requestedView=view;
  const actualView=activeAircraftCode()==="F900B"?(view==="ops"?"f900bmission":view==="told"?"f900b":view):view;
@@ -4088,24 +4129,32 @@ function updateToldCard(){
  const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
  const confirmed=$("lowFuelConfirm")?.checked;
  const issues=[];
- if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push("PASSENGER SEATING CHECK REQUIRED");
- if(!dr||!lr)issues.push("RUNWAY SELECTION REQUIRED");
- if(currentNotams.status!=="CHECKED")issues.push("NOTAM VERIFICATION REQUIRED");
+ if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push({label:"PASSENGER SEATING CHECK REQUIRED",target:"missionPassengerSection",focus:"paxRequested"});
+ if(!dr||!lr)issues.push({label:"RUNWAY SELECTION REQUIRED",target:"missionSetupSection",focus:!dr?"depRunway":"destRunway"});
+ if(currentNotams.status!=="CHECKED")issues.push({label:"NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
- if(obsEff.state==="CONFLICT")issues.push("PILOT OBSTACLE CONFLICT RECORDED");
+ if(obsEff.state==="CONFLICT")issues.push({label:"PILOT OBSTACLE CONFLICT RECORDED",target:"missionObstacleReview",focus:"perfObs"});
  else if(!obsEff.cleared){
-   if(obs.status==="FLAGGED")issues.push(`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`);
-   else issues.push("AUTO OBSTACLE NOTAM REVIEW REQUIRED");
+   if(obs.status==="FLAGGED")issues.push({label:`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`,target:"missionObstacleReview",focus:"perfObs"});
+   else issues.push({label:"AUTO OBSTACLE NOTAM REVIEW REQUIRED",target:"missionObstacleReview",focus:"perfObs"});
  }
- if(!$("fobVerified")?.checked)issues.push("FOB VERIFICATION REQUIRED");
- if(lowFuel&&!confirmed)issues.push("LOW LANDING FUEL CONFIRMATION REQUIRED");
+ if(!$("fobVerified")?.checked)issues.push({label:"FOB VERIFICATION REQUIRED",target:"missionSetupSection",focus:"fobVerified"});
+ if(lowFuel&&!confirmed)issues.push({label:"LOW LANDING FUEL CONFIRMATION REQUIRED",target:"lowFuelConfirmBox",focus:"lowFuelConfirm"});
  const ts=textOf("toStatus");
- if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push("TAKEOFF PERFORMANCE REVIEW REQUIRED");
- else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push("TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE");
- if(textOf("landStatus").includes("PENDING")||textOf("landStatus").includes("LOCKED"))issues.push("LANDING LIMITS NOT FULLY EVALUATED");
- $("toldOverall").textContent=issues.length?issues.join(" • "):"TOLD OPERATIONAL SUMMARY CURRENT — review all values before use.";
- $("toldOverall").className=issues.length?"callout small warn":"callout small ok";
+ if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push({label:"TAKEOFF PERFORMANCE REVIEW REQUIRED",target:"missionTakeoffPerformanceSection",focus:"toConfig"});
+ else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push({label:"TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE",target:"missionObstacleReview",focus:"perfObs"});
+ const lts=textOf("landStatus");
+ if(lts.includes("PENDING")||lts.includes("LOCKED"))issues.push({label:"LANDING LIMITS NOT FULLY EVALUATED",target:"missionLandingPerformanceSection",focus:"landConfig"});
+ renderToldAttentionIssues(issues);
+
+ // Make section-level warning / no-go badges actionable too.
+ let takeoffTarget=null,takeoffFocus=null;
+ if(ts.includes("OBSTACLE")){takeoffTarget="missionObstacleReview";takeoffFocus="perfObs";}
+ else if(ts.includes("PENDING")||ts.includes("LOCKED")||ts.includes("NO-GO")){takeoffTarget="missionTakeoffPerformanceSection";takeoffFocus="toConfig";}
+ setToldActionableStatus($("opTakeoffStatus"),takeoffTarget,takeoffFocus);
+ const landingActionable=lts.includes("PENDING")||lts.includes("LOCKED")||lts.includes("NO-GO");
+ setToldActionableStatus($("opLandingStatus"),landingActionable?"missionLandingPerformanceSection":null,landingActionable?"landConfig":null);
 }
 const esc=x=>x==null?"—":x;
 function pctMacFromArm(arm){return 25+arm/1.1177}
@@ -6054,7 +6103,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.36",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.37",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
