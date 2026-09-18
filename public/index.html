@@ -611,7 +611,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.39</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.40</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -910,7 +910,7 @@ PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplet
   <div><label>OAT °C</label><input id="manualWxOAT" type="number" step="0.1" inputmode="decimal" placeholder="Required"></div>
   <div><label>Pressure Altitude ft</label><input id="manualWxPA" type="number" step="1" inputmode="decimal" placeholder="Required or derive from altimeter"></div>
   <div><label>Altimeter inHg</label><input id="manualWxAlt" type="number" step="0.01" inputmode="decimal" placeholder="Optional"></div>
-  <div><label>Wind Direction °</label><input id="manualWxDir" type="number" min="0" max="360" step="1" inputmode="decimal" placeholder="Optional"></div>
+  <div><label>Wind Direction °</label><input id="manualWxDir" type="text" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="Optional (e.g. 040)"></div>
 </div>
 <div class="row" style="margin-top:10px">
   <div><label>Wind Speed kt</label><input id="manualWxSpeed" type="number" min="0" step="1" inputmode="decimal" placeholder="Optional"></div>
@@ -1267,7 +1267,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 <div class="row" id="missionTakeoffResultGate" style="margin-top:10px">
 <div><label>Balanced Field Length ft</label><input id="perfBFL" type="number" readonly></div>
-<div><label>V1 kt</label><input id="perfV1" type="number" step=".1" readonly></div>
+<div><label>V1 kt</label><input id="perfV1" type="number" step="1" readonly></div>
 <div><label>VR = V2 kt</label><input id="perfVR" type="number" step=".1" readonly></div>
 <div><label>2nd Segment Gross Gradient % — AUTO</label><input id="perfGrad" type="number" step=".1" readonly></div>
 </div>
@@ -2340,7 +2340,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.39&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.40&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2536,6 +2536,9 @@ async function loadF900BData(){
 }
 function f9Num(id){const v=$(id)?.value;return v===""||v==null?null:Number(v)}
 function f9Fmt(value,digits=0,suffix=""){return Number.isFinite(value)?`${value.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits})}${suffix}`:"—"}
+function formatVspeed(value,suffix=" kt"){const n=Number(value);return Number.isFinite(n)?`${Math.round(n)}${suffix}`:"—"}
+function formatWindDirection(value,degree=true){if(value==null||value==="")return"—";const raw=String(value).trim().toUpperCase();if(raw==="VRB")return"VRB";const n=Number(raw);if(!Number.isFinite(n))return raw;let d=Math.round(n);if(d<0||d>360)return raw;const txt=String(d).padStart(3,"0");return degree?`${txt}°`:txt}
+function formatWindDirectionInput(value){if(value==null||value==="")return"";const raw=String(value).trim().toUpperCase();if(raw==="VRB")return"VRB";const n=Number(raw);if(!Number.isFinite(n))return raw;let d=Math.round(n);if(d<0||d>360)return raw;return String(d).padStart(3,"0")}
 function f9Put(id,value){const el=$(id);if(el)el.textContent=value}
 function f9Status(id,text,tone="warn"){
  const el=$(id);if(!el)return;el.textContent=text;el.className=`told-op-status ${tone}`;
@@ -2607,7 +2610,7 @@ function f9SourceLockText(pa,temp,weight){
  return"SOURCE LOCKED — SELECTED POINT CROSSES AN UNPUBLISHED CELL";
 }
 function renderF900BTakeoff(out){
- f9Put("f9V1",f9Fmt(out.v1_kt,1," kt"));f9Put("f9VR",f9Fmt(out.vr_v2_kt,1," kt"));f9Put("f9VFT",f9Fmt(out.vft_kt,1," kt"));f9Put("f9VFR",f9Fmt(out.vfr_kt,1," kt"));
+ f9Put("f9V1",formatVspeed(out.v1_kt));f9Put("f9VR",formatVspeed(out.vr_v2_kt));f9Put("f9VFT",formatVspeed(out.vft_kt));f9Put("f9VFR",formatVspeed(out.vfr_kt));
  f9Put("f9BFL",f9Fmt(out.balanced_field_length_ft,0," ft"));f9Put("f9ToMargin",f9Fmt(out.margin,0," ft"));
  f9Put("f9N1",Number.isFinite(out.n1a)&&Number.isFinite(out.n1b)?`${out.n1a.toFixed(1)} / ${out.n1b.toFixed(1)}%`:"—");
  f9Put("f9GCLB2",f9Fmt(out.second_segment_gross_gradient_pct,2,"%"));f9Put("f9Accel",f9Fmt(out.acceleration_g,2," G"));f9Put("f9Pitch",f9Fmt(out.pitch_deg,1,"°"));f9Put("f9Limit",out.limit);
@@ -2626,9 +2629,9 @@ function renderF900BLanding(prefix,out,factor,structuralGate=true){
  const required=factor===1?out.landing_distance_ft:factor===1.92?out.landing_distance_x_1_92_ft:out.landing_distance_x_1_67_ft;
  const margin=Number.isFinite(out.runway)&&Number.isFinite(required)?out.runway-required:null;
  if(prefix==="f9Emer"){
-   f9Put("f9EmerWeight",f9Fmt(out.weight,0," lb"));f9Put("f9EmerVref",f9Fmt(out.vref_kt,1," kt"));f9Put("f9EmerLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9EmerRequired",f9Fmt(required,0," ft"));f9Put("f9EmerAvailable",f9Fmt(out.runway,0," ft"));f9Put("f9EmerMargin",f9Fmt(margin,0," ft"));f9Put("f9EmerACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9EmerLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
+   f9Put("f9EmerWeight",f9Fmt(out.weight,0," lb"));f9Put("f9EmerVref",formatVspeed(out.vref_kt));f9Put("f9EmerLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9EmerRequired",f9Fmt(required,0," ft"));f9Put("f9EmerAvailable",f9Fmt(out.runway,0," ft"));f9Put("f9EmerMargin",f9Fmt(margin,0," ft"));f9Put("f9EmerACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9EmerLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
  }else{
-   f9Put("f9LdgVref",f9Fmt(out.vref_kt,1," kt"));f9Put("f9LdgLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9Ldg167",f9Fmt(out.landing_distance_x_1_67_ft,0," ft"));f9Put("f9Ldg192",f9Fmt(out.landing_distance_x_1_92_ft,0," ft"));f9Put("f9LdgRequired",f9Fmt(required,0," ft"));f9Put("f9LdgMargin",f9Fmt(margin,0," ft"));f9Put("f9LdgACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9LdgLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
+   f9Put("f9LdgVref",formatVspeed(out.vref_kt));f9Put("f9LdgLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9Ldg167",f9Fmt(out.landing_distance_x_1_67_ft,0," ft"));f9Put("f9Ldg192",f9Fmt(out.landing_distance_x_1_92_ft,0," ft"));f9Put("f9LdgRequired",f9Fmt(required,0," ft"));f9Put("f9LdgMargin",f9Fmt(margin,0," ft"));f9Put("f9LdgACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9LdgLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
  }
  const ready=[out.vref_kt,required,out.approach_climb_gradient_pct,out.landing_climb_gradient_pct].every(Number.isFinite);
  let status,tone="warn";
@@ -2785,11 +2788,11 @@ function loadManualWeatherForm(){
  const m=p?.metar||{},saved=st?.manual_values||null;
  const val=(id,v)=>{const e=$(id);if(e)e.value=(v===null||v===undefined||v==="")?"":v};
  if(st?.applied&&saved){
-   val("manualWxOAT",saved.oat);val("manualWxPA",saved.pa);val("manualWxAlt",saved.alt);val("manualWxDir",saved.dir);val("manualWxSpeed",saved.spd);val("manualWxGust",saved.gust);val("manualWxNote",st?.note||"");
+   val("manualWxOAT",saved.oat);val("manualWxPA",saved.pa);val("manualWxAlt",saved.alt);val("manualWxDir",formatWindDirectionInput(saved.dir));val("manualWxSpeed",saved.spd);val("manualWxGust",saved.gust);val("manualWxNote",st?.note||"");
  }else{
    val("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));
    val("manualWxPA",p?.pressure_altitude_ft);val("manualWxAlt",p?.altimeter_inhg);
-   const w=activeWindValues(m);val("manualWxDir",w.dir);val("manualWxSpeed",w.spd);val("manualWxGust",w.gust);
+   const w=activeWindValues(m);val("manualWxDir",formatWindDirectionInput(w.dir));val("manualWxSpeed",w.spd);val("manualWxGust",w.gust);
    val("manualWxNote",st?.note||"");
  }
  manualWeatherModeChanged();updateWeatherSourceBadges();
@@ -2801,8 +2804,8 @@ function updateManualWeatherActionButton(){
 function manualWeatherModeChanged(){
  const mode=$("manualWxMode")?.value||"LIVE",which=$("manualWxTarget")?.value||"dep",st=manualWeather[which],p=wxPoint(which);
  const ids=["manualWxOAT","manualWxPA","manualWxAlt","manualWxDir","manualWxSpeed","manualWxGust","manualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
- if(mode==="MANUAL"&&st?.manual_values){const v=st.manual_values;const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",v.oat);put("manualWxPA",v.pa);put("manualWxAlt",v.alt);put("manualWxDir",v.dir);put("manualWxSpeed",v.spd);put("manualWxGust",v.gust);put("manualWxNote",st.note||"");}
- if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{};const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("manualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("manualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");const w=activeWindValues(m);put("manualWxDir",w.dir);put("manualWxSpeed",w.spd);put("manualWxGust",w.gust);}
+ if(mode==="MANUAL"&&st?.manual_values){const v=st.manual_values;const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",v.oat);put("manualWxPA",v.pa);put("manualWxAlt",v.alt);put("manualWxDir",formatWindDirectionInput(v.dir));put("manualWxSpeed",v.spd);put("manualWxGust",v.gust);put("manualWxNote",st.note||"");}
+ if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{};const put=(id,x)=>{if($(id))$(id).value=x??""};put("manualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("manualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("manualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");const w=activeWindValues(m);put("manualWxDir",formatWindDirectionInput(w.dir));put("manualWxSpeed",w.spd);put("manualWxGust",w.gust);}
  const stxt=$("manualWxStatus");if(stxt)stxt.textContent=mode==="MANUAL"?"MANUAL selected. Enter or revise pilot weather, then press UPDATE MANUAL WEATHER.":"LIVE selected. Press REFRESH / USE LIVE WEATHER to restore the live feed and recalculate.";
  updateManualWeatherActionButton();
 }
@@ -4048,7 +4051,7 @@ function updateToldCard(){
  $("toldLandingFuel").textContent=Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—";
  $("toldLDGCG").textContent=Number.isFinite(c.landingPct)?`${c.landingPct.toFixed(2)}% MAC`:"—";
  $("toldLDGConfig").textContent=`${FS_PERF.landing[$("landConfig").value]?.label||"—"} • A/I ${$("landAntiIce")?.value||"OFF"}`;
- setToldVspeed("toldVref",$("landVref").value?Number($("landVref").value).toFixed(1)+" kt":"SOURCE LOCKED");
+ setToldVspeed("toldVref",$("landVref").value?formatVspeed($("landVref").value):"SOURCE LOCKED");
  $("toldLFL").textContent=$("landFieldLen").value?Number($("landFieldLen").value).toLocaleString()+" ft":"SOURCE LOCKED";
  const landAssess=effectiveLandingRunwayAssessment();
  $("toldPublishedLDA").textContent=Number.isFinite(landAssess.published)?`${Math.round(landAssess.published).toLocaleString()} ft`:"—";
@@ -4113,7 +4116,7 @@ function updateToldCard(){
  $("opEmerAvailable").textContent=`${Number.isFinite(emergencyAvailable)?Math.round(emergencyAvailable).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?.value||"DRY"}`;
  $("opEmerRequired").textContent=Number.isFinite(emergencyRequired)?`${Math.round(emergencyRequired).toLocaleString()} ft`:"SOURCE LOCKED";
  $("opEmerMargin").textContent=Number.isFinite(emergencyMargin)?`${Math.round(emergencyMargin).toLocaleString()} ft`:"—";
- setToldVspeed("opEmerVref",Number.isFinite(emergencyVref)?`${emergencyVref.toFixed(1)} kt`:textOf("vsVREF"));
+ setToldVspeed("opEmerVref",Number.isFinite(emergencyVref)?formatVspeed(emergencyVref):textOf("vsVREF"));
  $("opEmerWeight").textContent=Number.isFinite(emergencyWeight)?`${Math.round(emergencyWeight).toLocaleString()} lb`:"—";
  $("opEmerBurn").textContent=`${Math.round(appliedReturnBurn).toLocaleString()} lb`;
  $("opEmerWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
@@ -4132,7 +4135,7 @@ function updateToldCard(){
  $("opLandingAvailable").textContent=`${Number.isFinite(landAssess.usable)?Math.round(landAssess.usable).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?.value||"DRY"}`;
  $("opLandingRequired").textContent=$("landFieldLen").value?`${Number($("landFieldLen").value).toLocaleString()} ft`:"SOURCE LOCKED";
  $("opLandingMargin").textContent=textOf("landRwyMargin");
- setToldVspeed("opLandingVref",$("landVref").value?`${Number($("landVref").value).toFixed(1)} kt`:"SOURCE LOCKED");
+ setToldVspeed("opLandingVref",$("landVref").value?formatVspeed($("landVref").value):"SOURCE LOCKED");
  $("opLandingWeight").textContent=Number.isFinite(c.landing)?`${Math.round(c.landing).toLocaleString()} lb`:"—";
  $("opLandingFuel").textContent=Number.isFinite(c.landingFuel)?`${Math.round(c.landingFuel).toLocaleString()} lb`:"—";
  $("opLandingConfig").textContent=`${FS_PERF.landing[$("landConfig").value]?.label||"—"} • A/I ${$("landAntiIce")?.value||"OFF"}`;
@@ -4545,10 +4548,10 @@ function syncTakeoffSection(){
  const runwayCondition=$("toRunwayCondition").value;
  const wk=(perfTakeoffWeightLb()||0)/1000;
  const speedParts=[];
- if(a.v1!=null)speedParts.push(`V1 ${a.v1.toFixed(1)}`);
- if(a.vr!=null)speedParts.push(`VR=V2 ${a.vr.toFixed(1)}`);
- if(a.vfr!=null)speedParts.push(`Vfr ${a.vfr.toFixed(1)}`);
- if(a.v15vs!=null)speedParts.push(`1.5Vs ${a.v15vs.toFixed(1)}`);
+ if(a.v1!=null)speedParts.push(`V1 ${Math.round(a.v1)}`);
+ if(a.vr!=null)speedParts.push(`VR=V2 ${Math.round(a.vr)}`);
+ if(a.vfr!=null)speedParts.push(`Vfr ${Math.round(a.vfr)}`);
+ if(a.v15vs!=null)speedParts.push(`1.5Vs ${Math.round(a.v15vs)}`);
  if(a.bfl!=null)speedParts.push(`BFL ${Math.round(a.bfl).toLocaleString()} ft`);
  $("toSpeeds").textContent=speedParts.length?`${runwayCondition} • ${speedParts.join(" • ")}`:"—";
 
@@ -4654,11 +4657,11 @@ function updateVSpeedCard(tow,landing){
  $("vsLDW").textContent=Math.round(emerWt).toLocaleString()+" lb";
  $("vsERWsrc").textContent=`TOW less ${Math.round(appliedBurn).toLocaleString()} lb return burn${requestedBurn>takeoffFuel?" (limited to available takeoff fuel)":""}`;
 
- $("vsV1").textContent=v1==null?"—":v1.toFixed(1)+" kt";
- $("vsVR").textContent=vr==null?"—":vr.toFixed(1)+" kt";
- $("vsVFT").textContent=vfr==null?"—":vfr.toFixed(1)+" kt";
- $("vsVFS").textContent=v15vs==null?"—":v15vs.toFixed(1)+" kt";
- $("vsVREF").textContent=emerVref==null?"—":emerVref.toFixed(1)+" kt";
+ $("vsV1").textContent=v1==null?"—":formatVspeed(v1);
+ $("vsVR").textContent=vr==null?"—":formatVspeed(vr);
+ $("vsVFT").textContent=vfr==null?"—":formatVspeed(vfr);
+ $("vsVFS").textContent=v15vs==null?"—":formatVspeed(v15vs);
+ $("vsVREF").textContent=emerVref==null?"—":formatVspeed(emerVref);
 
  $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50BflMigrationSource(toAuto.cfg)}`;
  $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":(toAuto.cfg==="S20"?`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`:`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`);
@@ -4830,7 +4833,7 @@ function normalizeAviationTime(v){
 }
 function fmtUtc(v){if(v==null||v==="")return"time unavailable";const d=new Date(normalizeAviationTime(v));if(Number.isNaN(d.getTime()))return String(v);return d.toLocaleString(undefined,{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit",timeZone:"UTC",timeZoneName:"short"})}
 function firstVal(o,ks){for(const k of ks){if(o&&o[k]!=null&&o[k]!=="")return o[k]}return null}
-function windTextObj(o){const dir=firstVal(o,["wind_dir","wdir","windDir","wind_direction"]);const spd=Number(firstVal(o,["wind_kt","wspd","windSpeed","wind_speed_kt"]));const gust=Number(firstVal(o,["wind_gust_kt","wgst","windGust","wind_gust"]));if(!Number.isFinite(spd)||spd===0)return"Wind calm";let d="variable";if(dir!=null&&String(dir).toUpperCase()!=="VRB"&&Number.isFinite(Number(dir)))d=`${String(Math.round(Number(dir))).padStart(3,"0")}°`;return`Wind ${d} at ${Math.round(spd)} kt${Number.isFinite(gust)&&gust>0?`, gusting ${Math.round(gust)} kt`:""}`}
+function windTextObj(o){const dir=firstVal(o,["wind_dir","wdir","windDir","wind_direction"]);const spd=Number(firstVal(o,["wind_kt","wspd","windSpeed","wind_speed_kt"]));const gust=Number(firstVal(o,["wind_gust_kt","wgst","windGust","wind_gust"]));if(!Number.isFinite(spd)||spd===0)return"Wind calm";const d=dir!=null?formatWindDirection(dir):"VRB";return`Wind ${d} at ${Math.round(spd)} kt${Number.isFinite(gust)&&gust>0?`, gusting ${Math.round(gust)} kt`:""}`}
 function visibilityText(v){if(v==null||v==="")return"Visibility not reported";const n=Number(v);return Number.isFinite(n)?`Visibility ${n} statute mile${n===1?"":"s"}`:`Visibility ${v}`}
 function cloudText(c){if(!Array.isArray(c)||!c.length)return"Clouds not reported";const n={SKC:"clear",CLR:"clear",FEW:"few",SCT:"scattered",BKN:"broken",OVC:"overcast",VV:"vertical visibility"};return c.map(x=>{const cov=firstVal(x,["cover","coverage","skyCover","amount"])||"";const base=firstVal(x,["base","base_ft_agl","baseFtAgl","altitude"]);const label=n[String(cov).toUpperCase()]||String(cov).toLowerCase();return base!=null?`${label} at ${Number(base).toLocaleString()} ft AGL`:label}).join(", ")}
 function formatMetarDecoded(m,altInHg){if(!m)return'<span class="warn">METAR unavailable</span>';const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);const cat=firstVal(m,["flight_category","fltCat","category"])||"METAR";const vis=firstVal(m,["visibility_sm","visib","visibility"]);const wx=firstVal(m,["wx","wxString","weather"]);const t=Number(firstVal(m,["temp_c","temp","temperature"]));const d=Number(firstVal(m,["dewpoint_c","dewp","dewpoint"]));const clouds=firstVal(m,["clouds","sky"])||[];const alt=altInHg??firstVal(m,["altimeter_inhg","altimeter"]);const lines=[];lines.push(`<div class="decoded-line"><b>${cat}</b> • observed ${fmtUtc(obs)}</div>`);lines.push(`<div class="decoded-line">${windTextObj(m)}</div>`);lines.push(`<div class="decoded-line">${visibilityText(vis)}</div>`);if(wx)lines.push(`<div class="decoded-line">Weather: ${wx}</div>`);lines.push(`<div class="decoded-line">${cloudText(clouds)}</div>`);if(Number.isFinite(t)||Number.isFinite(d))lines.push(`<div class="decoded-line">Temperature ${Number.isFinite(t)?t+"°C":"—"} • Dew point ${Number.isFinite(d)?d+"°C":"—"}</div>`);if(alt!=null&&Number.isFinite(Number(alt)))lines.push(`<div class="decoded-line">Altimeter ${Number(alt).toFixed(2)} inHg</div>`);return lines.join("")}
@@ -5255,8 +5258,8 @@ function updateWhatIfPlanner(force=false){
    $("whatIfV1").textContent="SOURCE LOCKED";
    const d=FS_PERF.takeoff[cfg],wk=(wt||0)/1000;
    const vr=d?interpScalarN(d.vr,wk):null,vfr=f50VfrFromVr(cfg,vr),v15=d?interpScalarN(d.v15vs,wk):null;
-   $("whatIfVR").textContent=vr==null?"—":`${vr.toFixed(1)} kt`;
-   $("whatIfVF").textContent=`${vfr==null?"—":vfr.toFixed(1)+" kt"} / ${v15==null?"—":v15.toFixed(1)+" kt"}`;
+   $("whatIfVR").textContent=vr==null?"—":formatVspeed(vr);
+   $("whatIfVF").textContent=`${vfr==null?"—":formatVspeed(vfr)} / ${v15==null?"—":formatVspeed(v15)}`;
    $("whatIfOps").textContent="WET DATA PENDING";
    $("whatIfOps").className="warn";
    $("whatIfGate").textContent="NOT FULLY EVALUATED";
@@ -5272,9 +5275,9 @@ function updateWhatIfPlanner(force=false){
  const vr=d?interpScalarN(d.vr,wk):null,vfr=f50VfrFromVr(cfg,vr),v15=d?interpScalarN(d.v15vs,wk):null;
 
  $("whatIfBFL").textContent=r?`${Math.round(r.bfl).toLocaleString()} ft`:"SOURCE LOCKED";
- $("whatIfV1").textContent=r?`${r.v1.toFixed(1)} kt`:"SOURCE LOCKED";
- $("whatIfVR").textContent=vr==null?"—":`${vr.toFixed(1)} kt`;
- $("whatIfVF").textContent=`${vfr==null?"—":vfr.toFixed(1)+" kt"} / ${v15==null?"—":v15.toFixed(1)+" kt"}`;
+ $("whatIfV1").textContent=r?formatVspeed(r.v1):"SOURCE LOCKED";
+ $("whatIfVR").textContent=vr==null?"—":formatVspeed(vr);
+ $("whatIfVF").textContent=`${vfr==null?"—":formatVspeed(vfr)} / ${v15==null?"—":formatVspeed(v15)}`;
  $("whatIfMargin").textContent=r&&Number.isFinite(rwy)?`${Math.round(rwy-r.bfl).toLocaleString()} ft`:"—";
  $("whatIfMaxWeight").textContent=mw==null?"SOURCE LOCKED":`${Math.round(mw).toLocaleString()} lb`;
  $("whatIfMaxTemp").textContent=mt==null?"SOURCE LOCKED":`${mt.toFixed(1)} °C`;
@@ -5855,7 +5858,7 @@ function autoTO(){
  const vr=d?interpScalarN(d.vr,wk):null;
  const vfr=f50VfrFromVr(cfg,vr);
  const v15vs=d?interpScalarN(d.v15vs,wk):null;
- if(vr!=null)$("perfVR").value=vr.toFixed(1);else $("perfVR").value="";
+ if(vr!=null)$("perfVR").value=Math.round(vr);else $("perfVR").value="";
  const runwayCondition=$("toRunwayCondition")?$("toRunwayCondition").value:"DRY";
  const ai=$("toAntiIce")?.value||"OFF";
  let pa=perfTakeoffPA(),t=perfTakeoffTemp(),r=null,reason="";
@@ -5871,7 +5874,7 @@ function autoTO(){
    r=fsTakeoff(cfg,lookupPA,t,wk);
    if(!r)reason="V1/BFL outside legacy digitized table range";else r.paBasis=paBasis
  }
- if(r){$("perfV1").value=r.v1.toFixed(1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
+ if(r){$("perfV1").value=Math.round(r.v1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
  return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason,pa,temp:t,weightLb}
 }
 function takeoffComparisonFor(cfg){
@@ -5921,7 +5924,7 @@ function updateTakeoffComparison(){
    $(button).setAttribute("aria-pressed",selected?"true":"false");
    $(`${prefix}Status`).textContent=x.status;
    $(`${prefix}Status`).className=`takeoff-compare-status ${x.status==="FIELD PASS"?"ok":x.status==="FIELD FAIL"?"bad":"warn"}`;
-   $(`${prefix}Speeds`).textContent=`${Number.isFinite(x.v1)?x.v1.toFixed(1):"—"} / ${Number.isFinite(x.vr)?x.vr.toFixed(1):"—"} kt`;
+   $(`${prefix}Speeds`).textContent=`${Number.isFinite(x.v1)?Math.round(x.v1):"—"} / ${Number.isFinite(x.vr)?Math.round(x.vr):"—"} kt`;
    $(`${prefix}Distance`).textContent=Number.isFinite(x.bfl)?`${Math.round(x.bfl).toLocaleString()} ft`:"SOURCE LOCKED";
    $(`${prefix}Margin`).textContent=Number.isFinite(x.margin)?`${Math.round(x.margin).toLocaleString()} ft`:"—";
    $(`${prefix}Source`).textContent=x.reason||x.source;
@@ -5944,7 +5947,7 @@ function autoLDG(){
  if(!missionData)return{ok:false,msg:"Load mission first",vref:null,lfl:null,ld:null};
  const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],wk=(valueOrNull("landWt")||0)/1000;
  const published=d?interpScalarN(d.speed,wk):null;const vref=published==null?null:(cfg==="S20"?published-5:published);
- if(vref!=null)$("landVref").value=vref.toFixed(1);else $("landVref").value="";
+ if(vref!=null)$("landVref").value=Math.round(vref);else $("landVref").value="";
  let pa=Number(missionData.destination.pressure_altitude_ft),r=null,reason="";
  if(!Number.isFinite(pa))reason="Destination pressure altitude unavailable";else if(d){
    let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
@@ -5976,7 +5979,7 @@ function syncLandingSection(){
  $("landRwyMargin").textContent=rwyMargin==null?"—":`${Math.round(rwyMargin).toLocaleString()} ft`;
 
  const parts=[];
- if(a.vref!=null)parts.push(`VREF ${a.vref.toFixed(1)} kt`);
+ if(a.vref!=null)parts.push(`VREF ${Math.round(a.vref)} kt`);
  if(a.lfl!=null)parts.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
  $("landDataSummary").textContent=parts.length?`${surface} • ${d.label} • ${parts.join(" • ")}`:"—";
 
@@ -6003,7 +6006,7 @@ function syncLandingSection(){
  const note=[`${d.label} selected`,`A/I ${ai}`];
  if(Number.isFinite(oat))note.push(`OAT ${oat.toFixed(1)}°C`);
  if(Number.isFinite(pa))note.push(`PA ${Math.round(pa).toLocaleString()} ft`);
- if(a.vref!=null)note.push(`VREF ${a.vref.toFixed(1)} kt`);
+ if(a.vref!=null)note.push(`VREF ${Math.round(a.vref)} kt`);
  if(a.lfl!=null)note.push(`LFL ${Math.round(a.lfl).toLocaleString()} ft`);
  if(climb!=null)note.push(`${afms.noLimitation?"AFMS climb not limiting":`AFMS climb limit ${Math.round(climb).toLocaleString()} lb`}`);
  else note.push(afms.basis||"AFMS landing climb source coverage pending");
@@ -6116,7 +6119,7 @@ async function evaluateLanding(){
    if(j.status==="NO-GO"){$("landStatus").textContent="NO-GO";$("landStatus").className="bad"}
    else{syncLandingSection();}
    applyLandingRunwayGateToStatus();
-   $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • A/I ${$("landAntiIce")?.value||"OFF"} • ${a.speedLabel} ${a.speed==null?"—":a.speed.toFixed(1)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • AFMS ${AFMS_REVC_LDG_CLIMB_SOURCE[a.cfg]||"landing climb source"}`;
+   $("landStatus").title=`${FS_PERF.landing[a.cfg].label} • A/I ${$("landAntiIce")?.value||"OFF"} • ${a.speedLabel} ${a.speed==null?"—":Math.round(a.speed)} kt • LFL ${a.lfl==null?"—":Math.round(a.lfl)} ft • AFMS ${AFMS_REVC_LDG_CLIMB_SOURCE[a.cfg]||"landing climb source"}`;
    updateVSpeedCard(perfTakeoffWeightLb()||0,valueOrNull("landWt")||0);updateToldCard();scheduleDraftSave();
  }catch(e){$("landStatus").textContent="EVALUATION ERROR";$("landStatus").className="bad";$("landConfigNote").textContent=String(e.message||e)}
 }
@@ -6132,7 +6135,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.39",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.40",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
@@ -6222,6 +6225,7 @@ $("manualRunwayStatusOverride")?.addEventListener("change",()=>{updateLandingRun
 
 $("totalBag")?.addEventListener("input",onTotalBagInput);
 ["bagComp0","bagComp1","bagComp2"].forEach(id=>$(id).addEventListener("input",onBaggageCompInput));
+$("manualWxDir")?.addEventListener("blur",()=>{const el=$("manualWxDir");if(el&&el.value.trim()!=="")el.value=formatWindDirectionInput(el.value)});
 ["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id)?.addEventListener("input",recalculate));
 $("perfObs")?.addEventListener("change",()=>{renderDepartureObstacleReview();recalculate();updateToldCard();});
 
