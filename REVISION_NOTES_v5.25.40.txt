@@ -1,0 +1,14 @@
+KUSA FlightOps v5.25.40 — Wind Direction + V-Speed Display Standardization
+
+1. Wind direction formatting
+- All decoded METAR/TAF wind directions use three digits (e.g. 040°, 090°, 270°).
+- Manual weather wind-direction field now preserves a three-digit entry/display and normalizes on blur.
+- VRB remains VRB; calm remains Wind calm.
+
+2. V-speed rounding
+- Operational V-speed displays are rounded to the nearest whole knot; tenths are no longer shown.
+- Applies to Falcon 50 and Falcon 900B V1, VR/V2, Vfr/Vft/transition speeds, VREF, emergency-return VREF, TOLD cards, comparison cards, and what-if displays.
+- Source/interpolation calculations retain their underlying precision; rounding is applied at the operational presentation/output layer unless the value is stored in an operational read-only V-speed field, which is now whole-knot.
+- Standard rule: nearest whole knot using conventional .5-up behavior for positive speeds.
+
+3. No performance-source or limit changes.
