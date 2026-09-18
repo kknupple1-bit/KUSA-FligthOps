@@ -611,7 +611,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.37</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.39</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -2332,7 +2332,7 @@ function f50RunShadowRegression(){
   F50_S20_NOMOGRAPH_SHADOW_REGRESSION={pass,tolerance_ft:tol,max_abs_error_ft:maxError,results};
   const el=$('s20NomographShadowStatus');
   if(el){
-    el.innerHTML=pass?`<b>SHADOW NOMOGRAPH:</b> PASS ${results.length}/${results.length} published anchors • max error ${Math.round(maxError)} ft • NOT YET RELEASED TO OPERATIONAL CALCULATION`:`<b>SHADOW NOMOGRAPH:</b> VALIDATION HOLD • ${valid.length}/${results.length} anchors computed • max error ${Number.isFinite(maxError)?Math.round(maxError)+' ft':'—'}`;
+    el.innerHTML=pass?`<b>SHADOW NOMOGRAPH:</b> PUBLISHED-ANCHOR CHECK PASS ${results.length}/${results.length} • original max absolute BFL error ${Math.round(maxError)} ft • broader 12-point dry validation gate complete • OPERATOR TRACE SIGNOFF / RELEASE STILL PENDING`:`<b>SHADOW NOMOGRAPH:</b> VALIDATION HOLD • ${valid.length}/${results.length} published anchors computed • max absolute BFL error ${Number.isFinite(maxError)?Math.round(maxError)+' ft':'—'}`;
     el.className=pass?'ok':'warn';
   }
   return F50_S20_NOMOGRAPH_SHADOW_REGRESSION;
@@ -2340,7 +2340,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.37&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.39&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2402,7 +2402,7 @@ const F50_DASSAULT_BFL_ANCHORS={
   }
 };
 function f50BflMigrationSource(cfg){
-  if(cfg==="S20")return "DTM813 §5.45.6 BFL shadow PASS 4/4 published anchors • §5.45.7 V1 dry panel chain complete in SHADOW validation • published-anchor regression PASS 5/5 within ±1 kt • anti-ice dotted family pending • controlled 12-point dry validation gate COMPLETE (5 published + 7 independent source-raster traces) • operator/human trace signoff + anti-ice validation pending • production grid unchanged";
+  if(cfg==="S20")return "DTM813 §5.45.6 BFL published-anchor check PASS 4/4 (original max absolute error 162 ft) • controlled 12-point dry validation gate COMPLETE • §5.45.7 V1 dry panel chain complete in SHADOW validation • published-anchor regression PASS 5/5 within ±1 kt • anti-ice dotted family pending • controlled 12-point dry validation gate COMPLETE (5 published + 7 independent source-raster traces) • operator/human trace signoff + anti-ice validation pending • production grid unchanged";
   if(cfg==="SLATS")return "DTM813 §5.50.6/§5.50.7 BFL + §5.50.8 VMBE + §5.50.9 balanced-field V1 • direct source pages + panel flow assigned • published anchors + V1 min/A-I correction rules registered • 8 fixed independent dry source-trace cases established • continuous geometry solver still pending";
   return "SOURCE MIGRATION PENDING";
 }
@@ -2457,7 +2457,12 @@ const F50_DASH4_N1_SOURCE={
 function f50Dash4TakeoffN1(pa,tempC,antiIce="OFF"){
  const mode=antiIce==="ON"?"ON":"OFF",tab=F50_DASH4_N1_TABLE[mode];
  if(!tab||![pa,tempC].every(Number.isFinite))return null;
- const pas=kN(tab),pb=bracketN(pas,pa);if(!pb)return null;
+ // AFMS tables begin at 0 ft. For ordinary below-sea-level pressure altitudes,
+ // use the published 0-ft boundary rather than extrapolating below the table.
+ // Values below -1,000 ft remain source-locked.
+ const pas=kN(tab),minPA=Math.min(...pas),paBoundaryApplied=pa<minPA&&minPA===0&&pa>=-1000;
+ const paUsed=paBoundaryApplied?0:pa;
+ const pb=bracketN(pas,paUsed);if(!pb)return null;
  function atPA(p){
    const tm=tab[p],tb=bracketN(kN(tm),tempC);if(!tb)return null;
    const[a,b]=tb,A=tm[a],B=tm[b];if(!A||!B)return null;
@@ -2466,9 +2471,9 @@ function f50Dash4TakeoffN1(pa,tempC,antiIce="OFF"){
    return{side:lerpN(+A[0],+B[0],f),center:lerpN(+A[1],+B[1],f)};
  }
  const[a,b]=pb,A=atPA(a),B=atPA(b);if(!A||!B)return null;
- if(a===b)return{...A,pa1:a,pa2:b,mode,source:F50_DASH4_N1_SOURCE[mode]};
- const f=(pa-a)/(b-a);
- return{side:lerpN(A.side,B.side,f),center:lerpN(A.center,B.center,f),pa1:a,pa2:b,mode,source:F50_DASH4_N1_SOURCE[mode]};
+ if(a===b)return{...A,pa1:a,pa2:b,mode,source:F50_DASH4_N1_SOURCE[mode],paBoundaryApplied,paActual:pa,paUsed};
+ const f=(paUsed-a)/(b-a);
+ return{side:lerpN(A.side,B.side,f),center:lerpN(A.center,B.center,f),pa1:a,pa2:b,mode,source:F50_DASH4_N1_SOURCE[mode],paBoundaryApplied,paActual:pa,paUsed};
 }
 
 
@@ -2489,7 +2494,8 @@ function currentF50TakeoffN1(){
    return{ok:false,text:"SOURCE LOCKED",source:`${F50_DASH4_N1_SOURCE[ai==="ON"?"ON":"OFF"]} • PA/OAT outside bounded digitized table coverage • no extrapolation`};
  }
  const wxSource=formatWeatherSource("dep");
- return{ok:true,text:`${n.side.toFixed(1)} / ${n.center.toFixed(1)}%`,side:n.side,center:n.center,source:`${n.source} • ${wxSource} • SAT ${temp.toFixed(1)}°C • PA ${Math.round(pa).toLocaleString()} ft`};
+ const paBasis=n.paBoundaryApplied?`PA ${Math.round(pa).toLocaleString()} ft → published 0-ft AFMS boundary`:`PA ${Math.round(pa).toLocaleString()} ft`;
+ return{ok:true,text:`${n.side.toFixed(1)} / ${n.center.toFixed(1)}%`,side:n.side,center:n.center,source:`${n.source} • ${wxSource} • SAT ${temp.toFixed(1)}°C • ${paBasis}`};
 }
 
 function f50VfrFromVr(cfg,vr){
@@ -4083,26 +4089,42 @@ function updateToldCard(){
  const appliedReturnBurn=Math.min(requestedReturnBurn,availableTakeoffFuel);
  const emergencyWeight=Number.isFinite(takeoffWeight)?Math.max(0,takeoffWeight-appliedReturnBurn):null;
  const emergencyPA=perfTakeoffPA();
- const emergencyPerf=Number.isFinite(emergencyWeight)&&Number.isFinite(emergencyPA)?fsLanding("S48",emergencyPA,emergencyWeight/1000):null;
+ let emergencyLookupPA=emergencyPA, emergencyPaBasis="actual";
+ if(Number.isFinite(emergencyPA)){
+   const emergencyMinPA=Math.min(...kN(FS_PERF.landing.S48.tables));
+   if(emergencyPA<emergencyMinPA&&emergencyMinPA===0&&emergencyPA>=-1000){
+     emergencyLookupPA=0;
+     emergencyPaBasis="SEA LEVEL row";
+   }
+ }
+ const emergencyPerf=Number.isFinite(emergencyWeight)&&Number.isFinite(emergencyLookupPA)?fsLanding("S48",emergencyLookupPA,emergencyWeight/1000):null;
+ if(emergencyPerf) emergencyPerf.paBasis=emergencyPaBasis;
+ const emergencyVref=Number.isFinite(emergencyWeight)?interpScalarN(FS_PERF.landing.S48.speed,emergencyWeight/1000):null;
  const emergencyRequired=emergencyPerf&&Number.isFinite(emergencyPerf.lfl)?emergencyPerf.lfl:null;
  const emergencyAvailable=Number.isFinite(depRunwayEval.usable)?depRunwayEval.usable:null;
  const emergencyMargin=Number.isFinite(emergencyRequired)&&Number.isFinite(emergencyAvailable)?emergencyAvailable-emergencyRequired:null;
  let emergencyStatus="PASS";
  if(!dr)emergencyStatus="RUNWAY REQUIRED";
  else if(Number.isFinite(emergencyWeight)&&emergencyWeight>maxLand)emergencyStatus="OVER MAX LANDING WEIGHT";
- else if(!Number.isFinite(emergencyRequired))emergencyStatus="SOURCE LOCKED";
+ else if(!Number.isFinite(emergencyRequired))emergencyStatus=Number.isFinite(emergencyVref)?"VREF READY • LANDING DISTANCE SOURCE LOCKED":"SOURCE LOCKED";
  else if(!Number.isFinite(emergencyAvailable))emergencyStatus="RUNWAY DATA REQUIRED";
  else if(emergencyMargin<0)emergencyStatus="NO-GO • INSUFFICIENT RUNWAY";
  $("opEmerRunway").textContent=`${depCode} / ${dr?dr.runway_id:"—"}`;
  $("opEmerAvailable").textContent=`${Number.isFinite(emergencyAvailable)?Math.round(emergencyAvailable).toLocaleString()+" ft":"—"} / ${$("toRunwayCondition")?.value||"DRY"}`;
  $("opEmerRequired").textContent=Number.isFinite(emergencyRequired)?`${Math.round(emergencyRequired).toLocaleString()} ft`:"SOURCE LOCKED";
  $("opEmerMargin").textContent=Number.isFinite(emergencyMargin)?`${Math.round(emergencyMargin).toLocaleString()} ft`:"—";
- setToldVspeed("opEmerVref",emergencyPerf&&Number.isFinite(emergencyPerf.speed)?`${emergencyPerf.speed.toFixed(1)} kt`:textOf("vsVREF"));
+ setToldVspeed("opEmerVref",Number.isFinite(emergencyVref)?`${emergencyVref.toFixed(1)} kt`:textOf("vsVREF"));
  $("opEmerWeight").textContent=Number.isFinite(emergencyWeight)?`${Math.round(emergencyWeight).toLocaleString()} lb`:"—";
  $("opEmerBurn").textContent=`${Math.round(appliedReturnBurn).toLocaleString()} lb`;
  $("opEmerWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
- $("opEmerPA").textContent=Number.isFinite(emergencyPA)?`${Math.round(emergencyPA).toLocaleString()} ft`:"—";
- $("opEmerSource").textContent=emergencyPerf?`VREF: ${DTM813_S48_VREF_SOURCE} • Landing distance: DTM813 §5.60.4 legacy grid pending direct digitization`:"SOURCE LOCKED";
+ $("opEmerPA").textContent=Number.isFinite(emergencyPA)?`${Math.round(emergencyPA).toLocaleString()} ft${emergencyPaBasis==="SEA LEVEL row"?" • uses 0-ft source boundary":""}`:"—";
+ if(emergencyPerf){
+   $("opEmerSource").textContent=`VREF: ${DTM813_S48_VREF_SOURCE} • Landing distance: DTM813 §5.60.4 legacy grid pending direct digitization${emergencyPaBasis==="SEA LEVEL row"?" • PA below 0 ft uses published 0-ft boundary":""}`;
+ }else if(Number.isFinite(emergencyVref)){
+   $("opEmerSource").textContent=`VREF READY: ${DTM813_S48_VREF_SOURCE} • Landing distance SOURCE LOCKED at this PA/weight point`;
+ }else{
+   $("opEmerSource").textContent="SOURCE LOCKED — emergency-return weight outside direct VREF coverage and/or landing-distance source coverage";
+ }
  $("opEmerStatus").textContent=emergencyStatus;
  $("opEmerStatus").className=`told-op-status ${emergencyStatus==="PASS"?"ok":emergencyStatus.includes("NO-GO")||emergencyStatus.includes("OVER MAX")?"bad":"warn"}`;
 
@@ -4567,6 +4589,13 @@ function syncTakeoffSection(){
  if(departureNotams.status!=="CHECKED")pending.push("DEPARTURE NOTAM REVIEW");
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
  if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
+ const n1Gate=currentF50TakeoffN1();
+ if(!n1Gate.ok){
+   if(n1Gate.text==="SOURCE LOCKED")pending.push("TAKEOFF N1 SOURCE COVERAGE");
+   else if(n1Gate.text==="A/I NOT PERMITTED")pending.push("TAKEOFF N1 / A-I CONDITION");
+   else if(n1Gate.text==="WEATHER REQUIRED")pending.push("TAKEOFF N1 WEATHER");
+   else if(n1Gate.text==="DAY-OF WX REQUIRED")pending.push("TAKEOFF N1 DAY-OF WX");
+ }
  if(climb.pass===false)pending.push("CLIMB FAIL");
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
@@ -6103,7 +6132,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.37",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.39",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B datasets…";
