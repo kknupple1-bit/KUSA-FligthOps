@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.39 — Emergency Return Source-Lock Boundary Fix
+
+- Corrects Falcon 50 Emergency Return landing-distance lookup at ordinary negative pressure altitude.
+- PA from -1,000 ft through 0 ft now uses the published 0-ft landing-distance source boundary, matching the destination-landing boundary treatment.
+- Emergency Return VREF remains independently available from direct DTM813 §5.60.5 digitization even if landing distance is source-locked.
+- A partial condition now displays “VREF READY • LANDING DISTANCE SOURCE LOCKED” instead of the ambiguous generic SOURCE LOCKED.
+- TOLD Emergency Return source text now identifies when the 0-ft source boundary is being used.
+- No extrapolation above/below established source guards.
+- No performance table values changed.

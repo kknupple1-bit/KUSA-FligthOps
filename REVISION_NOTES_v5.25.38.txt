@@ -1,0 +1,7 @@
+KUSA FlightOps v5.25.38 — Falcon 50 Takeoff N1 Boundary + Gate Visibility
+
+1. Falcon 50-4 takeoff N1 now applies the published 0-ft AFMS table boundary for ordinary below-sea-level pressure altitude from -1,000 ft through 0 ft. This mirrors the controlled landing-climb boundary handling and avoids a false SOURCE LOCKED condition near sea level. No extrapolation below -1,000 ft.
+2. N1 source detail explicitly states when an actual negative PA is using the published 0-ft AFMS boundary.
+3. A true takeoff-N1 source/weather/anti-ice issue now appears in the Takeoff pending gate/status instead of only showing SOURCE LOCKED on the N1 row.
+4. Updated the stale S+20 shadow-nomograph status wording: preserves the original 4/4 published-anchor result and 162-ft maximum absolute BFL error, while also stating that the broader 12-point dry validation gate is complete and operator trace/release remains pending.
+5. No change to performance source values, AFMS N1 tables, or operational promotion status.
