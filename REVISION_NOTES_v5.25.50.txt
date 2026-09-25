@@ -1,0 +1,16 @@
+KUSA FlightOps v5.25.50 — Falcon 900B Mission Parity / CG Trace
+
+Scope
+- Preserve v5.25.49 source-controlled performance/W&B math and operational gates.
+- Replace the Falcon 900B four-bar CG display with a Falcon 50-style weight-vs-%MAC envelope chart.
+- Add the actual modeled takeoff-to-landing CG trace using DTM9821 Rev59 no-XTK2 fuel-moment interpolation.
+- Plot ZFW, Ramp, Takeoff and Landing points and structural reference lines (MZFW/MLW/MTOW/MRW).
+- Add takeoff and landing CG limit/margin cards beneath the chart.
+- Expand Falcon 900B Mission toward Falcon 50 page depth with dedicated weather/airport/runway, V-speed, NOTAM/runway-assessment, runway table, mission summary, and limits presentation.
+- Continue to use the shared FlightOps mission backend for airport/runway/METAR/TAF/FAA NMS data.
+
+Important limitations
+- DTM9823 wind and runway-slope corrections remain DISPLAYED but are NOT yet numerically applied to Falcon 900B performance.
+- Stopway/clearway/ASDA/TODA source-chart digitization remains pending.
+- No source-controlled performance values, W&B station arms, fuel moment points, or structural limits were changed in this revision.
+- DEVELOPMENT / VALIDATION ONLY — NOT FOR FLIGHT USE.
