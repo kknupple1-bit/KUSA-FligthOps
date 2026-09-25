@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.56 — F900B Source Coverage / CG / Seat Move Corrections
+
+- Falcon 900B QRH grids now treat ordinary pressure altitudes from -1,000 ft to <0 ft as the published 0-ft (sea-level) row, matching the existing source-bounded no-extrapolation convention used elsewhere in FlightOps. Values above 6,000 ft remain locked.
+- Takeoff and landing source-lock diagnostics now distinguish PA, OAT, weight and unpublished-cell causes.
+- CG chart now uses DTM9821-style visual orientation: lower weights at top, higher weights downward; %MAC remains left-to-right. Envelope numeric limits are unchanged.
+- Added click-to-move / swap behavior for N699BG passenger seats while preserving editable individual weights and source-controlled station arms.
+- No DTM9823 numeric wind/slope surfaces, QRH values, W&B station arms, fuel-moment schedule, or structural limits changed.
+- Development/validation only; not approved for flight use.
