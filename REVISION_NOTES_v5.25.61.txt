@@ -1,0 +1,12 @@
+KUSA FlightOps v5.25.61 — Falcon 50 Visual Standard / 900B Parity
+
+- Falcon 50 is now the canonical visual standard for aircraft Mission and TOLD pages.
+- Falcon 900B Mission uses the same page width, card colors, borders, spacing and typography scale as Falcon 50.
+- Falcon 900B result tiles now use the Falcon 50 card treatment.
+- Falcon 900B CG chart now uses the Falcon 50 display convention: weight increases upward, FWD limit amber, AFT limit green, cyan fuel-burn trace, cyan TO marker, green LDG marker, white ZFW marker, and only MTOW as the chart structural reference line. Falcon 900B numerical limits are unchanged.
+- Removed duplicated Falcon 900B CG summary blocks; Takeoff/Landing/Trace/ZFW now occupy the same four-card arrangement as Falcon 50.
+- Falcon 900B TOLD operational metric grids now use the shared Falcon 50 told-op-metrics class.
+- Corrected a Falcon 900B CG flight-path gate bug: burn-path samples stored pct/arm directly, while the gate incorrectly looked for p.cg. This could hold the W&B/CG gate in CHECK even when the displayed TO/LDG values were inside limits.
+- No QRH/DTM performance values, W&B station arms, fuel-moment points, structural limits or DTM9823 numeric correction data changed.
+
+DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
