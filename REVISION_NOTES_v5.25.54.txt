@@ -1,0 +1,10 @@
+v5.25.54 — Falcon 900B CG / Passenger / Status / Gate Corrections
+
+- CG envelope boundaries now use the same neutral hard-limit color; allowable area is shaded.
+- Only Takeoff → Landing is connected as the in-flight fuel-burn vector; ZFW and Ramp remain standalone markers.
+- Adds Falcon 900B mission passenger-count input (0–12) tied to N699BG Version 11 positions; new passengers default to 170 lb and may be replaced with actual/approved weights.
+- Passenger-count vs occupied-seat mismatch now blocks the 900B W&B/operational gate with an explicit reason.
+- Fixes misleading startup amber DTM status: active numeric solver is the controlling readiness check; source register remains supplemental provenance.
+- Updates stale DTM9823 validation-lock text to ACTIVE / SOURCE-BOUNDED.
+- Operational gate now reports specific blocking gates and runway/performance sub-reasons.
+- Preserves v5.25.53 numeric wind/slope dataset and all source-controlled performance/W&B values unchanged.
