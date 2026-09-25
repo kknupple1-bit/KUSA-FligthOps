@@ -608,7 +608,7 @@ details summary{cursor:pointer;margin-top:8px}
 
 /* v5.25.47 — source-aligned cabin floorplans */
 /* v5.25.47 — Falcon 900B operational parity foundation */
-/* v5.25.50 — dual-aircraft offline package + Falcon 900B operational depth */
+/* v5.25.51 — dual-aircraft offline package + Falcon 900B operational depth */
 .f9-parity-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
 .f9-gate{border:1px solid var(--line);border-radius:12px;padding:12px;background:#071b31}
 .f9-gate b{display:block;font-size:16px;margin-top:3px}.f9-gate .small{line-height:1.35}
@@ -653,7 +653,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.50</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.51</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1805,7 +1805,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 
     <div class="card" id="f9mOperationalDataCard">
       <h2>2. Flight Data / Operational Verification</h2>
-      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. Wind and runway-slope values are displayed and source-controlled here; they are <b>not yet applied</b> to the 900B performance solution until the DTM9823 correction charts are digitized and validated.</div>
+      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections remain <b>validation-locked</b> until the independent raster second-read gate is closed.</div>
       <div class="row" style="margin-top:10px">
         <div><label>Fuel on Board lb</label><input id="f9mFOB" type="number" min="0" max="19165" step="10" readonly></div>
         <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" type="number" min="0" step="10" readonly></div>
@@ -1842,8 +1842,22 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
       <div class="f9-gate-summary"><b id="f9OperationalGate" class="warn">900B OPERATIONAL GATE — NOT READY</b><div class="small" id="f9OperationalGateNote">Complete W&amp;B, FOB reconciliation, current/verified weather, NOTAM/runway state and positive performance margins.</div></div>
     </div>
 
+    <div class="card" id="f9mDigitizationCard">
+      <h2>3. DTM9823 Takeoff Digitization / Validation</h2>
+      <div class="callout small"><b>Source register complete.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including wind/slope correction panels and clearway/stopway examples. Numeric correction surfaces remain locked pending independent source-raster second read, matching the validation discipline used on the Falcon 50.</div>
+      <div class="f9-parity-grid" style="margin-top:12px">
+        <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
+        <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
+        <div class="f9-gate"><span class="small">7° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-10-10 through -25 registered</span></div>
+        <div class="f9-gate"><span class="small">7° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-11-2 through -6 registered</span></div>
+        <div class="f9-gate"><span class="small">Clearway / Stopway</span><b class="ok">ANCHORS LOADED</b><span class="small">3A-5-1 and 3A-10-1 exact examples</span></div>
+        <div class="f9-gate"><span class="small">Wind / Slope Solver</span><b class="warn">VALIDATION LOCK</b><span class="small">Chart range: +50 kt HW / 10 kt TW • ±2% slope</span></div>
+      </div>
+      <div class="small f900b-source" style="margin-top:12px">Exact published anchors loaded: 20° dry BFL/V1, 20° wet BFL/V1, 7° dry BFL/V1/VMBE, 7° wet BFL/V1, and both clearway/stopway worked examples. AFM controls in case of discrepancy.</div>
+    </div>
+
     <div class="card" id="f9mWBCard">
-      <h2>3. N699BG Aircraft Loading / Weight &amp; Balance</h2>
+      <h2>4. N699BG Aircraft Loading / Weight &amp; Balance</h2>
       <div class="callout small">Current aircraft baseline: <b>24,431.10 lb</b> • arm <b>3.57 in</b> • moment <b>87,205.41 lb-in</b>. Limits: MRW 46,700 • MTOW 46,500 • MLW 42,000 • MZFW 30,864 lb. Fuel moment uses DTM9821 no-XTK2 published points only.</div>
       <div class="row" style="margin-top:10px">
         <div><label>Fuel on Board lb</label><input id="f9wbFuel" type="number" min="0" max="19165" step="10" value="8000" oninput="f9FuelPlanChanged('fob')"></div>
@@ -2599,7 +2613,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.50&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.51&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2785,6 +2799,16 @@ function fsLanding(cfg,pa,wk){const d=FS_PERF.landing[cfg],pb=d&&bracketN(kN(d.t
 
 let F900B_QRH=null,F900B_LOAD_PROMISE=null,F900B_REFRESH_TIMER=null,F900B_OVERLAYS=null,F900B_OVERLAY_PROMISE=null;
 let F900B_WB=null,F900B_WB_PROMISE=null;
+let F900B_DTM9823=null,F900B_DTM9823_PROMISE=null;
+async function loadF900BDTM9823(){
+ if(F900B_DTM9823)return F900B_DTM9823;
+ if(F900B_DTM9823_PROMISE)return F900B_DTM9823_PROMISE;
+ F900B_DTM9823_PROMISE=fetch('/data/f900b_dtm9823_digitization_v52551.json').then(r=>{if(!r.ok)throw new Error(`DTM9823 digitization HTTP ${r.status}`);return r.json()}).then(d=>{
+   if(d?.schema!=='kusa.f900b.dtm9823_digitization.v5.25.51'||d?.published_exact_anchors?.length<6)throw new Error('DTM9823 digitization integrity check failed');
+   F900B_DTM9823=d;return d;
+ }).catch(e=>{F900B_DTM9823_PROMISE=null;throw e});
+ return F900B_DTM9823_PROMISE;
+}
 async function loadF900BOverlays(){
  if(F900B_OVERLAYS)return F900B_OVERLAYS;
  if(!F900B_OVERLAY_PROMISE)F900B_OVERLAY_PROMISE=fetch(apiUrl("/data/f900b_operational_overlays_v52541.json"),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(`900B overlays HTTP ${r.status}`);return r.json()}).then(d=>{
@@ -3093,7 +3117,7 @@ function f9UpdateOperationalGate(){
  const depNotamOK=departureNotams?.status==="CHECKED"&&departureNotams?.runway_state!=="CLOSED",destNotamOK=currentNotams?.status==="CHECKED"&&currentNotams?.runway_state!=="CLOSED",notamOK=depNotamOK&&destNotamOK;f9SetTone("f9GateNotam",notamOK?"PASS":"CHECK",notamOK?"ok":"bad");f9Put("f9GateNotamNote",notamOK?`DEP ${departureNotams.runway_state||"OPEN"} • DEST ${currentNotams.runway_state||"OPEN"}`:(departureNotams?.runway_state==="CLOSED"||currentNotams?.runway_state==="CLOSED"?"Selected runway CLOSED by current NOTAM assessment":"Departure and destination FAA NMS review required"));
  const rp=f9RunwayPerformanceGate();f9SetTone("f9GateRunwayPerf",rp.ok?"PASS":"CHECK",rp.ok?"ok":"bad");f9Put("f9GateRunwayPerfNote",rp.ok?`TO +${Math.round(rp.depAvail-rp.bfl).toLocaleString()} ft • RETURN +${Math.round(rp.depAvail-rp.retReq).toLocaleString()} ft • LDG +${Math.round(rp.destAvail-rp.ldgReq).toLocaleString()} ft`:`Positive source-bounded takeoff, emergency-return and destination runway margins required`);
  const retWeight=f9DistanceFromText("f9EmerWeight"),retStatus=$("f9EmerStatus")?.textContent||"",returnOK=Number.isFinite(retWeight)&&retWeight<=42000&&rp.retOK&&!/NO-GO|UNAVAILABLE|REQUIRED|SOURCE LOCKED/i.test(retStatus);f9SetTone("f9GateReturn",returnOK?"PASS":"CHECK",returnOK?"ok":"bad");f9Put("f9GateReturnNote",returnOK?`${Math.round(retWeight).toLocaleString()} lb • required ${Math.round(rp.retReq).toLocaleString()} / usable ${Math.round(rp.depAvail).toLocaleString()} ft`:"Valid emergency-return weight, landing solution and runway margin required");
- const localDataOK=!!F900B_QRH&&!!F900B_WB&&F900B_QRH?.takeoff?.length===32&&F900B_QRH?.landing?.length===8&&F900B_WB?.aircraft?.registration==="N699BG";f9SetTone("f9GateLocalData",localDataOK?"PASS":"CHECK",localDataOK?"ok":"bad");f9Put("f9GateLocalDataNote",localDataOK?"QRH1 Rev02 + N699BG W&B verified locally / offline-ready":"Aircraft data package not yet verified");
+ const localDataOK=!!F900B_QRH&&!!F900B_WB&&!!F900B_DTM9823&&F900B_QRH?.takeoff?.length===32&&F900B_QRH?.landing?.length===8&&F900B_WB?.aircraft?.registration==="N699BG";f9SetTone("f9GateLocalData",localDataOK?"PASS":"CHECK",localDataOK?"ok":"bad");f9Put("f9GateLocalDataNote",localDataOK?"QRH1 Rev02 + N699BG W&B + DTM9823 chart register verified locally / offline-ready":"Aircraft data package not yet fully verified");
  const all=wbOK&&fuelOK&&wxOK&&notamOK&&rp.ok&&returnOK&&localDataOK;f9SetTone("f9OperationalGate",all?"900B OPERATIONAL GATE — READY":"900B OPERATIONAL GATE — NOT READY",all?"ok":"warn");f9Put("f9OperationalGateNote",all?"W&B/CG, reconciled FOB, current/verified weather, NOTAM/runway state, takeoff/return/landing margins and local aircraft data gates are complete. Wind/slope correction limitation still applies.":"Complete each gate above. Wind/slope are displayed but not yet applied to 900B performance until DTM9823 correction-chart validation is complete.");return all;
 }
 
@@ -6612,7 +6636,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.50",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.51",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6624,10 +6648,10 @@ async function startupCheck(manual=false){
    if(bs){bs.textContent=buildOk?"CURRENT":"UPDATE / REDEPLOY REQUIRED";bs.className=buildOk?"ok":"bad"}
    if(bn)bn.textContent=`Browser ${expected} • Server ${h.build||"unknown"}`;
    try{
-     const [f9,f9wb]=await Promise.all([loadF900BData(),loadF900BWB()]);
-     const perfOk=f9?.takeoff?.length===32&&f9?.landing?.length===8&&f9wb?.aircraft?.registration==="N699BG"&&f9wb?.empty_weight?.weight_lb===24431.10;
+     const [f9,f9wb,f9dtm]=await Promise.all([loadF900BData(),loadF900BWB(),loadF900BDTM9823()]);
+     const perfOk=f9?.takeoff?.length===32&&f9?.landing?.length===8&&f9wb?.aircraft?.registration==="N699BG"&&f9wb?.empty_weight?.weight_lb===24431.10&&f9dtm?.published_exact_anchors?.length>=6;
      if(ps){ps.textContent=perfOk?"LOADED":"DATA MISSING";ps.className=perfOk?"ok":"bad"}
-     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 + N699BG W&B v5.25.50":"Falcon 900B performance/W&B dataset failed integrity check";
+     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 + N699BG W&B + DTM9823 digitization v5.25.51":"Falcon 900B performance/W&B dataset failed integrity check";
    }catch(perfError){if(ps){ps.textContent="900B DATA MISSING";ps.className="bad"}if(pn)pn.textContent=`N33AP remains available • 900B load error: ${String(perfError?.message||perfError)}`}
    try{
      await loadF50S20NomographShadow();
@@ -6731,7 +6755,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.50",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.51",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
