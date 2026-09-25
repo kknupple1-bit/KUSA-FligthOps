@@ -1,0 +1,25 @@
+KUSA FlightOps v5.25.46
+September 25, 2026
+
+FALCON 50 / FALCON 900B CABIN FLOORPLAN + OFFLINE DATA FOUNDATION
+
+1. Falcon 900B / N699BG Version 11 cabin loading is redrawn as a source-aligned top-down floorplan based on the uploaded DTM9821 Version 11 accommodation sheet.
+   - Flight deck crew positions
+   - 3rd crew and baggage/doc station
+   - left/right galley areas
+   - forward lounge seats 1-4
+   - mid-cabin seats 5-8 and cabinet areas
+   - aft side-sofa/lounge positions 9/11/12 and seat 10
+   - aft lavatory and front/rear baggage areas
+   Existing source-controlled station arms and W&B math are unchanged.
+
+2. Falcon 50 / N33AP cabin display receives aircraft-floorplan styling refinements while preserving the current approved 9-passenger aft-lounge seat-to-station mapping and all W&B mathematics.
+
+3. Falcon 900B dataset delivery hardening:
+   - QRH1 performance loader now tries the server API first, then the versioned static dataset cached by the PWA.
+   - N699BG W&B loader now tries the server API first, then the versioned static W&B dataset cached by the PWA.
+   This is the first offline-operability foundation step; source integrity checks remain mandatory.
+
+4. Build/service-worker cache bumped to v5.25.46.
+
+No Falcon 50 or Falcon 900B performance values, structural limits, station arms, fuel moment values, or interpolation rules were intentionally changed in this revision.
