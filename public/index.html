@@ -907,7 +907,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.62</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.63</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -2023,7 +2023,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mOperationalDataCard">
 <h2>3. Weather Source / Manual Weather</h2>
-<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.62</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.63</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
 <div class="row" style="margin-top:10px">
 <div><label>Fuel on Board lb</label><input id="f9mFOB" max="19165" min="0" readonly="" step="10" type="number"/></div>
 <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" min="0" readonly="" step="10" type="number"/></div>
@@ -2220,7 +2220,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card"><h2>Aircraft Reference — N699BG</h2><div class="row"><div><label>Basic Empty Weight</label><input readonly="" value="24,431.10 lb"/></div><div><label>Basic Empty Moment</label><input readonly="" value="87,205.41 lb-in"/></div><div><label>Max Zero Fuel</label><input readonly="" value="30,864 lb"/></div><div><label>Max Takeoff</label><input readonly="" value="46,500 lb"/></div><div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div></div></div><div class="card"><h2>Mission Summary</h2><table><tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr></table></div><div class="card"><h2>Weight Limits</h2><table><tr><td>ZFW</td><td id="f9sZFW">—</td><td>MZFW 30,864 lb</td></tr><tr><td>Ramp</td><td id="f9sRamp">—</td><td>MRW 46,700 lb</td></tr><tr><td>Takeoff</td><td id="f9sTOW">—</td><td>MTOW 46,500 lb</td></tr><tr><td>Landing</td><td id="f9sLDW">—</td><td>MLW 42,000 lb</td></tr></table></div><div class="card"><h2>Fuel Check</h2><table><tr><td>On Board</td><td id="f9FuelCheckFOB">—</td></tr><tr><td>Mission Required</td><td id="f9FuelCheckMission">—</td></tr><tr><td>Taxi</td><td id="f9FuelCheckTaxi">—</td></tr><tr><td>Landing Fuel</td><td id="f9sLandingFuel">—</td></tr><tr><td>Status</td><td id="f9FuelCheckStatus">—</td></tr></table></div><div class="card"><h2>System Status</h2><table><tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr><tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr><tr><td>Runway selection</td><td class="ok">AUTO</td></tr><tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr><tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel CG calculation</td><td class="ok">DTM9821 REV 59 LOADED</td></tr><tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr><tr><td>DTM9823 wind/slope</td><td class="ok">ACTIVE • SOURCE-BOUNDED</td></tr><tr><td>Overall Gate</td><td class="warn" id="f9sGate">—</td></tr></table></div>
 <div class="card" id="f9mDigitizationCard">
 <h2>SUPPORTING DOCUMENTATION</h2>
-<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.62 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.63 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
 <div class="f9-parity-grid" style="margin-top:12px">
 <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
 <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -7084,7 +7084,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.61",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.63",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7204,7 +7204,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.61",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.63",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
