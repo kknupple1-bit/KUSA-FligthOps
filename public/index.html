@@ -651,8 +651,8 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{padding:52px 12px 26px}.f9-flightdeck{width:78%;gap:28px}.f9-forward-service,.f9-seat-row,.f9-mid-row,.f9-aft-lounge{grid-template-columns:1fr 34px 1fr;gap:6px}.f9-forward-service{gap:28px}.f9-seat{padding:6px}.f9-cockpit-seat{min-height:70px}}
 
 
-/* v5.25.61 — 900B CG/pax/status/gate corrections */
-/* v5.25.61 — source-like N699BG fuselage presentation */
+/* v5.25.62 — 900B CG/pax/status/gate corrections */
+/* v5.25.62 — source-like N699BG fuselage presentation */
 .f9-cabin-shell{clip-path:polygon(38% 0,62% 0,78% 5%,88% 12%,93% 23%,96% 38%,96% 82%,88% 94%,67% 100%,33% 100%,12% 94%,4% 82%,4% 38%,7% 23%,12% 12%,22% 5%);border-radius:0!important;padding-top:88px!important;padding-bottom:78px!important}
 .f9-cabin-shell:after{display:none!important}
 .f9-nose-glass{top:42px!important}.f9-centerline{opacity:.28}.f9-zone-label{letter-spacing:.12em}
@@ -670,12 +670,244 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{max-width:100%!important;padding:72px 18px 60px!important}.f9-window-strip{display:none}}
 
 </style>
+
+<style id="v52562-unified-visual-system">
+/* v5.25.62 — UNIFIED FLIGHTOPS VISUAL SYSTEM
+   Falcon 50 is the application visual baseline. Aircraft-specific data may differ;
+   page geometry, typography, palette, card treatment, semantic colors, TOLD structure
+   and cabin visual language must remain common across aircraft profiles. */
+:root{
+  --fo-bg:#071b33;
+  --fo-panel:#0d294a;
+  --fo-panel-deep:#06182c;
+  --fo-panel-soft:#081d34;
+  --fo-panel-accent:#0a223e;
+  --fo-line:#2a4b70;
+  --fo-line-strong:#3d6287;
+  --fo-text:#edf5ff;
+  --fo-muted:#9db6cf;
+  --fo-ok:#55d18b;
+  --fo-warn:#ffca58;
+  --fo-bad:#ff6b6b;
+  --fo-action:#174c80;
+  --fo-action-active:#245f96;
+  --fo-radius:14px;
+  --fo-inner-radius:10px;
+  --fo-card-pad:16px;
+  --fo-gap:10px;
+}
+
+/* ---- canonical page width / rhythm ---- */
+#opsView,
+#f900bmissionView>.f900b-shell,
+#toldView>.told-card,
+#f900bView>.f900b-shell{
+  width:100%;
+  max-width:1050px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+}
+#opsView .card,#f900bmissionView .card,
+#toldView .card,#f900bView .card{
+  background:var(--fo-panel)!important;
+  border:1px solid var(--fo-line)!important;
+  border-radius:var(--fo-radius)!important;
+  padding:var(--fo-card-pad)!important;
+  margin-bottom:18px!important;
+  color:var(--fo-text)!important;
+  box-shadow:none!important;
+}
+#opsView .card h2,#f900bmissionView .card h2,
+#toldView .card h2,#f900bView .card h2{
+  margin:0 0 12px!important;
+  font-size:16px!important;
+  line-height:1.25!important;
+  letter-spacing:0!important;
+  color:var(--fo-text)!important;
+}
+#opsView h3,#f900bmissionView h3,#toldView h3,#f900bView h3{
+  color:var(--fo-text)!important;
+  font-size:15px!important;
+  line-height:1.25!important;
+}
+#opsView .small,#f900bmissionView .small,#toldView .small,#f900bView .small,
+#opsView label,#f900bmissionView label,#toldView label,#f900bView label{
+  color:var(--fo-muted)!important;
+  font-size:12px!important;
+  line-height:1.35!important;
+}
+#opsView .row,#f900bmissionView .row{grid-template-columns:repeat(4,minmax(0,1fr));gap:var(--fo-gap)!important}
+
+/* ---- one inner-card language ---- */
+#opsView .wx,#f900bmissionView .wx,
+#f900bmissionView .f900b-result,
+#f900bmissionView .f9-live-panel,
+#f900bmissionView .f9-gate,
+#f900bmissionView .pax-check>div,
+#toldView .told-speed,#f900bView .told-speed,
+#toldView .told-op-metric,#f900bView .told-op-metric,
+#toldView .told-prep-box,#f900bView .told-prep-box,
+#toldView .told-panel,#f900bView .told-panel{
+  background:var(--fo-panel-deep)!important;
+  border:1px solid var(--fo-line)!important;
+  border-radius:var(--fo-inner-radius)!important;
+  color:var(--fo-text)!important;
+  box-shadow:none!important;
+}
+#f900bmissionView .f900b-result{padding:12px!important;min-height:72px!important}
+#f900bmissionView .f900b-result span{color:var(--fo-muted)!important;font-size:12px!important}
+#f900bmissionView .f900b-result b{font-size:17px!important;line-height:1.18!important;margin-top:4px!important}
+#f900bmissionView .f9-live-panel,#f900bmissionView .f9-gate{padding:12px!important}
+#f900bmissionView .f9-gate b{font-size:17px!important;line-height:1.18!important}
+#f900bmissionView .f9-live-grid{gap:10px!important}
+#f900bmissionView .f9-parity-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+#f900bmissionView .f900b-inputs,#f900bmissionView .f900b-results{gap:10px!important}
+
+/* ---- form controls / buttons ---- */
+#opsView input,#opsView select,#opsView button,
+#f900bmissionView input,#f900bmissionView select,#f900bmissionView button,
+#toldView input,#toldView select,#toldView button,
+#f900bView input,#f900bView select,#f900bView button{
+  border:1px solid var(--fo-line)!important;
+  border-radius:8px!important;
+  background:var(--fo-panel-deep)!important;
+  color:var(--fo-text)!important;
+  font-family:Arial,Helvetica,sans-serif!important;
+}
+#opsView button,#f900bmissionView button,#toldView button,#f900bView button{
+  background:var(--fo-action)!important;
+  font-weight:700!important;
+}
+#opsView button:hover,#f900bmissionView button:hover,#toldView button:hover,#f900bView button:hover{filter:brightness(1.08)}
+
+/* ---- callouts / semantic colors ---- */
+#opsView .callout,#f900bmissionView .callout,#toldView .callout,#f900bView .callout{
+  background:var(--fo-panel-accent)!important;
+  border-left:4px solid var(--fo-warn)!important;
+  color:var(--fo-text)!important;
+  border-radius:8px!important;
+}
+.ok{color:var(--fo-ok)!important}.warn{color:var(--fo-warn)!important}.bad{color:var(--fo-bad)!important}
+.told-vspeed.valid{color:var(--fo-ok)!important;text-shadow:none!important}
+.told-vspeed.emergency-value.valid,
+.told-op-panel.emergency .told-op-title,
+.told-op-panel.emergency #opEmerVref.valid,
+.told-op-panel.emergency #f9EmerVref.valid{color:var(--fo-bad)!important;text-shadow:none!important}
+
+/* ---- TOLD: identical geometry on all aircraft ---- */
+#toldView .told-card,#f900bView .f900b-shell{max-width:1040px!important}
+#toldView .told-head,#f900bView .told-head{
+  border-bottom:1px solid var(--fo-line)!important;
+  padding-bottom:12px!important;margin-bottom:14px!important
+}
+#toldView .told-title,#f900bView .told-title{font-size:25px!important;font-weight:800!important;letter-spacing:.04em!important}
+#toldView .told-operational-stack,#f900bView .told-operational-stack{display:grid!important;gap:14px!important;margin-bottom:14px!important}
+#toldView .told-op-panel,#f900bView .told-op-panel{
+  background:#071b31!important;border:1px solid var(--fo-line)!important;border-left:5px solid #2c78b8!important;
+  border-radius:12px!important;padding:15px!important
+}
+#toldView .told-op-panel.emergency,#f900bView .told-op-panel.emergency{border-left-color:#d69a20!important}
+#toldView .told-op-panel.landing,#f900bView .told-op-panel.landing{border-left-color:#32a66a!important}
+#toldView .told-op-metrics,#f900bView .told-op-metrics,
+#f900bView .told-op-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+#toldView .told-op-metric,#f900bView .told-op-metric{padding:10px!important;min-height:72px!important}
+#toldView .told-op-metric b,#f900bView .told-op-metric b{font-size:20px!important;line-height:1.15!important;margin-top:5px!important}
+#toldView .told-op-details,#f900bView .told-op-details{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:8px 14px!important;margin-top:12px!important}
+#toldView .told-grid,#f900bView .told-grid{display:grid!important;grid-template-columns:1fr 1fr!important;gap:14px!important}
+#toldView .told-panel,#f900bView .told-panel{padding:14px!important}
+#toldView .told-panel h3,#f900bView .told-panel h3{margin:0 0 10px!important;font-size:17px!important}
+#toldView .told-row,#f900bView .told-row{display:grid!important;grid-template-columns:1.1fr 1fr!important;gap:8px!important;padding:6px 0!important;border-bottom:1px solid #234361!important}
+#toldView .told-row span:first-child,#f900bView .told-row span:first-child{color:var(--fo-muted)!important;font-size:12px!important}
+#toldView .told-row span:last-child,#f900bView .told-row span:last-child{text-align:right!important;font-weight:700!important;font-size:13px!important;color:var(--fo-text)!important}
+#toldView .told-speeds,#f900bView .told-speeds{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important;margin-top:12px!important}
+#toldView .told-speed,#f900bView .told-speed{padding:10px!important;text-align:center!important}
+#toldView .told-speed b,#f900bView .told-speed b{display:block!important;font-size:21px!important;margin-top:4px!important}
+#toldView .told-prep,#f900bView .told-prep{background:#071b31!important;border:1px solid var(--fo-line)!important;border-radius:12px!important;padding:14px!important;margin-bottom:14px!important}
+#toldView .told-prep-grid,#f900bView .told-prep-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:10px!important}
+#f900bView .told-prep-columns{display:grid!important;grid-template-columns:1.2fr 1fr 1fr!important;gap:14px!important}
+
+/* ---- CG / canvas container visual parity ---- */
+#opsView canvas,#f900bmissionView canvas{background:var(--fo-panel-deep)!important;border-radius:10px!important}
+#f900bmissionView #f9cgChart,#opsView #cgChart{height:300px!important}
+
+/* ---- N699BG cabin: keep improved aircraft-like geometry, move it onto F50 palette ---- */
+.f9-cabin-shell{
+  max-width:520px!important;
+  padding:78px 42px 68px!important;
+  border:2px solid var(--fo-line-strong)!important;
+  border-radius:50% 50% 24% 24% / 92px 92px 42px 42px!important;
+  background:linear-gradient(90deg,#061522 0 8%,#081f39 8% 92%,#061522 92% 100%)!important;
+  box-shadow:inset 0 0 0 8px rgba(6,17,29,.62),0 8px 28px rgba(0,0,0,.24)!important;
+}
+.f9-cockpit-seat,.f9-seat{background:#102f51!important;border-color:#42688e!important;color:var(--fo-text)!important}
+.f9-fixture,.f9-cabinet{background:#0a223c!important;border-color:#31506f!important;color:var(--fo-muted)!important}
+.f9-divan{background:#0a223c!important;border-color:#42688e!important}
+.f9-aisle,.f9-zone-label,.f9-tail-label,.f9-door-mark{color:var(--fo-muted)!important}
+.f9-seat label{color:var(--fo-text)!important}.f9-seat label span{color:var(--fo-muted)!important}
+.f9-nose-glass span{background:#102f51!important;border-color:#557897!important}
+
+/* ---- N33AP cabin modernization using the same aircraft-floorplan language ---- */
+.floorplan-cabin{
+  width:min(520px,96%)!important;
+  min-height:980px!important;
+  padding:78px 42px 68px!important;
+  border:2px solid var(--fo-line-strong)!important;
+  border-radius:50% 50% 24% 24% / 92px 92px 42px 42px!important;
+  background:
+    repeating-linear-gradient(to bottom,transparent 0 42px,#4f7697 42px 51px,transparent 51px 88px) left 16px top 210px/8px calc(100% - 315px) no-repeat,
+    repeating-linear-gradient(to bottom,transparent 0 42px,#4f7697 42px 51px,transparent 51px 88px) right 16px top 210px/8px calc(100% - 315px) no-repeat,
+    linear-gradient(90deg,#061522 0 8%,#081f39 8% 92%,#061522 92% 100%)!important;
+  box-shadow:inset 0 0 0 8px rgba(6,17,29,.62),0 8px 28px rgba(0,0,0,.24)!important;
+  overflow:hidden!important;
+}
+.floorplan-cabin:before{
+  content:""!important;position:absolute!important;top:48px!important;left:50%!important;width:34px!important;height:17px!important;
+  transform:translateX(-44px) skewX(-8deg)!important;border:2px solid #557897!important;border-radius:50% 50% 35% 35%!important;
+  background:#102c44!important;box-shadow:46px 0 0 -2px #102c44,46px 0 0 0 #557897!important;z-index:4!important
+}
+.floorplan-cabin:after{
+  content:""!important;position:absolute!important;left:18%!important;right:18%!important;bottom:-38px!important;height:92px!important;
+  background:#071725!important;border:2px solid var(--fo-line-strong)!important;border-top:0!important;
+  clip-path:polygon(15% 0,85% 0,65% 100%,35% 100%)!important;z-index:0!important
+}
+.floorplan-cabin .cabin-titlebar{top:24px!important;z-index:5!important;color:var(--fo-muted)!important}
+.floorplan-cabin .nose-fp{margin-top:0!important;padding-top:8px!important;border-bottom-color:#31506f!important;position:relative!important;z-index:3!important}
+.floorplan-cabin .cockpit-seat,.floorplan-cabin .jumpseat-inner,.floorplan-cabin .tap-seat{
+  background:#102f51!important;border-color:#42688e!important;color:var(--fo-text)!important;box-shadow:none!important
+}
+.floorplan-cabin .tap-seat{clip-path:none!important;border-radius:22px 22px 12px 12px!important;position:relative!important}
+.floorplan-cabin .tap-seat:before{
+  content:""!important;display:block!important;width:34%!important;height:7px!important;margin:-1px auto 5px!important;
+  border:1px solid #6487a5!important;border-radius:50%!important;opacity:.75!important;position:static!important;background:transparent!important
+}
+.floorplan-cabin .tap-seat:after{content:""!important;position:absolute!important;left:14%!important;right:14%!important;bottom:8px!important;border-top:1px solid rgba(255,255,255,.10)!important}
+.floorplan-cabin .tap-seat.occupied{background:#113f48!important;border-color:var(--fo-ok)!important}
+.floorplan-cabin .fixture,.floorplan-cabin .bag-cell{background:#0a223c!important;border-color:#31506f!important;color:var(--fo-muted)!important}
+.floorplan-cabin .service-grid-fp,.floorplan-cabin .aft-service-fp,.floorplan-cabin .baggage-deck-fp{border-color:#31506f!important;position:relative!important;z-index:2!important}
+.floorplan-cabin .cabin-aisle-fp{border-color:#31506f!important;opacity:.52!important}
+.floorplan-cabin .seat-type-select,.floorplan-cabin .bag-input{background:var(--fo-panel-deep)!important;border-color:var(--fo-line)!important;color:var(--fo-text)!important}
+
+/* ---- desktop visual parity ---- */
+@media(min-width:851px){
+  #opsView .card,#f900bmissionView .card{padding:16px!important}
+  #f900bmissionView .f900b-titlebar{margin-bottom:12px!important}
+}
+@media(max-width:850px){
+  #opsView,#f900bmissionView>.f900b-shell,#toldView>.told-card,#f900bView>.f900b-shell{max-width:none!important}
+  #f900bmissionView .f9-parity-grid{grid-template-columns:1fr 1fr!important}
+  #toldView .told-op-metrics,#f900bView .told-op-metrics,#f900bView .told-op-grid{grid-template-columns:1fr 1fr!important}
+  #toldView .told-grid,#f900bView .told-grid,#f900bView .told-prep-columns{grid-template-columns:1fr!important}
+  #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(2,1fr)!important}
+  .floorplan-cabin,.f9-cabin-shell{max-width:100%!important;padding-left:18px!important;padding-right:18px!important}
+}
+</style>
+
 <link href="/manifest.webmanifest" rel="manifest"/>
 <meta content="#071b33" name="theme-color"/>
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.61</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.62</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1791,7 +2023,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mOperationalDataCard">
 <h2>3. Weather Source / Manual Weather</h2>
-<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.61</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.62</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
 <div class="row" style="margin-top:10px">
 <div><label>Fuel on Board lb</label><input id="f9mFOB" max="19165" min="0" readonly="" step="10" type="number"/></div>
 <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" min="0" readonly="" step="10" type="number"/></div>
@@ -1988,7 +2220,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card"><h2>Aircraft Reference — N699BG</h2><div class="row"><div><label>Basic Empty Weight</label><input readonly="" value="24,431.10 lb"/></div><div><label>Basic Empty Moment</label><input readonly="" value="87,205.41 lb-in"/></div><div><label>Max Zero Fuel</label><input readonly="" value="30,864 lb"/></div><div><label>Max Takeoff</label><input readonly="" value="46,500 lb"/></div><div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div></div></div><div class="card"><h2>Mission Summary</h2><table><tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr></table></div><div class="card"><h2>Weight Limits</h2><table><tr><td>ZFW</td><td id="f9sZFW">—</td><td>MZFW 30,864 lb</td></tr><tr><td>Ramp</td><td id="f9sRamp">—</td><td>MRW 46,700 lb</td></tr><tr><td>Takeoff</td><td id="f9sTOW">—</td><td>MTOW 46,500 lb</td></tr><tr><td>Landing</td><td id="f9sLDW">—</td><td>MLW 42,000 lb</td></tr></table></div><div class="card"><h2>Fuel Check</h2><table><tr><td>On Board</td><td id="f9FuelCheckFOB">—</td></tr><tr><td>Mission Required</td><td id="f9FuelCheckMission">—</td></tr><tr><td>Taxi</td><td id="f9FuelCheckTaxi">—</td></tr><tr><td>Landing Fuel</td><td id="f9sLandingFuel">—</td></tr><tr><td>Status</td><td id="f9FuelCheckStatus">—</td></tr></table></div><div class="card"><h2>System Status</h2><table><tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr><tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr><tr><td>Runway selection</td><td class="ok">AUTO</td></tr><tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr><tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel CG calculation</td><td class="ok">DTM9821 REV 59 LOADED</td></tr><tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr><tr><td>DTM9823 wind/slope</td><td class="ok">ACTIVE • SOURCE-BOUNDED</td></tr><tr><td>Overall Gate</td><td class="warn" id="f9sGate">—</td></tr></table></div>
 <div class="card" id="f9mDigitizationCard">
 <h2>SUPPORTING DOCUMENTATION</h2>
-<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.61 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.62 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
 <div class="f9-parity-grid" style="margin-top:12px">
 <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
 <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
