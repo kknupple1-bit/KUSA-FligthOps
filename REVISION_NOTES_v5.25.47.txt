@@ -1,0 +1,13 @@
+KUSA FlightOps v5.25.47 — Falcon 900B Operational Parity Foundation
+Date: 2026-09-25
+
+Adds to v5.25.46:
+- Falcon 900B trip start now requires FOB and mission fuel just as the Falcon 50 workflow does.
+- Adds deliberate pilot FOB verification gate for the 900B.
+- 900B mission now pulls airport/runway/live weather from the existing FlightOps mission backend and mirrors the selected controlling runways.
+- Adds departure and destination FAA NMS NOTAM review state to the 900B mission gate.
+- Adds 900B operational readiness gate: W&B/CG, FOB, weather/runway, and NOTAM checks.
+- Adds explicit ZFW/ramp/takeoff/landing CG-envelope visualization using the existing source-controlled DTM9821 envelope data.
+- Live runway wind components and runway metadata are displayed in the 900B mission view.
+- Wind and runway-slope corrections are NOT applied to 900B performance in this revision. These remain source-locked pending DTM9823 chart digitization and validation.
+- Preserves all v5.25.46 performance, W&B, cabin, PWA and offline-data behavior.

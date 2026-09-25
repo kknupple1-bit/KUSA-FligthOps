@@ -1,0 +1,291 @@
+<div class="callout small" style="margin-top:14px">
+Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structural MTOW is 40,780 lb; a lower source-evaluated maximum reflects the current digitized performance-source boundary or an actual performance limit, as labeled. Verify loading, FOB, runway selection and source status before use. Source-locked or unevaluated performance remains visibly unavailable; no extrapolation is performed.
+</div>
+</div>
+</div>
+
+
+<div id="f900bmissionView" style="display:none">
+  <div class="f900b-shell">
+    <div class="mission-actionbar">
+      <button type="button" onclick="showPlatformView('home')">← Menu</button>
+      <button type="button" onclick="showPlatformView('told')">Open TOLD</button>
+      <button type="button" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
+      <button type="button" onclick="completeMission()">Complete &amp; Archive Flight Plan</button>
+      <span class="small" id="f9mDraftStatus" style="align-self:center;margin-left:6px">Falcon 900B mission planning</span>
+    </div>
+
+    <div class="card">
+      <div class="f900b-titlebar">
+        <div>
+          <h2>Falcon 900B — MISSION</h2>
+          <div class="small" id="f9mRoute">— → —</div>
+        </div>
+        <button type="button" style="width:auto" onclick="refreshF900BMission()">Refresh 900B Mission</button>
+      </div>
+      <div class="callout small"><b>N699BG AIRCRAFT-SPECIFIC W&amp;B ACTIVE.</b> S/N 082 • Version 11 accommodation • SB F900-139 • no XTK2 • June 6, 2024 empty-weight baseline. Takeoff and landing weights below are calculated from the loading entries and fuel plan.</div>
+    </div>
+
+    <div class="card">
+      <h2>1. Mission Setup</h2>
+      <div class="row">
+        <div><label>Departure</label><input id="f9mDep" maxlength="4" readonly></div>
+        <div><label>Destination</label><input id="f9mDest" maxlength="4" readonly></div>
+        <div><label>Alternate</label><input id="f9mAlt" maxlength="4" readonly></div>
+        <div><label>Trip / Tail Note</label><input id="f9mNote" placeholder="optional"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><label>Trip Date</label><input id="f9mTripDate" type="date" onchange="activeTripDateChanged('f9mTripDate')"><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div><label>Emergency Return Fuel Burn lb</label><input id="f9mReturnBurn" type="number" min="0" step="10" value="500"></div>
+        <div><label>Takeoff Weight lb — AUTO</label><input id="f9mToWeight" type="number" readonly></div>
+        <div><label>Landing Weight lb — AUTO</label><input id="f9mLdgWeight" type="number" readonly></div>
+        <div><label>Weight &amp; Balance</label><div class="wx"><b id="f9mWBStatus" class="warn">LOAD DATA</b><div class="small" id="f9mWBNote">N699BG Version 11</div></div></div>
+      </div>
+    </div>
+
+    <div class="card" id="f9mWBCard">
+      <h2>2. N699BG Aircraft Loading / Weight &amp; Balance</h2>
+      <div class="callout small">Current aircraft baseline: <b>24,431.10 lb</b> • arm <b>3.57 in</b> • moment <b>87,205.41 lb-in</b>. Limits: MRW 46,700 • MTOW 46,500 • MLW 42,000 • MZFW 30,864 lb. Fuel moment uses DTM9821 no-XTK2 published points only.</div>
+      <div class="row" style="margin-top:10px">
+        <div><label>Fuel on Board lb</label><input id="f9wbFuel" type="number" min="0" max="19165" step="10" value="8000" oninput="f9RecalcWB()"></div>
+        <div><label>Taxi Fuel lb</label><input id="f9wbTaxi" type="number" min="0" step="10" value="200" oninput="f9RecalcWB()"></div>
+        <div><label>Trip Fuel Burn lb</label><input id="f9wbTripBurn" type="number" min="0" step="10" value="3000" oninput="f9RecalcWB()"></div>
+        <div><label>Landing Fuel lb — AUTO</label><input id="f9wbLandingFuel" readonly></div>
+      </div>
+      <h3 style="margin-top:14px">Crew / Cabin Load — N699BG Version 11</h3>
+      <div class="small" style="margin-bottom:8px">Source-aligned top-down layout based on the uploaded DTM9821 Version 11 accommodation drawing. Enter actual weight at the physical position; calculation arms remain source-controlled.</div>
+      <div class="f9-cabin-shell" aria-label="N699BG Version 11 source-aligned cabin loading">
+        <div class="f9-centerline"></div>
+        <div class="f9-zone-label">FLIGHT DECK</div>
+        <div class="f9-flightdeck">
+          <div class="f9-cockpit-seat"><b>PILOT • −311.18 in</b><input id="f9wb_pilot" type="number" min="0" step="1" value="170" oninput="f9RecalcWB()"></div>
+          <div class="f9-cockpit-seat"><b>COPILOT • −311.18 in</b><input id="f9wb_copilot" type="number" min="0" step="1" value="170" oninput="f9RecalcWB()"></div>
+        </div>
+        <div class="f9-forward-service">
+          <div class="f9-service-stack">
+            <div class="f9-fixture"><label>3RD CREW • −274.12 in</label><input id="f9wb_crew3" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-fixture"><label>BAGGAGE + DOC • −278.26 in</label><input id="f9wb_bagdocs" type="number" min="0" max="92" step="1" value="0" oninput="f9RecalcWB()"></div>
+          </div>
+          <div class="f9-service-stack">
+            <div class="f9-fixture"><label>RIGHT GALLEY • −225.0 in</label><input id="f9wb_rightgalley" type="number" min="0" max="200" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-fixture"><label>LEFT GALLEY • −223.0 in</label><input id="f9wb_leftgalley" type="number" min="0" max="200" step="1" value="0" oninput="f9RecalcWB()"></div>
+          </div>
+        </div>
+        <div class="f9-zone-label">FORWARD LOUNGE</div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 1 <span>−190.88 in</span></label><input id="f9wb_pax1" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 2 <span>−190.88 in</span></label><input id="f9wb_pax2" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-mid-row"><div></div><div class="f9-aisle"></div><div class="f9-cabinet">VIDEO CABINET</div></div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 3 <span>−143.24 in</span></label><input id="f9wb_pax3" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 4 <span>−143.24 in</span></label><input id="f9wb_pax4" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-zone-label">MID CABIN</div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input id="f9wb_pax5" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input id="f9wb_pax6" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-mid-row"><div class="f9-cabinet">MID-CABIN CABINET</div><div class="f9-aisle"></div><div></div></div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input id="f9wb_pax7" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input id="f9wb_pax8" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-zone-label">AFT LOUNGE / SIDE SOFA</div>
+        <div class="f9-aft-lounge">
+          <div class="f9-divan">
+            <div class="f9-seat"><label>Seat 9 <span>+1.76 in</span></label><input id="f9wb_pax9" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-seat"><label>Seat 11 <span>+27.65 in</span></label><input id="f9wb_pax11" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-seat"><label>Seat 12 <span>+52.94 in</span></label><input id="f9wb_pax12" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+          </div>
+          <div class="f9-aisle">AISLE</div>
+          <div class="f9-aft-right"><div class="f9-cabinet">CABINET</div><div class="f9-seat"><label>Seat 10 <span>+23.53 in</span></label><input id="f9wb_pax10" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-fixture">AFT LAV</div></div>
+        </div>
+        <div class="f9-baggage-deck">
+          <div class="f9-fixture"><label>FRONT BAGGAGE</label><input id="f9wb_bagfront" type="number" min="0" max="1213" step="1" value="0" oninput="f9RecalcWB()"></div>
+          <div class="f9-fixture"><label>REAR BAGGAGE</label><input id="f9wb_bagrear" type="number" min="0" max="1653" step="1" value="0" oninput="f9RecalcWB()"></div>
+        </div>
+      </div>
+      <h3 style="margin-top:14px">Aft / Baggage Loads</h3>
+      <div class="f900b-inputs">
+        <div><label>Water lb</label><input id="f9wb_water" type="number" min="0" max="88" step="1" value="0" oninput="f9RecalcWB()"></div>
+      </div>
+      <div class="f900b-results" style="margin-top:14px">
+        <div class="f900b-result"><span>Zero Fuel Weight</span><b id="f9wbZFW">—</b></div>
+        <div class="f900b-result"><span>Zero Fuel CG</span><b id="f9wbZFWCG">—</b></div>
+        <div class="f900b-result"><span>Ramp Weight</span><b id="f9wbRamp">—</b></div>
+        <div class="f900b-result"><span>Takeoff Weight / CG</span><b id="f9wbTO">—</b></div>
+        <div class="f900b-result"><span>Landing Weight / CG</span><b id="f9wbLDG">—</b></div>
+        <div class="f900b-result"><span>Structural Status</span><b id="f9wbStruct">—</b></div>
+        <div class="f900b-result"><span>CG Envelope Status</span><b id="f9wbEnvelope">—</b></div>
+        <div class="f900b-result"><span>Fuel / Load Status</span><b id="f9wbLoadStatus">—</b></div>
+      </div>
+      <details style="margin-top:12px"><summary class="small"><b>Loading detail / source-controlled arms</b></summary><table style="margin-top:8px"><thead><tr><th>Station</th><th>Weight</th><th>Arm</th><th>Moment</th></tr></thead><tbody id="f9wbDetail"></tbody></table></details>
+      <div class="small f900b-source" id="f9wbSource">N699BG • Duncan W&amp;B 06/06/2024 • DTM9821 Rev59 / Version 11 • no XTK2 • SB F900-139 • DTM9819 Rev12 §3-40 takeoff trim</div>
+    </div>
+
+    <div class="card">
+      <h2>3. Departure Performance Planning</h2>
+      <div class="f900b-inputs">
+        <div><label>Takeoff Configuration</label><select id="f9mToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
+        <div><label>Anti-Ice</label><select id="f9mToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        <div><label>Runway</label><select id="f9mToSurface"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
+        <div><label>Runway Available ft</label><input id="f9mToRunway" type="number" min="0" step="1" placeholder="e.g. 7000"></div>
+        <div><label>Pressure Altitude ft</label><input id="f9mToPA" type="number" step="1" placeholder="0 to 6000"></div>
+        <div><label>OAT °C</label><input id="f9mToTemp" type="number" step="0.1" placeholder="published range"></div>
+        <div><label>Recalculate</label><button type="button" onclick="refreshF900BMission()">Refresh Mission Performance</button></div>
+      </div>
+      <div class="f900b-results">
+        <div class="f900b-result"><span>V1</span><b id="f9mV1">—</b></div>
+        <div class="f900b-result"><span>VR = V2</span><b id="f9mVR">—</b></div>
+        <div class="f900b-result"><span>Balanced Field Length</span><b id="f9mBFL">—</b></div>
+        <div class="f900b-result"><span>Stabilizer Trim — AUTO</span><b id="f9mTrim">—</b></div>
+        <div class="f900b-result"><span>Runway Remaining</span><b id="f9mToMargin">—</b></div>
+        <div class="f900b-result"><span>Second-Segment Gradient</span><b id="f9mGCLB2">—</b></div>
+        <div class="f900b-result"><span>Takeoff Status</span><b id="f9mToStatus">—</b></div>
+      </div>
+      <div class="small f900b-source" id="f9mToSource">Falcon 900B QRH1 Rev02 • DTM9823/AFM source package • bounded interpolation</div>
+    </div>
+
+    <div class="card">
+      <h2>4. Destination Landing Planning</h2>
+      <div class="f900b-inputs">
+        <div><label>Anti-Ice</label><select id="f9mLdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        <div><label>Pressure Altitude ft</label><input id="f9mLdgPA" type="number" step="1" placeholder="0 to 6000"></div>
+        <div><label>OAT °C</label><input id="f9mLdgTemp" type="number" step="0.1" placeholder="published range"></div>
+        <div><label>Runway Available ft</label><input id="f9mLdgRunway" type="number" min="0" step="1" placeholder="e.g. 6500"></div>
+        <div><label>Runway Comparison</label><select id="f9mLdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
+        <div><label>Landing Mode</label><select id="f9mLdgMode"><option value="NORMAL">Normal</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
+        <div><label>HYD #2 Landing Flaps</label><select id="f9mHyd2Flaps"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
+        <div><label>Airbrakes</label><select id="f9mHyd2Airbrake"><option value="AVAILABLE">Available</option><option value="LOST">Lost (+10%)</option></select></div>
+      </div>
+      <div class="f900b-results">
+        <div class="f900b-result"><span>VREF</span><b id="f9mLdgVref">—</b></div>
+        <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9mLdgLD">—</b></div>
+        <div class="f900b-result"><span>Controlling Comparison</span><b id="f9mLdgRequired">—</b></div>
+        <div class="f900b-result"><span>Runway Remaining</span><b id="f9mLdgMargin">—</b></div>
+        <div class="f900b-result"><span>Approach Climb</span><b id="f9mLdgACG">—</b></div>
+        <div class="f900b-result"><span>Landing Status</span><b id="f9mLdgStatus">—</b></div>
+      </div>
+      <div class="small f900b-source" id="f9mLdgSource">Falcon 900B QRH1 Rev02 • 40° Flaps + Slats landing performance</div>
+    </div>
+
+    <div class="card">
+      <h2>5. Mission → TOLD</h2>
+      <div class="small">Mission assumptions above are synchronized into the TOLD card. Use <b>Open TOLD</b> to review the operational Takeoff → Emergency Return → Destination Landing layout without losing the Mission page.</div>
+      <button type="button" style="margin-top:12px;width:auto" onclick="showPlatformView('told')">Open 900B TOLD</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="f900bView" style="display:none">
+  <div class="f900b-shell">
+    <div class="card">
+      <div class="f900b-titlebar">
+        <div>
+          <h2>Falcon 900B — PERFORMANCE TOLD</h2>
+          <div class="small" id="f9Route">— → —</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button type="button" style="width:auto" onclick="refreshF900B()">Refresh 900B TOLD</button>
+          <button type="button" style="width:auto" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
+          <button type="button" style="width:auto" onclick="completeMission()">Complete &amp; Archive</button>
+        </div>
+      </div>
+      <div class="callout small warn"><b>DEVELOPMENT / VALIDATION ONLY.</b> QRH1 Rev02 data are interpolated only inside published pressure-altitude, temperature and weight cells. Wind and runway-slope corrections are not applied. N699BG aircraft-specific W&amp;B is active using the June 6, 2024 empty-weight revision and DTM9821 Version 11 / no-XTK2 / SB F900-139 loading configuration.</div>
+    </div>
+
+    <div class="told-operational-stack" style="margin-top:14px">
+      <section class="told-op-panel takeoff" aria-labelledby="f9TakeoffHeading">
+        <div class="told-op-head">
+          <div class="told-op-heading"><span class="told-op-number">1</span><div><div class="told-op-title" id="f9TakeoffHeading">TAKEOFF</div><div class="small">Falcon 900B QRH1 50-10 — zero wind and zero runway slope</div></div></div>
+          <span class="told-op-status" id="f9ToStatus">SOURCE LOADING</span>
+        </div>
+        <div class="f900b-inputs">
+          <div><label>Configuration</label><select id="f9ToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
+          <div><label>Anti-Ice</label><select id="f9ToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+          <div><label>Runway</label><select id="f9ToSurface"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
+          <div><label>Runway Available ft</label><input id="f9ToRunway" type="number" min="0" step="1" placeholder="e.g. 7000"></div>
+          <div><label>Pressure Altitude ft</label><input id="f9ToPA" type="number" step="1" placeholder="0 to 6000"></div>
+          <div><label>OAT °C</label><input id="f9ToTemp" type="number" step="0.1" placeholder="published range"></div>
+          <div><label>Takeoff Weight lb</label><input id="f9ToWeight" type="number" min="0" step="10" placeholder="28,000 to 45,500"></div>
+          <div><label>Emergency Return Burn lb</label><input id="f9ReturnBurn" type="number" min="0" step="10" value="500"></div>
+        </div>
+        <div class="f900b-results">
+          <div class="f900b-result"><span>V1</span><b id="f9V1">—</b></div>
+          <div class="f900b-result"><span>VR = V2</span><b id="f9VR">—</b></div>
+          <div class="f900b-result"><span>VFT</span><b id="f9VFT">—</b></div>
+          <div class="f900b-result"><span>VFR</span><b id="f9VFR">—</b></div>
+          <div class="f900b-result"><span>Balanced Field Length</span><b id="f9BFL">—</b></div>
+          <div class="f900b-result"><span>Stabilizer Trim — TO CG</span><b id="f9Trim">—</b></div>
+          <div class="f900b-result"><span>Runway Remaining</span><b id="f9ToMargin">—</b></div>
+          <div class="f900b-result"><span>N1 Single / Channel</span><b id="f9N1">—</b></div>
+          <div class="f900b-result"><span>Second-Segment Gross Gradient</span><b id="f9GCLB2">—</b></div>
+          <div class="f900b-result"><span>Acceleration</span><b id="f9Accel">—</b></div>
+          <div class="f900b-result"><span>Pitch</span><b id="f9Pitch">—</b></div>
+          <div class="f900b-result"><span>Limitation Code</span><b id="f9Limit">—</b></div>
+          <div class="f900b-result"><span>Structural MTOW</span><b>46,500 lb</b></div>
+        </div>
+        <div class="small f900b-source" id="f9ToSource">Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • table loading</div>
+      </section>
+
+      <section class="told-op-panel emergency" aria-labelledby="f9EmergencyHeading">
+        <div class="told-op-head">
+          <div class="told-op-heading"><span class="told-op-number">2</span><div><div class="told-op-title" id="f9EmergencyHeading">EMERGENCY RETURN</div><div class="small">Departure PA/OAT • 40° Flaps + Slats • landing distance × 1.67</div></div></div>
+          <span class="told-op-status" id="f9EmerStatus">—</span>
+        </div>
+        <div class="f900b-inputs">
+          <div><label>Emergency Return Anti-Ice</label><select id="f9EmerAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        </div>
+        <div class="f900b-results">
+          <div class="f900b-result"><span>Return Weight</span><b id="f9EmerWeight">—</b></div>
+          <div class="f900b-result"><span>VREF</span><b id="f9EmerVref" class="told-vspeed valid">—</b></div>
+          <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9EmerLD">—</b></div>
+          <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9EmerRequired">—</b></div>
+          <div class="f900b-result"><span>Runway Available</span><b id="f9EmerAvailable">—</b></div>
+          <div class="f900b-result"><span>Runway Remaining</span><b id="f9EmerMargin">—</b></div>
+          <div class="f900b-result"><span>Approach Climb</span><b id="f9EmerACG">—</b></div>
+          <div class="f900b-result"><span>Landing Climb</span><b id="f9EmerLCG">—</b></div>
+        </div>
+        <div class="small f900b-source" id="f9EmerSource">Falcon 900B QRH1 Rev02 • 50-25</div>
+      </section>
+
+      <section class="told-op-panel landing" aria-labelledby="f9LandingHeading">
+        <div class="told-op-head">
+          <div class="told-op-heading"><span class="told-op-number">3</span><div><div class="told-op-title" id="f9LandingHeading">LANDING — DESTINATION</div><div class="small">40° Flaps + Slats • select the controlling runway-comparison factor</div></div></div>
+          <span class="told-op-status" id="f9LdgStatus">—</span>
+        </div>
+        <div class="f900b-inputs">
+          <div><label>Anti-Ice</label><select id="f9LdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+          <div><label>Pressure Altitude ft</label><input id="f9LdgPA" type="number" step="1" placeholder="0 to 6000"></div>
+          <div><label>OAT °C</label><input id="f9LdgTemp" type="number" step="0.1" placeholder="published range"></div>
+          <div><label>Landing Weight lb</label><input id="f9LdgWeight" type="number" min="0" step="10" placeholder="28,000 to 42,000"></div>
+          <div><label>Runway Available ft</label><input id="f9LdgRunway" type="number" min="0" step="1" placeholder="e.g. 6500"></div>
+          <div><label>Runway Comparison</label><select id="f9LdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
+          <div><label>Landing Mode</label><select id="f9LdgMode"><option value="NORMAL">Normal</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
+          <div><label>HYD #2 Landing Flaps</label><select id="f9Hyd2Flaps"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
+          <div><label>Airbrakes</label><select id="f9Hyd2Airbrake"><option value="AVAILABLE">Available</option><option value="LOST">Lost (+10%)</option></select></div>
+        </div>
+        <div class="f900b-results">
+          <div class="f900b-result"><span>VREF</span><b id="f9LdgVref">—</b></div>
+          <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9LdgLD">—</b></div>
+          <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9Ldg167">—</b></div>
+          <div class="f900b-result"><span>Landing Distance × 1.92</span><b id="f9Ldg192">—</b></div>
+          <div class="f900b-result"><span>Controlling Comparison</span><b id="f9LdgRequired">—</b></div>
+          <div class="f900b-result"><span>Runway Remaining</span><b id="f9LdgMargin">—</b></div>
+          <div class="f900b-result"><span>Approach Climb</span><b id="f9LdgACG">—</b></div>
+          <div class="f900b-result"><span>Landing Climb</span><b id="f9LdgLCG">—</b></div>
+          <div class="f900b-result"><span>Abnormal Penalty</span><b id="f9LdgPenalty">None</b></div>
+        </div>
+        <div class="callout small" style="margin-top:10px"><b>Arrival advisory source loaded:</b> DTM20103 TC0171 / Annex 12. Recommended max crosswind by reported braking action: Good 25 kt • Good-to-Medium 20 kt • Medium 15 kt • Medium-to-Poor 10 kt • Poor 5 kt. Icy runway max crosswind 5 kt. Annex 12 numeric LDTA tables remain source-controlled and are not substituted for QRH1 landing calculations in this build.</div>
+        <div class="small f900b-source" id="f9LdgSource">Falcon 900B QRH1 Rev02 • 50-25 / 50-28 / 50-29</div>
+      </section>
+
+      <section class="told-supporting" aria-labelledby="f9SupportHeading">
+        <h2 id="f9SupportHeading">SUPPORTING DOCUMENTATION</h2>
+        <div class="told-support-note">Performance source set: Falcon 900B QRH1 Performance Rev02 (DGAC18DSOF182A), QRH2 Emergency &amp; Abnormal Procedures (DGAC18DSOF158A), DTM20103 AFM Rev31 source package and temporary changes, DTM9819 Operating Manual Procedures Rev12, DTM9821 Loading Manual Rev59, Falcon Operational Performance Rev4, and TC0171 / TC0190 change-project material. N699BG aircraft-specific W&amp;B is source-controlled to the June 6, 2024 empty-weight revision and DTM9821 Version 11 accommodation, U.S. units, no XTK2 transfer valve, SB F900-139. AFM exact MZFW 30,864 lb controls over the loading-chart rounded 30,870 lb display.</div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div id="archiveView" style="display:none">
+  <div class="card" style="max-width:1050px;margin:0 auto">
+    <div style="display:flex;justify-content:space-between;gap:12px;align-items:center">
+      <div>
+        <h2 style="margin-bottom:4px">Flight Plans</h2>
+        <div class="small">Drafts auto-save locally while you work. Completed plans remain in the Archive.</div>
+      </div>
+      <button type="button" style="width:auto" onclick="renderArchive()">Refresh</button>
+    </div>
