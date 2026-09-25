@@ -606,7 +606,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 
 
-/* v5.25.44 — N699BG Version 11 interactive cabin loading */
+/* v5.25.45 — N699BG Version 11 interactive cabin loading */
 .f9-cabin-shell{max-width:620px;margin:10px auto 4px;padding:14px 18px 18px;border:1px solid #38536f;border-radius:34px 34px 18px 18px;background:linear-gradient(180deg,#0a2034,#071725);position:relative}
 .f9-cabin-shell:before{content:"COCKPIT";display:block;text-align:center;font-size:11px;letter-spacing:.14em;color:#9eb3c8;margin:0 auto 8px}
 .f9-cabin-row{display:grid;grid-template-columns:1fr 52px 1fr;gap:8px;align-items:center;margin:8px 0}
@@ -626,7 +626,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.44</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.45</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -2415,7 +2415,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.44&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.45&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2613,9 +2613,9 @@ function activeAircraftCode(){return window.currentMissionMeta?.aircraft||$("hom
 async function loadF900BWB(){
  if(F900B_WB)return F900B_WB;
  if(F900B_WB_PROMISE)return F900B_WB_PROMISE;
- F900B_WB_PROMISE=fetch(apiUrl('/api/data/f900b_n699bg_wb_v52544'),{cache:'no-store'}).then(async r=>{
+ F900B_WB_PROMISE=fetch(apiUrl('/api/data/f900b_n699bg_wb_v52545'),{cache:'no-store'}).then(async r=>{
    if(!r.ok)throw new Error(`900B W&B data HTTP ${r.status}`);const d=await r.json();
-   if(d?.schema!=="kusa.f900b.n699bg_wb.v5.25.44"||d?.aircraft?.registration!=="N699BG")throw new Error("900B W&B integrity check failed");
+   if(d?.schema!=="kusa.f900b.n699bg_wb.v5.25.43"||d?.aircraft?.registration!=="N699BG"||Number(d?.empty_weight?.weight_lb)!==24431.1)throw new Error(`900B W&B integrity check failed • schema ${d?.schema||"missing"}`);
    F900B_WB=d;return d;
  });return F900B_WB_PROMISE;
 }
@@ -6292,7 +6292,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.44",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.45",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6307,8 +6307,8 @@ async function startupCheck(manual=false){
      const [f9,f9wb]=await Promise.all([loadF900BData(),loadF900BWB()]);
      const perfOk=f9?.takeoff?.length===32&&f9?.landing?.length===8&&f9wb?.aircraft?.registration==="N699BG"&&f9wb?.empty_weight?.weight_lb===24431.10;
      if(ps){ps.textContent=perfOk?"LOADED":"DATA MISSING";ps.className=perfOk?"ok":"bad"}
-     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 + N699BG W&B v5.25.44":"Falcon 900B performance/W&B dataset failed integrity check";
-   }catch(perfError){if(ps){ps.textContent="900B DATA MISSING";ps.className="bad"}if(pn)pn.textContent="N33AP remains available; redeploy the Falcon 900B dataset."}
+     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 + N699BG W&B v5.25.45":"Falcon 900B performance/W&B dataset failed integrity check";
+   }catch(perfError){if(ps){ps.textContent="900B DATA MISSING";ps.className="bad"}if(pn)pn.textContent=`N33AP remains available • 900B load error: ${String(perfError?.message||perfError)}`}
    try{
      await loadF50S20NomographShadow();
      const rg=F50_S20_NOMOGRAPH_SHADOW_REGRESSION;
@@ -6411,7 +6411,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.44",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.45",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
