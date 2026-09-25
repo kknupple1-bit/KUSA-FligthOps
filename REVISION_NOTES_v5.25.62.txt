@@ -1,0 +1,28 @@
+KUSA FlightOps v5.25.62 — Unified FlightOps Visual System
+Date: 2026-09-25
+
+PURPOSE
+This revision is a deliberate visual-system refactor following side-by-side review of the Falcon 900B and Falcon 50 Mission/TOLD recordings. Falcon 50 remains the application visual baseline. Aircraft-specific data may differ; application geometry, palette, typography, semantic colors, card treatment and TOLD presentation must not vary by aircraft.
+
+VISUAL STANDARDIZATION
+- Mission surface width standardized between N33AP and N699BG.
+- TOLD width standardized to the Falcon 50 card width.
+- Card backgrounds, borders, radius, padding and section spacing standardized.
+- Form fields, buttons, inner metric tiles and source-detail panels standardized.
+- Heading, label, supporting-text, metric-value and table typography standardized.
+- Falcon 900B custom result/gate/live panels now use the Falcon 50 panel palette.
+- PASS / CHECK / warning / failure colors now use one shared semantic palette.
+- TOLD operational metric grids, support grids, speed tiles, prep blocks and source-detail rows standardized across aircraft.
+- Falcon 900B TOLD support detail retains aircraft-specific data but uses the same layout/treatment as Falcon 50.
+
+CABIN VISUAL LANGUAGE
+- N699BG keeps the improved aircraft-like Version 11 floorplan geometry.
+- N699BG cabin colors were normalized to the Falcon 50 application palette.
+- N33AP cabin was modernized to the same aircraft-floorplan language: narrower fuselage treatment, cockpit glass, window strips, sidewalls, headrest-like seat geometry and aft taper.
+- N33AP seat mapping, station arms, baggage limits and passenger logic are unchanged.
+
+DATA / MATH
+No aircraft performance tables, V-speeds, landing data, CG limits, W&B station arms, fuel-moment schedules, structural limits, DTM9823 solver surfaces or interpolation rules were changed by this revision.
+
+VALIDATION
+Development / validation only — not approved for flight use.
