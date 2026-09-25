@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.58
+F900B TOLD Support Detail Parity
+
+- Rebuilt Falcon 900B TAKEOFF SUPPORT / SOURCE DETAIL to mirror the Falcon 50 support panel structure.
+- Added airport/runway, runway/condition, wind, OAT/PA, weather source, TOW, FOB verification, CG, configuration, BFL, structural MTOW, DTM9823 wind/slope state, runway margin, source/limit code, OEI gradient, balanced-field ASD, N1, acceleration, pitch, trim, status and full speed block.
+- Rebuilt Falcon 900B DESTINATION LANDING SUPPORT / SOURCE DETAIL to mirror the Falcon 50 landing support panel structure.
+- Preserved Falcon 900B-specific source items and did not invent unsupported maximum-weight or performance values.
+- Clarified interpolated takeoff limit-code display: valid takeoff performance no longer shows generic SOURCE LOCKED merely because a discrete QRH limit-code cell is not published at the interpolated point.
+- No performance tables, W&B station arms, fuel moment points, envelope coordinates, or DTM9823 numeric corrections were changed.
+- Development / validation only; not approved for flight use.

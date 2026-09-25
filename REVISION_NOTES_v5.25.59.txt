@@ -1,0 +1,11 @@
+KUSA FlightOps v5.25.59
+F900B Mission Section Parity
+
+- Reordered Falcon 900B Mission sections to match Falcon 50: 1 Mission Setup, 2 Passenger Seating — Tap to Move, 3 Weather Source / Operational Verification, 4 Mission Results — Decoded Weather, 5 Calculated Weight & Balance, 6 Available Runways, 7 Performance Evaluation.
+- Added Falcon-50-style 16-field Calculated Weight & Balance summary to the Falcon 900B Mission page.
+- Kept the Falcon 900B V-Speed Card as a separate, unnumbered card after Calculated W&B, matching Falcon 50 information architecture.
+- Moved Falcon 900B available-runway table into its own Section 6.
+- Moved departure/destination runway and NOTAM assessments under Section 7 Performance Evaluation, matching Falcon 50 layout.
+- Moved DTM9823 digitization/validation information to Supporting Documentation near the end of the Mission page so it no longer interrupts the numbered operational workflow.
+- No performance tables, W&B station arms, fuel moments, CG-envelope coordinates, or DTM9823 numeric corrections changed.
+- Development / validation only; not approved for flight use.
