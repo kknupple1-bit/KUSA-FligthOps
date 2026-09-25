@@ -1,0 +1,32 @@
+KUSA FlightOps v5.25.52 — Falcon 900B Recovery / Aircraft Profile / Cabin Refinement
+
+1. Restores deterministic N699BG Falcon 900B data delivery:
+   - QRH1 and W&B remain server-fallback protected.
+   - Operational overlays and DTM9823 source register now also have API + static + embedded server fallback delivery.
+   - A missing DTM9823 register no longer falsely reports the QRH1/W&B core as missing.
+   - TOLD takeoff/landing is no longer blocked by an optional abnormal-overlay load failure.
+
+2. Draft resume reliability:
+   - Falcon 900B FOB and mission fuel are stored explicitly in the draft state.
+   - Resume restores both Mission and W&B fuel fields.
+   - Pilot FOB verification is intentionally cleared on resume and must be re-verified.
+
+3. CG presentation:
+   - Removes the intermediate zig-zag/lightning-bolt fuel trace.
+   - Shows a direct Takeoff -> Landing fuel-burn vector; endpoint CGs still use the DTM9821 no-XTK2 fuel moment schedule.
+
+4. Operational gate:
+   - Separates core mission readiness from the DTM9823 wind/slope solver limitation.
+   - READY is allowed when no material wind/slope correction is required and all other gates pass.
+   - LIMITED is shown when wind/slope correction is required but the numeric solver remains validation-locked.
+
+5. Aircraft-specific identity groundwork:
+   - Visible aircraft labels include registration + model (N33AP — Falcon 50-4 / N699BG — Falcon 900B).
+   - Draft/archive records now preserve registration separately from internal aircraft dataset code.
+   - This prepares FlightOps for subscriber aircraft profiles without changing current dataset keys.
+
+6. N699BG cabin layout:
+   - Refined fuselage proportions, cockpit windshield, cabin windows, door marking and aft taper to more closely resemble the uploaded Version 11 accommodation drawing.
+   - W&B station arms and calculations are unchanged.
+
+Development / validation only — not approved for flight use.

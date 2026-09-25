@@ -1,0 +1,12 @@
+v5.25.53 — Falcon 900B DTM9823 Numeric Wind/Slope Solver
+
+- Activates a bounded numeric DTM9823 Section 3A correction solver for Falcon 900B takeoff BFL and V1.
+- Uses directly raster-traced wind and runway-slope correction panels for 20°/7° Flaps+Slats, dry/wet.
+- Solver applies QRH1 Rev02 zero-wind/zero-slope base values, then DTM9823 wind correction followed by slope correction.
+- No extrapolation: wind limited to 10 kt tailwind through 50 kt headwind; slope limited to ±2%; base QRH coverage remains 0–6,000 ft PA and published cells.
+- Adds explicit wind component and runway-slope inputs to 900B Mission/TOLD. Mission auto-populates signed along-runway wind from selected runway weather and runway slope when supplied by runway data.
+- Includes source-raster lookup package f900b_dtm9823_numeric_v52553.json in offline cache and startup integrity checks.
+- Regression anchor: DTM9823 20° dry worked example reproduces approximately 5,943 ft BFL vs 5,930 published and 116.47 kt V1 vs 117.0 published; 20° wet reproduces approximately 5,934 ft vs 5,930 and 107.10 kt vs 107.5. Both are within the established engineering trace tolerances.
+- Retains v5.25.52 recovery fixes (900B data loading, resume-draft fuel persistence, aircraft registration/profile identity, CG burn-vector cleanup).
+
+DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE. AFM/approved operator performance source remains controlling.
