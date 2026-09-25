@@ -1,0 +1,284 @@
+{
+  "schema": "kusa.f50.slats.source_raster_trace_bands.v1",
+  "build": "5.25.32",
+  "aircraft": "Falcon 50 / N33AP",
+  "configuration": "SLATS_ONLY",
+  "status": "EIGHT_POINT_SOURCE_RASTER_ENGINEERING_TRACE_BANDS_REGISTERED_PENDING_PILOT_SECOND_READ",
+  "source": "Dassault DTM813 \u00a75.50.6/.7/.8/.9 source-page raster",
+  "method": [
+    "Trace inputs through the printed nomograph in the published panel order.",
+    "Record an engineering read band rather than a false single-point precision when a printed curve falls between grid lines.",
+    "These bands are independent source-raster reads and are not populated by the FlightOps production interpolation tables.",
+    "A pilot/operator second read is still required before operational promotion."
+  ],
+  "acceptance": {
+    "bfl_engineering_band_halfwidth_ft_typical": 250,
+    "speed_band_halfwidth_kt_typical": 1.5
+  },
+  "cases": [
+    {
+      "id": "SL-R-01",
+      "inputs": {
+        "pa_ft": 0,
+        "sat_c": -20,
+        "weight_lb": 28000,
+        "slope_pct": 1,
+        "wind_type": "HEADWIND",
+        "wind_kt": 20
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          2700,
+          3200
+        ],
+        "v1_kt": [
+          95,
+          98
+        ],
+        "vmbe_kt": [
+          147,
+          152
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-02",
+      "inputs": {
+        "pa_ft": 4000,
+        "sat_c": 20,
+        "weight_lb": 30000,
+        "slope_pct": 0,
+        "wind_type": "CALM",
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          4300,
+          4750
+        ],
+        "v1_kt": [
+          105,
+          107
+        ],
+        "vmbe_kt": [
+          143,
+          147
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-03",
+      "inputs": {
+        "pa_ft": 8000,
+        "sat_c": 10,
+        "weight_lb": 32000,
+        "slope_pct": -1,
+        "wind_type": "TAILWIND",
+        "wind_kt": 5
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          6200,
+          6800
+        ],
+        "v1_kt": [
+          112,
+          115
+        ],
+        "vmbe_kt": [
+          137,
+          142
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-04",
+      "inputs": {
+        "pa_ft": 10000,
+        "sat_c": 20,
+        "weight_lb": 33000,
+        "slope_pct": 1,
+        "wind_type": "HEADWIND",
+        "wind_kt": 10
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          8700,
+          9500
+        ],
+        "v1_kt": [
+          119,
+          123
+        ],
+        "vmbe_kt": [
+          133,
+          138
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-05",
+      "inputs": {
+        "pa_ft": 4000,
+        "sat_c": 0,
+        "weight_lb": 35000,
+        "slope_pct": 0,
+        "wind_type": "HEADWIND",
+        "wind_kt": 20
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          4300,
+          4850
+        ],
+        "v1_kt": [
+          115,
+          118
+        ],
+        "vmbe_kt": [
+          136,
+          140
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-06",
+      "inputs": {
+        "pa_ft": 6000,
+        "sat_c": 10,
+        "weight_lb": 36000,
+        "slope_pct": 1,
+        "wind_type": "CALM",
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          6900,
+          7550
+        ],
+        "v1_kt": [
+          121,
+          125
+        ],
+        "vmbe_kt": [
+          132,
+          136
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-07",
+      "inputs": {
+        "pa_ft": 8000,
+        "sat_c": 20,
+        "weight_lb": 37000,
+        "slope_pct": -1,
+        "wind_type": "TAILWIND",
+        "wind_kt": 5
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          10000,
+          11500
+        ],
+        "v1_kt": [
+          128,
+          133
+        ],
+        "vmbe_kt": [
+          128,
+          133
+        ]
+      },
+      "status": "VMBE_PROXIMITY_ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "SL-R-08",
+      "inputs": {
+        "pa_ft": 10000,
+        "sat_c": 20,
+        "weight_lb": 38000,
+        "slope_pct": 1,
+        "wind_type": "TAILWIND",
+        "wind_kt": 5
+      },
+      "source_read_band": {
+        "bfl_ft": [
+          12500,
+          15000
+        ],
+        "v1_kt": [
+          132,
+          137
+        ],
+        "vmbe_kt": [
+          124,
+          130
+        ]
+      },
+      "status": "SOURCE_LIMIT_VMBE_REVIEW_REQUIRED"
+    }
+  ],
+  "published_exact_anchors": [
+    {
+      "id": "SL-PUB-01",
+      "inputs": {
+        "pa_ft": 4000,
+        "sat_c": 20,
+        "weight_lb": 34400,
+        "slope_pct": -1,
+        "wind_type": "TAILWIND",
+        "wind_kt": 5
+      },
+      "outputs": {
+        "bfl_ft": 6200,
+        "v1_kt": 116,
+        "vmbe_kt": 134,
+        "vr_v2_kt": 127.5
+      },
+      "source": "DTM813 \u00a75.50.5"
+    },
+    {
+      "id": "SL-PUB-02",
+      "inputs": {
+        "pa_ft": 4000,
+        "sat_c": 20,
+        "weight_lb": 39200,
+        "slope_pct": 1,
+        "wind_type": "TAILWIND",
+        "wind_kt": 5
+      },
+      "outputs": {
+        "v1_kt": 132
+      },
+      "source": "DTM813 \u00a75.70.2 referencing \u00a75.50.9"
+    },
+    {
+      "id": "SL-PUB-03",
+      "inputs": {
+        "pa_ft": 4000,
+        "sat_c": 20,
+        "weight_lb": 38000,
+        "slope_pct": 1,
+        "wind_type": "TAILWIND",
+        "wind_kt": 5
+      },
+      "outputs": {
+        "v1_kt": 130
+      },
+      "source": "DTM813 \u00a75.70.2 referencing \u00a75.50.9"
+    }
+  ],
+  "gate": {
+    "engineering_source_trace_cases": 8,
+    "published_exact_anchors": 3,
+    "pilot_second_read_required": true,
+    "operational_engine_active": false
+  }
+}

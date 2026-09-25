@@ -1,0 +1,50 @@
+{
+  "schema": "kusa.f50.slats.validation.phase1.v1",
+  "build": "5.25.29",
+  "aircraft": "Falcon 50 / N33AP",
+  "configuration": "SLATS_ONLY",
+  "status": "DIRECT_SOURCE_PHASE1_ANCHORS_AND_RULES_REGISTERED",
+  "source": {
+    "document": "Dassault DTM813 Airplane Flight Manual",
+    "charts": [
+      {"section":"5.50.6","title":"Balanced Field Length — Slats — Lower Weights","pdf_page":448,"page_revision":29,"anti_ice":"Use dotted altitude/temperature families when anti-icing is ON."},
+      {"section":"5.50.7","title":"Balanced Field Length — Slats — Higher Weights","pdf_page":449,"page_revision":23,"anti_ice":"Use dotted altitude/temperature families when anti-icing is ON."},
+      {"section":"5.50.8","title":"Maximum Brake Energy Speed (VMBE) — Slats","pdf_page":450,"page_revision":23},
+      {"section":"5.50.9","title":"Engine Failure Speed Associated With Balanced Field Length — Slats","pdf_page":451,"page_revision":23}
+    ]
+  },
+  "source_rules": {
+    "v1_min_kt": 91,
+    "anti_ice_v1_correction": [
+      {"pressure_altitude_ft":[0,2000,4000],"add_kt":1},
+      {"pressure_altitude_ft":[6000,8000,10000],"add_kt":2}
+    ],
+    "no_extrapolation_above_stated_source_altitudes": true,
+    "vmbe_required_for_slats": true
+  },
+  "published_numeric_anchors": [
+    {"id":"SLATS-WORKED-001","source":"§5.50.5 worked example","pa_ft":4000,"sat_c":20,"weight_lb":34400,"slope_pct":-1,"wind":{"type":"TAILWIND","kt":5},"bfl_ft":6200,"v1_kt":116,"vmbe_kt":134,"vr_v2_kt":127.5},
+    {"id":"SLATS-VMBE-002","source":"§5.50.1 stopway/clearway worked example","pa_ft":4000,"sat_c":35,"weight_lb":38800,"slope_pct":-1.5,"wind":{"type":"TAILWIND","kt":5},"vmbe_kt":123.5,"selected_v1_kt":123.5,"vr_v2_kt":136,"note":"V1 is VMBE-limited; not a balanced-field §5.50.9 anchor."},
+    {"id":"SLATS-V1-003","source":"§5.70.2 example referencing §5.50.9","pa_ft":4000,"sat_c":20,"weight_lb":39200,"slope_pct":1,"wind":{"type":"TAILWIND","kt":5},"v1_kt":132},
+    {"id":"SLATS-V1-004","source":"§5.70.2 example referencing §5.50.9","pa_ft":4000,"sat_c":20,"weight_lb":38000,"slope_pct":1,"wind":{"type":"TAILWIND","kt":5},"v1_kt":130}
+  ],
+  "validation_gate": {
+    "operational_engine_active": false,
+    "completed": [
+      "Source chart identity and page revisions registered",
+      "Published numeric anchors registered",
+      "Anti-ice V1 correction schedule registered",
+      "V1 minimum registered",
+      "No-extrapolation rule registered"
+    ],
+    "remaining": [
+      "Digitize §5.50.6 lower-weight BFL geometry",
+      "Digitize §5.50.7 higher-weight BFL geometry",
+      "Digitize §5.50.8 VMBE geometry",
+      "Digitize §5.50.9 balanced-field V1 geometry",
+      "Run independent dry lower/higher-weight regression set",
+      "Run anti-ice dotted-family regression set",
+      "Human/pilot chart-trace signoff"
+    ]
+  }
+}

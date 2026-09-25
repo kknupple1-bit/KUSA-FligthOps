@@ -1,0 +1,67 @@
+{
+  "schema": "kusa.f900b.operational_overlays.v5.25.41",
+  "aircraft": "Falcon 900B / SB F900-100 TFE731-5BR applicability must be confirmed where required",
+  "tc0190": {
+    "document": "DTM20103 Temporary Change No 0190",
+    "date": "2024-11-12",
+    "subject": "HYDR #2 PUMP landing distance penalty calculation",
+    "hyd2_loss": {
+      "flap_settings": {
+        "0": {
+          "vref_add_kt": 20,
+          "landing_distance_add_ft": 800,
+          "landing_field_length_add_ft": 1335,
+          "note": "land with slats extended"
+        },
+        "7": {
+          "vref_add_kt": 15,
+          "landing_distance_add_ft": 600,
+          "landing_field_length_add_ft": 1000
+        },
+        "20": {
+          "vref_add_kt": 5,
+          "landing_distance_add_ft": 200,
+          "landing_field_length_add_ft": 335
+        },
+        "40": {
+          "vref_add_kt": 0,
+          "landing_distance_add_ft": 0,
+          "landing_field_length_add_ft": 0
+        }
+      },
+      "airbrake_loss_multiplier": 1.1,
+      "order_of_operations": "Add flap-system landing-distance penalty first, then multiply by 1.10 when airbrake system is lost.",
+      "example": "7 degree final LD = (base LD + 600 ft) x 1.10"
+    }
+  },
+  "tc0171": {
+    "document": "DTM20103 Temporary Change No 171 / Annex 12",
+    "date": "2021-05-05",
+    "subject": "Landing Distance Assessment at Time of Arrival (LDTA)",
+    "us_status": "FAA advisory",
+    "recommended_crosswind_kt": {
+      "GOOD": 25,
+      "GOOD_TO_MEDIUM": 20,
+      "MEDIUM": 15,
+      "MEDIUM_TO_POOR": 10,
+      "POOR": 5
+    },
+    "icy_runway_max_crosswind_kt": 5,
+    "max_contaminant_depth_in": {
+      "standing_water": 0.5,
+      "slush": 0.5,
+      "wet_snow": 1.0,
+      "dry_snow": 1.4
+    },
+    "numeric_ldta_tables_active": false
+  },
+  "dtm9821": {
+    "document": "Falcon 900 Loading Manual DTM9821 Revision 59",
+    "moment_origin": "25% MAC",
+    "moment_origin_from_nose_in": 420.43,
+    "mac_length_in": 113.69,
+    "mac_le_from_nose_in": 392.01,
+    "aircraft_specific_wb_active": false,
+    "reason": "N699BG aircraft-specific basic operating weight/equipment/configuration applicability not yet validated."
+  }
+}

@@ -1,0 +1,392 @@
+{
+  "schema": "kusa.f900b.n699bg_wb.v5.25.43",
+  "aircraft": {
+    "registration": "N699BG",
+    "serial_number": "082",
+    "model": "Falcon 900B",
+    "sb_f900_100": true,
+    "sb_f900_139": true,
+    "xtk2_transfer_valve": false,
+    "accommodation": "Version 11"
+  },
+  "empty_weight": {
+    "date": "2024-06-06",
+    "weight_lb": 24431.1,
+    "arm_in": 3.57,
+    "moment_lb_in": 87205.41
+  },
+  "geometry": {
+    "moment_datum": "25% MAC",
+    "mac_in": 113.69,
+    "percent_mac_per_in": 0.8795848359574281,
+    "pct_mac_formula": "25 + arm_in / 1.1369"
+  },
+  "limits": {
+    "mrw_lb": 46700,
+    "mtow_lb": 46500,
+    "mlw_lb": 42000,
+    "mzfw_lb": 30864,
+    "min_flight_weight_lb": 20700,
+    "fuel_capacity_lb": 19165,
+    "loading_chart_mzfw_display_lb": 30870,
+    "full_fuel_load_limit_lb": 27535
+  },
+  "stations": [
+    {
+      "id": "pilot",
+      "label": "Pilot",
+      "arm_in": -311.18,
+      "default_lb": 170,
+      "max_lb": 300
+    },
+    {
+      "id": "copilot",
+      "label": "Copilot",
+      "arm_in": -311.18,
+      "default_lb": 170,
+      "max_lb": 300
+    },
+    {
+      "id": "crew3",
+      "label": "3rd Crew Member",
+      "arm_in": -274.12,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "bagdocs",
+      "label": "Baggage + Documents",
+      "arm_in": -278.26,
+      "default_lb": 0,
+      "max_lb": 92
+    },
+    {
+      "id": "rightgalley",
+      "label": "Right Galley Stores",
+      "arm_in": -225.0,
+      "default_lb": 0,
+      "max_lb": 200
+    },
+    {
+      "id": "leftgalley",
+      "label": "Left Galley Stores",
+      "arm_in": -223.0,
+      "default_lb": 0,
+      "max_lb": 200
+    },
+    {
+      "id": "pax1",
+      "label": "Passenger 1",
+      "arm_in": -190.88,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax2",
+      "label": "Passenger 2",
+      "arm_in": -190.88,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax3",
+      "label": "Passenger 3",
+      "arm_in": -143.24,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax4",
+      "label": "Passenger 4",
+      "arm_in": -143.24,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax5",
+      "label": "Passenger 5",
+      "arm_in": -89.41,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax6",
+      "label": "Passenger 6",
+      "arm_in": -89.41,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax7",
+      "label": "Passenger 7",
+      "arm_in": -45.0,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax8",
+      "label": "Passenger 8",
+      "arm_in": -45.0,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax9",
+      "label": "Passenger 9",
+      "arm_in": 1.76,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax10",
+      "label": "Passenger 10",
+      "arm_in": 23.53,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax11",
+      "label": "Passenger 11",
+      "arm_in": 27.65,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "pax12",
+      "label": "Passenger 12",
+      "arm_in": 52.94,
+      "default_lb": 0,
+      "max_lb": 300
+    },
+    {
+      "id": "water",
+      "label": "Water",
+      "arm_in": 88.64,
+      "default_lb": 0,
+      "max_lb": 88
+    },
+    {
+      "id": "bagfront",
+      "label": "Front Baggage Compartment",
+      "arm_in": 123.0,
+      "default_lb": 0,
+      "max_lb": 1213
+    },
+    {
+      "id": "bagrear",
+      "label": "Rear Baggage Compartment",
+      "arm_in": 157.0,
+      "default_lb": 0,
+      "max_lb": 1653
+    }
+  ],
+  "fuel_moment_schedule_0deg": [
+    [
+      0,
+      0
+    ],
+    [
+      500,
+      6.7
+    ],
+    [
+      1000,
+      -13.8
+    ],
+    [
+      1500,
+      -14.9
+    ],
+    [
+      2000,
+      -16.3
+    ],
+    [
+      2500,
+      -16.9
+    ],
+    [
+      3000,
+      -16.0
+    ],
+    [
+      3500,
+      -15.7
+    ],
+    [
+      4000,
+      -15.4
+    ],
+    [
+      4500,
+      -77.4
+    ],
+    [
+      5000,
+      -77.2
+    ],
+    [
+      5500,
+      -146.0
+    ],
+    [
+      6000,
+      -146.0
+    ],
+    [
+      6500,
+      -183.7
+    ],
+    [
+      7000,
+      -218.7
+    ],
+    [
+      7500,
+      -211.0
+    ],
+    [
+      8000,
+      -202.0
+    ],
+    [
+      8500,
+      -193.2
+    ],
+    [
+      9000,
+      -183.0
+    ],
+    [
+      9500,
+      -172.5
+    ],
+    [
+      10000,
+      -163.2
+    ],
+    [
+      10500,
+      -162.1
+    ],
+    [
+      11000,
+      -159.1
+    ],
+    [
+      11500,
+      -156.0
+    ],
+    [
+      12000,
+      -150.7
+    ],
+    [
+      12500,
+      -128.1
+    ],
+    [
+      13000,
+      -105.5
+    ],
+    [
+      13500,
+      -96.3
+    ],
+    [
+      14000,
+      -105.7
+    ],
+    [
+      14500,
+      -115.5
+    ],
+    [
+      15000,
+      -125.5
+    ],
+    [
+      15500,
+      -136.1
+    ],
+    [
+      16000,
+      -147.5
+    ],
+    [
+      16500,
+      -196.3
+    ],
+    [
+      17000,
+      -257.4
+    ],
+    [
+      17500,
+      -273.5
+    ],
+    [
+      18000,
+      -290.2
+    ],
+    [
+      18500,
+      -313.2
+    ],
+    [
+      19000,
+      -345.3
+    ],
+    [
+      19165,
+      -347.2
+    ]
+  ],
+  "cg_envelope_pct_mac": [
+    [
+      20700,
+      20.2,
+      27.4
+    ],
+    [
+      27535,
+      19.2,
+      28.0
+    ],
+    [
+      30864,
+      18.5,
+      28.5
+    ],
+    [
+      42000,
+      16.2,
+      29.5
+    ],
+    [
+      46500,
+      15.3,
+      30.3
+    ],
+    [
+      46700,
+      15.2,
+      30.4
+    ]
+  ],
+  "source_notes": [
+    "Empty-weight baseline from Duncan Aviation Calculated Wt & Balance and Equipment List Revision dated June 6, 2024.",
+    "Accommodation and station arms derived from DTM9821 Version 11 Accommodation sheet supplied for N699BG.",
+    "Fuel moment schedule uses the DTM9821 without-XTK2 0-degree pitch-attitude table; interpolation only between published points.",
+    "Structural MZFW uses AFM exact limit 30,864 lb; DTM9821 loading chart displays rounded 30,870 lb.",
+    "CG envelope points are chart-derived from DTM9821 Rev59 Section 7 Page 6C and are intended for working validation; no extrapolation outside published weights."
+  ],
+  "takeoff_trim": {
+    "source": "DTM9819 Revision 12, Section 3, Sub-section 40, Page 3 \u2014 Take-off trim setting for CG position",
+    "cg_min_pct_mac": 14.0,
+    "cg_max_pct_mac": 31.0,
+    "hs_deg_at_fwd": -7.5,
+    "hs_deg_at_aft": -4.5,
+    "method": "linear interpolation along published straight-line figure; display to 0.1 degree"
+  }
+}
