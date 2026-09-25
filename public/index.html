@@ -606,19 +606,37 @@ details summary{cursor:pointer;margin-top:8px}
 }
 
 
-/* v5.25.45 — N699BG Version 11 interactive cabin loading */
-.f9-cabin-shell{max-width:620px;margin:10px auto 4px;padding:14px 18px 18px;border:1px solid #38536f;border-radius:34px 34px 18px 18px;background:linear-gradient(180deg,#0a2034,#071725);position:relative}
-.f9-cabin-shell:before{content:"COCKPIT";display:block;text-align:center;font-size:11px;letter-spacing:.14em;color:#9eb3c8;margin:0 auto 8px}
-.f9-cabin-row{display:grid;grid-template-columns:1fr 52px 1fr;gap:8px;align-items:center;margin:8px 0}
-.f9-cabin-aisle{text-align:center;color:#55718d;font-size:10px;letter-spacing:.08em}
-.f9-seat{border:1px solid #456784;border-radius:12px;padding:7px;background:#0d2a43;min-height:62px}
-.f9-seat label{display:flex;justify-content:space-between;gap:6px;font-size:11px;margin:0 0 5px;color:#c8d6e4}
-.f9-seat label span{color:#829bb2;font-size:10px}
-.f9-seat input{width:100%;box-sizing:border-box;text-align:center;font-weight:700}
-.f9-seat.divan{background:#102c44}
-.f9-cabin-zone{font-size:10px;text-align:center;color:#7893aa;margin:3px 0}
+/* v5.25.46 — source-aligned cabin floorplans */
+.f9-cabin-shell{max-width:720px;margin:12px auto 6px;padding:58px 34px 34px;border:2px solid #385f83;border-radius:46% 46% 30px 30px / 90px 90px 28px 28px;background:linear-gradient(180deg,#0a2034,#071725);position:relative;overflow:hidden}
+.f9-cabin-shell:before{content:"N699BG • VERSION 11";position:absolute;top:15px;left:0;right:0;text-align:center;font-size:11px;letter-spacing:.14em;color:#9eb3c8;font-weight:800}
+.f9-centerline{position:absolute;top:54px;bottom:32px;left:50%;border-left:1px dashed #355878;opacity:.65;pointer-events:none}
+.f9-zone-label{text-align:center;font-size:10px;letter-spacing:.11em;color:#7893aa;margin:8px 0 5px;font-weight:800}
+.f9-flightdeck{display:grid;grid-template-columns:1fr 1fr;gap:54px;width:66%;margin:0 auto 10px;position:relative;z-index:2}
+.f9-cockpit-seat{border:2px solid #496f94;border-radius:16px 16px 10px 10px;background:#102f51;padding:8px;min-height:76px;text-align:center}
+.f9-cockpit-seat b{font-size:11px;display:block;margin-bottom:5px}.f9-cockpit-seat input{width:100%;text-align:center;font-weight:700}
+.f9-forward-service{display:grid;grid-template-columns:1fr 1fr;gap:54px;margin:4px 0 10px;position:relative;z-index:2}
+.f9-service-stack{display:grid;gap:8px}.f9-fixture{border:1px dashed #3d6384;border-radius:10px;background:#0a263f;padding:8px;text-align:center;min-height:52px;font-size:10px;color:#a6bad0;display:flex;flex-direction:column;justify-content:center}
+.f9-fixture label{font-size:10px;margin-bottom:4px}.f9-fixture input{width:100%;text-align:center}
+.f9-seat-row{display:grid;grid-template-columns:1fr 54px 1fr;gap:9px;align-items:center;margin:9px 0;position:relative;z-index:2}
+.f9-aisle{text-align:center;color:#55718d;font-size:9px;letter-spacing:.09em}
+.f9-seat{border:2px solid #456b8e;border-radius:16px 16px 10px 10px;padding:8px;background:#0d2a43;min-height:68px;box-shadow:inset 0 -7px 0 rgba(255,255,255,.02)}
+.f9-seat label{display:flex;justify-content:space-between;gap:6px;font-size:11px;margin:0 0 5px;color:#d1dfeb}.f9-seat label span{color:#829bb2;font-size:10px}.f9-seat input{width:100%;box-sizing:border-box;text-align:center;font-weight:700}
+.f9-cabinet{border:1px dashed #365b7d;border-radius:9px;background:#08223a;color:#819bb2;font-size:9px;text-align:center;padding:8px;position:relative;z-index:2}
+.f9-mid-row{display:grid;grid-template-columns:1fr 54px 1fr;gap:9px;align-items:center;margin:5px 0;position:relative;z-index:2}
+.f9-aft-lounge{display:grid;grid-template-columns:1.08fr 54px 1fr;gap:9px;align-items:stretch;margin:8px 0;position:relative;z-index:2}
+.f9-divan{border:2px solid #557897;border-radius:10px;background:#102c44;padding:6px;display:grid;grid-template-rows:repeat(3,1fr);gap:5px}
+.f9-divan .f9-seat{min-height:58px;border-radius:8px;border-width:1px}
+.f9-aft-right{display:grid;grid-template-rows:auto 1fr auto;gap:8px}.f9-aft-right .f9-fixture{min-height:48px}
+.f9-baggage-deck{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #31506f;position:relative;z-index:2}.f9-baggage-deck .f9-fixture{min-height:76px}
 .f9-trim-good{color:#55d38a!important}.f9-trim-warn{color:#f3c95b!important}
-@media(max-width:700px){.f9-cabin-shell{padding:12px 10px}.f9-cabin-row{grid-template-columns:1fr 34px 1fr}}
+/* Falcon 50 source-profile visual refinements */
+.floorplan-cabin{background:linear-gradient(180deg,#081f39 0%,#071a30 65%,#061526 100%);border-radius:48% 48% 28px 28px / 104px 104px 30px 30px}
+.floorplan-cabin:before,.floorplan-cabin:after{content:"";position:absolute;left:18px;right:18px;border-top:1px solid rgba(91,126,158,.28)}
+.floorplan-cabin:before{top:338px}.floorplan-cabin:after{bottom:155px}
+.tap-seat{position:relative;clip-path:polygon(12% 0,88% 0,100% 16%,100% 100%,0 100%,0 16%)}
+.tap-seat:after{content:"";position:absolute;left:14%;right:14%;bottom:8px;border-top:1px solid rgba(255,255,255,.10)}
+.aft-service-fp .lav-fp{min-height:82px}.service-grid-fp .fixture{letter-spacing:.04em}
+@media(max-width:700px){.f9-cabin-shell{padding:52px 12px 26px}.f9-flightdeck{width:78%;gap:28px}.f9-forward-service,.f9-seat-row,.f9-mid-row,.f9-aft-lounge{grid-template-columns:1fr 34px 1fr;gap:6px}.f9-forward-service{gap:28px}.f9-seat{padding:6px}.f9-cockpit-seat{min-height:70px}}
 
 </style>
 <link rel="manifest" href="/manifest.webmanifest">
@@ -626,7 +644,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.45</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.46</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">Falcon 50-4 + Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1785,32 +1803,51 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div><label>Trip Fuel Burn lb</label><input id="f9wbTripBurn" type="number" min="0" step="10" value="3000" oninput="f9RecalcWB()"></div>
         <div><label>Landing Fuel lb — AUTO</label><input id="f9wbLandingFuel" readonly></div>
       </div>
-      <h3 style="margin-top:14px">Crew / Cabin Load</h3>
-      <div class="f900b-inputs" id="f9wbLoadInputs">
-        <div><label>Pilot lb</label><input id="f9wb_pilot" type="number" min="0" step="1" value="170" oninput="f9RecalcWB()"></div>
-        <div><label>Copilot lb</label><input id="f9wb_copilot" type="number" min="0" step="1" value="170" oninput="f9RecalcWB()"></div>
-        <div><label>3rd Crew lb</label><input id="f9wb_crew3" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
-        <div><label>Baggage + Docs lb</label><input id="f9wb_bagdocs" type="number" min="0" max="92" step="1" value="0" oninput="f9RecalcWB()"></div>
-        <div><label>Right Galley Stores lb</label><input id="f9wb_rightgalley" type="number" min="0" max="200" step="1" value="0" oninput="f9RecalcWB()"></div>
-        <div><label>Left Galley Stores lb</label><input id="f9wb_leftgalley" type="number" min="0" max="200" step="1" value="0" oninput="f9RecalcWB()"></div>
-      </div>
-      <h3 style="margin-top:14px">Passengers — N699BG Version 11 Cabin</h3>
-      <div class="small" style="margin-bottom:6px">Enter actual occupant weight at the physical seat position. Arms are source-controlled to DTM9821 Version 11.</div>
-      <div class="f9-cabin-shell" aria-label="N699BG Version 11 passenger cabin loading">
-        <div class="f9-cabin-row"><div class="f9-seat"><label>Seat 1 <span>−190.88 in</span></label><input id="f9wb_pax1" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div class="f9-seat"><label>Seat 2 <span>−190.88 in</span></label><input id="f9wb_pax2" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
-        <div class="f9-cabin-row"><div class="f9-seat"><label>Seat 3 <span>−143.24 in</span></label><input id="f9wb_pax3" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div class="f9-seat"><label>Seat 4 <span>−143.24 in</span></label><input id="f9wb_pax4" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
-        <div class="f9-cabin-row"><div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input id="f9wb_pax5" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input id="f9wb_pax6" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
-        <div class="f9-cabin-row"><div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input id="f9wb_pax7" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input id="f9wb_pax8" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
-        <div class="f9-cabin-zone">AFT LOUNGE / DIVAN AREA</div>
-        <div class="f9-cabin-row"><div class="f9-seat divan"><label>Seat 9 <span>+1.76 in</span></label><input id="f9wb_pax9" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div class="f9-seat"><label>Seat 10 <span>+23.53 in</span></label><input id="f9wb_pax10" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
-        <div class="f9-cabin-row"><div class="f9-seat divan"><label>Seat 11 <span>+27.65 in</span></label><input id="f9wb_pax11" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div></div></div>
-        <div class="f9-cabin-row"><div class="f9-seat divan"><label>Seat 12 <span>+52.94 in</span></label><input id="f9wb_pax12" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-cabin-aisle">AISLE</div><div></div></div>
+      <h3 style="margin-top:14px">Crew / Cabin Load — N699BG Version 11</h3>
+      <div class="small" style="margin-bottom:8px">Source-aligned top-down layout based on the uploaded DTM9821 Version 11 accommodation drawing. Enter actual weight at the physical position; calculation arms remain source-controlled.</div>
+      <div class="f9-cabin-shell" aria-label="N699BG Version 11 source-aligned cabin loading">
+        <div class="f9-centerline"></div>
+        <div class="f9-zone-label">FLIGHT DECK</div>
+        <div class="f9-flightdeck">
+          <div class="f9-cockpit-seat"><b>PILOT • −311.18 in</b><input id="f9wb_pilot" type="number" min="0" step="1" value="170" oninput="f9RecalcWB()"></div>
+          <div class="f9-cockpit-seat"><b>COPILOT • −311.18 in</b><input id="f9wb_copilot" type="number" min="0" step="1" value="170" oninput="f9RecalcWB()"></div>
+        </div>
+        <div class="f9-forward-service">
+          <div class="f9-service-stack">
+            <div class="f9-fixture"><label>3RD CREW • −274.12 in</label><input id="f9wb_crew3" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-fixture"><label>BAGGAGE + DOC • −278.26 in</label><input id="f9wb_bagdocs" type="number" min="0" max="92" step="1" value="0" oninput="f9RecalcWB()"></div>
+          </div>
+          <div class="f9-service-stack">
+            <div class="f9-fixture"><label>RIGHT GALLEY • −225.0 in</label><input id="f9wb_rightgalley" type="number" min="0" max="200" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-fixture"><label>LEFT GALLEY • −223.0 in</label><input id="f9wb_leftgalley" type="number" min="0" max="200" step="1" value="0" oninput="f9RecalcWB()"></div>
+          </div>
+        </div>
+        <div class="f9-zone-label">FORWARD LOUNGE</div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 1 <span>−190.88 in</span></label><input id="f9wb_pax1" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 2 <span>−190.88 in</span></label><input id="f9wb_pax2" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-mid-row"><div></div><div class="f9-aisle"></div><div class="f9-cabinet">VIDEO CABINET</div></div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 3 <span>−143.24 in</span></label><input id="f9wb_pax3" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 4 <span>−143.24 in</span></label><input id="f9wb_pax4" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-zone-label">MID CABIN</div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input id="f9wb_pax5" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input id="f9wb_pax6" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-mid-row"><div class="f9-cabinet">MID-CABIN CABINET</div><div class="f9-aisle"></div><div></div></div>
+        <div class="f9-seat-row"><div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input id="f9wb_pax7" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input id="f9wb_pax8" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div></div>
+        <div class="f9-zone-label">AFT LOUNGE / SIDE SOFA</div>
+        <div class="f9-aft-lounge">
+          <div class="f9-divan">
+            <div class="f9-seat"><label>Seat 9 <span>+1.76 in</span></label><input id="f9wb_pax9" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-seat"><label>Seat 11 <span>+27.65 in</span></label><input id="f9wb_pax11" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+            <div class="f9-seat"><label>Seat 12 <span>+52.94 in</span></label><input id="f9wb_pax12" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div>
+          </div>
+          <div class="f9-aisle">AISLE</div>
+          <div class="f9-aft-right"><div class="f9-cabinet">CABINET</div><div class="f9-seat"><label>Seat 10 <span>+23.53 in</span></label><input id="f9wb_pax10" type="number" min="0" step="1" value="0" oninput="f9RecalcWB()"></div><div class="f9-fixture">AFT LAV</div></div>
+        </div>
+        <div class="f9-baggage-deck">
+          <div class="f9-fixture"><label>FRONT BAGGAGE</label><input id="f9wb_bagfront" type="number" min="0" max="1213" step="1" value="0" oninput="f9RecalcWB()"></div>
+          <div class="f9-fixture"><label>REAR BAGGAGE</label><input id="f9wb_bagrear" type="number" min="0" max="1653" step="1" value="0" oninput="f9RecalcWB()"></div>
+        </div>
       </div>
       <h3 style="margin-top:14px">Aft / Baggage Loads</h3>
       <div class="f900b-inputs">
         <div><label>Water lb</label><input id="f9wb_water" type="number" min="0" max="88" step="1" value="0" oninput="f9RecalcWB()"></div>
-        <div><label>Front Baggage lb</label><input id="f9wb_bagfront" type="number" min="0" max="1213" step="1" value="0" oninput="f9RecalcWB()"></div>
-        <div><label>Rear Baggage lb</label><input id="f9wb_bagrear" type="number" min="0" max="1653" step="1" value="0" oninput="f9RecalcWB()"></div>
       </div>
       <div class="f900b-results" style="margin-top:14px">
         <div class="f900b-result"><span>Zero Fuel Weight</span><b id="f9wbZFW">—</b></div>
@@ -2415,7 +2452,7 @@ function f50RunShadowRegression(){
 async function loadF50S20NomographShadow(){
   if(F50_S20_NOMOGRAPH_SHADOW)return F50_S20_NOMOGRAPH_SHADOW;
   if(!F50_S20_NOMOGRAPH_SHADOW_PROMISE){
-    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.45&t=${Date.now()}`;
+    const url=apiUrl('/api/data/f50_s20_nomograph_rev31')+`?build=5.25.46&t=${Date.now()}`;
     F50_S20_NOMOGRAPH_SHADOW_PROMISE=fetch(url,{cache:'no-store',headers:{'Cache-Control':'no-cache'}}).then(async r=>{
       if(!r.ok)throw new Error(`S20 nomograph dataset HTTP ${r.status} at ${r.url||url}`);
       const ct=String(r.headers.get('content-type')||'');
@@ -2613,11 +2650,11 @@ function activeAircraftCode(){return window.currentMissionMeta?.aircraft||$("hom
 async function loadF900BWB(){
  if(F900B_WB)return F900B_WB;
  if(F900B_WB_PROMISE)return F900B_WB_PROMISE;
- F900B_WB_PROMISE=fetch(apiUrl('/api/data/f900b_n699bg_wb_v52545'),{cache:'no-store'}).then(async r=>{
-   if(!r.ok)throw new Error(`900B W&B data HTTP ${r.status}`);const d=await r.json();
+ F900B_WB_PROMISE=(async()=>{let d=null,err=null;try{const r=await fetch(apiUrl('/api/data/f900b_n699bg_wb_v52545'),{cache:'no-store'});if(!r.ok)throw new Error(`900B W&B API HTTP ${r.status}`);d=await r.json()}catch(e){err=e;const r=await fetch('/data/f900b_n699bg_wb_v52543.json');if(!r.ok)throw new Error(`900B W&B API/static unavailable: ${err?.message||err} / HTTP ${r.status}`);d=await r.json()}
+
    if(d?.schema!=="kusa.f900b.n699bg_wb.v5.25.43"||d?.aircraft?.registration!=="N699BG"||Number(d?.empty_weight?.weight_lb)!==24431.1)throw new Error(`900B W&B integrity check failed • schema ${d?.schema||"missing"}`);
    F900B_WB=d;return d;
- });return F900B_WB_PROMISE;
+ })();return F900B_WB_PROMISE;
 }
 function f9WBInterpSchedule(schedule,w){
  if(!Array.isArray(schedule)||!Number.isFinite(w)||w<schedule[0][0]||w>schedule[schedule.length-1][0])return null;
@@ -2652,10 +2689,10 @@ async function f9RecalcWB(){
 
 async function loadF900BData(){
  if(F900B_QRH)return F900B_QRH;
- if(!F900B_LOAD_PROMISE)F900B_LOAD_PROMISE=fetch(apiUrl("/api/data/f900b_qrh_rev02"),{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(`900B dataset HTTP ${r.status}`);return r.json()}).then(d=>{
+ if(!F900B_LOAD_PROMISE)F900B_LOAD_PROMISE=(async()=>{let d=null,apiErr=null;try{const r=await fetch(apiUrl("/api/data/f900b_qrh_rev02"),{cache:"no-store"});if(!r.ok)throw new Error(`HTTP ${r.status}`);d=await r.json()}catch(e){apiErr=e;const r=await fetch("/data/f900b_qrh_rev02.json");if(!r.ok)throw new Error(`900B API/static unavailable: ${apiErr?.message||apiErr} / HTTP ${r.status}`);d=await r.json()}
    if(d?.source?.document_id!=="DGAC18DSOF182A"||d?.source?.revision!=="Rev02"||d?.takeoff?.length!==32||d?.landing?.length!==8)throw new Error("900B dataset integrity check failed");
    F900B_QRH=d;return d;
- }).catch(e=>{F900B_LOAD_PROMISE=null;throw e});
+ })().catch(e=>{F900B_LOAD_PROMISE=null;throw e});
  return F900B_LOAD_PROMISE;
 }
 function f9Num(id){const v=$(id)?.value;return v===""||v==null?null:Number(v)}
@@ -6292,7 +6329,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.45",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.46",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6307,7 +6344,7 @@ async function startupCheck(manual=false){
      const [f9,f9wb]=await Promise.all([loadF900BData(),loadF900BWB()]);
      const perfOk=f9?.takeoff?.length===32&&f9?.landing?.length===8&&f9wb?.aircraft?.registration==="N699BG"&&f9wb?.empty_weight?.weight_lb===24431.10;
      if(ps){ps.textContent=perfOk?"LOADED":"DATA MISSING";ps.className=perfOk?"ok":"bad"}
-     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 + N699BG W&B v5.25.45":"Falcon 900B performance/W&B dataset failed integrity check";
+     if(pn)pn.textContent=perfOk?"N33AP AFM/AFMS + Falcon 900B QRH1 Rev02 + N699BG W&B v5.25.46":"Falcon 900B performance/W&B dataset failed integrity check";
    }catch(perfError){if(ps){ps.textContent="900B DATA MISSING";ps.className="bad"}if(pn)pn.textContent=`N33AP remains available • 900B load error: ${String(perfError?.message||perfError)}`}
    try{
      await loadF50S20NomographShadow();
@@ -6411,7 +6448,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.45",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.46",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
