@@ -648,8 +648,8 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{padding:52px 12px 26px}.f9-flightdeck{width:78%;gap:28px}.f9-forward-service,.f9-seat-row,.f9-mid-row,.f9-aft-lounge{grid-template-columns:1fr 34px 1fr;gap:6px}.f9-forward-service{gap:28px}.f9-seat{padding:6px}.f9-cockpit-seat{min-height:70px}}
 
 
-/* v5.25.56 — 900B CG/pax/status/gate corrections */
-/* v5.25.56 — source-like N699BG fuselage presentation */
+/* v5.25.57 — 900B CG/pax/status/gate corrections */
+/* v5.25.57 — source-like N699BG fuselage presentation */
 .f9-cabin-shell{clip-path:polygon(38% 0,62% 0,78% 5%,88% 12%,93% 23%,96% 38%,96% 82%,88% 94%,67% 100%,33% 100%,12% 94%,4% 82%,4% 38%,7% 23%,12% 12%,22% 5%);border-radius:0!important;padding-top:88px!important;padding-bottom:78px!important}
 .f9-cabin-shell:after{display:none!important}
 .f9-nose-glass{top:42px!important}.f9-centerline{opacity:.28}.f9-zone-label{letter-spacing:.12em}
@@ -672,7 +672,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.56</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.57</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1828,8 +1828,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card" id="f9mOperationalDataCard">
-      <h2>2. Flight Data / Operational Verification</h2>
-      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.56</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+      <h2>3. Weather Source / Operational Verification</h2>
+      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.57</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
       <div class="row" style="margin-top:10px">
         <div><label>Fuel on Board lb</label><input id="f9mFOB" type="number" min="0" max="19165" step="10" readonly></div>
         <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" type="number" min="0" step="10" readonly></div>
@@ -1867,8 +1867,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card" id="f9mDigitizationCard">
-      <h2>3. DTM9823 Takeoff Digitization / Validation</h2>
-      <div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.56 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+      <h2>SUPPORTING DOCUMENTATION — DTM9823 Digitization / Validation</h2>
+      <div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.57 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
       <div class="f9-parity-grid" style="margin-top:12px">
         <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
         <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -1881,7 +1881,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card" id="f9mWBCard">
-      <h2>4. N699BG Aircraft Loading / Weight &amp; Balance</h2>
+      <h2>2. Passenger Seating / Calculated Weight &amp; Balance — Tap to Move</h2>
       <div class="callout small">Current aircraft baseline: <b>24,431.10 lb</b> • arm <b>3.57 in</b> • moment <b>87,205.41 lb-in</b>. Limits: MRW 46,700 • MTOW 46,500 • MLW 42,000 • MZFW 30,864 lb. Fuel moment uses DTM9821 no-XTK2 published points only.</div>
       <div class="row" style="margin-top:10px">
         <div><label>Fuel on Board lb</label><input id="f9wbFuel" type="number" min="0" max="19165" step="10" value="8000" oninput="f9FuelPlanChanged('fob')"></div>
@@ -1959,16 +1959,16 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <div class="wx"><div class="small">Takeoff Envelope</div><b id="f9cgToLimits">—</b><div class="small" id="f9cgToMargin">—</div></div>
           <div class="wx"><div class="small">Landing Envelope</div><b id="f9cgLdgLimits">—</b><div class="small" id="f9cgLdgMargin">—</div></div>
           <div class="wx"><div class="small">Trace Status</div><b id="f9cgTraceStatus">TO → LDG FUEL-BURN VECTOR</b><div class="small">DTM9821-style orientation: weight increases downward; %MAC increases left-to-right. Endpoint CGs use Rev 59 no-XTK2 fuel moments.</div></div>
-          <div class="wx"><div class="small">Envelope Status</div><b id="f9cgEnvelopeStatus">—</b><div class="small">ZFW • Ramp • Takeoff • Landing</div></div>
+          <div class="wx"><div class="small">Envelope Status</div><b id="f9cgEnvelopeStatus">—</b><div class="small">Takeoff → Landing controls flight-envelope gate • ZFW/Ramp shown as loading references</div></div>
         </div>
-        <div class="callout small" style="margin-top:12px">The Falcon 900B chart now uses the same presentation concept as the Falcon 50. FWD and AFT CG boundaries are equal hard limits and therefore use the same neutral limit color; the shaded area between them is the allowable envelope. ZFW and ramp are standalone loading-state markers. Only Takeoff → Landing is connected as the in-flight fuel-burn vector. DTM9821 Rev59 is controlling; no extrapolation outside the published envelope.</div>
+        <div class="callout small" style="margin-top:12px">The Falcon 900B chart now uses the same presentation concept as the Falcon 50. FWD and AFT CG boundaries are equal hard limits and therefore use the same neutral limit color; the shaded area between them is the allowable envelope. ZFW and ramp are standalone loading-state references and do not by themselves fail the in-flight CG gate. Only the Takeoff → Landing fuel-burn path controls the flight-envelope check. DTM9821 Rev59 is controlling; no extrapolation outside the published envelope.</div>
       </div>
       <details style="margin-top:12px"><summary class="small"><b>Loading detail / source-controlled arms</b></summary><table style="margin-top:8px"><thead><tr><th>Station</th><th>Weight</th><th>Arm</th><th>Moment</th></tr></thead><tbody id="f9wbDetail"></tbody></table></details>
       <div class="small f900b-source" id="f9wbSource">N699BG • Duncan W&amp;B 06/06/2024 • DTM9821 Rev59 / Version 11 • no XTK2 • SB F900-139 • DTM9819 Rev12 §3-40 takeoff trim</div>
     </div>
 
     <div class="card" id="f9mWeatherParityCard">
-      <h2>4. Mission Results — Weather / Airport / Runway</h2>
+      <h2>4. Mission Results — Decoded Weather / Airport / Runway</h2>
       <div class="small">Uses the same FlightOps airport/weather backend as the Falcon 50. Live weather is never substituted by cached data without being labeled as cached/stale.</div>
       <div class="row" style="margin-top:10px">
         <div class="wx decoded-weather"><div class="small"><b>Departure — METAR</b></div><div id="f9mDepMetarDecoded" class="decoded-text">—</div><details><summary class="small">Raw METAR</summary><div class="raw small" id="f9mDepMetarRaw">—</div></details></div>
@@ -1987,7 +1987,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card" id="f9mSpeedCard">
-      <h2>5. V-Speed / Takeoff Card</h2>
+      <h2>5. Calculated Performance — V-Speed Card</h2>
       <div class="row">
         <div class="wx"><div class="small">V1</div><b id="f9pV1">—</b></div>
         <div class="wx"><div class="small">VR = V2</div><b id="f9pVR">—</b></div>
@@ -2003,7 +2003,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card" id="f9mNotamParityCard">
-      <h2>6. Runway / NOTAM Assessments</h2>
+      <h2>6. Available Runways / Runway &amp; NOTAM Assessments</h2>
       <div class="f9-live-grid">
         <div class="f9-live-panel"><b>DEPARTURE RUNWAY / NOTAM</b><div class="small" id="f9mDepNotamDetail">No departure NOTAM data loaded.</div><div class="small" id="f9mDepUsableDetail" style="margin-top:8px">—</div></div>
         <div class="f9-live-panel"><b>DESTINATION RUNWAY / NOTAM</b><div class="small" id="f9mDestNotamDetail">No destination NOTAM data loaded.</div><div class="small" id="f9mDestUsableDetail" style="margin-top:8px">—</div></div>
@@ -2011,7 +2011,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card">
-      <h2>7. Departure Performance Planning</h2>
+      <h2>7. Performance Evaluation — Takeoff</h2>
       <div class="f900b-inputs">
         <div><label>Takeoff Configuration</label><select id="f9mToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
         <div><label>Anti-Ice</label><select id="f9mToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
@@ -2024,8 +2024,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div><label>Recalculate</label><button type="button" onclick="refreshF900BMission()">Refresh Mission Performance</button></div>
       </div>
       <div class="f900b-results">
-        <div class="f900b-result"><span>V1</span><b id="f9mV1">—</b></div>
-        <div class="f900b-result"><span>VR = V2</span><b id="f9mVR">—</b></div>
+        <div class="f900b-result"><span>V1</span><b id="f9mV1" class="told-vspeed valid">—</b></div>
+        <div class="f900b-result"><span>VR = V2</span><b id="f9mVR" class="told-vspeed valid">—</b></div>
         <div class="f900b-result"><span>Balanced Field Length</span><b id="f9mBFL">—</b></div>
         <div class="f900b-result"><span>Stabilizer Trim — AUTO</span><b id="f9mTrim">—</b></div>
         <div class="f900b-result"><span>Runway Remaining</span><b id="f9mToMargin">—</b></div>
@@ -2033,8 +2033,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div class="f900b-result"><span>N1 S/C</span><b id="f9mN1">—</b></div>
         <div class="f900b-result"><span>Acceleration</span><b id="f9mAccel">—</b></div>
         <div class="f900b-result"><span>Recommended Pitch</span><b id="f9mPitch">—</b></div>
-        <div class="f900b-result"><span>VFT</span><b id="f9mVFT">—</b></div>
-        <div class="f900b-result"><span>VFR</span><b id="f9mVFR">—</b></div>
+        <div class="f900b-result"><span>VFT</span><b id="f9mVFT" class="told-vspeed valid">—</b></div>
+        <div class="f900b-result"><span>VFR</span><b id="f9mVFR" class="told-vspeed valid">—</b></div>
         <div class="f900b-result"><span>Limiting Code</span><b id="f9mLimit">—</b></div>
         <div class="f900b-result"><span>Takeoff Status</span><b id="f9mToStatus">—</b></div>
       </div>
@@ -2042,11 +2042,11 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card">
-      <h2>8. Emergency Return — Departure Environment</h2>
+      <h2>Emergency Return — Departure Runway / Environment</h2>
       <div class="small">Uses calculated takeoff weight less the selected emergency-return burn, departure pressure altitude/OAT, and the controlling departure runway. This remains tied to the same source-bounded Falcon 900B landing dataset.</div>
       <div class="f900b-results" style="margin-top:12px">
         <div class="f900b-result"><span>Return Weight</span><b id="f9mEmerWeight">—</b></div>
-        <div class="f900b-result"><span>VREF</span><b id="f9mEmerVref">—</b></div>
+        <div class="f900b-result"><span>VREF</span><b id="f9mEmerVref" class="told-vspeed emergency-value valid">—</b></div>
         <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9mEmerLD">—</b></div>
         <div class="f900b-result"><span>Required ×1.67</span><b id="f9mEmerRequired">—</b></div>
         <div class="f900b-result"><span>Runway Remaining</span><b id="f9mEmerMargin">—</b></div>
@@ -2058,7 +2058,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
     </div>
 
     <div class="card">
-      <h2>9. Destination Landing Planning</h2>
+      <h2>Performance Evaluation — Destination Landing</h2>
       <div class="f900b-inputs">
         <div><label>Anti-Ice</label><select id="f9mLdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
         <div><label>Pressure Altitude ft</label><input id="f9mLdgPA" type="number" step="1" placeholder="0 to 6000"></div>
@@ -2070,18 +2070,19 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div><label>Airbrakes</label><select id="f9mHyd2Airbrake"><option value="AVAILABLE">Available</option><option value="LOST">Lost (+10%)</option></select></div>
       </div>
       <div class="f900b-results">
-        <div class="f900b-result"><span>VREF</span><b id="f9mLdgVref">—</b></div>
+        <div class="f900b-result"><span>VREF</span><b id="f9mLdgVref" class="told-vspeed valid">—</b></div>
         <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9mLdgLD">—</b></div>
         <div class="f900b-result"><span>Controlling Comparison</span><b id="f9mLdgRequired">—</b></div>
         <div class="f900b-result"><span>Runway Remaining</span><b id="f9mLdgMargin">—</b></div>
         <div class="f900b-result"><span>Approach Climb</span><b id="f9mLdgACG">—</b></div>
+        <div class="f900b-result"><span>Landing Climb</span><b id="f9mLdgLCG">—</b></div>
         <div class="f900b-result"><span>Landing Status</span><b id="f9mLdgStatus">—</b></div>
       </div>
       <div class="small f900b-source" id="f9mLdgSource">Falcon 900B QRH1 Rev02 • 40° Flaps + Slats landing performance</div>
     </div>
 
     <div class="card" id="f9mMissionSummaryCard">
-      <h2>Mission Summary / Limits</h2>
+      <h2>Aircraft Reference / Mission Summary / Limits / System Status</h2>
       <div class="row">
         <div class="wx"><div class="small">ZFW</div><b id="f9sZFW">—</b><div class="small">MZFW 30,864 lb</div></div>
         <div class="wx"><div class="small">Ramp</div><b id="f9sRamp">—</b><div class="small">MRW 46,700 lb</div></div>
@@ -2092,7 +2093,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div class="wx"><div class="small">FOB</div><b id="f9sFOB">—</b></div>
         <div class="wx"><div class="small">Mission Burn</div><b id="f9sTrip">—</b></div>
         <div class="wx"><div class="small">Landing Fuel</div><b id="f9sLandingFuel">—</b></div>
-        <div class="wx"><div class="small">Overall Gate</div><b id="f9sGate">—</b></div>
+        <div class="wx"><div class="small">System Status / Overall Gate</div><b id="f9sGate">—</b></div>
       </div>
       <div class="callout small" style="margin-top:12px"><b>Aircraft reference:</b> N699BG • Falcon 900B • S/N 082 • TFE731-5BR / SB F900-100 • SB F900-139 • no XTK2 • Version 11 accommodation • Duncan W&amp;B 06/06/2024.</div>
     </div>
@@ -2108,6 +2109,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 
 <div id="f900bView" style="display:none">
   <div class="f900b-shell">
+    <div class="mission-actionbar told-actionbar">
+      <button type="button" onclick="showPlatformView('home')">← Menu</button>
+      <button type="button" onclick="showPlatformView('f900bmission')">Return to Mission</button>
+      <button type="button" onclick="refreshF900B()">Refresh TOLD</button>
+      <button type="button" onclick="shareEditableCurrentTrip()">Share Editable Trip</button>
+      <button type="button" onclick="completeMission()">Complete &amp; Archive</button>
+    </div>
     <div class="card">
       <div class="f900b-titlebar">
         <div>
@@ -2120,7 +2128,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <button type="button" style="width:auto" onclick="completeMission()">Complete &amp; Archive</button>
         </div>
       </div>
-      <div class="callout small warn"><b>DEVELOPMENT / VALIDATION ONLY.</b> QRH1 Rev02 data are interpolated only inside published pressure-altitude, temperature and weight cells. Airport/runway/weather/NOTAM infrastructure and verification gates are active. Wind and runway-slope values are displayed but are not yet applied to the performance solution. N699BG aircraft-specific W&amp;B is active using the June 6, 2024 empty-weight revision and DTM9821 Version 11 / no-XTK2 / SB F900-139 loading configuration.</div>
+      <div class="callout small warn"><b>DEVELOPMENT / VALIDATION ONLY.</b> QRH1 Rev02 data are interpolated only inside published pressure-altitude, temperature and weight cells. Airport/runway/weather/NOTAM infrastructure and verification gates are active. DTM9823 wind and runway-slope corrections are active and source-bounded inside the validated chart panels; out-of-panel cases remain source-locked. N699BG aircraft-specific W&amp;B is active using the June 6, 2024 empty-weight revision and DTM9821 Version 11 / no-XTK2 / SB F900-139 loading configuration.</div>
     </div>
 
     <div class="told-operational-stack" style="margin-top:14px">
@@ -2129,7 +2137,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <div class="told-op-heading"><span class="told-op-number">1</span><div><div class="told-op-title" id="f9TakeoffHeading">TAKEOFF</div><div class="small">Falcon 900B QRH1 50-10 + DTM9823 §3A — validated wind / runway-slope correction</div></div></div>
           <span class="told-op-status" id="f9ToStatus">SOURCE LOADING</span>
         </div>
-        <div class="f900b-inputs">
+        <div class="told-op-grid">
+          <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="f9OpTakeoffRunway">—</b></div>
+          <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="f9OpTakeoffAvailable">—</b></div>
+          <div class="told-op-metric"><span class="small">Takeoff Distance Required</span><b id="f9OpTakeoffRequired">—</b></div>
+          <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="f9OpTakeoffMargin">—</b></div>
+        </div>
+        <details class="f9-told-inputs" style="margin-top:10px"><summary class="small">Performance inputs / what-if detail</summary><div class="f900b-inputs" style="margin-top:10px">
           <div><label>Configuration</label><select id="f9ToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
           <div><label>Anti-Ice</label><select id="f9ToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
           <div><label>Runway</label><select id="f9ToSurface"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
@@ -2140,12 +2154,12 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <div><label>OAT °C</label><input id="f9ToTemp" type="number" step="0.1" placeholder="published range"></div>
           <div><label>Takeoff Weight lb</label><input id="f9ToWeight" type="number" min="0" step="10" placeholder="28,000 to 45,500"></div>
           <div><label>Emergency Return Burn lb</label><input id="f9ReturnBurn" type="number" min="0" step="10" value="500"></div>
-        </div>
+        </div></details>
         <div class="f900b-results">
-          <div class="f900b-result"><span>V1</span><b id="f9V1">—</b></div>
-          <div class="f900b-result"><span>VR = V2</span><b id="f9VR">—</b></div>
-          <div class="f900b-result"><span>VFT</span><b id="f9VFT">—</b></div>
-          <div class="f900b-result"><span>VFR</span><b id="f9VFR">—</b></div>
+          <div class="f900b-result"><span>V1</span><b id="f9V1" class="told-vspeed valid">—</b></div>
+          <div class="f900b-result"><span>VR = V2</span><b id="f9VR" class="told-vspeed valid">—</b></div>
+          <div class="f900b-result"><span>VFT</span><b id="f9VFT" class="told-vspeed valid">—</b></div>
+          <div class="f900b-result"><span>VFR</span><b id="f9VFR" class="told-vspeed valid">—</b></div>
           <div class="f900b-result"><span>Balanced Field Length</span><b id="f9BFL">—</b></div>
           <div class="f900b-result"><span>Stabilizer Trim — TO CG</span><b id="f9Trim">—</b></div>
           <div class="f900b-result"><span>Runway Remaining</span><b id="f9ToMargin">—</b></div>
@@ -2164,12 +2178,18 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <div class="told-op-heading"><span class="told-op-number">2</span><div><div class="told-op-title" id="f9EmergencyHeading">EMERGENCY RETURN</div><div class="small">Departure PA/OAT • 40° Flaps + Slats • landing distance × 1.67</div></div></div>
           <span class="told-op-status" id="f9EmerStatus">—</span>
         </div>
-        <div class="f900b-inputs">
-          <div><label>Emergency Return Anti-Ice</label><select id="f9EmerAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        <div class="told-op-grid">
+          <div class="told-op-metric"><span class="small">Return Airport / Runway</span><b id="f9OpEmerRunway">—</b></div>
+          <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="f9OpEmerAvailable">—</b></div>
+          <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="f9OpEmerRequired">—</b></div>
+          <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="f9OpEmerMargin">—</b></div>
         </div>
+        <details class="f9-told-inputs" style="margin-top:10px"><summary class="small">Performance inputs / what-if detail</summary><div class="f900b-inputs" style="margin-top:10px">
+          <div><label>Emergency Return Anti-Ice</label><select id="f9EmerAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
+        </div></details>
         <div class="f900b-results">
           <div class="f900b-result"><span>Return Weight</span><b id="f9EmerWeight">—</b></div>
-          <div class="f900b-result"><span>VREF</span><b id="f9EmerVref" class="told-vspeed valid">—</b></div>
+          <div class="f900b-result"><span>VREF</span><b id="f9EmerVref" class="told-vspeed emergency-value valid">—</b></div>
           <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9EmerLD">—</b></div>
           <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9EmerRequired">—</b></div>
           <div class="f900b-result"><span>Runway Available</span><b id="f9EmerAvailable">—</b></div>
@@ -2185,7 +2205,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <div class="told-op-heading"><span class="told-op-number">3</span><div><div class="told-op-title" id="f9LandingHeading">LANDING — DESTINATION</div><div class="small">40° Flaps + Slats • select the controlling runway-comparison factor</div></div></div>
           <span class="told-op-status" id="f9LdgStatus">—</span>
         </div>
-        <div class="f900b-inputs">
+        <div class="told-op-grid">
+          <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="f9OpLandingRunway">—</b></div>
+          <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="f9OpLandingAvailable">—</b></div>
+          <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="f9OpLandingRequired">—</b></div>
+          <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="f9OpLandingMargin">—</b></div>
+        </div>
+        <details class="f9-told-inputs" style="margin-top:10px"><summary class="small">Performance inputs / what-if detail</summary><div class="f900b-inputs" style="margin-top:10px">
           <div><label>Anti-Ice</label><select id="f9LdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
           <div><label>Pressure Altitude ft</label><input id="f9LdgPA" type="number" step="1" placeholder="0 to 6000"></div>
           <div><label>OAT °C</label><input id="f9LdgTemp" type="number" step="0.1" placeholder="published range"></div>
@@ -2195,9 +2221,9 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
           <div><label>Landing Mode</label><select id="f9LdgMode"><option value="NORMAL">Normal</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
           <div><label>HYD #2 Landing Flaps</label><select id="f9Hyd2Flaps"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
           <div><label>Airbrakes</label><select id="f9Hyd2Airbrake"><option value="AVAILABLE">Available</option><option value="LOST">Lost (+10%)</option></select></div>
-        </div>
+        </div></details>
         <div class="f900b-results">
-          <div class="f900b-result"><span>VREF</span><b id="f9LdgVref">—</b></div>
+          <div class="f900b-result"><span>VREF</span><b id="f9LdgVref" class="told-vspeed valid">—</b></div>
           <div class="f900b-result"><span>Actual Landing Distance</span><b id="f9LdgLD">—</b></div>
           <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9Ldg167">—</b></div>
           <div class="f900b-result"><span>Landing Distance × 1.92</span><b id="f9Ldg192">—</b></div>
@@ -2213,7 +2239,34 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 
       <section class="told-supporting" aria-labelledby="f9SupportHeading">
         <h2 id="f9SupportHeading">SUPPORTING DOCUMENTATION</h2>
-        <div class="told-support-note">Performance source set: Falcon 900B QRH1 Performance Rev02 (DGAC18DSOF182A), QRH2 Emergency &amp; Abnormal Procedures (DGAC18DSOF158A), DTM20103 AFM Rev31 source package and temporary changes, DTM9819 Operating Manual Procedures Rev12, DTM9821 Loading Manual Rev59, Falcon Operational Performance Rev4, and TC0171 / TC0190 change-project material. N699BG aircraft-specific W&amp;B is source-controlled to the June 6, 2024 empty-weight revision and DTM9821 Version 11 accommodation, U.S. units, no XTK2 transfer valve, SB F900-139. AFM exact MZFW 30,864 lb controls over the loading-chart rounded 30,870 lb display.</div>
+        <div class="told-prep">
+          <h3 style="margin:0 0 10px">AIRCRAFT PREP / LOAD SUMMARY</h3>
+          <div class="told-prep-grid">
+            <div class="told-prep-box"><span class="small">Aircraft</span><b>N699BG</b><span class="small">Falcon 900B</span></div>
+            <div class="told-prep-box"><span class="small">Route</span><b id="f9PrepRoute">—</b><span class="small" id="f9PrepAlternate">Alternate —</span></div>
+            <div class="told-prep-box"><span class="small">Passengers</span><b id="f9PrepPax">—</b><span class="small">Version 11 • 12 positions</span></div>
+            <div class="told-prep-box"><span class="small">Baggage</span><b id="f9PrepBag">—</b><span class="small">Front + rear + docs</span></div>
+          </div>
+          <div class="told-prep-columns" style="margin-top:12px">
+            <div><h3>Cabin / Crew</h3><div class="small" id="f9PrepCabin">—</div></div>
+            <div><h3>Fuel Plan</h3><div class="small" id="f9PrepFuel">—</div></div>
+            <div><h3>Weight / CG</h3><div class="small" id="f9PrepWB">—</div></div>
+          </div>
+        </div>
+        <div class="told-support-grid" style="margin-top:14px">
+          <div class="card"><h3>TAKEOFF SUPPORT / SOURCE DETAIL</h3><div class="told-speed-grid">
+            <div class="told-speed"><span class="small">V1</span><b id="f9SupportV1" class="told-vspeed valid">—</b></div>
+            <div class="told-speed"><span class="small">VR=V2</span><b id="f9SupportVR" class="told-vspeed valid">—</b></div>
+            <div class="told-speed"><span class="small">VFT</span><b id="f9SupportVFT" class="told-vspeed valid">—</b></div>
+            <div class="told-speed"><span class="small">VFR</span><b id="f9SupportVFR" class="told-vspeed valid">—</b></div>
+            <div class="told-speed"><span class="small">Emer VREF</span><b id="f9SupportEmerVref" class="told-vspeed emergency-value valid">—</b></div>
+          </div><div class="small" id="f9SupportTakeoffSource">—</div></div>
+          <div class="card"><h3>DESTINATION LANDING SUPPORT / SOURCE DETAIL</h3>
+            <div class="told-speed"><span class="small">VREF</span><b id="f9SupportLdgVref" class="told-vspeed valid">—</b></div>
+            <div class="small" id="f9SupportLandingDetail">—</div><div class="small" id="f9SupportLandingSource">—</div>
+          </div>
+        </div>
+        <div class="told-support-note" style="margin-top:14px">Performance source set: Falcon 900B QRH1 Performance Rev02 (DGAC18DSOF182A), QRH2 Emergency &amp; Abnormal Procedures (DGAC18DSOF158A), DTM20103 AFM Rev31 source package and temporary changes, DTM9819 Operating Manual Procedures Rev12, DTM9821 Loading Manual Rev59, Falcon Operational Performance Rev4, and TC0171 / TC0190 change-project material. N699BG aircraft-specific W&amp;B is source-controlled to the June 6, 2024 empty-weight revision and DTM9821 Version 11 accommodation, U.S. units, no XTK2 transfer valve, SB F900-139. AFM exact MZFW 30,864 lb controls over the loading-chart rounded 30,870 lb display.</div>
       </section>
     </div>
   </div>
@@ -2954,14 +3007,17 @@ async function f9RecalcWB(){
  const fmr=fm(fob),fmt=fm(toFuel),fml=fm(ldgFuel);if(![fmr,fmt,fml].every(Number.isFinite))loadOK=false;
  const ramp=zfw+fob,tow=zfw+toFuel,ldw=zfw+ldgFuel,rm=zm+(fmr||0),tm=zm+(fmt||0),lm=zm+(fml||0);
  const zcg=f9WBCG(zfw,zm),rcg=f9WBCG(ramp,rm),tcg=f9WBCG(tow,tm),lcg=f9WBCG(ldw,lm);
- const inside=(w,cg)=>{const e=f9WBEnvelope(w);return !!(e&&cg&&cg.pct>=e.fwd&&cg.pct<=e.aft)};const envOK=[inside(zfw,zcg),inside(ramp,rcg),inside(tow,tcg),inside(ldw,lcg)].every(Boolean);
+ const inside=(w,cg)=>{const e=f9WBEnvelope(w);return !!(e&&cg&&cg.pct>=e.fwd&&cg.pct<=e.aft)};
+ const burnPath=f9FuelBurnPath(zfw,zm,toFuel,ldgFuel);
+ const flightPathOK=Array.isArray(burnPath)&&burnPath.length>1&&burnPath.every(p=>inside(p.weight,p.cg));
+ const envOK=flightPathOK;
  const structuralOK=zfw<=d.limits.mzfw_lb&&ramp<=d.limits.mrw_lb&&tow<=d.limits.mtow_lb&&ldw<=d.limits.mlw_lb&&Math.min(zfw,ramp,tow,ldw)>=d.limits.min_flight_weight_lb;
  if($("f9mToWeight"))$("f9mToWeight").value=Math.round(tow);if($("f9mLdgWeight"))$("f9mLdgWeight").value=Math.round(ldw);if($("f9wbLandingFuel"))$("f9wbLandingFuel").value=Math.round(ldgFuel);
  f9Put("f9wbZFW",`${Math.round(zfw).toLocaleString()} lb`);f9Put("f9wbZFWCG",zcg?`${zcg.arm.toFixed(2)} in • ${f9PctFmt(zcg.pct)}`:"—");f9Put("f9wbRamp",`${Math.round(ramp).toLocaleString()} lb • ${rcg?rcg.pct.toFixed(2):"—"}%`);f9Put("f9wbTO",`${Math.round(tow).toLocaleString()} lb • ${tcg?tcg.pct.toFixed(2):"—"}%`);f9Put("f9wbLDG",`${Math.round(ldw).toLocaleString()} lb • ${lcg?lcg.pct.toFixed(2):"—"}%`);
- f9Status("f9wbStruct",structuralOK?"WITHIN STRUCTURAL LIMITS":"CHECK STRUCTURAL LIMITS",structuralOK?"ok":"bad");f9Status("f9wbEnvelope",envOK?"WITHIN CG ENVELOPE":"CHECK CG ENVELOPE",envOK?"ok":"bad");f9Status("f9wbLoadStatus",loadOK?"LOAD / FUEL INPUTS VALID":"CHECK LOAD / FUEL INPUTS",loadOK?"ok":"bad");
+ f9Status("f9wbStruct",structuralOK?"WITHIN STRUCTURAL LIMITS":"CHECK STRUCTURAL LIMITS",structuralOK?"ok":"bad");f9Status("f9wbEnvelope",envOK?"TAKEOFF→LANDING PATH WITHIN CG ENVELOPE":"CHECK TAKEOFF→LANDING CG PATH",envOK?"ok":"bad");f9Status("f9wbLoadStatus",loadOK?"LOAD / FUEL INPUTS VALID":"CHECK LOAD / FUEL INPUTS",loadOK?"ok":"bad");
  const ok=structuralOK&&envOK&&loadOK;f9Status("f9mWBStatus",ok?"READY":"CHECK",ok?"ok":"bad");f9Put("f9mWBNote",ok?`TOW ${Math.round(tow).toLocaleString()} • LDW ${Math.round(ldw).toLocaleString()}`:"Review aircraft loading");
  const tb=$("f9wbDetail");if(tb){tb.innerHTML=`<tr><td>Basic Empty Weight</td><td>${d.empty_weight.weight_lb.toFixed(1)} lb</td><td>${d.empty_weight.arm_in.toFixed(2)} in</td><td>${d.empty_weight.moment_lb_in.toFixed(0)}</td></tr>`;rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r.label}</td><td>${r.w.toFixed(0)} lb</td><td>${r.arm.toFixed(2)} in</td><td>${r.m.toFixed(0)}</td></tr>`));if(Number.isFinite(fmr))tb.insertAdjacentHTML('beforeend',`<tr><td>Fuel on Board</td><td>${fob.toFixed(0)} lb</td><td>variable</td><td>${fmr.toFixed(0)}</td></tr>`);}
- const burnPath=f9FuelBurnPath(zfw,zm,toFuel,ldgFuel);window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();scheduleDraftSave();return window.f900bWBLatest;
+ window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();scheduleDraftSave();return window.f900bWBLatest;
 }
 
 async function loadF900BData(){
@@ -3139,12 +3195,14 @@ function renderF900BLanding(prefix,out,factor,structuralGate=true){
  }else{
    f9Put("f9LdgVref",formatVspeed(out.vref_kt));f9Put("f9LdgLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9Ldg167",f9Fmt(out.landing_distance_x_1_67_ft,0," ft"));f9Put("f9Ldg192",f9Fmt(out.landing_distance_x_1_92_ft,0," ft"));f9Put("f9LdgRequired",f9Fmt(required,0," ft"));f9Put("f9LdgMargin",f9Fmt(margin,0," ft"));f9Put("f9LdgACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9LdgLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));f9Put("f9LdgPenalty",out.penalty_text||"None");
  }
- const ready=[out.vref_kt,required,out.approach_climb_gradient_pct,out.landing_climb_gradient_pct].every(Number.isFinite);
+ const fieldReady=[out.vref_kt,required].every(Number.isFinite);
+ const climbReady=[out.approach_climb_gradient_pct,out.landing_climb_gradient_pct].every(Number.isFinite);
  let status,tone="warn";
  if(structuralGate&&Number.isFinite(out.weight)&&out.weight>42000){status="NO-GO • OVER 42,000 LB MLW";tone="bad"}
- else if(!ready)status=f9SourceLockText(out.pa,out.temp,out.weight,"landing",{anti_ice:out.antiIce});
+ else if(!fieldReady)status=f9SourceLockText(out.pa,out.temp,out.weight,"landing",{anti_ice:out.antiIce});
  else if(!Number.isFinite(out.runway))status="RUNWAY REQUIRED";
  else if(margin<0){status="NO-GO • REQUIRED DISTANCE EXCEEDS RUNWAY";tone="bad"}
+ else if(!climbReady){status="FIELD PASS • CLIMB VALUE NOT PUBLISHED AT SELECTED POINT";tone="ok"}
  else{status="FIELD PASS • CLIMB VALUES DISPLAYED";tone="ok"}
  f9Status(prefix+"Status",status,tone);
  return{required,margin,status};
@@ -3306,9 +3364,27 @@ async function refreshF900BMission(){
  f9MissionCopy("f9mLdgRequired",$("f9LdgRequired")?.textContent||"—");
  f9MissionCopy("f9mLdgMargin",$("f9LdgMargin")?.textContent||"—");
  f9MissionCopy("f9mLdgACG",$("f9LdgACG")?.textContent||"—");
+ f9MissionCopy("f9mLdgLCG",$("f9LdgLCG")?.textContent||"—");
  f9MissionCopy("f9mLdgStatus",$("f9LdgStatus")?.textContent||"—");
  f9MissionCopy("f9mLdgSource",$("f9LdgSource")?.textContent||"—");
  f9UpdateOperationalGate();f9RenderMissionParity();f9DrawCGTrace(window.f900bWBLatest);
+}
+function f9RenderToldParity(){
+ const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest");
+ const depAvail=Number(departureNotams?.usable_length_ft||dep?.length_ft),destAvail=Number(currentNotams?.usable_length_ft||dest?.length_ft);
+ const depCond=departureNotams?.runway_state||"OPEN",destCond=currentNotams?.runway_state||"OPEN";
+ const depIcao=cleanICAO($("f9mDep")?.value)||cleanICAO($("dep")?.value)||"—",destIcao=cleanICAO($("f9mDest")?.value)||cleanICAO($("dest")?.value)||"—";
+ const depR=dep?.runway_id||"—",destR=dest?.runway_id||"—";
+ f9Put("f9OpTakeoffRunway",`${depIcao} • RWY ${depR}`);f9Put("f9OpTakeoffAvailable",Number.isFinite(depAvail)?`${Math.round(depAvail).toLocaleString()} ft • ${depCond}`:`— • ${depCond}`);f9Put("f9OpTakeoffRequired",textOf("f9BFL"));f9Put("f9OpTakeoffMargin",textOf("f9ToMargin"));
+ f9Put("f9OpEmerRunway",`${depIcao} • RWY ${depR}`);f9Put("f9OpEmerAvailable",Number.isFinite(depAvail)?`${Math.round(depAvail).toLocaleString()} ft • ${depCond}`:`— • ${depCond}`);f9Put("f9OpEmerRequired",textOf("f9EmerRequired"));f9Put("f9OpEmerMargin",textOf("f9EmerMargin"));
+ f9Put("f9OpLandingRunway",`${destIcao} • RWY ${destR}`);f9Put("f9OpLandingAvailable",Number.isFinite(destAvail)?`${Math.round(destAvail).toLocaleString()} ft • ${destCond}`:`— • ${destCond}`);f9Put("f9OpLandingRequired",textOf("f9LdgRequired"));f9Put("f9OpLandingMargin",textOf("f9LdgMargin"));
+ const alt=cleanICAO($("f9mAlt")?.value);f9Put("f9PrepRoute",`${depIcao} → ${destIcao}`);f9Put("f9PrepAlternate",`Alternate ${alt||"—"}`);
+ const pax=Math.max(0,Number($("f9mPaxCount")?.value)||0);f9Put("f9PrepPax",`${pax} PAX`);
+ const bag=(Number($("f9wb_bagfront")?.value)||0)+(Number($("f9wb_bagrear")?.value)||0)+(Number($("f9wb_bagdocs")?.value)||0);f9Put("f9PrepBag",`${Math.round(bag).toLocaleString()} lb`);
+ const crew=(Number($("f9wb_pilot")?.value)||0)+(Number($("f9wb_copilot")?.value)||0)+(Number($("f9wb_crew3")?.value)||0);f9Put("f9PrepCabin",`Crew ${Math.round(crew).toLocaleString()} lb • PAX ${pax} / 12 assigned positions`);
+ const wb=window.f900bWBLatest;if(wb){const trip=Number($("f9wbTripBurn")?.value)||0;f9Put("f9PrepFuel",`FOB ${Math.round(wb.fob).toLocaleString()} lb • taxi ${Math.round(Math.max(0,Number($("f9wbTaxi")?.value)||0)).toLocaleString()} • trip ${Math.round(trip).toLocaleString()} • landing ${Math.round(wb.ldgFuel).toLocaleString()} lb`);f9Put("f9PrepWB",`ZFW ${Math.round(wb.zfw).toLocaleString()} • TOW ${Math.round(wb.tow).toLocaleString()} @ ${wb.tcg?.pct?.toFixed(2)||"—"}% MAC • LDW ${Math.round(wb.ldw).toLocaleString()} @ ${wb.lcg?.pct?.toFixed(2)||"—"}% MAC`);}
+ f9Put("f9SupportV1",textOf("f9V1"));f9Put("f9SupportVR",textOf("f9VR"));f9Put("f9SupportVFT",textOf("f9VFT"));f9Put("f9SupportVFR",textOf("f9VFR"));f9Put("f9SupportEmerVref",textOf("f9EmerVref"));f9Put("f9SupportLdgVref",textOf("f9LdgVref"));
+ f9Put("f9SupportTakeoffSource",textOf("f9ToSource"));f9Put("f9SupportLandingDetail",`LD ${textOf("f9LdgLD")} • required ${textOf("f9LdgRequired")} • margin ${textOf("f9LdgMargin")} • ${textOf("f9LdgStatus")}`);f9Put("f9SupportLandingSource",textOf("f9LdgSource"));
 }
 async function refreshF900B(){
  try{await Promise.all([loadF900BData(),loadF900BWB()])}catch(e){f9Status("f9ToStatus","900B CORE DATASET UNAVAILABLE","bad");f9Put("f9ToSource",String(e.message||e));return}
@@ -3324,6 +3400,7 @@ async function refreshF900B(){
  const factor=Number($("f9LdgFactor")?.value||1.67);renderF900BLanding("f9Ldg",ldg,factor,true);
  const abnormal=ldg.abnormal?` • DTM20103 TC0190 HYD #2 LOSS • ${ldg.penalty_text}`:"";
  f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • base 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}${abnormal}`);
+ f9RenderToldParity();
 }
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
 async function startF900BTrip(dep,dest,alt,tripDate=localISODate(new Date()),fob=0,missionFuel=0){
@@ -6778,7 +6855,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.56",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.57",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6898,7 +6975,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.56",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.57",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
