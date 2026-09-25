@@ -420,14 +420,16 @@ details summary{cursor:pointer;margin-top:8px}
 .archive-delete:hover{filter:brightness(1.1)}
 
 /* v5.25.6 — pilot obstacle review disposition priority */
-.f900b-shell{max-width:1120px;margin:0 auto}
+.f900b-shell{margin:0 auto}
+#f900bmissionView .f900b-shell{max-width:none}
+#f900bView .f900b-shell{max-width:1040px}
 .f900b-titlebar{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:14px}
-.f900b-titlebar h2{margin:0 0 4px;font-size:24px}
+.f900b-titlebar h2{margin:0 0 4px;font-size:16px}
 .f900b-inputs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:12px 0}
-.f900b-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:12px}
-.f900b-result{background:#06182c;border:1px solid #294d70;border-radius:9px;padding:9px}
-.f900b-result span{display:block;color:var(--muted);font-size:11px}
-.f900b-result b{display:block;margin-top:4px;font-size:16px}
+.f900b-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+.f900b-result{background:#06182c;border:1px solid var(--line);border-radius:10px;padding:12px}
+.f900b-result span{display:block;color:var(--muted);font-size:12px}
+.f900b-result b{display:block;margin-top:3px;font-size:16px}
 .f900b-source{margin-top:12px;padding-top:10px;border-top:1px solid #294d70}
 .f900b-source-lock{color:#ffc857}
 @media(max-width:850px){.f900b-inputs,.f900b-results{grid-template-columns:1fr 1fr}.f900b-titlebar{display:block}.f900b-titlebar button{margin-top:10px}}
@@ -649,8 +651,8 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{padding:52px 12px 26px}.f9-flightdeck{width:78%;gap:28px}.f9-forward-service,.f9-seat-row,.f9-mid-row,.f9-aft-lounge{grid-template-columns:1fr 34px 1fr;gap:6px}.f9-forward-service{gap:28px}.f9-seat{padding:6px}.f9-cockpit-seat{min-height:70px}}
 
 
-/* v5.25.60 — 900B CG/pax/status/gate corrections */
-/* v5.25.60 — source-like N699BG fuselage presentation */
+/* v5.25.61 — 900B CG/pax/status/gate corrections */
+/* v5.25.61 — source-like N699BG fuselage presentation */
 .f9-cabin-shell{clip-path:polygon(38% 0,62% 0,78% 5%,88% 12%,93% 23%,96% 38%,96% 82%,88% 94%,67% 100%,33% 100%,12% 94%,4% 82%,4% 38%,7% 23%,12% 12%,22% 5%);border-radius:0!important;padding-top:88px!important;padding-bottom:78px!important}
 .f9-cabin-shell:after{display:none!important}
 .f9-nose-glass{top:42px!important}.f9-centerline{opacity:.28}.f9-zone-label{letter-spacing:.12em}
@@ -673,7 +675,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.60</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.61</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1703,7 +1705,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card">
 <div class="f900b-titlebar">
 <div>
-<h2>N699BG — Falcon 900B — MISSION</h2>
+<div style="font-size:16px;font-weight:700">N699BG — Falcon 900B — MISSION</div>
 <div class="small" id="f9mRoute">— → —</div>
 </div>
 <button onclick="refreshF900BMission()" style="width:auto" type="button">Refresh 900B Mission</button>
@@ -1789,7 +1791,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mOperationalDataCard">
 <h2>3. Weather Source / Manual Weather</h2>
-<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.60</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.61</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
 <div class="row" style="margin-top:10px">
 <div><label>Fuel on Board lb</label><input id="f9mFOB" max="19165" min="0" readonly="" step="10" type="number"/></div>
 <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" min="0" readonly="" step="10" type="number"/></div>
@@ -1890,32 +1892,21 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Landing Fuel lb — AUTO</label><input id="f9wbLandingFuel" readonly=""/></div>
 </div><h3 style="margin-top:14px">Aft / Baggage Loads</h3><div class="f900b-inputs">
 <div><label>Water lb</label><input id="f9wb_water" max="88" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-</div><details style="margin-top:12px"><summary class="small"><b>Loading detail / source-controlled arms</b></summary><table style="margin-top:8px"><thead><tr><th>Station</th><th>Weight</th><th>Arm</th><th>Moment</th></tr></thead><tbody id="f9wbDetail"></tbody></table></details></div><div class="card"><h2>CG Envelope — Takeoff to Landing</h2><div class="f900b-results" style="margin-top:14px">
-<div class="f900b-result"><span>Zero Fuel Weight</span><b id="f9wbZFW">—</b></div>
-<div class="f900b-result"><span>Zero Fuel CG</span><b id="f9wbZFWCG">—</b></div>
-<div class="f900b-result"><span>Ramp Weight</span><b id="f9wbRamp">—</b></div>
-<div class="f900b-result"><span>Takeoff Weight / CG</span><b id="f9wbTO">—</b></div>
-<div class="f900b-result"><span>Landing Weight / CG</span><b id="f9wbLDG">—</b></div>
-<div class="f900b-result"><span>Structural Status</span><b id="f9wbStruct">—</b></div>
-<div class="f900b-result"><span>CG Envelope Status</span><b id="f9wbEnvelope">—</b></div>
-<div class="f900b-result"><span>Fuel / Load Status</span><b id="f9wbLoadStatus">—</b></div>
-</div><div class="f9-cg-parity" style="margin-top:14px">
-<h3>CG Envelope — Takeoff to Landing</h3>
-<canvas id="f9cgChart" style="width:100%;height:320px"></canvas>
+</div><details style="margin-top:12px"><summary class="small"><b>Loading detail / source-controlled arms</b></summary><table style="margin-top:8px"><thead><tr><th>Station</th><th>Weight</th><th>Arm</th><th>Moment</th></tr></thead><tbody id="f9wbDetail"></tbody></table></details></div><div class="card">
+<h2>CG Envelope — Takeoff to Landing</h2>
+<canvas id="f9cgChart"></canvas>
 <div class="row" style="margin-top:10px">
-<div class="wx"><div class="small">Zero-Fuel CG</div><b id="f9cgZeroFuel">—</b><div class="small" id="f9cgZeroFuelArm">—</div></div>
-<div class="wx"><div class="small">Ramp CG</div><b id="f9cgRamp">—</b><div class="small" id="f9cgRampArm">—</div></div>
 <div class="wx"><div class="small">Takeoff CG</div><b id="f9cgTakeoff">—</b><div class="small" id="f9cgTakeoffArm">—</div></div>
 <div class="wx"><div class="small">Landing CG</div><b id="f9cgLanding">—</b><div class="small" id="f9cgLandingArm">—</div></div>
+<div class="wx"><div class="small">Trace Status</div><b class="ok" id="f9cgTraceStatus">DTM9821 FUEL MOMENT</b><div class="small">Rev 59 • no-XTK2 • interpolated within published fuel points</div></div>
+<div class="wx"><div class="small">Zero-Fuel CG</div><b id="f9cgZeroFuel">—</b><div class="small" id="f9cgZeroFuelArm">—</div></div>
 </div>
-<div class="row" style="margin-top:10px">
-<div class="wx"><div class="small">Takeoff Envelope</div><b id="f9cgToLimits">—</b><div class="small" id="f9cgToMargin">—</div></div>
-<div class="wx"><div class="small">Landing Envelope</div><b id="f9cgLdgLimits">—</b><div class="small" id="f9cgLdgMargin">—</div></div>
-<div class="wx"><div class="small">Trace Status</div><b id="f9cgTraceStatus">TO → LDG FUEL-BURN VECTOR</b><div class="small">DTM9821-style orientation: weight increases downward; %MAC increases left-to-right. Endpoint CGs use Rev 59 no-XTK2 fuel moments.</div></div>
-<div class="wx"><div class="small">Envelope Status</div><b id="f9cgEnvelopeStatus">—</b><div class="small">Takeoff → Landing controls flight-envelope gate • ZFW/Ramp shown as loading references</div></div>
+<div class="callout small" style="margin-top:12px">The chart follows the standard FlightOps/Falcon 50 display convention: weight increases upward and %MAC increases left-to-right. The <b>forward limit is amber</b>, the <b>aft limit is green</b>, the actual Takeoff → Landing fuel-burn trace is cyan, and the endpoint markers use the same colors as the Falcon 50 display. Numerical Falcon 900B limits and DTM9821 fuel-moment data are unchanged.</div>
+<div style="display:none">
+<b id="f9wbZFW">—</b><b id="f9wbZFWCG">—</b><b id="f9wbRamp">—</b><b id="f9wbTO">—</b><b id="f9wbLDG">—</b><b id="f9wbStruct">—</b><b id="f9wbEnvelope">—</b><b id="f9wbLoadStatus">—</b>
+<b id="f9cgRamp">—</b><span id="f9cgRampArm">—</span><b id="f9cgToLimits">—</b><span id="f9cgToMargin">—</span><b id="f9cgLdgLimits">—</b><span id="f9cgLdgMargin">—</span><b id="f9cgEnvelopeStatus">—</b>
 </div>
-<div class="callout small" style="margin-top:12px">The Falcon 900B chart now uses the same presentation concept as the Falcon 50. FWD and AFT CG boundaries are equal hard limits and therefore use the same neutral limit color; the shaded area between them is the allowable envelope. ZFW and ramp are standalone loading-state references and do not by themselves fail the in-flight CG gate. Only the Takeoff → Landing fuel-burn path controls the flight-envelope check. DTM9821 Rev59 is controlling; no extrapolation outside the published envelope.</div>
-</div></div>
+</div>
 <div class="card" id="f9mAvailableRunwaysCard">
 <h2>6. Available Runways</h2>
 <table>
@@ -1997,7 +1988,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card"><h2>Aircraft Reference — N699BG</h2><div class="row"><div><label>Basic Empty Weight</label><input readonly="" value="24,431.10 lb"/></div><div><label>Basic Empty Moment</label><input readonly="" value="87,205.41 lb-in"/></div><div><label>Max Zero Fuel</label><input readonly="" value="30,864 lb"/></div><div><label>Max Takeoff</label><input readonly="" value="46,500 lb"/></div><div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div></div></div><div class="card"><h2>Mission Summary</h2><table><tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr></table></div><div class="card"><h2>Weight Limits</h2><table><tr><td>ZFW</td><td id="f9sZFW">—</td><td>MZFW 30,864 lb</td></tr><tr><td>Ramp</td><td id="f9sRamp">—</td><td>MRW 46,700 lb</td></tr><tr><td>Takeoff</td><td id="f9sTOW">—</td><td>MTOW 46,500 lb</td></tr><tr><td>Landing</td><td id="f9sLDW">—</td><td>MLW 42,000 lb</td></tr></table></div><div class="card"><h2>Fuel Check</h2><table><tr><td>On Board</td><td id="f9FuelCheckFOB">—</td></tr><tr><td>Mission Required</td><td id="f9FuelCheckMission">—</td></tr><tr><td>Taxi</td><td id="f9FuelCheckTaxi">—</td></tr><tr><td>Landing Fuel</td><td id="f9sLandingFuel">—</td></tr><tr><td>Status</td><td id="f9FuelCheckStatus">—</td></tr></table></div><div class="card"><h2>System Status</h2><table><tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr><tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr><tr><td>Runway selection</td><td class="ok">AUTO</td></tr><tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr><tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel CG calculation</td><td class="ok">DTM9821 REV 59 LOADED</td></tr><tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr><tr><td>DTM9823 wind/slope</td><td class="ok">ACTIVE • SOURCE-BOUNDED</td></tr><tr><td>Overall Gate</td><td class="warn" id="f9sGate">—</td></tr></table></div>
 <div class="card" id="f9mDigitizationCard">
 <h2>SUPPORTING DOCUMENTATION</h2>
-<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.60 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.61 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
 <div class="f9-parity-grid" style="margin-top:12px">
 <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
 <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -2025,9 +2016,9 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <button onclick="completeMission()" type="button">Complete &amp; Archive</button>
 </div>
 <div class="card">
-<div class="f900b-titlebar">
+<div class="told-head">
 <div>
-<h2>N699BG — TOLD CARD</h2>
+<div class="told-title">N699BG — TOLD CARD</div>
 <div class="small" id="f9Route">— → —</div><div class="small">Aircraft Preparation • Weight &amp; Balance • Takeoff &amp; Landing Data</div>
 </div>
 
@@ -2040,7 +2031,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-op-heading"><span class="told-op-number">1</span><div><div class="told-op-title" id="f9TakeoffHeading">TAKEOFF</div><div class="small">Falcon 900B QRH1 50-10 + DTM9823 §3A — validated wind / runway-slope correction</div></div></div>
 <span class="told-op-status" id="f9ToStatus">SOURCE LOADING</span>
 </div>
-<div class="told-op-grid">
+<div class="told-op-metrics">
 <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="f9OpTakeoffRunway">—</b></div>
 <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="f9OpTakeoffAvailable">—</b></div>
 <div class="told-op-metric"><span class="small">Takeoff Distance Required</span><b id="f9OpTakeoffRequired">—</b></div>
@@ -2080,7 +2071,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-op-heading"><span class="told-op-number">2</span><div><div class="told-op-title" id="f9EmergencyHeading">EMERGENCY RETURN</div><div class="small">Departure PA/OAT • 40° Flaps + Slats • landing distance × 1.67</div></div></div>
 <span class="told-op-status" id="f9EmerStatus">—</span>
 </div>
-<div class="told-op-grid">
+<div class="told-op-metrics">
 <div class="told-op-metric"><span class="small">Return Airport / Runway</span><b id="f9OpEmerRunway">—</b></div>
 <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="f9OpEmerAvailable">—</b></div>
 <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="f9OpEmerRequired">—</b></div>
@@ -2106,7 +2097,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-op-heading"><span class="told-op-number">3</span><div><div class="told-op-title" id="f9LandingHeading">LANDING — DESTINATION</div><div class="small">40° Flaps + Slats • select the controlling runway-comparison factor</div></div></div>
 <span class="told-op-status" id="f9LdgStatus">—</span>
 </div>
-<div class="told-op-grid">
+<div class="told-op-metrics">
 <div class="told-op-metric"><span class="small">Airport / Runway</span><b id="f9OpLandingRunway">—</b></div>
 <div class="told-op-metric"><span class="small">Runway Available / Condition</span><b id="f9OpLandingAvailable">—</b></div>
 <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="f9OpLandingRequired">—</b></div>
@@ -2905,25 +2896,23 @@ function f9DrawCGTrace(wb){
  const dpr=devicePixelRatio||1,H=320;c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
  const env=F900B_WB.cg_envelope_pct_mac||[],lim=F900B_WB.limits||{};if(env.length<2)return;
  const minW=20000,maxW=47500,minCG=13,maxCG=32;
- const px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>25+(v-minW)/(maxW-minW)*(H-60);
+ const px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>H-35-(v-minW)/(maxW-minW)*(H-60);
  x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
  for(let ww=20000;ww<=45000;ww+=5000){x.fillText(ww.toLocaleString(),4,py(ww)+4);x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke();}
  for(let cg=14;cg<=32;cg+=2){x.fillText(String(cg),px(cg)-5,H-12);x.beginPath();x.moveTo(px(cg),18);x.lineTo(px(cg),H-30);x.stroke();}x.fillText("% MAC",W-58,H-12);
+ if(Number.isFinite(lim.mtow_lb)){x.save();x.strokeStyle="#ff6b6b";x.lineWidth=2;x.setLineDash([8,5]);x.beginPath();x.moveTo(40,py(lim.mtow_lb));x.lineTo(W-20,py(lim.mtow_lb));x.stroke();x.setLineDash([]);x.fillStyle="#ffb0b0";x.font="bold 11px Arial";x.fillText(`MTOW ${Number(lim.mtow_lb).toLocaleString()} lb`,Math.max(45,W-160),py(lim.mtow_lb)-6);x.restore();}
  const fwd=env.map(p=>[p[0],p[1]]),aft=env.map(p=>[p[0],p[2]]);
- x.save();x.fillStyle="rgba(92,146,190,.12)";x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));[...aft].reverse().forEach(p=>x.lineTo(px(p[1]),py(p[0])));x.closePath();x.fill();x.restore();
- const limitColor="#86a9c7";x.strokeStyle=limitColor;x.lineWidth=2;x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.strokeStyle=limitColor;x.beginPath();aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.fillStyle="#b8cadc";x.font="bold 10px Arial";const hi=env[env.length-1];if(hi){x.fillText("FWD CG LIMIT",Math.max(42,px(hi[1])-82),Math.max(22,py(hi[0])-8));x.fillText("AFT CG LIMIT",Math.min(W-92,px(hi[2])+8),Math.max(22,py(hi[0])-8));}
- const refs=[[lim.mzfw_lb,"MZFW"],[lim.mlw_lb,"MLW"],[lim.mtow_lb,"MTOW"],[lim.mrw_lb,"MRW"]];
- refs.forEach(([w,label],i)=>{if(!Number.isFinite(w))return;x.save();x.strokeStyle=i<2?"#7f96ad":"#ff6b6b";x.lineWidth=1.4;x.setLineDash([7,5]);x.beginPath();x.moveTo(40,py(w));x.lineTo(W-20,py(w));x.stroke();x.setLineDash([]);x.fillStyle=i<2?"#b8cadc":"#ffb0b0";x.font="bold 10px Arial";x.fillText(`${label} ${Number(w).toLocaleString()}`,Math.max(45,W-145),py(w)-4);x.restore();});
- if(wb.tcg&&wb.lcg&&Number.isFinite(wb.tow)&&Number.isFinite(wb.ldw)){x.save();x.strokeStyle="#8fd3ff";x.lineWidth=3;x.setLineDash([8,5]);x.beginPath();x.moveTo(px(wb.tcg.pct),py(wb.tow));x.lineTo(px(wb.lcg.pct),py(wb.ldw));x.stroke();x.setLineDash([]);x.restore();}
- const point=(w,cg,label,color,r=6)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#d6e7f8";x.font="bold 10px Arial";x.fillText(label,px(cg.pct)+8,py(w)-7);};
- point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4);point(wb.ramp,wb.rcg,"RAMP","#d9a6ff",5);point(wb.tow,wb.tcg,"TO","#8fd3ff",7);point(wb.ldw,wb.lcg,"LDG","#55d18b",7);
+ x.strokeStyle="#ffca58";x.lineWidth=2;x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
+ x.strokeStyle="#55d18b";x.beginPath();aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
+ if(Array.isArray(wb.burnPath)&&wb.burnPath.length>1){x.strokeStyle="#8fd3ff";x.lineWidth=3;x.beginPath();wb.burnPath.forEach((p,i)=>i?x.lineTo(px(p.pct),py(p.weight)):x.moveTo(px(p.pct),py(p.weight)));x.stroke();}
+ const point=(w,cg,label,color,r=7,dy=-8)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#d6e7f8";x.font="bold 11px Arial";x.fillText(label,px(cg.pct)+9,py(w)+dy);};
+ point(wb.tow,wb.tcg,"TO","#8fd3ff",7);point(wb.ldw,wb.lcg,"LDG","#55d18b",7);point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4,14);
  const set=(id,cg)=>f9Put(id,cg?`${cg.pct.toFixed(2)}% MAC`:"—"),setArm=(id,cg)=>f9Put(id,cg?`${cg.arm.toFixed(2)} in`:"—");
  set("f9cgZeroFuel",wb.zcg);setArm("f9cgZeroFuelArm",wb.zcg);set("f9cgRamp",wb.rcg);setArm("f9cgRampArm",wb.rcg);set("f9cgTakeoff",wb.tcg);setArm("f9cgTakeoffArm",wb.tcg);set("f9cgLanding",wb.lcg);setArm("f9cgLandingArm",wb.lcg);
  const upd=(prefix,w,cg)=>{const e=f9WBEnvelope(w);if(!e||!cg){f9Put(prefix+"Limits","—");f9Put(prefix+"Margin","—");return}const nearest=Math.min(cg.pct-e.fwd,e.aft-cg.pct);f9Put(prefix+"Limits",`${e.fwd.toFixed(2)}–${e.aft.toFixed(2)}% MAC`);f9Put(prefix+"Margin",`${nearest.toFixed(2)}% MAC nearest boundary`);};
  upd("f9cgTo",wb.tow,wb.tcg);upd("f9cgLdg",wb.ldw,wb.lcg);f9Status("f9cgEnvelopeStatus",wb.envOK?"WITHIN CG ENVELOPE":"CHECK CG ENVELOPE",wb.envOK?"ok":"bad");
 }
+
 function f9RawText(obj,keys){return String(firstVal(obj||{},keys)||"—")}
 function f9RenderMissionParity(){
  if(!missionData)return;
@@ -2978,7 +2967,7 @@ async function f9RecalcWB(){
  const zcg=f9WBCG(zfw,zm),rcg=f9WBCG(ramp,rm),tcg=f9WBCG(tow,tm),lcg=f9WBCG(ldw,lm);
  const inside=(w,cg)=>{const e=f9WBEnvelope(w);return !!(e&&cg&&cg.pct>=e.fwd&&cg.pct<=e.aft)};
  const burnPath=f9FuelBurnPath(zfw,zm,toFuel,ldgFuel);
- const flightPathOK=Array.isArray(burnPath)&&burnPath.length>1&&burnPath.every(p=>inside(p.weight,p.cg));
+ const flightPathOK=Array.isArray(burnPath)&&burnPath.length>1&&burnPath.every(p=>inside(p.weight,{pct:p.pct,arm:p.arm}));
  const envOK=flightPathOK;
  const structuralOK=zfw<=d.limits.mzfw_lb&&ramp<=d.limits.mrw_lb&&tow<=d.limits.mtow_lb&&ldw<=d.limits.mlw_lb&&Math.min(zfw,ramp,tow,ldw)>=d.limits.min_flight_weight_lb;
  if($("f9mToWeight"))$("f9mToWeight").value=Math.round(tow);if($("f9mLdgWeight"))$("f9mLdgWeight").value=Math.round(ldw);if($("f9wbLandingFuel"))$("f9wbLandingFuel").value=Math.round(ldgFuel);
@@ -6863,7 +6852,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.60",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.61",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6983,7 +6972,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.60",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.61",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
