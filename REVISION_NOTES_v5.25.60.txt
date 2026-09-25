@@ -1,0 +1,36 @@
+KUSA FlightOps v5.25.60 — Canonical Aircraft-Independent Layout Standard
+
+Purpose
+- Make Mission and TOLD navigation/layout structurally consistent across Falcon 50, Falcon 900B, and future aircraft profiles.
+
+Falcon 900B Mission now follows the Falcon 50 canonical sequence:
+1. Mission Setup
+2. Passenger Seating — Tap to Move
+3. Weather Source / Manual Weather
+4. Mission Results — Decoded Weather
+5. Calculated Weight & Balance
+   - V-Speed Card
+   - Seat & Baggage Loading Detail
+   - CG Envelope — Takeoff to Landing
+6. Available Runways
+7. Performance Evaluation
+   - Takeoff
+   - Departure Runway / NOTAM Assessment
+   - Emergency Return
+   - Landing
+   - Destination Runway / NOTAM Assessment
+Then, unnumbered standard cards:
+- Aircraft Reference — tail number
+- Mission Summary
+- Weight Limits
+- Fuel Check
+- System Status
+- Supporting Documentation
+- Mission → TOLD action
+
+Falcon 900B TOLD
+- Uses the same three operational blocks and supporting-documentation architecture as Falcon 50.
+- Header wording standardized to [TAIL] — TOLD CARD.
+- Aircraft Prep / Load Summary, Takeoff Support / Source Detail, and Destination Landing Support / Source Detail retained.
+
+No performance values, W&B arms, fuel moment points, structural limits, CG envelope coordinates, QRH grids, or DTM9823 numeric solver values were changed in this revision.
