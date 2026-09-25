@@ -1,0 +1,26 @@
+KUSA FlightOps v5.25.42 — N699BG Aircraft-Specific Falcon 900B Weight & Balance
+
+BASELINE
+- Built from v5.25.41 without changing historical revision files.
+- v5.25.41 remains the prior produced revision.
+
+FALCON 900B / N699BG W&B
+- Added aircraft-specific N699BG (S/N 082) W&B dataset.
+- Current empty-weight baseline: 24,431.10 lb; arm 3.57 in; moment 87,205.41 lb-in; revision dated June 6, 2024.
+- Configuration: Falcon 900B / SB F900-100 (TFE731-5BR), SB F900-139 installed, no XTK2 transfer valve, Version 11 accommodation.
+- Structural limits: MRW 46,700 lb; MTOW 46,500 lb; MLW 42,000 lb; AFM exact MZFW 30,864 lb; minimum flight weight 20,700 lb.
+- Fuel capacity / moment schedule source-controlled to DTM9821 without-XTK2 data; interpolation only between published points.
+- Added Version 11 crew/passenger/baggage loading stations and automatic ZFW/ramp/takeoff/landing weight and CG calculations.
+- Mission takeoff and landing weights are now populated automatically from W&B.
+- Added structural-limit, CG-envelope, and load/fuel validity status indications.
+- Corrected Falcon 900B structural takeoff gate from 45,500 lb to 46,500 lb for the confirmed SB F900-139 configuration.
+
+SOURCE CONTROL
+- Duncan Aviation N699BG Calculated Wt & Balance and Equipment List Revision dated June 6, 2024.
+- StandardAero March 4, 2022 W&B / supplemental equipment history.
+- Dassault DTM9821 Loading Manual, Version 11 accommodation and Rev59 no-XTK2 / SB F900-139 loading charts.
+- DTM20103 AFM Rev31 and applicable supplements remain controlling for certified structural limitations.
+
+CAUTION
+- CG envelope points used by the working calculation are chart-derived from DTM9821 Rev59 Section 7 Page 6C. They are bounded to the published weight range and are not extrapolated.
+- Development / validation software. Continue independent AFM/W&B verification before operational use.

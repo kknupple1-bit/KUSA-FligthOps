@@ -1,0 +1,49 @@
+KUSA FlightOps v5.25.41 — Falcon 900B Operational Overlays + PWA Reliability Foundation
+
+1. Baseline
+- Built directly from v5.25.40.
+- v5.25.40 wind-direction and whole-knot V-speed display behavior retained.
+- Existing Falcon 50 and Falcon 900B QRH1 performance interpolation is unchanged except where the user explicitly selects the new HYD #2 abnormal landing overlay.
+
+2. Falcon 900B HYD #2 abnormal landing — DTM20103 Temporary Change No 0190 (Nov. 12, 2024)
+- Added destination Landing Mode selector: Normal / HYD #2 Loss — TC0190.
+- Added actual landing flap selections 40°, 20°, 7°, and 0° + slats.
+- TC0190 VREF additives and landing-distance increments are applied only when HYD #2 mode is selected:
+  0°: VREF +20 kt, +800 ft landing distance.
+  7°: VREF +15 kt, +600 ft.
+  20°: VREF +5 kt, +200 ft.
+  40°: VREF, +0 ft.
+- Optional airbrake-loss selection applies ×1.10 after the flap-system distance increment, matching the TC0190 order of operations.
+- The selected runway-comparison factor is then applied to the TC0190-adjusted actual landing distance.
+- Source text identifies the TC0190 overlay when active.
+
+3. Falcon 900B LDTA source control — DTM20103 TC0171 / Annex 12
+- Added on-screen arrival advisory source note with Dassault recommended braking-action crosswind values and icy-runway limit.
+- TC0171 numeric LDTA tables are NOT activated in this revision; QRH1 remains the numeric landing-distance engine.
+- This prevents substitution of advisory/undigitized Annex 12 data for the validated QRH1 dataset.
+
+4. Falcon 900B Loading Manual source control — DTM9821 Revision 59
+- Added source-controlled reference geometry to f900b_operational_overlays_v52541.json:
+  moment origin 25% MAC, 420.43 in aft of nose; MAC 113.69 in; MAC LE 392.01 in from nose.
+- Aircraft-specific W&B remains locked pending N699BG current BOW/equipment/configuration applicability.
+
+5. Source package expanded
+- QRH1 Rev02 DGAC18DSOF182A
+- QRH2 DGAC18DSOF158A
+- DTM20103 AFM Rev31 source package + TC0171 + TC0190
+- DTM9819 Operating Manual Procedures Rev12
+- DTM9821 Loading Manual Rev59
+- Falcon Operational Performance Rev4
+
+6. Reliability / installable-app foundation
+- Re-enabled a versioned PWA service worker instead of deleting caches and unregistering on every launch.
+- App shell and source-controlled local datasets can be cached for more reliable relaunches.
+- API calls remain network-only; live weather, runway, FAA NMS and server-side functions still require connectivity.
+- Navigation uses network-first with cached shell fallback.
+- Manifest updated with stable app id/scope/start URL.
+- This is the PWA reliability foundation only. Persistent account/session authentication still requires a production authentication layer at the hosting/server level and is not represented as completed in this build.
+
+7. Safety / validation status
+- DEVELOPMENT / VALIDATION ONLY.
+- No new Falcon 900B normal takeoff/landing performance table interpolation was introduced.
+- TC0190 overlay values are explicit source constants; TC0171 numeric LDTA tables remain inactive.

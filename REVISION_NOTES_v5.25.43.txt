@@ -1,0 +1,17 @@
+KUSA FlightOps v5.25.43
+=======================
+Baseline: v5.25.42
+
+Falcon 900B / N699BG
+- Added interactive Version 11 cabin seating layout with 12 passenger loading positions.
+- Passenger station arms remain source-controlled to DTM9821 Version 11.
+- Added automatic takeoff horizontal-stabilizer trim output from actual calculated takeoff CG.
+- Trim source: DTM9819 Revision 12, Section 3, Sub-section 40, Page 3, “Take-off trim setting for CG position”.
+- Published figure endpoints: 14% MAC = -7.5 deg HS; 31% MAC = -4.5 deg HS; straight-line interpolation only within that source range.
+- Takeoff trim shown with V1 / VR=V2 / BFL in Mission and TOLD outputs.
+- Corrected displayed Falcon 900B structural MTOW label to 46,500 lb.
+- Retains v5.25.42 N699BG June 6, 2024 empty-weight baseline, Version 11, no-XTK2, SB F900-139 configuration and v5.25.41 abnormal/LDTA/PWA work.
+
+Validation intent
+- No extrapolation of trim outside 14–31% MAC.
+- Performance QRH interpolation logic otherwise unchanged.

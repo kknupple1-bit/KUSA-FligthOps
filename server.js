@@ -27,7 +27,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.25.40",
+    build:"5.25.43",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -53,7 +53,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.25.40"
+      "User-Agent":"KUSA-FlightOps/5.25.43"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -114,7 +114,7 @@ app.use((req,res,next)=>{
 });
 app.use(express.static(path.join(__dirname,"public"),{maxAge:0,etag:false}));
 
-// v5.25.40: deterministic Falcon 50 S+20 nomograph delivery.
+// v5.25.43: deterministic Falcon 50 S+20 nomograph delivery.
 // Some hosted deployments can fall through missing static JSON requests to index.html;
 // this API route always returns JSON and carries a verified embedded fallback copy.
 const F50_S20_NOMOGRAPH_FALLBACK={"schema":"kusa.f50.s20.nomograph.v2","status":"SHADOW_DRY_12POINT_GATE_COMPLETE_PENDING_OPERATOR_SIGNOFF","aircraft":"Falcon 50 / N33AP","configuration":"SLATS_PLUS_FLAPS_20","source":{"document":"Dassault DTM813 Airplane Flight Manual","revision":"31","section":"5.45","chart":"5.45.6 Balanced Field Length \u2014 S + Flaps 20\u00b0","source_page_pdf":426,"digitization_render_px":[2478,3504],"note":"Direct chart-coordinate digitization from approved DTM813 \u00a75.45.6. Phase 8 corrects the weight-panel traversal: PA/temperature enters the 30,000-lb REF line, then follows the interpolated weight-family curve to actual takeoff weight. Shadow-only pending expanded envelope validation."},"registration":{"field_axis_x_px":{"intercept":185.0,"per_1000_ft":189.0},"weight_axis_y_px":{"at_10000_kg":1458.0,"px_per_1000_kg":96.0},"temperature_axis_crop":{"crop_x_offset":250.0,"crop_y_offset":430.0,"y_at_0c":576.0,"px_per_c":-9.4},"panel_x_registration_shift_px":0.0,"panel_x_registration_note":"DEPRECATED for v2 solver. Direct whole-page x registration is used; the weight panel is indexed at the printed 30,000-lb REF line rather than at the upper panel boundary."},"pa_temperature_panel":{"units":{"pa":"ft","temp":"degC","x":"source_render_px"},"anti_ice":"OFF_SOLID_CURVES","curves":{"0":{"-40":672.0,"-30":684.3,"-20":698.7,"-10":714.2,"0":729.9,"10":745.8,"20":762.5,"30":807.0,"40":874.6},"2000":{"-40":700.0,"-30":712.2,"-20":729.2,"-10":746.5,"0":762.8,"10":779.8,"20":819.8,"30":895.0},"4000":{"-40":728.0,"-30":741.8,"-20":761.7,"-10":777.6,"0":797.1,"10":828.2,"20":896.5,"30":986.0,"37":1067.0},"6000":{"-40":765.0,"-30":781.1,"-20":799.8,"-10":818.9,"0":863.1,"10":926.9,"20":1012.1}}},"weight_panel":{"reference_weight_lb":30000,"reference_x_px":[657.5,749.0,841.0,907.0,969.0,1044.0,1144.0],"rows_lb":{"24000":[653.0,734.5,813.5,871.0,933.5,994.5,1054.0],"26000":[654.0,739.0,822.5,883.0,945.0,1010.0,1069.5],"28000":[656.0,744.0,831.5,895.0,957.5,1026.0,1089.0],"30000":[657.5,749.0,841.0,907.0,969.0,1044.0,1144.0],"32000":[672.0,770.5,869.0,972.5,1074.0,1173.5,1275.5],"34000":[718.5,830.0,944.5,1068.0,1194.0,1312.0,1427.5],"35000":[743.5,862.0,985.0,1118.5,1256.0,1383.0,1505.5],"36000":[770.5,895.0,1027.5,1171.5,1320.0,1455.5,1587.5],"37000":[798.5,930.0,1071.5,1227.0,1384.0,1531.5,1671.5],"38000":[828.5,966.0,1117.0,1285.0,1451.0,1609.5,1755.5],"38600":[847.5,988.5,1146.5,1320.0,1491.5,1658.0,1808.5],"40000":[894.5,1044.5,1218.0,1406.0,1591.0,1771.5,1933.0]},"method":"Enter the weight-family panel on the printed 30,000-lb REF line at the x-coordinate delivered by the PA/temperature panel. Interpolate between adjacent family curves at REF, then trace the same interpolated family to actual takeoff weight. This replaces the incorrect v1 assumption that family identity was indexed at the 22,000-lb upper boundary.","digitization_note":"Curve crossings re-read from the source render at the printed weight rows. Example-arrow overlays were excluded from family crossings."},"runway_slope_panel":{"reference":"0 percent","positive_2pct":{"x_ref_px":[296.68,325.48,352.28,377.83,407.26,431.35,459.96,484.8,511.56],"x_selected_px":[331.0,365.0,397.0,432.09,466.0,500.35,538.96,578.4,608.28]},"negative_2pct":{"x_ref_px":[325.4,352.54,379.6,406.17,433.69,461.5,486.53,515.0,542.79],"x_selected_px":[315.0,338.46,364.0,384.5,402.81,422.5,438.0,464.3,488.93]},"note":"Direct Hough/line-center digitization from the slope correction panel; interpolation is bounded to the digitized x range."},"wind_panel":{"reference":"0 kt","headwind_50kt":{"x_ref_px":[185.29,291.0,345.14,453.04,509.0],"x_selected_px":[136.03,222.25,263.0,351.96,398.42]},"tailwind_10kt":{"x_ref_px":[211.59,264.0,372.67,453.04,509.7,533.0],"x_selected_px":[255.0,319.0,446.0,542.0,601.0,632.0]},"note":"Direct line-center digitization from the wind correction panel; interpolation is bounded to the digitized x range."},"published_regression_anchors":[{"id":"S20-BFL-001","pa_ft":4000,"sat_c":37,"weight_lb":35000,"slope_pct":-1,"wind_kt":30,"wind_type":"HEADWIND","expected_bfl_ft":5200,"expected_v1_kt":112.0,"expected_vr_v2_kt":117.3,"source":"DTM813 \u00a75.45.5 worked example"},{"id":"S20-BFL-002","pa_ft":2000,"sat_c":30,"weight_lb":37000,"slope_pct":0,"wind_kt":0,"expected_bfl_ft":5500,"source":"DTM813 Annex 4 antiskid example \u2014 fictitious length entered in \u00a75.45.6"},{"id":"S20-BFL-003","pa_ft":2000,"sat_c":30,"weight_lb":38600,"slope_pct":0,"wind_kt":0,"expected_bfl_ft":6000,"source":"DTM813 Annex 4 antiskid example \u2014 second-method fictitious length entered in \u00a75.45.6"},{"id":"S20-BFL-004","pa_ft":4000,"sat_c":37,"weight_lb":34000,"slope_pct":-1,"wind_kt":30,"wind_type":"HEADWIND","expected_bfl_ft":4850,"expected_v1_kt":109.2,"expected_vr_v2_kt":115.6,"source":"DTM813 \u00a75.45.12 obstacle-clearance example \u2014 same conditions as \u00a75.45.5, 34,000 lb"}],"release_gate":{"operational_engine_active":false,"reason":"\u00a75.45.6 dry shadow has completed the controlled 12-point dry regression program. Operational activation remains blocked pending human/pilot trace verification, anti-ice validation, and controlled-build signoff.","target_distance_tolerance_ft":250,"target_speed_tolerance_kt":1.0},"shadow_regression":{"solver_status":"PASS_4_OF_4_PUBLISHED_ANCHORS_EXPANDED_ENVELOPE_STILL_REQUIRED","distance_tolerance_ft":250,"results":[{"id":"S20-BFL-001","expected_bfl_ft":5200,"shadow_bfl_ft":5285,"error_ft":85,"pass":true},{"id":"S20-BFL-002","expected_bfl_ft":5500,"shadow_bfl_ft":5364,"error_ft":-136,"pass":true},{"id":"S20-BFL-003","expected_bfl_ft":6000,"shadow_bfl_ft":5838,"error_ft":-162,"pass":true},{"id":"S20-BFL-004","expected_bfl_ft":4850,"shadow_bfl_ft":4981,"error_ft":131,"pass":true}],"max_abs_error_ft":162,"release_note":"Phase 8 corrected the weight-panel traversal/indexing error. Published-anchor regression is now 4/4 within \u00b1250 ft. Shadow remains non-operational pending broader cold/hot, PA, weight, slope and wind hand-read coverage plus \u00a75.45.7 paired V1 validation."}};
@@ -332,12 +332,12 @@ app.get("/api/shared-trips/:id",(req,res)=>{
   }catch(e){res.status(500).json({error:"Unable to open shared trip."})}
 });
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.25.40",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02"]}));
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.25.43",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02","N699BG_WB_V52543"]}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.25.40",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.25.43",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -407,7 +407,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.25.40"
+      "User-Agent":"KUSA-FlightOps/5.25.43"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
