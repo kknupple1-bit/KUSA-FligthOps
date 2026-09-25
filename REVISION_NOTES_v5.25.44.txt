@@ -1,0 +1,15 @@
+KUSA FlightOps v5.25.44
+
+PURPOSE
+Reliability hotfix for Falcon 900B dataset delivery discovered during live v5.25.43 review.
+
+CHANGES
+- Keeps all v5.25.43 N699BG cabin-layout and takeoff-stabilizer-trim functionality.
+- Adds deterministic server API delivery for Falcon 900B QRH1 performance data.
+- Adds deterministic server API delivery for N699BG aircraft-specific W&B data.
+- Each server endpoint includes an embedded verified fallback so a partial static-file deployment cannot report the 900B dataset missing.
+- Corrects the PWA service-worker shell list to cache f900b_n699bg_wb_v52543.json (v5.25.43 had referenced the obsolete v5.25.42 filename).
+- Updates browser/server build identity to v5.25.44.
+
+NO PERFORMANCE DATA CHANGES
+No Falcon 50 or Falcon 900B performance values, W&B source values, limits, station arms, fuel schedules, trim relationship, or interpolation logic were changed in this hotfix.
