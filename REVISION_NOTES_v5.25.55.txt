@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.55
+Falcon 900B numeric-solver delivery recovery
+
+Changes:
+- DTM9823 numeric solver now has an embedded server-side fallback, matching the existing deterministic QRH/W&B delivery architecture.
+- Added versioned v5.25.55 and generic API aliases plus versioned/static fallback paths.
+- Added duplicate static v5.25.55 numeric package to defeat stale/missing-host extraction cases.
+- Data Status now exposes the numeric-loader error when the solver cannot initialize.
+- No DTM9823 numeric surfaces, regression values, W&B data, or performance math changed from v5.25.54/v5.25.53.
