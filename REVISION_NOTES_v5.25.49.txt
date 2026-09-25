@@ -1,0 +1,16 @@
+KUSA FlightOps v5.25.49 — Falcon 900B Dispatch / Verification Gate Depth
+
+Builds on v5.25.48 without changing source-controlled Falcon 50 or Falcon 900B performance values.
+
+Falcon 900B operational-depth changes:
+- Adds explicit weather-currency gate: live METAR must be 90 minutes old or less, or pilot must explicitly verify independently sourced manual weather for departure/destination.
+- Adds FOB / fuel-plan reconciliation: Mission FOB and trip burn must match the N699BG W&B fuel plan; changing aircraft fuel or trip burn automatically clears prior FOB verification.
+- Adds NOTAM runway-state gating: a selected runway assessed CLOSED no longer passes merely because the NMS request was completed.
+- Adds runway/performance gate using the current NOTAM-adjusted usable runway length against source-bounded takeoff BFL, emergency-return required landing distance, and destination required landing distance.
+- Adds explicit Emergency Return gate including return weight <= 42,000 lb MLW, valid landing solution, and positive departure-runway margin.
+- Expands CG-envelope readout to show the nearest forward/aft margin in %MAC for ZFW, ramp, takeoff and landing.
+- Local aircraft-data gate now identifies the QRH1 + N699BG W&B package as offline-ready once verified.
+
+Important source limitation retained:
+- Falcon 900B DTM9823 wind and runway-slope corrections are still NOT numerically applied. The runway-performance gate uses the current QRH1 zero-wind/zero-slope source-bounded result and is visibly subject to this limitation.
+- Stopway/clearway/ASDA/TODA chart-based performance remains pending source-chart digitization and validation.

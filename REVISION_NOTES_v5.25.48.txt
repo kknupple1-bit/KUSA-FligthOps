@@ -1,0 +1,21 @@
+KUSA FlightOps v5.25.48 — Dual-Aircraft Offline Package + Falcon 900B Operational Depth
+
+Builds on v5.25.47 without changing approved/source-controlled performance numbers.
+
+Falcon 50 + Falcon 900B offline:
+- Service worker now pre-caches the complete current static performance/W&B JSON package for BOTH aircraft.
+- App shell and aircraft datasets remain available after successful installation/cache population.
+- Live APIs (weather, FAA NMS/NOTAM, FAA NASR fallback) remain network-dependent and fail visibly offline.
+
+Falcon 900B depth:
+- Adds local-aircraft-data verification as an explicit operational gate.
+- Expands Mission departure results to include N1 S/C, acceleration, recommended pitch, VFT, VFR and limiting code.
+- Adds an Emergency Return mission panel using takeoff weight less selected return burn, departure PA/OAT and departure runway.
+- 900B TOLD operational refresh now refreshes mission weather/runways/NOTAMs before recomputing performance.
+- Live weather summaries now display observation age and flag reports older than 90 minutes as STALE.
+- New-trip aircraft label updated to N699BG — Falcon 900B and wording reflects active aircraft-specific W&B.
+
+Still intentionally NOT implemented:
+- DTM9823 wind/slope numerical correction surfaces have not yet been digitized/validated.
+- Stopway/clearway/ASDA/TODA performance corrections remain pending chart digitization.
+- Online weather, NOTAM and NASR fallback are not available offline; cached aircraft data/manual inputs remain available.
