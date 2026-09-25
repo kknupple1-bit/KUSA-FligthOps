@@ -648,8 +648,8 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{padding:52px 12px 26px}.f9-flightdeck{width:78%;gap:28px}.f9-forward-service,.f9-seat-row,.f9-mid-row,.f9-aft-lounge{grid-template-columns:1fr 34px 1fr;gap:6px}.f9-forward-service{gap:28px}.f9-seat{padding:6px}.f9-cockpit-seat{min-height:70px}}
 
 
-/* v5.25.54 — 900B CG/pax/status/gate corrections */
-/* v5.25.54 — source-like N699BG fuselage presentation */
+/* v5.25.55 — 900B CG/pax/status/gate corrections */
+/* v5.25.55 — source-like N699BG fuselage presentation */
 .f9-cabin-shell{clip-path:polygon(38% 0,62% 0,78% 5%,88% 12%,93% 23%,96% 38%,96% 82%,88% 94%,67% 100%,33% 100%,12% 94%,4% 82%,4% 38%,7% 23%,12% 12%,22% 5%);border-radius:0!important;padding-top:88px!important;padding-bottom:78px!important}
 .f9-cabin-shell:after{display:none!important}
 .f9-nose-glass{top:42px!important}.f9-centerline{opacity:.28}.f9-zone-label{letter-spacing:.12em}
@@ -672,7 +672,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.54</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.55</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1828,7 +1828,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 
     <div class="card" id="f9mOperationalDataCard">
       <h2>2. Flight Data / Operational Verification</h2>
-      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.54</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.55</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
       <div class="row" style="margin-top:10px">
         <div><label>Fuel on Board lb</label><input id="f9mFOB" type="number" min="0" max="19165" step="10" readonly></div>
         <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" type="number" min="0" step="10" readonly></div>
@@ -1867,7 +1867,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 
     <div class="card" id="f9mDigitizationCard">
       <h2>3. DTM9823 Takeoff Digitization / Validation</h2>
-      <div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.54 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+      <div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.55 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
       <div class="f9-parity-grid" style="margin-top:12px">
         <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
         <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -2841,8 +2841,17 @@ async function loadF900BDTM9823(){
 async function loadF900BNumeric(){
  if(F900B_NUMERIC)return F900B_NUMERIC;
  if(F900B_NUMERIC_PROMISE)return F900B_NUMERIC_PROMISE;
- F900B_NUMERIC_PROMISE=(async()=>{let d=null,apiErr=null;try{const r=await fetch(apiUrl('/api/data/f900b_dtm9823_numeric_v52553'),{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);d=await r.json()}catch(e){apiErr=e;const r=await fetch('/data/f900b_dtm9823_numeric_v52553.json');if(!r.ok)throw new Error(`DTM9823 numeric API/static unavailable: ${apiErr?.message||apiErr} / HTTP ${r.status}`);d=await r.json()}
-   if(d?.schema!=='kusa.f900b.dtm9823_numeric.v5.25.53'||d?.active!==true||!d?.charts?.['20_DRY']?.bfl)throw new Error('DTM9823 numeric solver integrity check failed');
+ F900B_NUMERIC_PROMISE=(async()=>{
+   let d=null;const errs=[];
+   const tries=[
+     apiUrl('/api/data/f900b_dtm9823_numeric_v52555'),
+     apiUrl('/api/data/f900b_dtm9823_numeric'),
+     apiUrl('/api/data/f900b_dtm9823_numeric_v52553'),
+     '/data/f900b_dtm9823_numeric_v52555.json',
+     '/data/f900b_dtm9823_numeric_v52553.json'
+   ];
+   for(const u of tries){try{const r=await fetch(u,{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);const c=await r.json();if(c?.schema==='kusa.f900b.dtm9823_numeric.v5.25.53'&&c?.active===true&&c?.charts?.['20_DRY']?.bfl){d=c;break}throw new Error('integrity')}catch(e){errs.push(`${u}: ${e?.message||e}`)}}
+   if(!d)throw new Error(`DTM9823 numeric unavailable — ${errs.join(' | ')}`);
    F900B_NUMERIC=d;return d;
  })().catch(e=>{F900B_NUMERIC_PROMISE=null;throw e});
  return F900B_NUMERIC_PROMISE;
@@ -6742,7 +6751,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.54",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.55",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6862,7 +6871,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.54",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.55",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
