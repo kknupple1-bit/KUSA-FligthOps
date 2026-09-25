@@ -648,8 +648,8 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{padding:52px 12px 26px}.f9-flightdeck{width:78%;gap:28px}.f9-forward-service,.f9-seat-row,.f9-mid-row,.f9-aft-lounge{grid-template-columns:1fr 34px 1fr;gap:6px}.f9-forward-service{gap:28px}.f9-seat{padding:6px}.f9-cockpit-seat{min-height:70px}}
 
 
-/* v5.25.55 — 900B CG/pax/status/gate corrections */
-/* v5.25.55 — source-like N699BG fuselage presentation */
+/* v5.25.56 — 900B CG/pax/status/gate corrections */
+/* v5.25.56 — source-like N699BG fuselage presentation */
 .f9-cabin-shell{clip-path:polygon(38% 0,62% 0,78% 5%,88% 12%,93% 23%,96% 38%,96% 82%,88% 94%,67% 100%,33% 100%,12% 94%,4% 82%,4% 38%,7% 23%,12% 12%,22% 5%);border-radius:0!important;padding-top:88px!important;padding-bottom:78px!important}
 .f9-cabin-shell:after{display:none!important}
 .f9-nose-glass{top:42px!important}.f9-centerline{opacity:.28}.f9-zone-label{letter-spacing:.12em}
@@ -672,7 +672,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link rel="apple-touch-icon" href="/icons/icon-192.png">
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.55</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.56</div>
 
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
@@ -1823,12 +1823,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
       <div class="row" style="margin-top:10px">
         <div><label>Weight &amp; Balance</label><div class="wx"><b id="f9mWBStatus" class="warn">LOAD DATA</b><div class="small" id="f9mWBNote">N699BG Version 11</div></div></div>
         <div><label>Passenger Loading</label><div class="wx"><b id="f9mPaxStatus" class="warn">0 / 0 LOADED</b><div class="small" id="f9mPaxNote">Entered PAX must equal occupied passenger positions.</div></div></div>
+        <div><label>Seat Move Mode</label><div class="wx"><b>CLICK-TO-MOVE ACTIVE</b><div class="small" id="f9SeatMoveNote">Tap an occupied seat card to pick up that passenger weight, then tap another seat to move or swap. Click directly in a weight field to edit the weight.</div></div></div>
       </div>
     </div>
 
     <div class="card" id="f9mOperationalDataCard">
       <h2>2. Flight Data / Operational Verification</h2>
-      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.55</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+      <div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.56</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
       <div class="row" style="margin-top:10px">
         <div><label>Fuel on Board lb</label><input id="f9mFOB" type="number" min="0" max="19165" step="10" readonly></div>
         <div><label>Mission Fuel Burn lb</label><input id="f9mMissionFuel" type="number" min="0" step="10" readonly></div>
@@ -1867,7 +1868,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 
     <div class="card" id="f9mDigitizationCard">
       <h2>3. DTM9823 Takeoff Digitization / Validation</h2>
-      <div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.55 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+      <div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.56 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
       <div class="f9-parity-grid" style="margin-top:12px">
         <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
         <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -1957,7 +1958,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
         <div class="row" style="margin-top:10px">
           <div class="wx"><div class="small">Takeoff Envelope</div><b id="f9cgToLimits">—</b><div class="small" id="f9cgToMargin">—</div></div>
           <div class="wx"><div class="small">Landing Envelope</div><b id="f9cgLdgLimits">—</b><div class="small" id="f9cgLdgMargin">—</div></div>
-          <div class="wx"><div class="small">Trace Status</div><b id="f9cgTraceStatus">TO → LDG FUEL-BURN VECTOR</b><div class="small">Endpoint CGs use DTM9821 Rev 59 no-XTK2 fuel moments; intermediate transfer-path zig-zag is intentionally not graphed</div></div>
+          <div class="wx"><div class="small">Trace Status</div><b id="f9cgTraceStatus">TO → LDG FUEL-BURN VECTOR</b><div class="small">DTM9821-style orientation: weight increases downward; %MAC increases left-to-right. Endpoint CGs use Rev 59 no-XTK2 fuel moments.</div></div>
           <div class="wx"><div class="small">Envelope Status</div><b id="f9cgEnvelopeStatus">—</b><div class="small">ZFW • Ramp • Takeoff • Landing</div></div>
         </div>
         <div class="callout small" style="margin-top:12px">The Falcon 900B chart now uses the same presentation concept as the Falcon 50. FWD and AFT CG boundaries are equal hard limits and therefore use the same neutral limit color; the shaded area between them is the allowable envelope. ZFW and ramp are standalone loading-state markers. Only Takeoff → Landing is connected as the in-flight fuel-burn vector. DTM9821 Rev59 is controlling; no extrapolation outside the published envelope.</div>
@@ -2906,7 +2907,7 @@ function f9DrawCGTrace(wb){
  const dpr=devicePixelRatio||1,H=320;c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
  const env=F900B_WB.cg_envelope_pct_mac||[],lim=F900B_WB.limits||{};if(env.length<2)return;
  const minW=20000,maxW=47500,minCG=13,maxCG=32;
- const px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>H-35-(v-minW)/(maxW-minW)*(H-60);
+ const px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>25+(v-minW)/(maxW-minW)*(H-60);
  x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
  for(let ww=20000;ww<=45000;ww+=5000){x.fillText(ww.toLocaleString(),4,py(ww)+4);x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke();}
  for(let cg=14;cg<=32;cg+=2){x.fillText(String(cg),px(cg)-5,H-12);x.beginPath();x.moveTo(px(cg),18);x.lineTo(px(cg),H-30);x.stroke();}x.fillText("% MAC",W-58,H-12);
@@ -2980,6 +2981,12 @@ function f9Put(id,value){const el=$(id);if(el)el.textContent=value}
 function f9Status(id,text,tone="warn"){
  const el=$(id);if(!el)return;el.textContent=text;el.className=`told-op-status ${tone}`;
 }
+function f9NormalizePublishedPA(pa){
+ if(!Number.isFinite(pa))return{ok:false,actual:pa,lookup:null,basis:"PRESSURE ALTITUDE REQUIRED"};
+ if(pa>=0&&pa<=6000)return{ok:true,actual:pa,lookup:pa,basis:"ACTUAL PA"};
+ if(pa<0&&pa>=-1000)return{ok:true,actual:pa,lookup:0,basis:"SEA LEVEL ROW (PA BELOW 0 FT)"};
+ return{ok:false,actual:pa,lookup:null,basis:"PA OUTSIDE SOURCE COVERAGE"};
+}
 function f9ArrayBracket(values,value){
  const a=[...new Set(values.map(Number).filter(Number.isFinite))].sort((x,y)=>x-y);
  if(!a.length||!Number.isFinite(value)||value<a[0]||value>a[a.length-1])return null;
@@ -3000,11 +3007,12 @@ function f9CellValue(table,weight,temp,key,transform=v=>v){
 }
 function f9GridValue(kind,filters,pa,temp,weight,key,transform){
  if(!F900B_QRH)return null;
+ const norm=f9NormalizePublishedPA(pa);if(!norm.ok)return null;const lookupPA=norm.lookup;
  const tables=F900B_QRH[kind].filter(t=>Object.entries(filters).every(([k,v])=>String(t[k])===String(v)));
- const pb=f9ArrayBracket(tables.map(t=>t.pressure_altitude_ft),pa);if(!pb)return null;
+ const pb=f9ArrayBracket(tables.map(t=>t.pressure_altitude_ft),lookupPA);if(!pb)return null;
  const values=pb.map(p=>{const table=tables.find(t=>t.pressure_altitude_ft===p);return table?f9CellValue(table,weight,temp,key,transform):null});
  if(values.some(v=>v==null))return null;
- return pb[0]===pb[1]?values[0]:lerpN(values[0],values[1],(pa-pb[0])/(pb[1]-pb[0]));
+ return pb[0]===pb[1]?values[0]:lerpN(values[0],values[1],(lookupPA-pb[0])/(pb[1]-pb[0]));
 }
 function f9Speed(rows,weight,key){
  if(!rows)return null;const wb=f9ArrayBracket(rows.map(r=>r.weight_lb),weight);if(!wb)return null;
@@ -3013,7 +3021,8 @@ function f9Speed(rows,weight,key){
 }
 function f9ExactLimitCode(filters,pa,temp,weight){
  if(![pa,temp,weight].every(Number.isFinite))return "—";
- const table=F900B_QRH?.takeoff.find(t=>t.pressure_altitude_ft===pa&&Object.entries(filters).every(([k,v])=>String(t[k])===String(v)));
+ const norm=f9NormalizePublishedPA(pa);if(!norm.ok)return "—";const lookupPA=norm.lookup;
+ const table=F900B_QRH?.takeoff.find(t=>t.pressure_altitude_ft===lookupPA&&Object.entries(filters).every(([k,v])=>String(t[k])===String(v)));
  const cell=table?.cells.find(c=>c.weight_lb===weight&&c.temperature_c===temp);
  if(cell)return cell.limit_code||"NONE";
  const matching=F900B_QRH?.takeoff.filter(t=>Object.entries(filters).every(([k,v])=>String(t[k])===String(v)))||[];
@@ -3052,7 +3061,7 @@ function f9TakeoffResult(){
  const wind=Number(f9Num("f9ToWind")??0),slope=Number(f9Num("f9ToSlope")??0);
  const filters={flaps_deg:Number($("f9ToConfig")?.value||20),surface:$("f9ToSurface")?.value||"DRY",anti_ice:$("f9ToAI")?.value||"OFF"};
  const keys=["v1_kt","vr_v2_kt","vft_kt","balanced_field_length_ft","second_segment_gross_gradient_pct","acceleration_g","pitch_deg"];
- const out={pa,temp,weight,runway,wind,slope,filters};keys.forEach(key=>out[key]=f9GridValue("takeoff",filters,pa,temp,weight,key));
+ const paNorm=f9NormalizePublishedPA(pa);const out={pa,temp,weight,runway,wind,slope,filters,pa_lookup:paNorm.lookup,pa_basis:paNorm.basis};keys.forEach(key=>out[key]=f9GridValue("takeoff",filters,pa,temp,weight,key));
  out.base_bfl_ft=out.balanced_field_length_ft;out.base_v1_kt=out.v1_kt;
  if(Number.isFinite(out.base_bfl_ft)){const c=f9DTMCorrect('bfl',filters,out.base_bfl_ft,wind,slope);out.bfl_correction=c;if(Number.isFinite(c.value))out.balanced_field_length_ft=c.value;else if(Math.abs(wind)>0.01||Math.abs(slope)>0.001)out.balanced_field_length_ft=null;}
  if(Number.isFinite(out.base_v1_kt)){const c=f9DTMCorrect('v1',filters,out.base_v1_kt,wind,slope);out.v1_correction=c;if(Number.isFinite(c.value))out.v1_kt=Math.max(90,c.value);else if(Math.abs(wind)>0.01||Math.abs(slope)>0.001)out.v1_kt=null;}
@@ -3067,15 +3076,17 @@ function f9TakeoffResult(){
 function f9LandingResult(pa,temp,weight,antiIce,runway){
  const filters={anti_ice:antiIce};
  const keys=["landing_distance_ft","landing_distance_x_1_67_ft","landing_distance_x_1_92_ft","approach_climb_gradient_pct","landing_climb_gradient_pct"];
- const out={pa,temp,weight,runway,antiIce};keys.forEach(key=>out[key]=f9GridValue("landing",filters,pa,temp,weight,key));
+ const paNorm=f9NormalizePublishedPA(pa);const out={pa,temp,weight,runway,antiIce,pa_lookup:paNorm.lookup,pa_basis:paNorm.basis};keys.forEach(key=>out[key]=f9GridValue("landing",filters,pa,temp,weight,key));
  out.vref_kt=f9Speed(F900B_QRH?.vref,weight,"vref_kt");
  return out;
 }
-function f9SourceLockText(pa,temp,weight){
+function f9SourceLockText(pa,temp,weight,kind="takeoff",filters={}){
  if(![pa,temp,weight].every(Number.isFinite))return"ENTER PRESSURE ALTITUDE, OAT AND WEIGHT";
- if(pa<0||pa>6000)return"SOURCE LOCKED — PA OUTSIDE 0–6,000 FT";
+ const norm=f9NormalizePublishedPA(pa);if(!norm.ok)return"SOURCE LOCKED — PA OUTSIDE −1,000 TO 6,000 FT SUPPORTED INPUT RANGE";
  if(weight<28000||weight>46500)return"SOURCE LOCKED — WEIGHT OUTSIDE 28,000–46,500 LB";
- return"SOURCE LOCKED — SELECTED POINT CROSSES AN UNPUBLISHED CELL";
+ const tables=(F900B_QRH?.[kind]||[]).filter(t=>Object.entries(filters||{}).every(([k,v])=>String(t[k])===String(v)));
+ if(tables.length){const temps=[...new Set(tables.flatMap(t=>t.temperatures_c||[]).map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);if(temps.length&&(temp<temps[0]||temp>temps[temps.length-1]))return`SOURCE LOCKED — OAT ${temp.toFixed(0)}°C OUTSIDE ${temps[0]} TO ${temps[temps.length-1]}°C SOURCE RANGE`; }
+ return"SOURCE LOCKED — SELECTED POINT CROSSES AN UNPUBLISHED SOURCE CELL";
 }
 function f9TakeoffTrimFromCG(pct){
  const src=F900B_WB?.takeoff_trim;
@@ -3099,13 +3110,13 @@ function renderF900BTakeoff(out){
  const fieldReady=[out.v1_kt,out.vr_v2_kt,out.balanced_field_length_ft].every(Number.isFinite);
  let status,tone="warn";
  if(Number.isFinite(out.weight)&&out.weight>46500){status="NO-GO • OVER 46,500 LB STRUCTURAL MTOW";tone="bad"}
- else if(!fieldReady)status=f9SourceLockText(out.pa,out.temp,out.weight);
+ else if(!fieldReady)status=f9SourceLockText(out.pa,out.temp,out.weight,"takeoff",out.filters);
  else if(!Number.isFinite(out.runway))status="RUNWAY REQUIRED";
  else if(out.margin<0){status="NO-GO • BFL EXCEEDS RUNWAY";tone="bad"}
  else if(!Number.isFinite(out.second_segment_gross_gradient_pct))status="FIELD PASS • CLIMB VALUE NOT PUBLISHED";
  else{status="FIELD PASS • CLIMB VALUE DISPLAYED";tone="ok"}
  f9Status("f9ToStatus",status,tone);
- f9Put("f9ToSource",`Falcon 900B QRH1 Rev02 + DTM9823 §3A • ${out.filters.flaps_deg}° F+S • A/I ${out.filters.anti_ice} • ${out.filters.surface} • wind ${out.wind>=0?"+":""}${out.wind.toFixed(1)} kt • slope ${out.slope>=0?"+":""}${out.slope.toFixed(2)}% • ${out.solver_status}`);
+ f9Put("f9ToSource",`Falcon 900B QRH1 Rev02 + DTM9823 §3A • ${out.filters.flaps_deg}° F+S • A/I ${out.filters.anti_ice} • ${out.filters.surface} • ${out.pa_basis}${out.pa_lookup!==out.pa?` (${Math.round(out.pa)}→${Math.round(out.pa_lookup)} ft)`:""} • wind ${out.wind>=0?"+":""}${out.wind.toFixed(1)} kt • slope ${out.slope>=0?"+":""}${out.slope.toFixed(2)}% • ${out.solver_status}`);
 }
 function f9Hyd2AdjustedLanding(out){
  const mode=$("f9LdgMode")?.value||"NORMAL";
@@ -3131,7 +3142,7 @@ function renderF900BLanding(prefix,out,factor,structuralGate=true){
  const ready=[out.vref_kt,required,out.approach_climb_gradient_pct,out.landing_climb_gradient_pct].every(Number.isFinite);
  let status,tone="warn";
  if(structuralGate&&Number.isFinite(out.weight)&&out.weight>42000){status="NO-GO • OVER 42,000 LB MLW";tone="bad"}
- else if(!ready)status=f9SourceLockText(out.pa,out.temp,out.weight);
+ else if(!ready)status=f9SourceLockText(out.pa,out.temp,out.weight,"landing",{anti_ice:out.antiIce});
  else if(!Number.isFinite(out.runway))status="RUNWAY REQUIRED";
  else if(margin<0){status="NO-GO • REQUIRED DISTANCE EXCEEDS RUNWAY";tone="bad"}
  else{status="FIELD PASS • CLIMB VALUES DISPLAYED";tone="ok"}
@@ -3198,6 +3209,22 @@ function f9RunwayPerformanceGate(){
 }
 function f9PassengerSeatIds(){return Array.from({length:12},(_,i)=>`f9wb_pax${i+1}`)}
 function f9PassengerLoadedCount(){return f9PassengerSeatIds().filter(id=>Number($(id)?.value)>0).length}
+let F9_MOVING_PAX=null;
+function f9SeatWeightInput(i){return $("f9wb_pax"+i)}
+function f9SeatMoveTap(i,e){
+ if(e?.target?.tagName==="INPUT")return;
+ const el=f9SeatWeightInput(i);if(!el)return;const current=Math.max(0,Number(el.value)||0);
+ if(F9_MOVING_PAX){
+   const moving=F9_MOVING_PAX;
+   if(current>0){el.value=moving.weight;const src=f9SeatWeightInput(moving.from);if(src)src.value=current;F9_MOVING_PAX=null;f9Put("f9SeatMoveNote",`Swapped Seat ${moving.from} and Seat ${i}.`);}
+   else{el.value=moving.weight;F9_MOVING_PAX=null;f9Put("f9SeatMoveNote",`Passenger moved to Seat ${i}.`);}
+   f9RecalcWB();return;
+ }
+ if(current>0){F9_MOVING_PAX={from:i,weight:current};el.value=0;f9Put("f9SeatMoveNote",`Seat ${i} selected (${Math.round(current)} lb). Tap an empty seat to move, or occupied seat to swap.`);f9RecalcWB();}
+}
+function f9InitSeatMover(){
+ for(let i=1;i<=12;i++){const el=f9SeatWeightInput(i),card=el?.closest?.(".f9-seat");if(!el||!card||card.dataset.moveReady)return;card.dataset.moveReady="1";card.style.cursor="pointer";card.addEventListener("click",e=>f9SeatMoveTap(i,e));}
+}
 function f9PassengerCountChanged(){
  const el=$("f9mPaxCount");if(!el)return;const requested=Math.max(0,Math.min(12,Math.round(Number(el.value)||0)));el.value=requested;
  f9PassengerSeatIds().forEach((id,i)=>{const e=$(id);if(!e)return;if(i<requested){if(!(Number(e.value)>0))e.value=170}else e.value=0;});
@@ -6751,7 +6778,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.55",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.56",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -6871,11 +6898,13 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.55",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.56",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
 
 try{enableUppercaseEntry();updateManualWeatherStationLabels();syncToldRunwaySelectors();}catch(e){}
+
+window.addEventListener("DOMContentLoaded",()=>{setTimeout(f9InitSeatMover,0)});
 </script>
 </body></html>
