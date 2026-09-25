@@ -1,0 +1,7 @@
+KUSA FlightOps v5.25.63
+
+Deployment/version-sync correction only.
+- Corrected stale browser expected-build constant from 5.25.61 to 5.25.63.
+- Corrected stale service-worker registration query from sw.js?v=5.25.61 to sw.js?v=5.25.63.
+- Bumped server, package, service worker cache, footer, and visible build references to 5.25.63.
+- No aircraft data, performance math, W&B logic, or visual-system logic changed from v5.25.62.
