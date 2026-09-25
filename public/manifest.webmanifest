@@ -1,9 +1,11 @@
 {
-  "name": "KUSA FlightOps — Performance + W&B",
+  "name": "KUSA FlightOps",
   "short_name": "FlightOps",
-  "start_url": "/",
+  "start_url": "/?source=pwa",
   "display": "standalone",
   "background_color": "#071b33",
   "theme_color": "#071b33",
-  "description": "KUSA FlightOps — Performance + W&B for N33AP mission, aircraft preparation, takeoff and landing performance."
+  "description": "KUSA FlightOps \u2014 mission planning, Falcon performance and weight & balance.",
+  "id": "/",
+  "scope": "/"
 }
