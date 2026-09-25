@@ -1,0 +1,19 @@
+KUSA FlightOps v5.25.51 — Falcon 900B DTM9823 Digitization Register
+
+Scope
+- Preserve v5.25.50 performance and W&B math unchanged.
+- Add source-controlled DTM9823 Section 3A digitization register for Falcon 900B / SB F900-100 (TFE731-5BR).
+- Register 20° and 7° Flaps + Slats dry/wet takeoff chart families, including wind/slope correction panels.
+- Register clearway/stopway / ASDA/TODA chart families.
+- Load six exact published worked-example anchors from DTM9823 for validation.
+- Add DTM9823 digitization state to the Falcon 900B Mission page and local/offline aircraft-data integrity gate.
+- Precache the DTM9823 digitization JSON for offline availability.
+
+Validation discipline
+- Numeric wind/slope correction surfaces remain validation-locked pending independent source-raster second read.
+- Published exact worked examples are hard anchors and must be reproduced before operational promotion.
+- Engineering read tolerances follow the same validation philosophy used on Falcon 50 raster-trace work.
+- No performance values, W&B station arms, fuel moments, structural limits, or QRH interpolation logic changed.
+
+Status
+- DEVELOPMENT / VALIDATION ONLY — NOT FOR FLIGHT USE.
