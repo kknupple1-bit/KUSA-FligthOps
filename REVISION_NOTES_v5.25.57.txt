@@ -1,0 +1,11 @@
+KUSA FlightOps v5.25.57 — Falcon 50 / Falcon 900B Mission + TOLD Parity
+
+- Falcon 900B Mission headings aligned to Falcon 50 workflow terminology.
+- Falcon 900B TOLD now mirrors Falcon 50 operational layout with Menu / Mission / Refresh / Share / Complete actions, runway context, available/required/margin blocks, and aircraft-prep/load support summary.
+- Falcon 900B V-speeds display green; emergency-return VREF displays red; destination VREF green.
+- Destination landing field solution no longer source-locks solely because a separate climb-gradient cell is unpublished. Landing distance/VREF can pass while missing climb data are explicitly identified.
+- Falcon 900B CG gate now applies the Loading Manual in-flight criterion to the full Takeoff→Landing fuel-burn path. ZFW and Ramp remain displayed loading references but Ramp alone no longer fails the in-flight CG gate.
+- Supporting source/documentation detail expanded to match Falcon 50 TOLD depth.
+- No source performance tables, W&B arms, fuel-moment points, or structural limits changed.
+
+DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
