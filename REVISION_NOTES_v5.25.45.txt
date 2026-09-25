@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.45
+
+Purpose: Falcon 900B data-status deployment/integrity hotfix.
+
+Changes:
+- Corrected N699BG W&B loader integrity check. The aircraft data schema is source-controlled as kusa.f900b.n699bg_wb.v5.25.43 even though the application build advances independently.
+- Kept server-side API delivery with embedded fallback for Falcon 900B QRH1 and N699BG W&B data.
+- Added the actual performance/W&B load error to FlightOps Data Status so a deployment problem is immediately diagnosable.
+- Bumped service-worker cache and browser/server build identifiers to 5.25.45 to force a clean update.
+- No performance values, W&B values, cabin stations, or trim relationship changed.
