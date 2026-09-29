@@ -670,7 +670,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{max-width:100%!important;padding:72px 18px 60px!important}.f9-window-strip{display:none}}
 
 
-/* v5.25.70 — canonical mission width/parity */
+/* v5.25.71 — canonical mission width/parity */
 #missionResultsStart{grid-template-columns:1fr!important;gap:0!important}
 #missionResultsStart>section,#missionResultsStart>aside{min-width:0;width:100%}
 #missionResultsStart>aside{display:block}
@@ -679,7 +679,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:1000px){#f900bmissionView .canonical-result-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){#f900bmissionView .canonical-result-grid{grid-template-columns:1fr}}
 
-/* v5.25.70 — canonical Mission Section 7+ presentation */
+/* v5.25.71 — canonical Mission Section 7+ presentation */
 .canonical-perf-source{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0 14px}
 .canonical-perf-source .source-gate,.canonical-perf-grid .canon-cell{background:#0d2137;border:1px solid #28445f;border-radius:10px;padding:10px 12px;min-height:72px;display:flex;flex-direction:column;gap:4px;justify-content:center}
 .canonical-perf-source .source-gate b,.canonical-perf-grid .canon-cell b{font-size:17px;line-height:1.15}
@@ -703,7 +703,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:520px){.canonical-perf-source,.canonical-perf-grid{grid-template-columns:1fr}}
 
 
-/* v5.25.70 — final mission parity + DTM9821 CG presentation */
+/* v5.25.71 — final mission parity + DTM9821 CG presentation */
 #opsView .canonical-perf-source,#f900bmissionView .canonical-perf-source{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 #opsView .canonical-perf-grid,#f900bmissionView .canonical-perf-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 #opsView .canonical-perf-block,#f900bmissionView .canonical-perf-block{margin-top:12px}
@@ -716,7 +716,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:560px){#opsView .canonical-perf-source,#f900bmissionView .canonical-perf-source,#opsView .canonical-perf-grid,#f900bmissionView .canonical-perf-grid{grid-template-columns:1fr}}
 
 
-/* v5.25.70 structural cleanup — post-performance cards remain inside their aircraft Mission view */
+/* v5.25.71 structural cleanup — post-performance cards remain inside their aircraft Mission view */
 #opsView>.canonical-post-card,#f900bmissionView>.canonical-post-card{width:100%;max-width:none;margin-top:14px}
 #opsView>#missionBottomActions,#f900bmissionView>#f9MissionBottomActions{width:100%;margin-top:14px}
 #opsView .legacy-performance-detail .canonical-perf-source,#opsView .legacy-performance-detail .canonical-perf-block{display:none!important}
@@ -955,9 +955,21 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/manifest.webmanifest" rel="manifest"/>
 <meta content="#071b33" name="theme-color"/>
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
+
+<style id="v52571-cleanup">
+/* v5.25.71 — parity cleanup / width containment / advanced-detail simplification */
+#opsView .canonical-post-card,#f900bmissionView .canonical-post-card{width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important}
+#opsView .canonical-post-card .row,#f900bmissionView .canonical-post-card .row{width:100%!important;min-width:0!important}
+#opsView .canonical-post-card .row>div,#f900bmissionView .canonical-post-card .row>div{min-width:0!important}
+#opsView .canonical-post-card input,#f900bmissionView .canonical-post-card input{min-width:0!important;width:100%!important}
+#opsView .canonical-advanced>.canonical-advanced-inner>.callout:first-child,#f900bmissionView .canonical-advanced>.canonical-advanced-inner>.callout:first-child{display:none!important}
+#opsView .canonical-advanced summary,#f900bmissionView .canonical-advanced summary{font-size:13px!important}
+#f9mSpeedCard .wx b{color:var(--fo-ok)!important}
+#f9mSpeedCard #f9pTrim,#f9mSpeedCard #f9pBFL,#f9mSpeedCard #f9pGCLB2,#f9mSpeedCard #f9pLimit{color:var(--fo-text)!important}
+</style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.70</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.71</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1469,7 +1481,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="canon-cell"><span class="small">Performance Mode</span><b>MISSION / ACTUAL</b></div>
 <div class="canon-cell"><span class="small">Source Status</span><b class="ok">VERIFIED</b></div>
 </div></div>
-<details class="canonical-advanced"><summary>Performance controls / advanced detail</summary><div class="canonical-advanced-inner legacy-performance-detail">
+<details class="canonical-advanced"><summary>Advanced performance controls (optional)</summary><div class="canonical-advanced-inner legacy-performance-detail">
 <div class="card" id="legacyF50PerformanceCard">
 <h2>7. Performance Evaluation</h2>
 <div class="canonical-perf-source">
@@ -1512,7 +1524,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="canon-cell"><span class="small">Performance Mode</span><b>MISSION / ACTUAL</b></div>
 </div>
 </div>
-<details class="canonical-advanced"><summary>Performance controls / advanced detail</summary><div class="canonical-advanced-inner">
+<details class="canonical-advanced"><summary>Advanced performance controls (optional)</summary><div class="canonical-advanced-inner">
 <div class="canonical-perf-source">
 <div class="source-gate"><span class="small">Takeoff Source Gate</span><b class="ok">SOURCE-CONTROLLED</b><span class="small">AFMS / DTM source package loaded</span></div>
 <div class="source-gate"><span class="small">Landing Source Gate</span><b class="ok">SOURCE-CONTROLLED</b><span class="small">DTM landing source package loaded</span></div>
@@ -1553,7 +1565,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="canon-cell"><span class="small">Performance Mode</span><b>MISSION / ACTUAL</b></div>
 </div>
 </div>
-<details class="canonical-advanced"><summary>Performance controls / advanced detail</summary><div class="canonical-advanced-inner">
+<details class="canonical-advanced"><summary>Advanced performance controls (optional)</summary><div class="canonical-advanced-inner">
 <div class="callout small">
 <b>Performance source control:</b> FTA-PA-001019 Rev C is the <b>current controlling Dash-4 AFMS</b>. Section 5 performance pages are unchanged by Rev C and remain active. DTM813/DTM912 remain controlling where not superseded. <b>Digitization audit:</b> balanced-field accelerate-stop is displayed by the AFM definition (ASD = BFL at the selected balanced-field V1). Phase 6 directly digitized the S+Flaps 20° §5.45.6 nomograph panels (pressure-altitude/temperature, weight-family crossings, runway-slope correction, wind correction and field-length axis) into a separate source-controlled shadow dataset. §5.45.6 BFL shadow now passes all four published anchors after the REF-line traversal correction. Phase 11 continues §5.45.7 V1 source control: the runway-slope family remains directly digitized, the weight-family geometry is now directly extracted and registered across the 30,000-lb REF line, and the top PA/temperature solid-family geometry has been extracted for label/applicability trace verification. Headwind/tailwind digitization remains incomplete. The continuous V1 solver remains shadow-only. <span id="s20NomographShadowStatus"><b>SHADOW NOMOGRAPH:</b> loading regression…</span> The S+Flaps 20° dry BFL/V1 shadow engine has completed the controlled 12-point software-regression gate; operator/human trace signoff and the anti-ice BFL/V1 family remain pending, so the production grid is not yet promoted or relabeled. Dash-4 takeoff N1 is now formally regression-checked against FTA-PA-001019 Rev I/R for both ice-protection OFF and engine ice-protection ON, including bounded interpolation. Emergency-return VREF is direct DTM813 §5.60.5 data; §5.60.4 landing distance remains pending. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
 </div>
@@ -2394,7 +2406,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="canon-cell"><span class="small">Performance Mode</span><b>MISSION / ACTUAL</b></div>
 <div class="canon-cell"><span class="small">Source Status</span><b class="ok">VERIFIED</b></div>
 </div></div>
-<details class="canonical-advanced"><summary>Performance controls / advanced detail</summary><div class="canonical-advanced-inner legacy-performance-detail">
+<details class="canonical-advanced"><summary>Advanced performance controls (optional)</summary><div class="canonical-advanced-inner legacy-performance-detail">
 <div class="card" id="legacyF9PerformanceCard">
 <h2>7. Performance Evaluation</h2>
 <div class="callout small"><b>Performance source control:</b> Falcon 900B QRH1 Rev02 provides the bounded zero-wind/zero-slope base grid. DTM9823 Section 3A supplies the active source-bounded wind and runway-slope corrections. Interpolation is allowed only inside published source cells; no extrapolation.</div>
@@ -3432,28 +3444,37 @@ function f9FuelBurnPath(zfw,zm,startFuel,endFuel){
 }
 function f9DrawCGTrace(wb){
  const c=$("f9cgChart");if(!c||!wb||!F900B_WB)return;
- const W=c.clientWidth;if(!Number.isFinite(W)||W<120)return;
- const dpr=devicePixelRatio||1,H=340;c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
- const env=F900B_WB.cg_envelope_pct_mac||[],lim=F900B_WB.limits||{};if(env.length<2)return;
- // DTM9821 presentation: light weights at top, heavy weights downward; %MAC increases left-to-right.
+ const W=c.clientWidth;if(!Number.isFinite(W)||W<160)return;
+ const dpr=devicePixelRatio||1,H=360;c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
+ const env=(F900B_WB.cg_envelope_pct_mac||[]).slice().sort((a,b)=>a[0]-b[0]),lim=F900B_WB.limits||{};if(env.length<2)return;
+ // DTM9821 visual convention: %MAC left-to-right, weight increases downward.
  const minW=19000,maxW=51000,minCG=13,maxCG=32;
- const px=v=>52+(v-minCG)/(maxCG-minCG)*(W-82),py=v=>28+(v-minW)/(maxW-minW)*(H-62);
- x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
- for(let ww=20000;ww<=50000;ww+=5000){x.fillText(ww.toLocaleString(),3,py(ww)+4);x.beginPath();x.moveTo(46,py(ww));x.lineTo(W-20,py(ww));x.stroke();}
- for(let cg=14;cg<=32;cg+=2){x.fillText(String(cg),px(cg)-5,H-10);x.beginPath();x.moveTo(px(cg),20);x.lineTo(px(cg),H-28);x.stroke();}x.fillText("% MAC",W-62,H-10);
- // Shade the published allowable envelope. This is not an additional limit model; it is the existing source-controlled envelope.
- const poly=[...env.map(p=>[p[1],p[0]]),...env.slice().reverse().map(p=>[p[2],p[0]])];
- x.save();x.fillStyle="rgba(143,211,255,.10)";x.beginPath();poly.forEach((p,i)=>i?x.lineTo(px(p[0]),py(p[1])):x.moveTo(px(p[0]),py(p[1])));x.closePath();x.fill();x.restore();
- const drawH=(w,label,style="#738ba3",dash=[6,5])=>{if(!Number.isFinite(w))return;x.save();x.strokeStyle=style;x.setLineDash(dash);x.beginPath();x.moveTo(46,py(w));x.lineTo(W-20,py(w));x.stroke();x.setLineDash([]);x.fillStyle="#c0d0df";x.font="bold 10px Arial";x.fillText(label,Math.max(55,W-170),py(w)-5);x.restore();};
- drawH(20700,"MIN FLIGHT 20,700");drawH(27535,"FULL FUEL LOAD 27,535");drawH(lim.mzfw_lb||30864,`MZFW ${(lim.mzfw_lb||30864).toLocaleString()}`);drawH(lim.mlw_lb||42000,`MLW ${(lim.mlw_lb||42000).toLocaleString()}`);drawH(lim.mtow_lb||46500,`MTOW ${(lim.mtow_lb||46500).toLocaleString()}`,"#ff6b6b",[8,5]);drawH(lim.mrw_lb||46700,`MRW ${(lim.mrw_lb||46700).toLocaleString()}`);
- const fwd=env.map(p=>[p[0],p[1]]),aft=env.map(p=>[p[0],p[2]]);
- x.strokeStyle="#ffca58";x.lineWidth=2.5;x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.strokeStyle="#55d18b";x.beginPath();aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.fillStyle="#ffca58";x.font="bold 10px Arial";x.fillText("FWD CG LIMIT",px(env[0][1])-10,18);x.fillStyle="#55d18b";x.fillText("AFT CG LIMIT",Math.max(55,px(env[0][2])-55),18);
- // Only the in-flight endpoints are connected. ZFW and ramp are reference points, not part of the burn trace.
+ const L=58,R=28,T=28,B=34;
+ const px=v=>L+(v-minCG)/(maxCG-minCG)*(W-L-R),py=v=>T+(v-minW)/(maxW-minW)*(H-T-B);
+ x.font="10px Arial";x.lineWidth=1;
+ // Manual-like grid: 2,000-lb horizontal spacing and 1% MAC vertical spacing.
+ for(let ww=19000;ww<=51000;ww+=2000){x.strokeStyle=(ww%4000===1000)?"#24425f":"#1b3650";x.beginPath();x.moveTo(L,py(ww));x.lineTo(W-R,py(ww));x.stroke();x.fillStyle="#9db6cf";x.fillText(String(Math.round(ww/1000)),6,py(ww)+3);}
+ for(let cg=13;cg<=32;cg+=1){x.strokeStyle=cg%2===0?"#24425f":"#1b3650";x.beginPath();x.moveTo(px(cg),T);x.lineTo(px(cg),H-B);x.stroke();if(cg>=13){x.fillStyle="#9db6cf";x.fillText(String(cg),px(cg)-4,H-11);}}
+ x.fillStyle="#9db6cf";x.font="bold 10px Arial";x.fillText("WEIGHT (x1,000 lb)",4,15);x.fillText("C.G. POSITION % MAC",Math.max(L,W-155),H-11);
+ // Closed published flight envelope polygon.
+ const fwd=env.map(p=>[p[1],p[0]]),aft=env.map(p=>[p[2],p[0]]);
+ x.save();x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[0]),py(p[1])):x.moveTo(px(p[0]),py(p[1])));for(let i=aft.length-1;i>=0;i--)x.lineTo(px(aft[i][0]),py(aft[i][1]));x.closePath();x.fillStyle="rgba(143,211,255,.08)";x.fill();x.strokeStyle="#9cc7ea";x.lineWidth=2.2;x.stroke();x.restore();
+ // Label both hard limits neutrally; color is not a pass/fail cue.
+ x.fillStyle="#c8d8e8";x.font="bold 10px Arial";x.fillText("FWD CG LIMIT",px(env[0][1])-26,18);x.fillText("AFT CG LIMIT",px(env[0][2])-24,18);
+ // Structural/reference lines. Close values are deliberately label-staggered to prevent collisions.
+ const refs=[
+  [20700,"MIN FLIGHT 20,700","#738ba3",0],
+  [27535,"FULL FUEL LOAD 27,535","#738ba3",0],
+  [lim.mzfw_lb||30864,`MZFW ${(lim.mzfw_lb||30864).toLocaleString()}`,"#738ba3",0],
+  [lim.mlw_lb||42000,`MLW ${(lim.mlw_lb||42000).toLocaleString()}`,"#738ba3",0],
+  [lim.mtow_lb||46500,`MTOW ${(lim.mtow_lb||46500).toLocaleString()}`,"#ff8b8b",-9],
+  [lim.mrw_lb||46700,`MRW ${(lim.mrw_lb||46700).toLocaleString()}`,"#b8c9d9",11]
+ ];
+ refs.forEach(([w,label,color,dy])=>{if(!Number.isFinite(Number(w)))return;x.save();x.strokeStyle=color;x.setLineDash([6,5]);x.lineWidth=1;x.beginPath();x.moveTo(L,py(Number(w)));x.lineTo(W-R,py(Number(w)));x.stroke();x.setLineDash([]);x.fillStyle=color;x.font="bold 9px Arial";const tw=x.measureText(label).width;x.fillText(label,Math.max(L+8,W-R-tw-6),py(Number(w))-5+Number(dy));x.restore();});
+ // Only the in-flight trajectory is connected. ZFW and ramp are references, never path vertices.
  if(wb.tcg&&wb.lcg&&Number.isFinite(wb.tow)&&Number.isFinite(wb.ldw)){x.strokeStyle="#8fd3ff";x.lineWidth=3;x.beginPath();x.moveTo(px(wb.tcg.pct),py(wb.tow));x.lineTo(px(wb.lcg.pct),py(wb.ldw));x.stroke();}
- const point=(w,cg,label,color,r=7,dy=-8)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#d6e7f8";x.font="bold 11px Arial";x.fillText(label,px(cg.pct)+9,py(w)+dy);};
- point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4,14);point(wb.ramp,wb.rcg,"RAMP","#d9a7ff",5,-8);point(wb.tow,wb.tcg,"TO","#8fd3ff",7);point(wb.ldw,wb.lcg,"LDG","#55d18b",7);
+ const point=(w,cg,label,color,r=6,dx=8,dy=-8)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#edf5ff";x.font="bold 10px Arial";x.fillText(label,px(cg.pct)+dx,py(w)+dy);};
+ point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4,8,13);point(wb.ramp,wb.rcg,"RAMP","#d9a7ff",5,8,-7);point(wb.tow,wb.tcg,"TO","#8fd3ff",6,8,-7);point(wb.ldw,wb.lcg,"LDG","#55d18b",6,8,-7);
  const set=(id,cg)=>f9Put(id,cg?`${cg.pct.toFixed(2)}% MAC`:"—"),setArm=(id,cg)=>f9Put(id,cg?`${cg.arm.toFixed(2)} in`:"—");
  set("f9cgZeroFuel",wb.zcg);setArm("f9cgZeroFuelArm",wb.zcg);set("f9cgRamp",wb.rcg);setArm("f9cgRampArm",wb.rcg);set("f9cgTakeoff",wb.tcg);setArm("f9cgTakeoffArm",wb.tcg);set("f9cgLanding",wb.lcg);setArm("f9cgLandingArm",wb.lcg);
  const upd=(prefix,w,cg)=>{const e=f9WBEnvelope(w);if(!e||!cg){f9Put(prefix+"Limits","—");f9Put(prefix+"Margin","—");return}const nearest=Math.min(cg.pct-e.fwd,e.aft-cg.pct);f9Put(prefix+"Limits",`${e.fwd.toFixed(2)}–${e.aft.toFixed(2)}% MAC`);f9Put(prefix+"Margin",`${nearest.toFixed(2)}% MAC nearest boundary`);};
@@ -3530,7 +3551,7 @@ async function f9RecalcWB(){
  const flightPathOK=Array.isArray(burnPath)&&burnPath.length>1&&burnPath.every(p=>inside(p.weight,{pct:p.pct,arm:p.arm}));
  const envOK=flightPathOK;
  const structuralOK=zfw<=d.limits.mzfw_lb&&ramp<=d.limits.mrw_lb&&tow<=d.limits.mtow_lb&&ldw<=d.limits.mlw_lb&&Math.min(zfw,ramp,tow,ldw)>=d.limits.min_flight_weight_lb;
- if($("f9mToWeight"))$("f9mToWeight").value=Math.round(tow);if($("f9mLdgWeight"))$("f9mLdgWeight").value=Math.round(ldw);if($("f9wbLandingFuel"))$("f9wbLandingFuel").value=Math.round(ldgFuel);
+ if($("f9mToWeight"))$("f9mToWeight").value=Math.round(tow);if($("f9mLdgWeight"))$("f9mLdgWeight").value=Math.round(ldw);if($("f9ToWeight"))$("f9ToWeight").value=Math.round(tow);if($("f9LdgWeight"))$("f9LdgWeight").value=Math.round(ldw);if($("legacyF9CanonicalTOW"))$("legacyF9CanonicalTOW").value=Math.round(tow);if($("f9wbLandingFuel"))$("f9wbLandingFuel").value=Math.round(ldgFuel);
  f9Put("f9wbZFW",`${Math.round(zfw).toLocaleString()} lb`);f9Put("f9wbZFWCG",zcg?`${zcg.arm.toFixed(2)} in • ${f9PctFmt(zcg.pct)}`:"—");f9Put("f9wbRamp",`${Math.round(ramp).toLocaleString()} lb • ${rcg?rcg.pct.toFixed(2):"—"}%`);f9Put("f9wbTO",`${Math.round(tow).toLocaleString()} lb • ${tcg?tcg.pct.toFixed(2):"—"}%`);f9Put("f9wbLDG",`${Math.round(ldw).toLocaleString()} lb • ${lcg?lcg.pct.toFixed(2):"—"}%`);
  f9Status("f9wbStruct",structuralOK?"WITHIN STRUCTURAL LIMITS":"CHECK STRUCTURAL LIMITS",structuralOK?"ok":"bad");f9Status("f9wbEnvelope",envOK?"TAKEOFF→LANDING PATH WITHIN CG ENVELOPE":"CHECK TAKEOFF→LANDING CG PATH",envOK?"ok":"bad");f9Status("f9wbLoadStatus",loadOK?"LOAD / FUEL INPUTS VALID":"CHECK LOAD / FUEL INPUTS",loadOK?"ok":"bad");
  const ok=structuralOK&&envOK&&loadOK;f9Status("f9mWBStatus",ok?"READY":"CHECK",ok?"ok":"bad");f9Put("f9mWBNote",ok?`TOW ${Math.round(tow).toLocaleString()} • LDW ${Math.round(ldw).toLocaleString()}`:"Review aircraft loading");
@@ -3914,10 +3935,17 @@ function syncF900BTOLDToMission(){
  pairs.forEach(([a,b])=>{if($(a)&&$(b)&&String($(a).value)!=="")$(b).value=$(a).value});
 }
 function f9MissionCopy(id,val){const e=$(id);if(e)e.textContent=val??"—"}
+function f9SyncVisiblePerformance(){
+ const copy=(dst,src)=>f9Put(dst,textOf(src)||"—");
+ [["f9pV1","f9V1"],["f9pVR","f9VR"],["f9pVFT","f9VFT"],["f9pVFR","f9VFR"],["f9pTrim","f9Trim"],["f9pBFL","f9BFL"],["f9pGCLB2","f9GCLB2"],["f9pLimit","f9Limit"]].forEach(([d,s])=>copy(d,s));
+ [["f9mV1","f9V1"],["f9mVR","f9VR"],["f9mVFT","f9VFT"],["f9mVFR","f9VFR"],["f9mTrim","f9Trim"],["f9mBFL","f9BFL"],["f9mGCLB2","f9GCLB2"],["f9mLimit","f9Limit"],["f9mToMargin","f9ToMargin"],["f9mToStatus","f9ToStatus"],["f9mLdgVref","f9LdgVref"],["f9mLdgLD","f9LdgLD"],["f9mLdgRequired","f9LdgRequired"],["f9mLdgMargin","f9LdgMargin"],["f9mLdgStatus","f9LdgStatus"],["f9mEmerVref","f9EmerVref"],["f9mEmerRequired","f9EmerRequired"],["f9mEmerMargin","f9EmerMargin"],["f9mEmerStatus","f9EmerStatus"]].forEach(([d,s])=>copy(d,s));
+}
+
 async function refreshF900BMission(){
  await f9RecalcWB();
  syncF900BMissionToTOLD();
  await refreshF900B();
+ f9SyncVisiblePerformance();
  f9MissionCopy("f9mV1",$("f9V1")?.textContent||"—");
  f9MissionCopy("f9mVR",$("f9VR")?.textContent||"—");
  f9MissionCopy("f9mBFL",$("f9BFL")?.textContent||"—");
@@ -3949,7 +3977,7 @@ async function refreshF900BMission(){
  f9MissionCopy("f9mLdgLCG",$("f9LdgLCG")?.textContent||"—");
  f9MissionCopy("f9mLdgStatus",$("f9LdgStatus")?.textContent||"—");
  f9MissionCopy("f9mLdgSource",$("f9LdgSource")?.textContent||"—");
- f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();f9DrawCGTrace(window.f900bWBLatest);
+ f9SyncVisiblePerformance();f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();f9DrawCGTrace(window.f900bWBLatest);
 }
 function f9RenderToldParity(){
  const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest");
@@ -7477,7 +7505,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.70",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.71",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7597,7 +7625,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.70",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.71",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -7606,7 +7634,7 @@ try{enableUppercaseEntry();updateManualWeatherStationLabels();syncToldRunwaySele
 
 window.addEventListener("DOMContentLoaded",()=>{setTimeout(f9InitSeatMover,0)});
 
-// v5.25.70 canonical Falcon 900 mission fallback/parity helpers
+// v5.25.71 canonical Falcon 900 mission fallback/parity helpers
 function f9SelectedMissionRunway(which){
   const sel=$(which==='DEP'?'f9mDepRunway':'f9mDestRunway');
   const id=String(sel?.value||'');
@@ -7673,8 +7701,8 @@ function f9RenderCanonicalParityFields(){
   put('f50CanonTOW',read('perfTOW'),' lb'); put('f50CanonBFL',read('perfBFL'),' ft'); put('f50CanonV1',read('perfV1'),' kt'); put('f50CanonVR',read('perfVR'),' kt'); put('f50CanonGrad',read('perfGrad'),'%'); put('f50CanonToMargin',read('toRwyMargin')); put('f50CanonToStatus',read('toStatus'));
   put('f50CanonLdgConfig',read('landConfig')); put('f50CanonLdgAI',read('landAntiIce')); put('f50CanonLdgSurface',read('landRunwayCondition')); put('f50CanonLdgRunway',read('destNotamRunwaySelect')); put('f50CanonLDW',read('landWt'),' lb'); put('f50CanonLFL',read('landFieldLen'),' ft'); put('f50CanonVREF',read('landVref'),' kt'); put('f50CanonLdgMargin',read('landRwyMargin')); put('f50CanonLdgStatus',read('landStatus'));
   put('f9CanonDepNotam',read('f9DepNotamStatusCanonical')); put('f9CanonDestNotam',read('f9DestNotamStatusCanonical'));
-  put('f9CanonToConfig',read('f9mToConfig')); put('f9CanonToAI',read('f9mToAI')); put('f9CanonToSurface',read('f9mToSurface')); put('f9CanonToRunway',read('f9DepRunwayCanonical')); put('f9CanonTOW',read('f9CanonicalTOW'),' lb'); put('f9CanonBFL',read('f9mBFL')); put('f9CanonV1',read('f9mV1')); put('f9CanonVR',read('f9mVR')); put('f9CanonGrad',read('f9mGCLB2')); put('f9CanonToMargin',read('f9mToMargin')); put('f9CanonToStatus',read('f9mToStatus'));
-  put('f9CanonLdgConfig',read('f9CanonicalLandingConfig')); put('f9CanonLdgAI',read('f9mLdgAI')); put('f9CanonLdgSurface',read('f9CanonicalLandingSurface')); put('f9CanonLdgRunway',read('f9DestRunwayCanonical')); put('f9CanonLDW',read('f9sLDW')); put('f9CanonLFL',read('f9mLdgRequired')); put('f9CanonVREF',read('f9mLdgVref')); put('f9CanonLdgMargin',read('f9mLdgMargin')); put('f9CanonLdgStatus',read('f9mLdgStatus'));
+  put('f9CanonToConfig',read('f9mToConfig')); put('f9CanonToAI',read('f9mToAI')); put('f9CanonToSurface',read('f9mToSurface')); put('f9CanonToRunway',read('f9DepRunwayCanonical')); put('f9CanonTOW',read('f9ToWeight'),' lb'); put('f9CanonBFL',read('f9mBFL')); put('f9CanonV1',read('f9mV1')); put('f9CanonVR',read('f9mVR')); put('f9CanonGrad',read('f9mGCLB2')); put('f9CanonToMargin',read('f9mToMargin')); put('f9CanonToStatus',read('f9mToStatus'));
+  put('f9CanonLdgConfig','40° Flaps + Slats'); put('f9CanonLdgAI',read('f9mLdgAI')); put('f9CanonLdgSurface','DRY / SOURCE'); put('f9CanonLdgRunway',read('f9DestRunwayCanonical')); put('f9CanonLDW',read('f9sLDW')); put('f9CanonLFL',read('f9mLdgRequired')); put('f9CanonVREF',read('f9mLdgVref')); put('f9CanonLdgMargin',read('f9mLdgMargin')); put('f9CanonLdgStatus',read('f9mLdgStatus'));
  }
  document.addEventListener('DOMContentLoaded',()=>{sync();setInterval(sync,500)}); document.addEventListener('input',()=>setTimeout(sync,0)); document.addEventListener('change',()=>setTimeout(sync,0));
 })();
