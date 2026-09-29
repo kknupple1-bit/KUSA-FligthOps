@@ -1,0 +1,26 @@
+KUSA FlightOps v5.25.65 — Canonical Mission Section 1
+
+Scope
+- Section 1 only: enforce Falcon 50 Mission Setup as the canonical FlightOps Mission Setup structure for Falcon 50 and Falcon 900B.
+
+Falcon 900B Section 1 now matches the Falcon 50 field/order model:
+- Origin / Destination / Alternate / Trip Date
+- Fuel on Board / Mission Fuel Required / Taxi Fuel / Emergency Return Fuel Burn
+- Number of Passengers / Departure Runway / Destination Runway / Load-Refresh Mission
+- Deliberate FOB Verification block
+- Captain Weight / First Officer Weight / Total Baggage
+- Mission status line
+
+Synchronization
+- Falcon 900B Section 1 fuel values synchronize bidirectionally with N699BG W&B fuel inputs.
+- Captain and First Officer weights synchronize with N699BG cockpit stations.
+- Total Baggage synchronizes with the front/rear baggage stations using source limits; detailed station edits flow back to the Section 1 total.
+- Departure/destination runway controls were moved out of Section 3 and into Section 1; Section 3 now reports the selected runway rather than owning a second selector.
+- Section 1 values are included in draft save/resume state.
+
+Cleanup
+- Removed an accidental Falcon 900B fuel/verification row that had been injected into the Falcon 50 Mission Setup markup.
+
+No aircraft performance data, W&B station arms, CG limits, fuel-moment schedules, QRH grids or DTM9823 numeric solver data were changed.
+
+DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.
