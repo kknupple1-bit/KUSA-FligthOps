@@ -1,0 +1,13 @@
+KUSA FlightOps v5.25.67 — Canonical Mission Section 4
+
+Scope: Falcon 900B Mission Section 4 parity with Falcon 50.
+
+Changes:
+- Rebuilt Falcon 900B Section 4 to the Falcon 50 summary-first structure.
+- Row 1: Origin, Departure Runway, Pressure Altitude, Density Altitude.
+- Row 2: Destination, Destination Runway, Pressure Altitude, Density Altitude.
+- Added identical decoded-weather status placement.
+- Reordered decoded METAR/TAF panels to match Falcon 50 and added station identifiers.
+- Added Alternate decoded METAR/TAF panels using the same show/hide behavior as Falcon 50.
+- Standardized runway summary and wind-component formatting to Falcon 50 conventions.
+- No performance tables, W&B data, fuel moments, station arms, limits, or solver math changed.
