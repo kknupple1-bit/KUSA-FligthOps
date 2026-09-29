@@ -670,7 +670,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{max-width:100%!important;padding:72px 18px 60px!important}.f9-window-strip{display:none}}
 
 
-/* v5.25.72 — canonical mission width/parity */
+/* v5.25.73 — canonical mission width/parity */
 #missionResultsStart{grid-template-columns:1fr!important;gap:0!important}
 #missionResultsStart>section,#missionResultsStart>aside{min-width:0;width:100%}
 #missionResultsStart>aside{display:block}
@@ -679,7 +679,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:1000px){#f900bmissionView .canonical-result-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:650px){#f900bmissionView .canonical-result-grid{grid-template-columns:1fr}}
 
-/* v5.25.72 — canonical Mission Section 7+ presentation */
+/* v5.25.73 — canonical Mission Section 7+ presentation */
 .canonical-perf-source{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:10px 0 14px}
 .canonical-perf-source .source-gate,.canonical-perf-grid .canon-cell{background:#0d2137;border:1px solid #28445f;border-radius:10px;padding:10px 12px;min-height:72px;display:flex;flex-direction:column;gap:4px;justify-content:center}
 .canonical-perf-source .source-gate b,.canonical-perf-grid .canon-cell b{font-size:17px;line-height:1.15}
@@ -703,7 +703,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:520px){.canonical-perf-source,.canonical-perf-grid{grid-template-columns:1fr}}
 
 
-/* v5.25.72 — final mission parity + DTM9821 CG presentation */
+/* v5.25.73 — final mission parity + DTM9821 CG presentation */
 #opsView .canonical-perf-source,#f900bmissionView .canonical-perf-source{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 #opsView .canonical-perf-grid,#f900bmissionView .canonical-perf-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 #opsView .canonical-perf-block,#f900bmissionView .canonical-perf-block{margin-top:12px}
@@ -716,7 +716,7 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:560px){#opsView .canonical-perf-source,#f900bmissionView .canonical-perf-source,#opsView .canonical-perf-grid,#f900bmissionView .canonical-perf-grid{grid-template-columns:1fr}}
 
 
-/* v5.25.72 structural cleanup — post-performance cards remain inside their aircraft Mission view */
+/* v5.25.73 structural cleanup — post-performance cards remain inside their aircraft Mission view */
 #opsView>.canonical-post-card,#f900bmissionView>.canonical-post-card{width:100%;max-width:none;margin-top:14px}
 #opsView>#missionBottomActions,#f900bmissionView>#f9MissionBottomActions{width:100%;margin-top:14px}
 #opsView .legacy-performance-detail .canonical-perf-source,#opsView .legacy-performance-detail .canonical-perf-block{display:none!important}
@@ -957,7 +957,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 
 <style id="v52571-cleanup">
-/* v5.25.72 — parity cleanup / width containment / advanced-detail simplification */
+/* v5.25.73 — parity cleanup / width containment / advanced-detail simplification */
 #opsView .canonical-post-card,#f900bmissionView .canonical-post-card{width:100%!important;max-width:100%!important;min-width:0!important;overflow:hidden!important}
 #opsView .canonical-post-card .row,#f900bmissionView .canonical-post-card .row{width:100%!important;min-width:0!important}
 #opsView .canonical-post-card .row>div,#f900bmissionView .canonical-post-card .row>div{min-width:0!important}
@@ -969,7 +969,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52572-deep-parity">
-/* v5.25.72 — deep parity: speed cards, loading table, fallback gate, post-section width */
+/* v5.25.73 — deep parity: speed cards, loading table, fallback gate, post-section width */
 #vsV1,#vsVR,#vsVFT,#vsVFS,#f9pV1,#f9pVR,#f9pVFT,#f9pVFR{color:var(--fo-ok)!important}
 #vsVREF,#f9pVREF{color:var(--fo-bad)!important}
 #f50CanonicalPerformanceCard>details.canonical-advanced,#f9CanonicalPerformanceCard>details.canonical-advanced{display:none!important}
@@ -981,7 +981,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.72</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.73</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -2144,9 +2144,9 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card" id="f9MissionSetupSection">
 <h2>1. Mission Setup</h2>
 <div class="row">
-<div><label>Origin</label><input id="f9mDep" maxlength="4" onchange="f9MissionRouteChanged()" value=""/></div>
-<div><label>Destination</label><input id="f9mDest" maxlength="4" onchange="f9MissionRouteChanged()" value=""/></div>
-<div><label>Alternate</label><input id="f9mAlt" maxlength="4" onchange="f9MissionRouteChanged()" placeholder="Optional" value=""/></div>
+<div><label>Origin</label><input id="f9mDep" maxlength="4" oninput="f9MissionRouteChanged()" value=""/></div>
+<div><label>Destination</label><input id="f9mDest" maxlength="4" oninput="f9MissionRouteChanged()" value=""/></div>
+<div><label>Alternate</label><input id="f9mAlt" maxlength="4" oninput="f9MissionRouteChanged()" placeholder="Optional" value=""/></div>
 <div><label>Trip Date</label><input id="f9mTripDate" onchange="activeTripDateChanged('f9mTripDate')" type="date"/><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
@@ -2162,8 +2162,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Load Airport / Weather Data</label><button onclick="f9LoadOperationalData(true)" type="button">Load / Refresh Mission</button></div>
 <div>
 <label>Fuel Verification — Deliberate Safety Check</label>
-<div class="wx" style="min-height:58px;display:flex;align-items:center;gap:10px;border:2px solid #6a5b28">
-<input id="f9mFOBVerified" onchange="f9UpdateOperationalGate()" style="width:auto;transform:scale(1.25)" type="checkbox"/>
+<div class="wx" id="f9mFOBVerifyBox" style="min-height:58px;display:flex;align-items:center;gap:10px;border:2px solid #6a5b28">
+<input id="f9mFOBVerified" onchange="f9FOBVerificationChanged()" style="width:auto;transform:scale(1.25)" type="checkbox"/>
 <div><b class="warn" id="f9mFOBVerifyText">FOB NOT VERIFIED</b><div class="small">Verify the entered Fuel on Board after confirming the mission inputs.</div></div>
 </div>
 </div>
@@ -2175,6 +2175,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div></div>
 </div>
 <div class="small" id="f9mMissionStatus" style="margin-top:10px">Ready.</div>
+<!-- Canonical 900B fuel-plan backing state. These values mirror Section 1 and are retained for W&B/TOLD/draft logic. -->
+<div aria-hidden="true" style="display:none">
+<input id="f9wbFuel" type="number" value="0"/>
+<input id="f9wbTaxi" type="number" value="200"/>
+<input id="f9wbTripBurn" type="number" value="0"/>
+<input id="f9wbLandingFuel" type="number" value="0"/>
+</div>
 </div>
 <div class="card" id="f9mWBCard">
 <h2>2. Passenger Seating — Tap to Move</h2>
@@ -3533,7 +3540,7 @@ function f9RenderCalculatedWBParity(wb){
  const crew=n("f9wb_pilot")+n("f9wb_copilot")+n("f9wb_crew3");
  let pax=0;for(let i=1;i<=12;i++)pax+=n(`f9wb_pax${i}`);
  const bag=n("f9wb_bagdocs")+n("f9wb_bagfront")+n("f9wb_bagrear");
- const taxi=n("f9wbTaxi"),trip=n("f9wbTripBurn"),missionFuel=taxi+trip;
+ const taxi=n("f9wbTaxi"),trip=n("f9wbTripBurn"),missionFuel=trip;
  const env=f9WBEnvelope(wb.zfw);
  f9Put("f9CalcCrew",`${Math.round(crew).toLocaleString()} lb`);
  f9Put("f9CalcPax",`${Math.round(pax).toLocaleString()} lb`);
@@ -3553,6 +3560,10 @@ function f9RenderCalculatedWBParity(wb){
 }
 async function f9RecalcWB(){
  try{await loadF900BWB()}catch(e){f9Status("f9mWBStatus","W&B DATA MISSING","bad");return null}
+ // Section 1 is canonical. Keep the hidden W&B fuel state synchronized before every calculation.
+ if($("f9wbFuel")&&$("f9mFOB"))$("f9wbFuel").value=Math.max(0,Number($("f9mFOB").value)||0);
+ if($("f9wbTaxi")&&$("f9mTaxiFuel"))$("f9wbTaxi").value=Math.max(0,Number($("f9mTaxiFuel").value)||0);
+ if($("f9wbTripBurn")&&$("f9mMissionFuel"))$("f9wbTripBurn").value=Math.max(0,Number($("f9mMissionFuel").value)||0);
  const d=F900B_WB,n=id=>Math.max(0,Number($(id)?.value)||0);let zfw=d.empty_weight.weight_lb,zm=d.empty_weight.moment_lb_in;const rows=[];let loadOK=true;
  for(const st of d.stations){const w=n(`f9wb_${st.id}`);if(Number.isFinite(st.max_lb)&&w>st.max_lb)loadOK=false;zfw+=w;zm+=w*st.arm_in;if(w>0)rows.push({label:st.label,w,arm:st.arm_in,m:w*st.arm_in});}
  const fob=n("f9wbFuel"),taxi=n("f9wbTaxi"),trip=n("f9wbTripBurn");if(fob>d.limits.fuel_capacity_lb||taxi>fob||taxi+trip>fob)loadOK=false;
@@ -3594,7 +3605,7 @@ async function loadF900BData(){
 }
 function f9Num(id){const v=$(id)?.value;return v===""||v==null?null:Number(v)}
 function f9Fmt(value,digits=0,suffix=""){return Number.isFinite(value)?`${value.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits})}${suffix}`:"—"}
-function formatVspeed(value,suffix=" kt"){const n=Number(value);return Number.isFinite(n)?`${Math.round(n)}${suffix}`:"—"}
+function formatVspeed(value,suffix=" kt"){const n=Number(value);return Number.isFinite(n)&&n>0?`${Math.round(n)}${suffix}`:"—"}
 function formatWindDirection(value,degree=true){if(value==null||value==="")return"—";const raw=String(value).trim().toUpperCase();if(raw==="VRB")return"VRB";const n=Number(raw);if(!Number.isFinite(n))return raw;let d=Math.round(n);if(d<0||d>360)return raw;const txt=String(d).padStart(3,"0");return degree?`${txt}°`:txt}
 function formatWindDirectionInput(value){if(value==null||value==="")return"";const raw=String(value).trim().toUpperCase();if(raw==="VRB")return"VRB";const n=Number(raw);if(!Number.isFinite(n))return raw;let d=Math.round(n);if(d<0||d>360)return raw;return String(d).padStart(3,"0")}
 function f9Put(id,value){const el=$(id);if(el)el.textContent=value}
@@ -3815,14 +3826,33 @@ function f9MetarAgeMinutes(point){
 function f9DistanceFromText(id){const t=$(id)?.textContent||"";const m=String(t).replace(/,/g,"").match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null;}
 // Canonical FlightOps Mission Section 1 synchronization.
 // The Falcon 50 defines the shared Mission Setup structure; aircraft-specific IDs map into the same workflow.
+let F9_ROUTE_AUTOLOAD_TIMER=null;
 function f9MissionRouteChanged(){
  const dep=cleanICAO($("f9mDep")?.value),dest=cleanICAO($("f9mDest")?.value),alt=cleanICAO($("f9mAlt")?.value);
  if($("dep"))$("dep").value=dep||"";if($("dest"))$("dest").value=dest||"";if($("alt"))$("alt").value=alt||"";scheduleDraftSave();
+ // Canonical behavior: once a complete origin + destination are entered, automatically refresh airport/runway/weather/NOTAM data.
+ clearTimeout(F9_ROUTE_AUTOLOAD_TIMER);
+ if(dep.length===4&&dest.length===4){
+   F9_ROUTE_AUTOLOAD_TIMER=setTimeout(()=>f9LoadOperationalData(true).catch(()=>{}),350);
+ }
 }
 function f9Section1FuelChanged(kind){
  const fob=Math.max(0,Number($("f9mFOB")?.value)||0),mission=Math.max(0,Number($("f9mMissionFuel")?.value)||0),taxi=Math.max(0,Number($("f9mTaxiFuel")?.value)||0);
  if($("f9wbFuel"))$("f9wbFuel").value=fob;if($("f9wbTripBurn"))$("f9wbTripBurn").value=mission;if($("f9wbTaxi"))$("f9wbTaxi").value=taxi;
- if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;f9RecalcWB();scheduleDraftSave();
+ if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;f9UpdateFOBVerificationUI();f9RecalcWB();scheduleDraftSave();
+}
+function f9UpdateFOBVerificationUI(){
+ const fob=Math.max(0,Number($("f9mFOB")?.value)||0),cb=$("f9mFOBVerified"),txt=$("f9mFOBVerifyText"),box=$("f9mFOBVerifyBox");
+ if(cb&&fob<=0)cb.checked=false;
+ const verified=!!cb?.checked&&fob>0;
+ if(txt){txt.textContent=fob<=0?"ENTER FOB FIRST":(verified?"FOB VERIFIED":"FOB NOT VERIFIED");txt.className=fob<=0?"bad":(verified?"ok":"warn");}
+ if(box){box.style.borderColor=fob<=0?"#c95656":(verified?"#2d8a5b":"#6a5b28");box.style.background=fob<=0?"#311b22":(verified?"#08271c":"#0b223b");}
+ return verified;
+}
+function f9FOBVerificationChanged(){
+ const fob=Math.max(0,Number($("f9mFOB")?.value)||0),cb=$("f9mFOBVerified");
+ if(cb&&fob<=0)cb.checked=false;
+ f9UpdateFOBVerificationUI();f9UpdateOperationalGate();scheduleDraftSave();
 }
 function f9Section1ReturnBurnChanged(){
  const v=Math.max(0,Number($("f9mReturnBurn")?.value)||0);if($("f9ReturnBurn"))$("f9ReturnBurn").value=v;refreshF900BMission();scheduleDraftSave();
@@ -3923,7 +3953,7 @@ async function f9ApplyManualWeather(){
 }
 
 function f9UpdateOperationalGate(){
- const wb=window.f900bWBLatest,verified=!!$("f9mFOBVerified")?.checked;f9Put("f9mFOBVerifyText",verified?"VERIFIED":"NOT VERIFIED");const vf=$("f9mFOBVerifyText");if(vf)vf.className=verified?"ok":"warn";
+ const wb=window.f900bWBLatest;const verified=f9UpdateFOBVerificationUI();
  const pax=f9SyncPassengerStatus();const wbOK=!!wb?.ok&&pax.ok;f9SetTone("f9GateWB",wbOK?"PASS":"CHECK",wbOK?"ok":"bad");f9Put("f9GateWBNote",wbOK?`TOW ${Math.round(wb.tow).toLocaleString()} lb • CG ${wb.tcg?.pct?.toFixed(2)}% MAC • LDG ${Math.round(wb.ldw).toLocaleString()} lb / ${wb.lcg?.pct?.toFixed(2)}% MAC • PAX ${pax.loaded}/${pax.requested}`:(!pax.ok?`Passenger loading mismatch — ${pax.requested} entered / ${pax.loaded} seated`:"Structural/load/CG check incomplete"));
  const fob=Number($("f9mFOB")?.value),wbFob=Number($("f9wbFuel")?.value),missionFuel=Number($("f9mMissionFuel")?.value),wbTrip=Number($("f9wbTripBurn")?.value);const fuelMatch=Number.isFinite(fob)&&Number.isFinite(wbFob)&&Math.abs(fob-wbFob)<1&&Number.isFinite(missionFuel)&&Number.isFinite(wbTrip)&&Math.abs(missionFuel-wbTrip)<1;const fuelOK=fuelMatch&&fob>0&&missionFuel>=0&&missionFuel<=fob&&verified&&!!wb?.loadOK;f9SetTone("f9GateFOB",fuelOK?"PASS":"CHECK",fuelOK?"ok":"bad");f9Put("f9GateFOBNote",fuelOK?`${Math.round(fob).toLocaleString()} lb verified • taxi ${Math.round(Number($("f9wbTaxi")?.value)||0).toLocaleString()} • trip ${Math.round(missionFuel).toLocaleString()} • landing FOB ${Math.round(wb?.ldgFuel||0).toLocaleString()} lb`:(fuelMatch?"FOB/mission fuel require pilot verification and valid fuel plan":"Mission and W&B fuel values are not reconciled"));
  const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest"),depAge=f9MetarAgeMinutes(missionData?.departure),destAge=f9MetarAgeMinutes(missionData?.destination),depManual=!!$("f9mDepManualWxVerified")?.checked,destManual=!!$("f9mDestManualWxVerified")?.checked;const depWx=(Number.isFinite(depAge)&&depAge<=90)||depManual,destWx=(Number.isFinite(destAge)&&destAge<=90)||destManual;const wxFields=Number.isFinite(Number($("f9mToPA")?.value))&&Number.isFinite(Number($("f9mToTemp")?.value))&&Number.isFinite(Number($("f9mLdgPA")?.value))&&Number.isFinite(Number($("f9mLdgTemp")?.value));const wxOK=!!dep&&!!dest&&wxFields&&depWx&&destWx;f9SetTone("f9GateWx",wxOK?"PASS":"CHECK",wxOK?"ok":"bad");f9Put("f9GateWxNote",wxOK?`DEP ${depManual?"MANUAL VERIFIED":`METAR ${Math.round(depAge)} min`} • DEST ${destManual?"MANUAL VERIFIED":`METAR ${Math.round(destAge)} min`}`:`Current METAR ≤90 min or explicit manual verification required at both airports`);
@@ -3965,7 +3995,7 @@ function f9SyncVisiblePerformance(){
  [["f9pV1","f9V1"],["f9pVR","f9VR"],["f9pVFT","f9VFT"],["f9pVFR","f9VFR"],["f9pVREF","f9EmerVref"]].forEach(([d,s])=>copy(d,s));
  const wb=window.f900bWBLatest;
  if(wb){f9Put("f9pTOW",`${Math.round(wb.tow).toLocaleString()} lb`);const rb=Math.max(0,Number($("f9mReturnBurn")?.value)||0);f9Put("f9pERW",`${Math.round(Math.max(0,wb.tow-rb)).toLocaleString()} lb`);}
- const speedOK=["f9pV1","f9pVR","f9pVFT","f9pVFR","f9pVREF"].every(id=>{const t=textOf(id);return t&&t!=="—"&&!/LOCKED|UNAVAILABLE/i.test(t)});
+ const speedOK=["f9pV1","f9pVR","f9pVFT","f9pVFR","f9pVREF"].every(id=>{const t=textOf(id),m=String(t).match(/\d+(?:\.\d+)?/);return t&&t!=="—"&&!/LOCKED|UNAVAILABLE/i.test(t)&&m&&Number(m[0])>0});
  f9Status("f9pStatus",speedOK?"SOURCE DATA READY":"SOURCE CHECK",speedOK?"ok":"warn");
  [["f9mV1","f9V1"],["f9mVR","f9VR"],["f9mVFT","f9VFT"],["f9mVFR","f9VFR"],["f9mTrim","f9Trim"],["f9mBFL","f9BFL"],["f9mGCLB2","f9GCLB2"],["f9mLimit","f9Limit"],["f9mToMargin","f9ToMargin"],["f9mToStatus","f9ToStatus"],["f9mLdgVref","f9LdgVref"],["f9mLdgLD","f9LdgLD"],["f9mLdgRequired","f9LdgRequired"],["f9mLdgMargin","f9LdgMargin"],["f9mLdgStatus","f9LdgStatus"],["f9mEmerVref","f9EmerVref"],["f9mEmerRequired","f9EmerRequired"],["f9mEmerMargin","f9EmerMargin"],["f9mEmerStatus","f9EmerStatus"]].forEach(([d,s])=>copy(d,s));
 }
@@ -4085,9 +4115,10 @@ async function startF900BTrip(dep,dest,alt,tripDate=localISODate(new Date()),fob
  if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
  f9Put("f9Route",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);f9Put("f9mRoute",`${dep} → ${dest}${alt?` • Alternate ${alt}`:""}`);
  if($("f9mDep"))$("f9mDep").value=dep;if($("f9mDest"))$("f9mDest").value=dest;if($("f9mAlt"))$("f9mAlt").value=alt||"";if($("f9mNote"))$("f9mNote").value=window.currentMissionMeta.note||"";
- if($("f9mFOB"))$("f9mFOB").value=Math.round(fob);if($("f9mMissionFuel"))$("f9mMissionFuel").value=Math.round(missionFuel);if($("f9mPaxCount"))$("f9mPaxCount").value=0;if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;if($("f9mDepManualWxVerified"))$("f9mDepManualWxVerified").checked=false;if($("f9mDestManualWxVerified"))$("f9mDestManualWxVerified").checked=false;
- if($("f9wbFuel"))$("f9wbFuel").value=Math.round(fob);if($("f9wbTripBurn"))$("f9wbTripBurn").value=Math.round(missionFuel);
- showPlatformView("ops");saveCurrentDraft();await f9RecalcWB();await f9LoadOperationalData(true);await refreshF900BMission();scheduleDraftSave();
+ if($("f9mFOB"))$("f9mFOB").value=Math.round(fob);if($("f9mMissionFuel"))$("f9mMissionFuel").value=Math.round(missionFuel);if($("f9mTaxiFuel"))$("f9mTaxiFuel").value=200;if($("f9mPaxCount"))$("f9mPaxCount").value=0;if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;if($("f9mDepManualWxVerified"))$("f9mDepManualWxVerified").checked=false;if($("f9mDestManualWxVerified"))$("f9mDestManualWxVerified").checked=false;
+ if($("f9wbFuel"))$("f9wbFuel").value=Math.round(fob);if($("f9wbTripBurn"))$("f9wbTripBurn").value=Math.round(missionFuel);if($("f9wbTaxi"))$("f9wbTaxi").value=200;
+ window.currentMissionMeta.initial_fob_lb=Math.round(fob);window.currentMissionMeta.planned_mission_fuel_lb=Math.round(missionFuel);
+ f9UpdateFOBVerificationUI();showPlatformView("ops");await f9RecalcWB();saveCurrentDraft();await f9LoadOperationalData(true);scheduleDraftSave();
 }
 
 
@@ -4371,8 +4402,8 @@ function applyF900BPlanState(state){
  set("f9mFOB",savedFob);set("f9mMissionFuel",savedMissionFuel);set("f9mTaxiFuel",f.taxi_fuel_lb??f.wb?.taxi_lb??200);set("f9mPaxCount",f.passenger_count??Object.values(f.wb?.loads||{}).filter((v,i)=>String(Object.keys(f.wb?.loads||{})[i]||"").startsWith("pax")&&Number(v)>0).length);
  set("f9mCaptainWt",f.captain_weight_lb??f.wb?.loads?.pilot??170);set("f9mFOWt",f.first_officer_weight_lb??f.wb?.loads?.copilot??170);set("f9mTotalBag",f.total_baggage_lb??((Number(f.wb?.loads?.bagfront)||0)+(Number(f.wb?.loads?.bagrear)||0)));
  set("f9mReturnBurn",f.return_burn_lb);set("f9mToWeight",f.takeoff_weight_lb);set("f9mLdgWeight",f.landing_weight_lb);
- if(f.wb){set("f9wbFuel",f.wb.fuel_lb??savedFob);set("f9wbTaxi",f.wb.taxi_lb);set("f9wbTripBurn",f.wb.trip_burn_lb??savedMissionFuel);Object.entries(f.wb.loads||{}).forEach(([k,v])=>set(`f9wb_${k}`,v));}
- else{set("f9wbFuel",savedFob);set("f9wbTripBurn",savedMissionFuel);}
+ if(f.wb){set("f9wbFuel",f.wb.fuel_lb??savedFob);set("f9wbTaxi",f.wb.taxi_lb??f.taxi_fuel_lb??200);set("f9wbTripBurn",f.wb.trip_burn_lb??savedMissionFuel);Object.entries(f.wb.loads||{}).forEach(([k,v])=>set(`f9wb_${k}`,v));}
+ else{set("f9wbFuel",savedFob);set("f9wbTaxi",f.taxi_fuel_lb??200);set("f9wbTripBurn",savedMissionFuel);}
  if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;
  set("f9mToConfig",f.takeoff_config||"20");set("f9mToAI",f.takeoff_anti_ice||"OFF");set("f9mToSurface",f.takeoff_surface||"DRY");
  set("f9mToRunway",f.takeoff_runway_ft);set("f9mToPA",f.takeoff_pa_ft);set("f9mToTemp",f.takeoff_oat_c);
@@ -4395,9 +4426,10 @@ async function restoreF900BFlightPlan(record,opts={}){
  const newId=opts.newCopy?newMissionId():(record.id||newMissionId());
  window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(record.trip_date||state.trip_date||(opts.newCopy?localISODate(new Date()):(record.started_at||new Date()))),trip_date:record.trip_date||state.trip_date||localISODate(new Date()),leg_number:record.leg_number||1,aircraft:"F900B",registration:record.registration||state.registration||aircraftRegistration("F900B"),note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};syncActiveTripDateInputs();
  if($("homeAircraft"))$("homeAircraft").value="F900B";
- await refreshF900BMission();
- saveCurrentDraft();
  showPlatformView("ops");
+ f9UpdateFOBVerificationUI();
+ await f9LoadOperationalData(true);
+ saveCurrentDraft();
 }
 function draftRecord(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
@@ -7534,7 +7566,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.72",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.73",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7654,7 +7686,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.72",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.73",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -7663,7 +7695,7 @@ try{enableUppercaseEntry();updateManualWeatherStationLabels();syncToldRunwaySele
 
 window.addEventListener("DOMContentLoaded",()=>{setTimeout(f9InitSeatMover,0)});
 
-// v5.25.72 canonical Falcon 900 mission fallback/parity helpers
+// v5.25.73 canonical Falcon 900 mission fallback/parity helpers
 function f9SelectedMissionRunway(which){
   const sel=$(which==='DEP'?'f9mDepRunway':'f9mDestRunway');
   const id=String(sel?.value||'');
@@ -7713,8 +7745,11 @@ function f9RenderCanonicalParityFields(){
     if($('f9DestUsableCanonical')) $('f9DestUsableCanonical').textContent=(destUs.match(/[0-9,]+\s*ft/i)||[])[0]||'—';
     if($('f9DepNotamStatusCanonical')) $('f9DepNotamStatusCanonical').textContent=(($('f9mDepNotamDetail')?.textContent||'').match(/CHECKED|UNAVAILABLE|NOT CHECKED/i)||['—'])[0].toUpperCase();
     if($('f9DestNotamStatusCanonical')) $('f9DestNotamStatusCanonical').textContent=(($('f9mDestNotamDetail')?.textContent||'').match(/CHECKED|UNAVAILABLE|NOT CHECKED/i)||['—'])[0].toUpperCase();
-    if($('f9CanonicalTOW')) $('f9CanonicalTOW').value=Math.round(Number(window.f900bWBLatest?.takeoff?.weight||0))||'';
-    const lf=$('f9sLandingFuel')?.textContent||'—'; if($('f9FuelCheckReserve')) $('f9FuelCheckReserve').textContent=lf;
+    if($('f9CanonicalTOW')) $('f9CanonicalTOW').value=Math.round(Number(window.f900bWBLatest?.tow||0))||'';
+    const fob=Math.max(0,Number($('f9mFOB')?.value)||0),mission=Math.max(0,Number($('f9mMissionFuel')?.value)||0),taxi=Math.max(0,Number($('f9mTaxiFuel')?.value)||0);
+    const wb=window.f900bWBLatest,landing=Number.isFinite(Number(wb?.ldgFuel))?Number(wb.ldgFuel):Math.max(0,fob-taxi-mission);
+    f9Put('f9FuelCheckFOB',`${Math.round(fob).toLocaleString()} lb`);f9Put('f9FuelCheckMission',`${Math.round(mission).toLocaleString()} lb`);f9Put('f9FuelCheckTaxi',`${Math.round(taxi).toLocaleString()} lb`);f9Put('f9FuelCheckReserve',`${Math.round(landing).toLocaleString()} lb`);
+    const fuelPlanOK=fob>0&&taxi>=0&&mission>=0&&(taxi+mission)<=fob;f9SetTone('f9FuelCheckStatus',fuelPlanOK?'SUFFICIENT':'CHECK FUEL PLAN',fuelPlanOK?'ok':'bad');
     f9PopulateFallbackRunwayOptions();
   }catch(e){}
 }
