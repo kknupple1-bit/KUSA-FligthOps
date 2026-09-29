@@ -907,7 +907,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.66</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.67</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -2071,19 +2071,28 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mWeatherParityCard">
 <h2>4. Mission Results — Decoded Weather</h2>
-<div class="small">Uses the same FlightOps airport/weather backend as the Falcon 50. Live weather is never substituted by cached data without being labeled as cached/stale.</div>
-<div class="row" style="margin-top:10px">
-<div class="wx decoded-weather"><div class="small"><b>Departure — METAR</b></div><div class="decoded-text" id="f9mDepMetarDecoded">—</div><details><summary class="small">Raw METAR</summary><div class="raw small" id="f9mDepMetarRaw">—</div></details></div>
-<div class="wx decoded-weather"><div class="small"><b>Departure — TAF</b></div><div class="decoded-text" id="f9mDepTafDecoded">—</div><details><summary class="small">Raw TAF</summary><div class="raw small" id="f9mDepTafRaw">—</div></details></div>
-<div class="wx decoded-weather"><div class="small"><b>Destination — METAR</b></div><div class="decoded-text" id="f9mDestMetarDecoded">—</div><details><summary class="small">Raw METAR</summary><div class="raw small" id="f9mDestMetarRaw">—</div></details></div>
-<div class="wx decoded-weather"><div class="small"><b>Destination — TAF</b></div><div class="decoded-text" id="f9mDestTafDecoded">—</div><details><summary class="small">Raw TAF</summary><div class="raw small" id="f9mDestTafRaw">—</div></details></div>
-</div>
-<div class="row" style="margin-top:10px">
-<div class="wx"><div class="small">Departure Airport</div><b id="f9mDepAirportSummary">—</b><div class="small" id="f9mDepAirportNote">—</div></div>
+<div class="row">
+<div class="wx"><div class="small">Origin</div><b id="f9mDepTitle">—</b><div class="small" id="f9mDepAirportNote">—</div></div>
 <div class="wx"><div class="small">Departure Runway</div><b id="f9mDepRunwaySummary">—</b><div class="small" id="f9mDepWindSummary">—</div></div>
-<div class="wx"><div class="small">Destination Airport</div><b id="f9mDestAirportSummary">—</b><div class="small" id="f9mDestAirportNote">—</div></div>
-<div class="wx"><div class="small">Destination Runway</div><b id="f9mDestRunwaySummary">—</b><div class="small" id="f9mDestWindSummary">—</div></div>
+<div class="wx"><div class="small">Pressure Altitude</div><b id="f9mDepPA">—</b></div>
+<div class="wx"><div class="small">Density Altitude</div><b id="f9mDepDA">—</b></div>
 </div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Destination</div><b id="f9mDestTitle">—</b><div class="small" id="f9mDestAirportNote">—</div></div>
+<div class="wx"><div class="small">Destination Runway</div><b id="f9mDestRunwaySummary">—</b><div class="small" id="f9mDestWindSummary">—</div></div>
+<div class="wx"><div class="small">Pressure Altitude</div><b id="f9mDestPA">—</b></div>
+<div class="wx"><div class="small">Density Altitude</div><b id="f9mDestDA">—</b></div>
+</div>
+<div class="small" id="f9mWeatherDecodeStatus" style="margin-top:12px">Decoded METAR/TAF will populate after Load / Refresh Mission.</div>
+<div class="weather-decode-grid" style="margin-top:14px">
+<div class="wx decoded-weather"><div class="small"><b>Origin — METAR (Decoded)</b> • <span id="f9mDepWxIdent">—</span></div><div class="decoded-text" id="f9mDepMetarDecoded">—</div><details><summary class="small">Raw METAR</summary><div class="raw small" id="f9mDepMetarRaw">—</div></details></div>
+<div class="wx decoded-weather"><div class="small"><b>Origin — TAF (Decoded)</b> • <span id="f9mDepWxIdent2">—</span></div><div class="decoded-text" id="f9mDepTafDecoded">—</div><details><summary class="small">Raw TAF</summary><div class="raw small" id="f9mDepTafRaw">—</div></details></div>
+<div class="wx decoded-weather"><div class="small"><b>Destination — METAR (Decoded)</b> • <span id="f9mDestWxIdent">—</span></div><div class="decoded-text" id="f9mDestMetarDecoded">—</div><details><summary class="small">Raw METAR</summary><div class="raw small" id="f9mDestMetarRaw">—</div></details></div>
+<div class="wx decoded-weather"><div class="small"><b>Destination — TAF (Decoded)</b> • <span id="f9mDestWxIdent2">—</span></div><div class="decoded-text" id="f9mDestTafDecoded">—</div><details><summary class="small">Raw TAF</summary><div class="raw small" id="f9mDestTafRaw">—</div></details></div>
+<div class="wx decoded-weather" id="f9mAltMetarPanel" style="display:none"><div class="small"><b>Alternate — METAR (Decoded)</b> • <span id="f9mAltTitle">—</span></div><div class="decoded-text" id="f9mAltMetarDecoded">—</div><details><summary class="small">Raw METAR</summary><div class="raw small" id="f9mAltMetarRaw">—</div></details></div>
+<div class="wx decoded-weather" id="f9mAltTafPanel" style="display:none"><div class="small"><b>Alternate — TAF (Decoded)</b> • <span id="f9mAltTitle2">—</span></div><div class="decoded-text" id="f9mAltTafDecoded">—</div><details><summary class="small">Raw TAF</summary><div class="raw small" id="f9mAltTafRaw">—</div></details></div>
+</div>
+<div style="display:none"><span id="f9mDepAirportSummary"></span><span id="f9mDestAirportSummary"></span></div>
 </div>
 <div class="card" id="f9mCalculatedWBCard">
 <h2>5. Calculated Weight &amp; Balance</h2>
@@ -2230,7 +2239,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card"><h2>Aircraft Reference — N699BG</h2><div class="row"><div><label>Basic Empty Weight</label><input readonly="" value="24,431.10 lb"/></div><div><label>Basic Empty Moment</label><input readonly="" value="87,205.41 lb-in"/></div><div><label>Max Zero Fuel</label><input readonly="" value="30,864 lb"/></div><div><label>Max Takeoff</label><input readonly="" value="46,500 lb"/></div><div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div></div></div><div class="card"><h2>Mission Summary</h2><table><tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr></table></div><div class="card"><h2>Weight Limits</h2><table><tr><td>ZFW</td><td id="f9sZFW">—</td><td>MZFW 30,864 lb</td></tr><tr><td>Ramp</td><td id="f9sRamp">—</td><td>MRW 46,700 lb</td></tr><tr><td>Takeoff</td><td id="f9sTOW">—</td><td>MTOW 46,500 lb</td></tr><tr><td>Landing</td><td id="f9sLDW">—</td><td>MLW 42,000 lb</td></tr></table></div><div class="card"><h2>Fuel Check</h2><table><tr><td>On Board</td><td id="f9FuelCheckFOB">—</td></tr><tr><td>Mission Required</td><td id="f9FuelCheckMission">—</td></tr><tr><td>Taxi</td><td id="f9FuelCheckTaxi">—</td></tr><tr><td>Landing Fuel</td><td id="f9sLandingFuel">—</td></tr><tr><td>Status</td><td id="f9FuelCheckStatus">—</td></tr></table></div><div class="card"><h2>System Status</h2><table><tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr><tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr><tr><td>Runway selection</td><td class="ok">AUTO</td></tr><tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr><tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel CG calculation</td><td class="ok">DTM9821 REV 59 LOADED</td></tr><tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr><tr><td>DTM9823 wind/slope</td><td class="ok">ACTIVE • SOURCE-BOUNDED</td></tr><tr><td>Overall Gate</td><td class="warn" id="f9sGate">—</td></tr></table></div>
 <div class="card" id="f9mDigitizationCard">
 <h2>SUPPORTING DOCUMENTATION</h2>
-<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.66 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.67 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
 <div class="f9-parity-grid" style="margin-top:12px">
 <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
 <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -3163,10 +3172,17 @@ function f9RenderMissionParity(){
  const dm=$("f9mDepMetarDecoded"),dt=$("f9mDepTafDecoded"),lm=$("f9mDestMetarDecoded"),lt=$("f9mDestTafDecoded");
  if(dm)dm.innerHTML=formatMetarDecoded(dep.metar,depAlt);if(dt)dt.innerHTML=formatTafDecoded(dep.taf);if(lm)lm.innerHTML=formatMetarDecoded(dest.metar,destAlt);if(lt)lt.innerHTML=formatTafDecoded(dest.taf);
  f9Put("f9mDepMetarRaw",f9RawText(dep.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mDepTafRaw",f9RawText(dep.taf,["raw","rawTAF","raw_text","rawText"]));f9Put("f9mDestMetarRaw",f9RawText(dest.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mDestTafRaw",f9RawText(dest.taf,["raw","rawTAF","raw_text","rawText"]));
- const airportLine=x=>`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
- f9Put("f9mDepAirportSummary",dep.icao||dep.airport?.ident||"—");f9Put("f9mDepAirportNote",airportLine(dep));f9Put("f9mDestAirportSummary",dest.icao||dest.airport?.ident||"—");f9Put("f9mDestAirportNote",airportLine(dest));
- const rwLine=r=>r?`${r.runway_id} • ${Math.round(Number(r.length_ft)||0).toLocaleString()} ft • ${r.surface||"—"}`:"—",windLine=r=>{if(!r)return"—";const w=r.wind_components||{};return`HDG ${formatWindDirection(r.heading)} • HW ${f9Fmt(w.headwind_kt,1," kt")} • TW ${f9Fmt(w.tailwind_kt,1," kt")} • XW ${f9Fmt(w.crosswind_kt,1," kt")}`};
+ const airportLine=x=>{const e=Number((x.airport||{}).elevation_ft??(x.airport||{}).elev??(x.airport||{}).elevation);return `${airportName(x)} • ${Number.isFinite(e)?Math.round(e).toLocaleString():"—"} ft`};
+ const depId=dep.icao||dep.airport?.ident||"—",destId=dest.icao||dest.airport?.ident||"—";
+ f9Put("f9mDepTitle",depId);f9Put("f9mDestTitle",destId);f9Put("f9mDepWxIdent",depId);f9Put("f9mDepWxIdent2",depId);f9Put("f9mDestWxIdent",destId);f9Put("f9mDestWxIdent2",destId);
+ f9Put("f9mDepAirportSummary",depId);f9Put("f9mDepAirportNote",airportLine(dep));f9Put("f9mDestAirportSummary",destId);f9Put("f9mDestAirportNote",airportLine(dest));
+ const fmtAlt=v=>Number.isFinite(Number(v))?`${Math.round(Number(v)).toLocaleString()} ft`:"—";
+ f9Put("f9mDepPA",fmtAlt(dep.pressure_altitude_ft));f9Put("f9mDepDA",fmtAlt(dep.density_altitude_ft));f9Put("f9mDestPA",fmtAlt(dest.pressure_altitude_ft));f9Put("f9mDestDA",fmtAlt(dest.density_altitude_ft));
+ const rwLine=r=>r?`RWY ${r.runway_id} • ${Math.round(Number(r.length_ft)||0)} ft`:"—",windLine=r=>{if(!r)return"—";const w=r.wind_components||{};return`HW ${f9Fmt(w.headwind_kt,1)} • TW ${f9Fmt(w.tailwind_kt,1)} • XW ${f9Fmt(w.crosswind_kt,1)} kt`};
  f9Put("f9mDepRunwaySummary",rwLine(dr));f9Put("f9mDepWindSummary",windLine(dr));f9Put("f9mDestRunwaySummary",rwLine(lr));f9Put("f9mDestWindSummary",windLine(lr));
+ const ws=$("f9mWeatherDecodeStatus");if(ws)ws.innerHTML='<span class="ok">Decoded METAR/TAF loaded.</span> Raw reports remain available below.';
+ const alt=missionData.alternate,altId=cleanICAO($("f9mAlt")?.value||"");
+ if(altId&&alt){const am=$("f9mAltMetarDecoded"),at=$("f9mAltTafDecoded");if(am)am.innerHTML=formatMetarDecoded(alt.metar,alt.altimeter_inhg);if(at)at.innerHTML=formatTafDecoded(alt.taf);f9Put("f9mAltMetarRaw",f9RawText(alt.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mAltTafRaw",f9RawText(alt.taf,["raw","rawTAF","raw_text","rawText"]));f9Put("f9mAltTitle",altId);f9Put("f9mAltTitle2",altId);if($("f9mAltMetarPanel"))$("f9mAltMetarPanel").style.display="block";if($("f9mAltTafPanel"))$("f9mAltTafPanel").style.display="block";}else{if($("f9mAltMetarPanel"))$("f9mAltMetarPanel").style.display="none";if($("f9mAltTafPanel"))$("f9mAltTafPanel").style.display="none";}
  const tb=$("f9mRunways");if(tb){tb.innerHTML="";[["DEP",dep],["DEST",dest]].forEach(([label,pt])=>directionalRunwayOptions(pt.runways||[],pt).forEach(q=>{const r=q.runway,w=r.wind_components||{};tb.insertAdjacentHTML("beforeend",`<tr><td>${label}</td><td>${r.runway_id||"—"}</td><td>${Number.isFinite(Number(r.heading))?formatWindDirection(r.heading):"—"}</td><td>${Number(r.length_ft||0).toLocaleString()}</td><td>${Number(r.width_ft||0).toLocaleString()}</td><td>${r.surface||"—"}</td><td>${f9Fmt(w.headwind_kt,1)}</td><td>${f9Fmt(w.tailwind_kt,1)}</td><td>${f9Fmt(w.crosswind_kt,1)}</td></tr>`);}));if(!tb.innerHTML)tb.innerHTML='<tr><td colspan="9">No runway data loaded.</td></tr>';}
  const depNotam=[textOf("depNotamStatus"),textOf("depNotamSource"),textOf("depNotamImpact"),textOf("depNotamList")].filter(Boolean).join(" • ");const destNotam=[textOf("notamStatus"),textOf("notamSource"),textOf("notamRunwayImpact"),textOf("notamList")].filter(Boolean).join(" • ");
  f9Put("f9mDepNotamDetail",depNotam||"No departure NOTAM data loaded.");f9Put("f9mDestNotamDetail",destNotam||"No destination NOTAM data loaded.");f9Put("f9mDepUsableDetail",`Published ${textOf("depPublishedTora")||"—"} • Usable ${textOf("depUsableTora")||"—"}`);f9Put("f9mDestUsableDetail",`Published ${textOf("publishedLda")||"—"} • Usable ${textOf("usableLda")||"—"}`);
@@ -7159,7 +7175,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.66",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.67",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7279,7 +7295,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.66",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.67",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
