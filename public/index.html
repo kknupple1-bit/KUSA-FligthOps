@@ -907,7 +907,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.64</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.65</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1038,12 +1038,6 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Mission Fuel Required lb</label><input enterkeyhint="done" id="missionFuel" inputmode="decimal" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input enterkeyhint="done" id="taxiFuel" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input enterkeyhint="done" id="emerReturnBurn" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="500"/></div>
-</div>
-<div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb</label><input id="f9mFOB" max="19165" min="0" readonly="" step="10" type="number"/><div class="small">Mission fuel plan synchronized with N699BG W&amp;B.</div></div>
-<div><label>Mission Fuel Required lb</label><input id="f9mMissionFuel" min="0" readonly="" step="10" type="number"/></div>
-<div><label>Load Airport / Weather Data</label><button onclick="f9LoadOperationalData(true)" type="button">Load / Refresh Mission</button></div>
-<div><label>Fuel Verification — Deliberate Safety Check</label><label style="display:flex;gap:8px;align-items:center;padding-top:8px"><input id="f9mFOBVerified" onchange="f9UpdateOperationalGate()" style="width:auto" type="checkbox"/> <b class="warn" id="f9mFOBVerifyText">NOT VERIFIED</b></label><div class="small">Verify the entered Fuel on Board after confirming the mission inputs.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Number of Passengers</label><input enterkeyhint="done" id="paxRequested" inputmode="numeric" max="9" min="0" step="1" type="number" value="0"/></div>
@@ -1950,28 +1944,40 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="callout small"><b>N699BG AIRCRAFT-SPECIFIC W&amp;B ACTIVE.</b> S/N 082 • Version 11 accommodation • SB F900-139 • no XTK2 • June 6, 2024 empty-weight baseline. Takeoff and landing weights below are calculated from the loading entries and fuel plan.</div>
 </div><div class="callout small">STANDARD FLIGHTOPS LAYOUT • Mission and TOLD structure is aircraft-independent; only aircraft-specific data, limits, configurations and source logic change.</div>
-<div class="card">
+<div class="card" id="f9MissionSetupSection">
 <h2>1. Mission Setup</h2>
 <div class="row">
-<div><label>Departure</label><input id="f9mDep" maxlength="4" readonly=""/></div>
-<div><label>Destination</label><input id="f9mDest" maxlength="4" readonly=""/></div>
-<div><label>Alternate</label><input id="f9mAlt" maxlength="4" readonly=""/></div>
-<div><label>Trip / Tail Note</label><input id="f9mNote" placeholder="optional"/></div>
-</div>
-<div class="row" style="margin-top:10px">
+<div><label>Origin</label><input id="f9mDep" maxlength="4" onchange="f9MissionRouteChanged()" value=""/></div>
+<div><label>Destination</label><input id="f9mDest" maxlength="4" onchange="f9MissionRouteChanged()" value=""/></div>
+<div><label>Alternate</label><input id="f9mAlt" maxlength="4" onchange="f9MissionRouteChanged()" placeholder="Optional" value=""/></div>
 <div><label>Trip Date</label><input id="f9mTripDate" onchange="activeTripDateChanged('f9mTripDate')" type="date"/><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Number of Passengers</label><input id="f9mPaxCount" inputmode="numeric" max="12" min="0" onchange="f9PassengerCountChanged()" step="1" type="number" value="0"/><div class="small">N699BG Version 11 capacity: 12 passenger positions. New PAX default to 170 lb; replace with actual/approved weights below.</div></div>
-<div><label>Emergency Return Fuel Burn lb</label><input id="f9mReturnBurn" min="0" step="10" type="number" value="500"/></div>
-<div><label>Takeoff Weight lb — AUTO</label><input id="f9mToWeight" readonly="" type="number"/></div>
-<div><label>Landing Weight lb — AUTO</label><input id="f9mLdgWeight" readonly="" type="number"/></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="f9mFOB" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote">Enter fuel on board, then verify the quantity.</div></div>
+<div><label>Mission Fuel Required lb</label><input id="f9mMissionFuel" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
+<div><label>Taxi Fuel lb</label><input id="f9mTaxiFuel" inputmode="decimal" min="0" oninput="f9Section1FuelChanged('taxi')" step="10" type="number" value="200"/></div>
+<div><label>Emer. Return Fuel Burn lb</label><input id="f9mReturnBurn" inputmode="decimal" min="0" oninput="f9Section1ReturnBurnChanged()" step="10" type="number" value="500"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Weight &amp; Balance</label><div class="wx"><b class="warn" id="f9mWBStatus">LOAD DATA</b><div class="small" id="f9mWBNote">N699BG Version 11</div></div></div>
-<div><label>Passenger Loading</label><div class="wx"><b class="warn" id="f9mPaxStatus">0 / 0 LOADED</b><div class="small" id="f9mPaxNote">Entered PAX must equal occupied passenger positions.</div></div></div>
-<div><label>Seat Move Mode</label><div class="wx"><b>CLICK-TO-MOVE ACTIVE</b><div class="small" id="f9SeatMoveNote">Tap an occupied seat card to pick up that passenger weight, then tap another seat to move or swap. Click directly in a weight field to edit the weight.</div></div></div>
+<div><label>Number of Passengers</label><input id="f9mPaxCount" inputmode="numeric" max="12" min="0" onchange="f9PassengerCountChanged()" step="1" type="number" value="0"/><div class="small">N699BG Version 11 capacity: 12 passenger positions.</div></div>
+<div><label>Departure Runway</label><select id="f9mDepRunway" onchange="f9RunwayChanged('dep')"><option value="">Load mission first</option></select></div>
+<div><label>Destination Runway</label><select id="f9mDestRunway" onchange="f9RunwayChanged('dest')"><option value="">Load mission first</option></select></div>
+<div><label>Load Airport / Weather Data</label><button onclick="f9LoadOperationalData(true)" type="button">Load / Refresh Mission</button></div>
+<div>
+<label>Fuel Verification — Deliberate Safety Check</label>
+<div class="wx" style="min-height:58px;display:flex;align-items:center;gap:10px;border:2px solid #6a5b28">
+<input id="f9mFOBVerified" onchange="f9UpdateOperationalGate()" style="width:auto;transform:scale(1.25)" type="checkbox"/>
+<div><b class="warn" id="f9mFOBVerifyText">FOB NOT VERIFIED</b><div class="small">Verify the entered Fuel on Board after confirming the mission inputs.</div></div>
 </div>
+</div>
+</div>
+<div class="row" style="margin-top:10px">
+<div><label>Captain Weight lb</label><input id="f9mCaptainWt" inputmode="decimal" min="0" oninput="f9Section1CrewChanged()" type="number" value="170"/></div>
+<div><label>First Officer Weight lb</label><input id="f9mFOWt" inputmode="decimal" min="0" oninput="f9Section1CrewChanged()" type="number" value="170"/></div>
+<div><label>Total Baggage lb</label><input id="f9mTotalBag" inputmode="decimal" max="2866" min="0" oninput="f9Section1BaggageChanged()" type="number" value="0"/></div>
+<div></div>
+</div>
+<div class="small" id="f9mMissionStatus" style="margin-top:10px">Ready.</div>
 </div>
 <div class="card" id="f9mWBCard">
 <h2>2. Passenger Seating — Tap to Move</h2>
@@ -2029,20 +2035,20 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mOperationalDataCard">
 <h2>3. Weather Source / Manual Weather</h2>
-<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.64</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.65</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
 <div class="row" style="margin-top:10px">
 <div><label>Refresh / Use Live Weather</label><button onclick="f9LoadOperationalData(true)" type="button">REFRESH / USE LIVE WEATHER</button></div>
 </div>
 <div class="f9-live-grid" style="margin-top:12px">
 <div class="f9-live-panel">
 <b id="f9mDepDataTitle">DEPARTURE</b><div class="small" id="f9mDepWx">Weather not loaded.</div>
-<label style="margin-top:10px">Departure Runway</label><select id="f9mDepRunway" onchange="f9RunwayChanged('dep')"><option value="">Load mission data</option></select>
+<div class="small" style="margin-top:10px"><b>Selected Departure Runway</b></div>
 <div class="small" id="f9mDepRunwayInfo" style="margin-top:8px">—</div>
 <div class="small" id="f9mDepNotamInfo">NOTAM: NOT CHECKED</div>
 </div>
 <div class="f9-live-panel">
 <b id="f9mDestDataTitle">DESTINATION</b><div class="small" id="f9mDestWx">Weather not loaded.</div>
-<label style="margin-top:10px">Destination Runway</label><select id="f9mDestRunway" onchange="f9RunwayChanged('dest')"><option value="">Load mission data</option></select>
+<div class="small" style="margin-top:10px"><b>Selected Destination Runway</b></div>
 <div class="small" id="f9mDestRunwayInfo" style="margin-top:8px">—</div>
 <div class="small" id="f9mDestNotamInfo">NOTAM: NOT CHECKED</div>
 </div>
@@ -2223,7 +2229,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card"><h2>Aircraft Reference — N699BG</h2><div class="row"><div><label>Basic Empty Weight</label><input readonly="" value="24,431.10 lb"/></div><div><label>Basic Empty Moment</label><input readonly="" value="87,205.41 lb-in"/></div><div><label>Max Zero Fuel</label><input readonly="" value="30,864 lb"/></div><div><label>Max Takeoff</label><input readonly="" value="46,500 lb"/></div><div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div></div></div><div class="card"><h2>Mission Summary</h2><table><tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr></table></div><div class="card"><h2>Weight Limits</h2><table><tr><td>ZFW</td><td id="f9sZFW">—</td><td>MZFW 30,864 lb</td></tr><tr><td>Ramp</td><td id="f9sRamp">—</td><td>MRW 46,700 lb</td></tr><tr><td>Takeoff</td><td id="f9sTOW">—</td><td>MTOW 46,500 lb</td></tr><tr><td>Landing</td><td id="f9sLDW">—</td><td>MLW 42,000 lb</td></tr></table></div><div class="card"><h2>Fuel Check</h2><table><tr><td>On Board</td><td id="f9FuelCheckFOB">—</td></tr><tr><td>Mission Required</td><td id="f9FuelCheckMission">—</td></tr><tr><td>Taxi</td><td id="f9FuelCheckTaxi">—</td></tr><tr><td>Landing Fuel</td><td id="f9sLandingFuel">—</td></tr><tr><td>Status</td><td id="f9FuelCheckStatus">—</td></tr></table></div><div class="card"><h2>System Status</h2><table><tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr><tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr><tr><td>Runway selection</td><td class="ok">AUTO</td></tr><tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr><tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel CG calculation</td><td class="ok">DTM9821 REV 59 LOADED</td></tr><tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr><tr><td>DTM9823 wind/slope</td><td class="ok">ACTIVE • SOURCE-BOUNDED</td></tr><tr><td>Overall Gate</td><td class="warn" id="f9sGate">—</td></tr></table></div>
 <div class="card" id="f9mDigitizationCard">
 <h2>SUPPORTING DOCUMENTATION</h2>
-<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.64 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.65 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
 <div class="f9-parity-grid" style="margin-top:12px">
 <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
 <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -3210,7 +3216,7 @@ async function f9RecalcWB(){
  f9Status("f9wbStruct",structuralOK?"WITHIN STRUCTURAL LIMITS":"CHECK STRUCTURAL LIMITS",structuralOK?"ok":"bad");f9Status("f9wbEnvelope",envOK?"TAKEOFF→LANDING PATH WITHIN CG ENVELOPE":"CHECK TAKEOFF→LANDING CG PATH",envOK?"ok":"bad");f9Status("f9wbLoadStatus",loadOK?"LOAD / FUEL INPUTS VALID":"CHECK LOAD / FUEL INPUTS",loadOK?"ok":"bad");
  const ok=structuralOK&&envOK&&loadOK;f9Status("f9mWBStatus",ok?"READY":"CHECK",ok?"ok":"bad");f9Put("f9mWBNote",ok?`TOW ${Math.round(tow).toLocaleString()} • LDW ${Math.round(ldw).toLocaleString()}`:"Review aircraft loading");
  const tb=$("f9wbDetail");if(tb){tb.innerHTML=`<tr><td>Basic Empty Weight</td><td>${d.empty_weight.weight_lb.toFixed(1)} lb</td><td>${d.empty_weight.arm_in.toFixed(2)} in</td><td>${d.empty_weight.moment_lb_in.toFixed(0)}</td></tr>`;rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r.label}</td><td>${r.w.toFixed(0)} lb</td><td>${r.arm.toFixed(2)} in</td><td>${r.m.toFixed(0)}</td></tr>`));if(Number.isFinite(fmr))tb.insertAdjacentHTML('beforeend',`<tr><td>Fuel on Board</td><td>${fob.toFixed(0)} lb</td><td>variable</td><td>${fmr.toFixed(0)}</td></tr>`);}
- window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9RenderCalculatedWBParity(window.f900bWBLatest);f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();scheduleDraftSave();return window.f900bWBLatest;
+ window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9SyncCanonicalMissionSetup();f9RenderCalculatedWBParity(window.f900bWBLatest);f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();scheduleDraftSave();return window.f900bWBLatest;
 }
 
 async function loadF900BData(){
@@ -3434,7 +3440,7 @@ async function f9RunwayChanged(which){
 async function f9LoadOperationalData(refreshNotamsToo=true){
  const dep=cleanICAO($("f9mDep")?.value),dest=cleanICAO($("f9mDest")?.value),alt=cleanICAO($("f9mAlt")?.value);if(!dep||!dest)return;
  if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
- try{await loadMission({quiet:true,preserveManualWeather:true});f9MirrorRunways();if(refreshNotamsToo){try{await Promise.all([refreshDepartureNotams(true),refreshNotams()])}catch(e){}}f9ApplyMissionEnvironment();await refreshF900BMission();}catch(e){f9Put("f9mDepWx",`Mission data error: ${e.message||e}`);}
+ try{if($("f9mMissionStatus"))$("f9mMissionStatus").textContent="Loading mission…";await loadMission({quiet:true,preserveManualWeather:true});f9MirrorRunways();if(refreshNotamsToo){try{await Promise.all([refreshDepartureNotams(true),refreshNotams()])}catch(e){}}f9ApplyMissionEnvironment();await refreshF900BMission();if($("f9mMissionStatus"))$("f9mMissionStatus").textContent="Mission loaded. Runway, weather and NOTAM data synchronized.";}catch(e){f9Put("f9mDepWx",`Mission data error: ${e.message||e}`);if($("f9mMissionStatus"))$("f9mMissionStatus").textContent=`Mission data error: ${e.message||e}`;}
  f9UpdateOperationalGate();
 }
 function f9RenderCG(id,w,cg){const env=f9WBEnvelope(w),band=$("f9cg"+id+"Band"),mark=$("f9cg"+id+"Mark"),txt=$("f9cg"+id+"Text");if(!band||!mark||!txt||!env||!cg){if(txt)txt.textContent="—";return}const lo=14,hi=32,p=x=>Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100));band.style.left=p(env.fwd)+"%";band.style.width=(p(env.aft)-p(env.fwd))+"%";mark.style.left=p(cg.pct)+"%";const ok=cg.pct>=env.fwd&&cg.pct<=env.aft;const fwdMargin=cg.pct-env.fwd,aftMargin=env.aft-cg.pct,nearest=Math.min(fwdMargin,aftMargin);txt.textContent=`${cg.pct.toFixed(2)}% • limits ${env.fwd.toFixed(2)}–${env.aft.toFixed(2)}% • nearest margin ${nearest.toFixed(2)}% MAC`;txt.className=`small ${ok?"ok":"bad"}`;}
@@ -3442,9 +3448,41 @@ function f9MetarAgeMinutes(point){
  const m=point?.metar||null;if(!m)return null;const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);if(!obs)return null;const t=new Date(normalizeAviationTime(obs)).getTime();if(!Number.isFinite(t))return null;const age=(Date.now()-t)/60000;return Number.isFinite(age)&&age>=0?age:null;
 }
 function f9DistanceFromText(id){const t=$(id)?.textContent||"";const m=String(t).replace(/,/g,"").match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null;}
+// Canonical FlightOps Mission Section 1 synchronization.
+// The Falcon 50 defines the shared Mission Setup structure; aircraft-specific IDs map into the same workflow.
+function f9MissionRouteChanged(){
+ const dep=cleanICAO($("f9mDep")?.value),dest=cleanICAO($("f9mDest")?.value),alt=cleanICAO($("f9mAlt")?.value);
+ if($("dep"))$("dep").value=dep||"";if($("dest"))$("dest").value=dest||"";if($("alt"))$("alt").value=alt||"";scheduleDraftSave();
+}
+function f9Section1FuelChanged(kind){
+ const fob=Math.max(0,Number($("f9mFOB")?.value)||0),mission=Math.max(0,Number($("f9mMissionFuel")?.value)||0),taxi=Math.max(0,Number($("f9mTaxiFuel")?.value)||0);
+ if($("f9wbFuel"))$("f9wbFuel").value=fob;if($("f9wbTripBurn"))$("f9wbTripBurn").value=mission;if($("f9wbTaxi"))$("f9wbTaxi").value=taxi;
+ if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;f9RecalcWB();scheduleDraftSave();
+}
+function f9Section1ReturnBurnChanged(){
+ const v=Math.max(0,Number($("f9mReturnBurn")?.value)||0);if($("f9ReturnBurn"))$("f9ReturnBurn").value=v;refreshF900BMission();scheduleDraftSave();
+}
+function f9Section1CrewChanged(){
+ if($("f9wb_pilot"))$("f9wb_pilot").value=Math.max(0,Number($("f9mCaptainWt")?.value)||0);
+ if($("f9wb_copilot"))$("f9wb_copilot").value=Math.max(0,Number($("f9mFOWt")?.value)||0);
+ f9RecalcWB();scheduleDraftSave();
+}
+function f9Section1BaggageChanged(){
+ const total=Math.max(0,Math.min(2866,Number($("f9mTotalBag")?.value)||0));
+ if($("f9mTotalBag"))$("f9mTotalBag").value=total;
+ const front=Math.min(1213,total),rear=Math.min(1653,Math.max(0,total-front));
+ if($("f9wb_bagfront"))$("f9wb_bagfront").value=front;if($("f9wb_bagrear"))$("f9wb_bagrear").value=rear;
+ f9RecalcWB();scheduleDraftSave();
+}
+function f9SyncCanonicalMissionSetup(){
+ const put=(id,v)=>{const e=$(id);if(e&&document.activeElement!==e)e.value=v};
+ put("f9mFOB",Math.round(Number($("f9wbFuel")?.value)||0));put("f9mMissionFuel",Math.round(Number($("f9wbTripBurn")?.value)||0));put("f9mTaxiFuel",Math.round(Number($("f9wbTaxi")?.value)||0));
+ put("f9mCaptainWt",Math.round(Number($("f9wb_pilot")?.value)||0));put("f9mFOWt",Math.round(Number($("f9wb_copilot")?.value)||0));
+ put("f9mTotalBag",Math.round((Number($("f9wb_bagfront")?.value)||0)+(Number($("f9wb_bagrear")?.value)||0)));
+}
 function f9FuelPlanChanged(kind){
  const fob=Math.max(0,Number($("f9wbFuel")?.value)||0),trip=Math.max(0,Number($("f9wbTripBurn")?.value)||0);
- if($("f9mFOB"))$("f9mFOB").value=Math.round(fob);if($("f9mMissionFuel"))$("f9mMissionFuel").value=Math.round(trip);
+ if($("f9mFOB"))$("f9mFOB").value=Math.round(fob);if($("f9mMissionFuel"))$("f9mMissionFuel").value=Math.round(trip);if($("f9mTaxiFuel"))$("f9mTaxiFuel").value=Math.round(Number($("f9wbTaxi")?.value)||0);
  if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;
  f9RecalcWB();f9UpdateOperationalGate();scheduleDraftSave();
 }
@@ -3906,7 +3944,8 @@ function captureF900BPlanState(){
  return {
    dep,dest,alt,aircraft:"F900B",registration:aircraftRegistration("F900B"),note:val("f9mNote").trim(),trip_date:currentTripDate(),
    f900b:{
-     fob_lb:val("f9mFOB"),mission_fuel_lb:val("f9mMissionFuel"),passenger_count:val("f9mPaxCount"),fob_verified:!!$("f9mFOBVerified")?.checked,
+     fob_lb:val("f9mFOB"),mission_fuel_lb:val("f9mMissionFuel"),taxi_fuel_lb:val("f9mTaxiFuel"),passenger_count:val("f9mPaxCount"),fob_verified:!!$("f9mFOBVerified")?.checked,
+     captain_weight_lb:val("f9mCaptainWt"),first_officer_weight_lb:val("f9mFOWt"),total_baggage_lb:val("f9mTotalBag"),
      return_burn_lb:val("f9mReturnBurn"),takeoff_weight_lb:val("f9mToWeight"),landing_weight_lb:val("f9mLdgWeight"),
      wb:{fuel_lb:val("f9wbFuel"),taxi_lb:val("f9wbTaxi"),trip_burn_lb:val("f9wbTripBurn"),loads:Object.fromEntries((F900B_WB?.stations||[]).map(st=>[st.id,val(`f9wb_${st.id}`)]))},
      takeoff_config:val("f9mToConfig"),takeoff_anti_ice:val("f9mToAI"),takeoff_surface:val("f9mToSurface"),
@@ -3922,7 +3961,8 @@ function applyF900BPlanState(state){
  set("f9mDep",s.dep||"");set("f9mDest",s.dest||"");set("f9mAlt",s.alt||"");set("f9mNote",s.note||"");
  const savedFob=(f.fob_lb!==undefined&&f.fob_lb!==null&&String(f.fob_lb)!=="")?f.fob_lb:f.wb?.fuel_lb;
  const savedMissionFuel=(f.mission_fuel_lb!==undefined&&f.mission_fuel_lb!==null&&String(f.mission_fuel_lb)!=="")?f.mission_fuel_lb:f.wb?.trip_burn_lb;
- set("f9mFOB",savedFob);set("f9mMissionFuel",savedMissionFuel);set("f9mPaxCount",f.passenger_count??Object.values(f.wb?.loads||{}).filter((v,i)=>String(Object.keys(f.wb?.loads||{})[i]||"").startsWith("pax")&&Number(v)>0).length);
+ set("f9mFOB",savedFob);set("f9mMissionFuel",savedMissionFuel);set("f9mTaxiFuel",f.taxi_fuel_lb??f.wb?.taxi_lb??200);set("f9mPaxCount",f.passenger_count??Object.values(f.wb?.loads||{}).filter((v,i)=>String(Object.keys(f.wb?.loads||{})[i]||"").startsWith("pax")&&Number(v)>0).length);
+ set("f9mCaptainWt",f.captain_weight_lb??f.wb?.loads?.pilot??170);set("f9mFOWt",f.first_officer_weight_lb??f.wb?.loads?.copilot??170);set("f9mTotalBag",f.total_baggage_lb??((Number(f.wb?.loads?.bagfront)||0)+(Number(f.wb?.loads?.bagrear)||0)));
  set("f9mReturnBurn",f.return_burn_lb);set("f9mToWeight",f.takeoff_weight_lb);set("f9mLdgWeight",f.landing_weight_lb);
  if(f.wb){set("f9wbFuel",f.wb.fuel_lb??savedFob);set("f9wbTaxi",f.wb.taxi_lb);set("f9wbTripBurn",f.wb.trip_burn_lb??savedMissionFuel);Object.entries(f.wb.loads||{}).forEach(([k,v])=>set(`f9wb_${k}`,v));}
  else{set("f9wbFuel",savedFob);set("f9wbTripBurn",savedMissionFuel);}
@@ -7087,7 +7127,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.64",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.65",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7207,7 +7247,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.64",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.65",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
