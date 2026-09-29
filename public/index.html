@@ -907,7 +907,7 @@ details summary{cursor:pointer;margin-top:8px}
 <link href="/icons/icon-192.png" rel="apple-touch-icon"/>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.65</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.66</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1981,7 +1981,14 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mWBCard">
 <h2>2. Passenger Seating — Tap to Move</h2>
-<div class="callout small">Current aircraft baseline: <b>24,431.10 lb</b> • arm <b>3.57 in</b> • moment <b>87,205.41 lb-in</b>. Limits: MRW 46,700 • MTOW 46,500 • MLW 42,000 • MZFW 30,864 lb. Fuel moment uses DTM9821 no-XTK2 published points only.</div>
+<div class="small" style="margin-bottom:12px">FlightOps preloads the entered passenger count beginning with the first available N699BG passenger position. Tap an occupied seat to move that passenger; tap an empty seat to place the selected passenger. Passenger weight moves with the passenger.</div>
+<div class="pax-check">
+<div><span class="small">PAX Entered</span><b id="f9PaxRequestedDisplay">0</b></div>
+<div><span class="small">PAX Seated</span><b id="f9PaxSeatedDisplay">0</b></div>
+<div><span class="small">Unseated PAX</span><b id="f9PaxUnseatedDisplay">0</b></div>
+<div><span class="small">Seat Check</span><b class="ok" id="f9SeatCheck">MATCH</b></div>
+</div>
+<div class="callout small" style="margin-top:12px">Current aircraft baseline: <b>24,431.10 lb</b> • arm <b>3.57 in</b> • moment <b>87,205.41 lb-in</b>. Limits: MRW 46,700 • MTOW 46,500 • MLW 42,000 • MZFW 30,864 lb. Fuel moment uses DTM9821 no-XTK2 published points only.</div>
 
 <h3 style="margin-top:14px">Crew / Cabin Load — N699BG Version 11</h3>
 <div class="small" style="margin-bottom:8px">Source-aligned top-down layout based on the uploaded DTM9821 Version 11 accommodation drawing. Enter actual weight at the physical position; calculation arms remain source-controlled.</div>
@@ -2035,38 +2042,32 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="card" id="f9mOperationalDataCard">
 <h2>3. Weather Source / Manual Weather</h2>
-<div class="callout small"><b>900B parity foundation.</b> Airport, runway, live weather and FAA NMS NOTAM data now use the same FlightOps mission backend as the Falcon 50. DTM9823 Section 3A chart families are now source-registered and exact published examples are loaded for 20°/7° dry/wet and clearway/stopway validation. Wind and runway-slope corrections are <b>ACTIVE / SOURCE-BOUNDED in v5.25.65</b> using the independently traced DTM9823 §3A correction panels. No extrapolation is permitted; out-of-panel cases remain source-locked.</div>
+<div class="callout small"><b>Weather source control:</b> LIVE uses the loaded METAR. MANUAL uses pilot-entered values for performance and wind components. If no report is available, select MANUAL and enter OAT, pressure altitude, and wind as applicable. Manual weather is visibly identified on the TOLD. Runway condition remains a separate pilot selection.</div>
 <div class="row" style="margin-top:10px">
-<div><label>Refresh / Use Live Weather</label><button onclick="f9LoadOperationalData(true)" type="button">REFRESH / USE LIVE WEATHER</button></div>
-</div>
-<div class="f9-live-grid" style="margin-top:12px">
-<div class="f9-live-panel">
-<b id="f9mDepDataTitle">DEPARTURE</b><div class="small" id="f9mDepWx">Weather not loaded.</div>
-<div class="small" style="margin-top:10px"><b>Selected Departure Runway</b></div>
-<div class="small" id="f9mDepRunwayInfo" style="margin-top:8px">—</div>
-<div class="small" id="f9mDepNotamInfo">NOTAM: NOT CHECKED</div>
-</div>
-<div class="f9-live-panel">
-<b id="f9mDestDataTitle">DESTINATION</b><div class="small" id="f9mDestWx">Weather not loaded.</div>
-<div class="small" style="margin-top:10px"><b>Selected Destination Runway</b></div>
-<div class="small" id="f9mDestRunwayInfo" style="margin-top:8px">—</div>
-<div class="small" id="f9mDestNotamInfo">NOTAM: NOT CHECKED</div>
-</div>
+<div><label>Station</label><select id="f9ManualWxTarget" onchange="f9LoadManualWeatherForm()"><option id="f9ManualWxDepOption" value="dep">Departure —</option><option id="f9ManualWxDestOption" value="dest">Destination —</option></select></div>
+<div><label>Weather Source</label><select id="f9ManualWxMode" onchange="f9ManualWeatherModeChanged()"><option value="LIVE">LIVE / REPORTED</option><option value="MANUAL">MANUAL / PILOT ENTRY</option></select></div>
+<div class="wx"><div class="small">Departure Weather</div><b id="f9DepWxSourceBadge">UNAVAILABLE</b><div class="small" id="f9DepWxSourceTime">—</div></div>
+<div class="wx"><div class="small">Destination Weather</div><b id="f9DestWxSourceBadge">UNAVAILABLE</b><div class="small" id="f9DestWxSourceTime">—</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Departure Manual WX Verification</label><label style="display:flex;gap:8px;align-items:center;padding-top:8px"><input id="f9mDepManualWxVerified" onchange="f9UpdateOperationalGate()" style="width:auto" type="checkbox"/> <span class="small">Use only if live METAR is unavailable/stale and entered PA/OAT/wind were independently verified.</span></label></div>
-<div><label>Destination Manual WX Verification</label><label style="display:flex;gap:8px;align-items:center;padding-top:8px"><input id="f9mDestManualWxVerified" onchange="f9UpdateOperationalGate()" style="width:auto" type="checkbox"/> <span class="small">Use only if live METAR is unavailable/stale and entered PA/OAT/wind were independently verified.</span></label></div>
+<div><label>OAT °C</label><input id="f9ManualWxOAT" inputmode="decimal" placeholder="Required" step="0.1" type="number"/></div>
+<div><label>Pressure Altitude ft</label><input id="f9ManualWxPA" inputmode="decimal" placeholder="Required or derive from altimeter" step="1" type="number"/></div>
+<div><label>Altimeter inHg</label><input id="f9ManualWxAlt" inputmode="decimal" placeholder="Optional" step="0.01" type="number"/></div>
+<div><label>Wind Direction °</label><input id="f9ManualWxDir" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="Optional (e.g. 040)" type="text"/></div>
 </div>
-<div class="f9-parity-grid" style="margin-top:12px">
-<div class="f9-gate"><span class="small">W&amp;B / CG</span><b class="warn" id="f9GateWB">PENDING</b><span class="small" id="f9GateWBNote">Calculate loading.</span></div>
-<div class="f9-gate"><span class="small">FOB / Fuel Reconciliation</span><b class="warn" id="f9GateFOB">PENDING</b><span class="small" id="f9GateFOBNote">Pilot verification required.</span></div>
-<div class="f9-gate"><span class="small">Weather Currency</span><b class="warn" id="f9GateWx">PENDING</b><span class="small" id="f9GateWxNote">Current live METAR or verified manual weather required.</span></div>
-<div class="f9-gate"><span class="small">NOTAM / Runway State</span><b class="warn" id="f9GateNotam">PENDING</b><span class="small" id="f9GateNotamNote">Departure and destination.</span></div>
-<div class="f9-gate"><span class="small">Runway / Performance</span><b class="warn" id="f9GateRunwayPerf">PENDING</b><span class="small" id="f9GateRunwayPerfNote">Takeoff, return and destination margins.</span></div>
-<div class="f9-gate"><span class="small">Emergency Return</span><b class="warn" id="f9GateReturn">PENDING</b><span class="small" id="f9GateReturnNote">Return landing solution required.</span></div>
-<div class="f9-gate"><span class="small">Local Aircraft Data</span><b class="warn" id="f9GateLocalData">CHECKING</b><span class="small" id="f9GateLocalDataNote">Performance + W&amp;B package verification.</span></div>
+<div class="row" style="margin-top:10px">
+<div><label>Wind Speed kt</label><input id="f9ManualWxSpeed" inputmode="decimal" min="0" placeholder="Optional" step="1" type="number"/></div>
+<div><label>Wind Gust kt</label><input id="f9ManualWxGust" inputmode="decimal" min="0" placeholder="Optional" step="1" type="number"/></div>
+<div><label>Manual Weather Note</label><input id="f9ManualWxNote" placeholder="Optional source / remarks"/></div>
+<div><label>Update / Toggle</label><button id="f9ManualWxActionBtn" onclick="f9ApplyManualWeather()" type="button">REFRESH / USE LIVE WEATHER</button></div>
 </div>
-<div class="f9-gate-summary"><b class="warn" id="f9OperationalGate">900B OPERATIONAL GATE — NOT READY</b><div class="small" id="f9OperationalGateNote">Complete W&amp;B, FOB reconciliation, current/verified weather, NOTAM/runway state and positive performance margins.</div></div>
+<div class="small" id="f9ManualWxStatus" style="margin-top:10px">Select LIVE or MANUAL, then use the update/toggle button to make that source controlling.</div>
+<!-- Operational gate state is retained for calculations but no longer changes the canonical Section 3 layout. -->
+<div style="display:none" aria-hidden="true">
+<input id="f9mDepManualWxVerified" type="checkbox"/><input id="f9mDestManualWxVerified" type="checkbox"/>
+<span id="f9GateWB"></span><span id="f9GateWBNote"></span><span id="f9GateFOB"></span><span id="f9GateFOBNote"></span><span id="f9GateWx"></span><span id="f9GateWxNote"></span><span id="f9GateNotam"></span><span id="f9GateNotamNote"></span><span id="f9GateRunwayPerf"></span><span id="f9GateRunwayPerfNote"></span><span id="f9GateReturn"></span><span id="f9GateReturnNote"></span><span id="f9GateLocalData"></span><span id="f9GateLocalDataNote"></span><span id="f9OperationalGate"></span><span id="f9OperationalGateNote"></span>
+<span id="f9mDepWx"></span><span id="f9mDestWx"></span><span id="f9mDepDataTitle"></span><span id="f9mDestDataTitle"></span><span id="f9mDepRunwayInfo"></span><span id="f9mDestRunwayInfo"></span><span id="f9mDepNotamInfo"></span><span id="f9mDestNotamInfo"></span>
+</div>
 </div>
 <div class="card" id="f9mWeatherParityCard">
 <h2>4. Mission Results — Decoded Weather</h2>
@@ -2229,7 +2230,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="card"><h2>Aircraft Reference — N699BG</h2><div class="row"><div><label>Basic Empty Weight</label><input readonly="" value="24,431.10 lb"/></div><div><label>Basic Empty Moment</label><input readonly="" value="87,205.41 lb-in"/></div><div><label>Max Zero Fuel</label><input readonly="" value="30,864 lb"/></div><div><label>Max Takeoff</label><input readonly="" value="46,500 lb"/></div><div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div></div></div><div class="card"><h2>Mission Summary</h2><table><tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr></table></div><div class="card"><h2>Weight Limits</h2><table><tr><td>ZFW</td><td id="f9sZFW">—</td><td>MZFW 30,864 lb</td></tr><tr><td>Ramp</td><td id="f9sRamp">—</td><td>MRW 46,700 lb</td></tr><tr><td>Takeoff</td><td id="f9sTOW">—</td><td>MTOW 46,500 lb</td></tr><tr><td>Landing</td><td id="f9sLDW">—</td><td>MLW 42,000 lb</td></tr></table></div><div class="card"><h2>Fuel Check</h2><table><tr><td>On Board</td><td id="f9FuelCheckFOB">—</td></tr><tr><td>Mission Required</td><td id="f9FuelCheckMission">—</td></tr><tr><td>Taxi</td><td id="f9FuelCheckTaxi">—</td></tr><tr><td>Landing Fuel</td><td id="f9sLandingFuel">—</td></tr><tr><td>Status</td><td id="f9FuelCheckStatus">—</td></tr></table></div><div class="card"><h2>System Status</h2><table><tr><td>Seat-by-seat loading</td><td class="ok">ACTIVE</td></tr><tr><td>Custom passenger weights</td><td class="ok">ACTIVE</td></tr><tr><td>Runway selection</td><td class="ok">AUTO</td></tr><tr><td>FAA/NASR runway data</td><td class="ok">NATIONWIDE LIVE + CACHE</td></tr><tr><td>AWC weather backend</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel weight calculations</td><td class="ok">ACTIVE</td></tr><tr><td>Fuel CG calculation</td><td class="ok">DTM9821 REV 59 LOADED</td></tr><tr><td>Falcon chart interpolation</td><td class="ok">ACTIVE • SOURCE-GATED</td></tr><tr><td>DTM9823 wind/slope</td><td class="ok">ACTIVE • SOURCE-BOUNDED</td></tr><tr><td>Overall Gate</td><td class="warn" id="f9sGate">—</td></tr></table></div>
 <div class="card" id="f9mDigitizationCard">
 <h2>SUPPORTING DOCUMENTATION</h2>
-<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.65 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
+<div class="callout small"><b>Source register + numeric solver active.</b> Falcon 900B / TFE731-5BR Section 3A chart families are loaded for 20° and 7° Flaps + Slats, dry and wet runway, including the independently traced wind/slope correction panels. v5.25.66 uses the active source-bounded numeric package from v5.25.53; out-of-panel cases remain source-locked and no extrapolation is permitted.</div>
 <div class="f9-parity-grid" style="margin-top:12px">
 <div class="f9-gate"><span class="small">20° Dry</span><b class="ok">DIGITIZED</b><span class="small">3A-5-10 through -23 registered</span></div>
 <div class="f9-gate"><span class="small">20° Wet</span><b class="ok">DIGITIZED</b><span class="small">3A-6-2 through -5 registered</span></div>
@@ -3521,11 +3522,42 @@ function f9PassengerCountChanged(){
  f9RecalcWB();scheduleDraftSave();
 }
 function f9SyncPassengerStatus(){
- const req=Math.max(0,Math.min(12,Math.round(Number($("f9mPaxCount")?.value)||0))),loaded=f9PassengerLoadedCount(),ok=req===loaded;
+ const req=Math.max(0,Math.min(12,Math.round(Number($("f9mPaxCount")?.value)||0))),loaded=f9PassengerLoadedCount(),unseated=Math.max(0,req-loaded),ok=req===loaded;
  f9Put("f9mPaxStatus",`${loaded} / ${req} LOADED`);const st=$("f9mPaxStatus");if(st)st.className=ok?"ok":"bad";
  f9Put("f9mPaxNote",ok?(req?`All ${req} entered passengers are assigned to Version 11 passenger positions.`:"No passengers entered."):`Passenger count mismatch — ${req} entered, ${loaded} occupied positions.`);
- return {ok,requested:req,loaded};
+ f9Put("f9PaxRequestedDisplay",String(req));f9Put("f9PaxSeatedDisplay",String(loaded));f9Put("f9PaxUnseatedDisplay",String(unseated));f9Put("f9SeatCheck",ok?"MATCH":"CHECK");const sc=$("f9SeatCheck");if(sc)sc.className=ok?"ok":"bad";
+ return {ok,requested:req,loaded,unseated};
 }
+function f9UpdateManualWeatherStationLabels(){
+ const dep=cleanICAO($("f9mDep")?.value||""),dest=cleanICAO($("f9mDest")?.value||"");
+ const a=$("f9ManualWxDepOption"),b=$("f9ManualWxDestOption");if(a)a.textContent=`Departure${dep?" — "+dep:""}`;if(b)b.textContent=`Destination${dest?" — "+dest:""}`;
+}
+function f9UpdateWeatherSourceBadges(){
+ [["dep","f9DepWxSourceBadge","f9DepWxSourceTime"],["dest","f9DestWxSourceBadge","f9DestWxSourceTime"]].forEach(([which,bid,tid])=>{const w=weatherSourceState(which),b=$(bid),t=$(tid);if(!b)return;b.textContent=w.mode;b.className=w.mode==="LIVE"?"ok":w.mode==="MANUAL"?"warn":"bad";if(t)t.textContent=w.mode==="MANUAL"?(w.time?new Date(w.time).toLocaleString():"Pilot entry"):(w.mode==="LIVE"?(w.time?fmtUtc(w.time):"Reported weather"):(w.note||"No report"));});
+}
+function f9LoadManualWeatherForm(){
+ f9UpdateManualWeatherStationLabels();const which=$("f9ManualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
+ if($("f9ManualWxMode"))$("f9ManualWxMode").value=st?.applied?"MANUAL":"LIVE";const m=p?.metar||{},saved=st?.manual_values||null;const val=(id,v)=>{const e=$(id);if(e)e.value=(v===null||v===undefined||v==="")?"":v};
+ if(st?.applied&&saved){val("f9ManualWxOAT",saved.oat);val("f9ManualWxPA",saved.pa);val("f9ManualWxAlt",saved.alt);val("f9ManualWxDir",formatWindDirectionInput(saved.dir));val("f9ManualWxSpeed",saved.spd);val("f9ManualWxGust",saved.gust);val("f9ManualWxNote",st?.note||"");}
+ else{val("f9ManualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));val("f9ManualWxPA",p?.pressure_altitude_ft);val("f9ManualWxAlt",p?.altimeter_inhg);const w=activeWindValues(m);val("f9ManualWxDir",formatWindDirectionInput(w.dir));val("f9ManualWxSpeed",w.spd);val("f9ManualWxGust",w.gust);val("f9ManualWxNote",st?.note||"");}
+ f9ManualWeatherModeChanged();f9UpdateWeatherSourceBadges();
+}
+function f9UpdateManualWeatherActionButton(){const mode=$("f9ManualWxMode")?.value||"LIVE",b=$("f9ManualWxActionBtn");if(b)b.textContent=mode==="MANUAL"?"UPDATE MANUAL WEATHER":"REFRESH / USE LIVE WEATHER";}
+function f9ManualWeatherModeChanged(){
+ const mode=$("f9ManualWxMode")?.value||"LIVE",which=$("f9ManualWxTarget")?.value||"dep",st=manualWeather[which],p=wxPoint(which);const ids=["f9ManualWxOAT","f9ManualWxPA","f9ManualWxAlt","f9ManualWxDir","f9ManualWxSpeed","f9ManualWxGust","f9ManualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
+ if(mode==="MANUAL"&&st?.manual_values){const v=st.manual_values,put=(id,x)=>{if($(id))$(id).value=x??""};put("f9ManualWxOAT",v.oat);put("f9ManualWxPA",v.pa);put("f9ManualWxAlt",v.alt);put("f9ManualWxDir",formatWindDirectionInput(v.dir));put("f9ManualWxSpeed",v.spd);put("f9ManualWxGust",v.gust);put("f9ManualWxNote",st.note||"");}
+ if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{},put=(id,x)=>{if($(id))$(id).value=x??""};put("f9ManualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("f9ManualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("f9ManualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");const w=activeWindValues(m);put("f9ManualWxDir",formatWindDirectionInput(w.dir));put("f9ManualWxSpeed",w.spd);put("f9ManualWxGust",w.gust);}
+ const stxt=$("f9ManualWxStatus");if(stxt)stxt.textContent=mode==="MANUAL"?"MANUAL selected. Enter or revise pilot weather, then press UPDATE MANUAL WEATHER.":"LIVE selected. Press REFRESH / USE LIVE WEATHER to restore the live feed and recalculate.";f9UpdateManualWeatherActionButton();
+}
+async function f9ApplyManualWeather(){
+ const which=$("f9ManualWxTarget")?.value||"dep",mode=$("f9ManualWxMode")?.value||"LIVE";
+ if(!missionData){const dep=cleanICAO($("f9mDep")?.value||""),dest=cleanICAO($("f9mDest")?.value||"");if(!dep||!dest){alert("Enter departure and destination identifiers first.");return}missionData={departure:{icao:dep,airport:{ident:dep},runways:[],metar:null,taf:null},destination:{icao:dest,airport:{ident:dest},runways:[],metar:null,taf:null},alternate:null};}
+ const p=wxPoint(which),st=manualWeather[which];if(!p)return;if(!st.live)st.live={metar:p.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p.pressure_altitude_ft??null,density_altitude_ft:p.density_altitude_ft??null,altimeter_inhg:p.altimeter_inhg??null};
+ if(mode==="LIVE"){const L=st.live||{};p.metar=L.metar||null;p.pressure_altitude_ft=L.pressure_altitude_ft??null;p.density_altitude_ft=L.density_altitude_ft??null;p.altimeter_inhg=L.altimeter_inhg??null;st.mode="LIVE";st.applied=false;if($(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified"))$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified").checked=false;try{await f9LoadOperationalData(true);f9LoadManualWeatherForm();return}catch(e){}}
+ else{const num=id=>{const e=$(id),n=Number(e?.value);return e&&String(e.value).trim()!==""&&Number.isFinite(n)?n:null};const oat=num("f9ManualWxOAT"),alt=num("f9ManualWxAlt"),dir=num("f9ManualWxDir"),spd=num("f9ManualWxSpeed"),gust=num("f9ManualWxGust");let pa=num("f9ManualWxPA");const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}const now=new Date().toISOString();st.manual_values={oat,pa:Math.round(pa),alt:Number.isFinite(alt)?alt:null,dir:Number.isFinite(dir)?dir:null,spd:Number.isFinite(spd)?spd:null,gust:Number.isFinite(gust)?gust:null};p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:st.manual_values.dir,wind_kt:st.manual_values.spd,wind_gust_kt:st.manual_values.gust,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=st.manual_values.alt;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("f9ManualWxNote")?.value||"").trim();const cb=$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified");if(cb)cb.checked=true;}
+ f9ApplyMissionEnvironment();await refreshF900BMission();f9UpdateWeatherSourceBadges();f9UpdateOperationalGate();f9RenderMissionParity();scheduleDraftSave();const ms=$("f9ManualWxStatus");if(ms)ms.textContent=weatherSourceState(which).mode==="MANUAL"?`MANUAL WEATHER UPDATED ${new Date(manualWeather[which].entered_at).toLocaleString()}`:"LIVE weather restored.";f9UpdateManualWeatherActionButton();
+}
+
 function f9UpdateOperationalGate(){
  const wb=window.f900bWBLatest,verified=!!$("f9mFOBVerified")?.checked;f9Put("f9mFOBVerifyText",verified?"VERIFIED":"NOT VERIFIED");const vf=$("f9mFOBVerifyText");if(vf)vf.className=verified?"ok":"warn";
  const pax=f9SyncPassengerStatus();const wbOK=!!wb?.ok&&pax.ok;f9SetTone("f9GateWB",wbOK?"PASS":"CHECK",wbOK?"ok":"bad");f9Put("f9GateWBNote",wbOK?`TOW ${Math.round(wb.tow).toLocaleString()} lb • CG ${wb.tcg?.pct?.toFixed(2)}% MAC • LDG ${Math.round(wb.ldw).toLocaleString()} lb / ${wb.lcg?.pct?.toFixed(2)}% MAC • PAX ${pax.loaded}/${pax.requested}`:(!pax.ok?`Passenger loading mismatch — ${pax.requested} entered / ${pax.loaded} seated`:"Structural/load/CG check incomplete"));
@@ -7127,7 +7159,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.65",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.66",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7247,7 +7279,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.65",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.66",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
