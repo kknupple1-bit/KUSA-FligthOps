@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.68 — Canonical Mission Sections 4-End
+
+- Falcon 50 Mission section 4 and all subsequent sections now render full width; removes legacy two-column/aside condensation.
+- Adds Falcon 900B Airport / Runway Fallback section matching Falcon 50 structure.
+- Rebuilds Falcon 900B Section 7 Performance Evaluation to the Falcon 50 component hierarchy while preserving 900B source IDs and calculation engine.
+- Normalizes departure/destination runway & NOTAM assessment panels, takeoff, emergency return, and landing result grids.
+- Normalizes Aircraft Reference, Mission Summary, Weight Limits, Fuel Check, System Status, Supporting Documentation and Mission→TOLD flow.
+- No performance tables, W&B values, station arms, CG limits, fuel moments, or solver math changed.
