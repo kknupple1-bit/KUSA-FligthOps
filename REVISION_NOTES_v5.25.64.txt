@@ -1,0 +1,12 @@
+KUSA FlightOps v5.25.64 — Mission Workflow Parity + CG Renderer Repair
+
+Scope
+- Falcon 900B Mission workflow parity refinements against the Falcon 50 canonical layout.
+- Removed the standalone 900B header refresh button.
+- Moved FOB, Mission Fuel, deliberate FOB verification, and Load / Refresh Mission into Section 1 Mission Setup.
+- Section 3 is weather-focused; live-weather refresh remains there without duplicate fuel controls.
+- Falcon 900B CG flight trace now renders one clean Takeoff-to-Landing vector only. ZFW and Ramp remain standalone reference markers and are not connected to the flight trace.
+- No performance tables, W&B source values, station arms, fuel-moment points, CG-envelope limits, or DTM9823 numeric solver data changed.
+
+Build 5.25.64
+Development / validation only — not approved for flight use.
