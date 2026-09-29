@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.66 — Canonical Mission Sections 2–3
+
+Scope: UI/workflow parity only; no performance, W&B, fuel-moment, envelope, station-arm, or DTM solver source values changed.
+
+1. Falcon 900B Mission Section 2 now carries the same four top-of-section passenger reconciliation fields as Falcon 50: PAX Entered, PAX Seated, Unseated PAX, Seat Check. Values are driven from the existing 12-seat N699BG loading state.
+2. Falcon 900B Mission Section 3 rebuilt to the Falcon 50 canonical Weather Source / Manual Weather component: Station, Weather Source, departure/destination source badges, OAT, pressure altitude, altimeter, wind direction, wind speed, gust, manual note, Update/Toggle, and status line in the same row order.
+3. Existing 900B operational-gate state remains functional but no longer changes the visible Section 3 layout.
+4. Manual weather on the 900B now uses the common mission weather state and refreshes the aircraft-specific performance path after application.
+5. Section numbering/order unchanged.
