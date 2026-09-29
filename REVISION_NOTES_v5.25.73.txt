@@ -1,0 +1,21 @@
+KUSA FlightOps v5.25.73 — F900B Mission State / Fuel / Live Data Recovery
+
+Scope: Falcon 900B mission-state reliability. No source performance tables, W&B station arms, CG envelope coordinates, fuel moment points, structural limits, or DTM9823 correction surfaces were changed.
+
+Corrections:
+1. Restored canonical F900B fuel backing state (FOB, taxi, mission/trip burn, landing fuel) that was removed during visual-parity refactoring. Section 1 is now the canonical fuel input source and synchronizes every W&B/TOLD calculation.
+2. New F900B trips now transfer New Trip FOB and Mission Fuel into Mission Section 1 and W&B immediately; taxi fuel defaults to 200 lb on every new trip.
+3. Draft capture/resume now retains FOB, Mission Fuel, taxi fuel and backing W&B fuel values. Older drafts without taxi data default to 200 lb.
+4. FOB verification cannot remain checked or display green when FOB is zero. Zero FOB displays ENTER FOB FIRST in red; changing fuel clears verification.
+5. Origin/destination entry auto-loads airport/runway/live weather and FAA NMS NOTAM data once both ICAOs are complete. Draft resume also refreshes live operational data automatically.
+6. Fuel values propagate through calculated W&B, mission summary, fuel check, TOLD prep/support, operational gate, takeoff/landing weights and draft state.
+7. Falcon 900B V-speed display will not present 0 kt as valid. Speed-data READY requires positive source-derived V1, VR/V2, VFT, VFR and emergency VREF.
+8. Corrected canonical TOW reference to the current F900B W&B `tow` field.
+9. Corrected Section 5 Mission Fuel Required display to show entered mission/trip burn rather than taxi + mission burn.
+
+Validation:
+- No duplicate HTML IDs.
+- Inline JavaScript syntax passes Node check.
+- server.js syntax passes Node check.
+- All packaged JSON files parse.
+- Browser/server/service-worker build synchronized to 5.25.73.
