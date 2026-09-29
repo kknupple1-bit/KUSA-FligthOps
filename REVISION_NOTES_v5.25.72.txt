@@ -1,0 +1,15 @@
+KUSA FlightOps v5.25.72 — Deep Parity / CG Presentation
+
+- Falcon 50 and Falcon 900B V-speed cards now share the same 2-row geometry and semantic speed colors.
+- Normal takeoff speeds display green; emergency-return VREF displays red.
+- Per-speed source prose removed from the operational V-speed card; provenance remains in Source Verification.
+- Falcon 900B adds emergency-return VREF, TOW, return weight, and speed-data status to the V-speed card.
+- Falcon 900B Seat & Baggage Loading Detail now uses the same five-column table format as Falcon 50.
+- Falcon 900B Airport / Runway Fallback NOT EVALUATED state is red, matching Falcon 50.
+- Falcon 900B post-performance cards are constrained to the same canonical 1050px mission width.
+- Section 7 advanced-control dropdowns are hidden from the normal Mission view on both aircraft; source verification gates remain visible.
+- Falcon 900B Section 7 uses active Mission/W&B result fields instead of stale TOLD inputs.
+- Falcon 900B CG chart keeps DTM9821 orientation and unchanged source geometry/math, but structural labels are moved to a dedicated right gutter to eliminate MTOW/MRW overlap.
+- ZFW/Ramp remain standalone markers; only the actual TO→LDG fuel-burn path is connected.
+
+No source performance tables, W&B station arms, structural limits, fuel moment points, or DTM9823 numeric correction surfaces changed.

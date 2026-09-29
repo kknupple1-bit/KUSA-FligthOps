@@ -655,21 +655,39 @@ function f9FuelBurnPath(zfw,zm,startFuel,endFuel){
 }
 function f9DrawCGTrace(wb){
  const c=$("f9cgChart");if(!c||!wb||!F900B_WB)return;
- const W=c.clientWidth;if(!Number.isFinite(W)||W<120)return;
- const dpr=devicePixelRatio||1,H=320;c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
- const env=F900B_WB.cg_envelope_pct_mac||[],lim=F900B_WB.limits||{};if(env.length<2)return;
- const minW=20000,maxW=47500,minCG=13,maxCG=32;
- const px=v=>45+(v-minCG)/(maxCG-minCG)*(W-70),py=v=>H-35-(v-minW)/(maxW-minW)*(H-60);
- x.strokeStyle="#2a4b70";x.fillStyle="#9db6cf";x.font="11px Arial";
- for(let ww=20000;ww<=45000;ww+=5000){x.fillText(ww.toLocaleString(),4,py(ww)+4);x.beginPath();x.moveTo(40,py(ww));x.lineTo(W-20,py(ww));x.stroke();}
- for(let cg=14;cg<=32;cg+=2){x.fillText(String(cg),px(cg)-5,H-12);x.beginPath();x.moveTo(px(cg),18);x.lineTo(px(cg),H-30);x.stroke();}x.fillText("% MAC",W-58,H-12);
- if(Number.isFinite(lim.mtow_lb)){x.save();x.strokeStyle="#ff6b6b";x.lineWidth=2;x.setLineDash([8,5]);x.beginPath();x.moveTo(40,py(lim.mtow_lb));x.lineTo(W-20,py(lim.mtow_lb));x.stroke();x.setLineDash([]);x.fillStyle="#ffb0b0";x.font="bold 11px Arial";x.fillText(`MTOW ${Number(lim.mtow_lb).toLocaleString()} lb`,Math.max(45,W-160),py(lim.mtow_lb)-6);x.restore();}
- const fwd=env.map(p=>[p[0],p[1]]),aft=env.map(p=>[p[0],p[2]]);
- x.strokeStyle="#ffca58";x.lineWidth=2;x.beginPath();fwd.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- x.strokeStyle="#55d18b";x.beginPath();aft.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));x.stroke();
- if(Array.isArray(wb.burnPath)&&wb.burnPath.length>1){x.strokeStyle="#8fd3ff";x.lineWidth=3;x.beginPath();wb.burnPath.forEach((p,i)=>i?x.lineTo(px(p.pct),py(p.weight)):x.moveTo(px(p.pct),py(p.weight)));x.stroke();}
- const point=(w,cg,label,color,r=7,dy=-8)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#d6e7f8";x.font="bold 11px Arial";x.fillText(label,px(cg.pct)+9,py(w)+dy);};
- point(wb.tow,wb.tcg,"TO","#8fd3ff",7);point(wb.ldw,wb.lcg,"LDG","#55d18b",7);point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4,14);
+ const W=c.clientWidth;if(!Number.isFinite(W)||W<300)return;
+ const dpr=devicePixelRatio||1,H=360;c.width=W*dpr;c.height=H*dpr;const x=c.getContext("2d");x.scale(dpr,dpr);x.clearRect(0,0,W,H);
+ const env=(F900B_WB.cg_envelope_pct_mac||[]).slice().sort((a,b)=>a[0]-b[0]),lim=F900B_WB.limits||{};if(env.length<2)return;
+ // Mirror the Dassault DTM9821 chart: %MAC left-to-right; increasing weight downward.
+ const minW=19000,maxW=51000,minCG=13,maxCG=32;
+ const L=62,R=170,T=30,B=34;
+ const plotR=W-R,plotB=H-B;
+ const px=v=>L+(v-minCG)/(maxCG-minCG)*(plotR-L),py=v=>T+(v-minW)/(maxW-minW)*(plotB-T);
+ x.font="10px Arial";x.lineWidth=1;
+ // clean manual-like grid
+ for(let ww=19000;ww<=51000;ww+=2000){x.strokeStyle="#203b57";x.beginPath();x.moveTo(L,py(ww));x.lineTo(plotR,py(ww));x.stroke();x.fillStyle="#9db6cf";x.fillText(String(Math.round(ww/1000)),8,py(ww)+3);}
+ for(let cg=13;cg<=32;cg++){x.strokeStyle="#203b57";x.beginPath();x.moveTo(px(cg),T);x.lineTo(px(cg),plotB);x.stroke();x.fillStyle="#9db6cf";x.fillText(String(cg),px(cg)-4,H-11);}
+ x.fillStyle="#9db6cf";x.font="bold 10px Arial";x.fillText("WEIGHT (x1,000 lb)",5,16);x.fillText("C.G. POSITION % MAC",Math.max(L,plotR-135),H-11);
+ // published envelope, one neutral outline and light fill; no semantic pass/fail colors on hard limits
+ x.save();x.beginPath();env.forEach((p,i)=>i?x.lineTo(px(p[1]),py(p[0])):x.moveTo(px(p[1]),py(p[0])));for(let i=env.length-1;i>=0;i--)x.lineTo(px(env[i][2]),py(env[i][0]));x.closePath();x.fillStyle="rgba(143,211,255,.075)";x.fill();x.strokeStyle="#a9c6df";x.lineWidth=2.4;x.stroke();x.restore();
+ x.fillStyle="#cbdbea";x.font="bold 9px Arial";x.fillText("FWD CG LIMIT",px(env[0][1])-24,20);x.fillText("AFT CG LIMIT",px(env[0][2])-22,20);
+ // Dassault structural/reference lines with labels in a dedicated right gutter to prevent collisions.
+ const refs=[
+  [20700,"Minimum flight weight","20,700 lb","#8ca2b7"],
+  [27535,"Full fuel load limit","27,535 lb","#8ca2b7"],
+  [lim.mzfw_lb||30864,"MZFW",`${(lim.mzfw_lb||30864).toLocaleString()} lb`,"#8ca2b7"],
+  [lim.mlw_lb||42000,"MLW",`${(lim.mlw_lb||42000).toLocaleString()} lb`,"#8ca2b7"],
+  [lim.mtow_lb||46500,"MTOW",`${(lim.mtow_lb||46500).toLocaleString()} lb`,"#ff8b8b"],
+  [lim.mrw_lb||46700,"MRW",`${(lim.mrw_lb||46700).toLocaleString()} lb`,"#b8c9d9"]
+ ];
+ const used=[];
+ refs.forEach(([w,a,b,color])=>{w=Number(w);if(!Number.isFinite(w))return;const yy=py(w);x.save();x.strokeStyle=color;x.setLineDash([6,5]);x.beginPath();x.moveTo(L,yy);x.lineTo(plotR,yy);x.stroke();x.setLineDash([]);x.beginPath();x.moveTo(plotR,yy);x.lineTo(plotR+16,yy);x.stroke();let ly=yy;while(used.some(v=>Math.abs(v-ly)<20))ly+=20;used.push(ly);x.fillStyle=color;x.font="bold 9px Arial";x.fillText(a,plotR+22,ly-2);x.font="9px Arial";x.fillText(b,plotR+22,ly+10);x.restore();});
+ // Only the actual in-flight fuel burn is connected. ZFW and ramp are standalone references.
+ const path=Array.isArray(wb.burnPath)?wb.burnPath.filter(p=>Number.isFinite(p?.pct)&&Number.isFinite(p?.weight)):[];
+ if(path.length>1){x.strokeStyle="#8fd3ff";x.lineWidth=2.8;x.beginPath();path.forEach((p,i)=>i?x.lineTo(px(p.pct),py(p.weight)):x.moveTo(px(p.pct),py(p.weight)));x.stroke();}
+ else if(wb.tcg&&wb.lcg){x.strokeStyle="#8fd3ff";x.lineWidth=2.8;x.beginPath();x.moveTo(px(wb.tcg.pct),py(wb.tow));x.lineTo(px(wb.lcg.pct),py(wb.ldw));x.stroke();}
+ const point=(w,cg,label,color,r=5,dx=8,dy=-7)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#edf5ff";x.font="bold 10px Arial";x.fillText(label,px(cg.pct)+dx,py(w)+dy);};
+ point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4,8,13);point(wb.ramp,wb.rcg,"RAMP","#d9a7ff",5,8,-7);point(wb.tow,wb.tcg,"TO","#8fd3ff",6,8,-7);point(wb.ldw,wb.lcg,"LDG","#55d18b",6,8,-7);
  const set=(id,cg)=>f9Put(id,cg?`${cg.pct.toFixed(2)}% MAC`:"—"),setArm=(id,cg)=>f9Put(id,cg?`${cg.arm.toFixed(2)} in`:"—");
  set("f9cgZeroFuel",wb.zcg);setArm("f9cgZeroFuelArm",wb.zcg);set("f9cgRamp",wb.rcg);setArm("f9cgRampArm",wb.rcg);set("f9cgTakeoff",wb.tcg);setArm("f9cgTakeoffArm",wb.tcg);set("f9cgLanding",wb.lcg);setArm("f9cgLandingArm",wb.lcg);
  const upd=(prefix,w,cg)=>{const e=f9WBEnvelope(w);if(!e||!cg){f9Put(prefix+"Limits","—");f9Put(prefix+"Margin","—");return}const nearest=Math.min(cg.pct-e.fwd,e.aft-cg.pct);f9Put(prefix+"Limits",`${e.fwd.toFixed(2)}–${e.aft.toFixed(2)}% MAC`);f9Put(prefix+"Margin",`${nearest.toFixed(2)}% MAC nearest boundary`);};
@@ -684,15 +702,28 @@ function f9RenderMissionParity(){
  const dm=$("f9mDepMetarDecoded"),dt=$("f9mDepTafDecoded"),lm=$("f9mDestMetarDecoded"),lt=$("f9mDestTafDecoded");
  if(dm)dm.innerHTML=formatMetarDecoded(dep.metar,depAlt);if(dt)dt.innerHTML=formatTafDecoded(dep.taf);if(lm)lm.innerHTML=formatMetarDecoded(dest.metar,destAlt);if(lt)lt.innerHTML=formatTafDecoded(dest.taf);
  f9Put("f9mDepMetarRaw",f9RawText(dep.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mDepTafRaw",f9RawText(dep.taf,["raw","rawTAF","raw_text","rawText"]));f9Put("f9mDestMetarRaw",f9RawText(dest.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mDestTafRaw",f9RawText(dest.taf,["raw","rawTAF","raw_text","rawText"]));
- const airportLine=x=>`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
- f9Put("f9mDepAirportSummary",dep.icao||dep.airport?.ident||"—");f9Put("f9mDepAirportNote",airportLine(dep));f9Put("f9mDestAirportSummary",dest.icao||dest.airport?.ident||"—");f9Put("f9mDestAirportNote",airportLine(dest));
- const rwLine=r=>r?`${r.runway_id} • ${Math.round(Number(r.length_ft)||0).toLocaleString()} ft • ${r.surface||"—"}`:"—",windLine=r=>{if(!r)return"—";const w=r.wind_components||{};return`HDG ${formatWindDirection(r.heading)} • HW ${f9Fmt(w.headwind_kt,1," kt")} • TW ${f9Fmt(w.tailwind_kt,1," kt")} • XW ${f9Fmt(w.crosswind_kt,1," kt")}`};
+ const airportLine=x=>{const e=Number((x.airport||{}).elevation_ft??(x.airport||{}).elev??(x.airport||{}).elevation);return `${airportName(x)} • ${Number.isFinite(e)?Math.round(e).toLocaleString():"—"} ft`};
+ const depId=dep.icao||dep.airport?.ident||"—",destId=dest.icao||dest.airport?.ident||"—";
+ f9Put("f9mDepTitle",depId);f9Put("f9mDestTitle",destId);f9Put("f9mDepWxIdent",depId);f9Put("f9mDepWxIdent2",depId);f9Put("f9mDestWxIdent",destId);f9Put("f9mDestWxIdent2",destId);
+ f9Put("f9mDepAirportSummary",depId);f9Put("f9mDepAirportNote",airportLine(dep));f9Put("f9mDestAirportSummary",destId);f9Put("f9mDestAirportNote",airportLine(dest));
+ const fmtAlt=v=>Number.isFinite(Number(v))?`${Math.round(Number(v)).toLocaleString()} ft`:"—";
+ f9Put("f9mDepPA",fmtAlt(dep.pressure_altitude_ft));f9Put("f9mDepDA",fmtAlt(dep.density_altitude_ft));f9Put("f9mDestPA",fmtAlt(dest.pressure_altitude_ft));f9Put("f9mDestDA",fmtAlt(dest.density_altitude_ft));
+ const rwLine=r=>r?`RWY ${r.runway_id} • ${Math.round(Number(r.length_ft)||0)} ft`:"—",windLine=r=>{if(!r)return"—";const w=r.wind_components||{};return`HW ${f9Fmt(w.headwind_kt,1)} • TW ${f9Fmt(w.tailwind_kt,1)} • XW ${f9Fmt(w.crosswind_kt,1)} kt`};
  f9Put("f9mDepRunwaySummary",rwLine(dr));f9Put("f9mDepWindSummary",windLine(dr));f9Put("f9mDestRunwaySummary",rwLine(lr));f9Put("f9mDestWindSummary",windLine(lr));
+ const ws=$("f9mWeatherDecodeStatus");if(ws)ws.innerHTML='<span class="ok">Decoded METAR/TAF loaded.</span> Raw reports remain available below.';
+ const alt=missionData.alternate,altId=cleanICAO($("f9mAlt")?.value||"");
+ if(altId&&alt){const am=$("f9mAltMetarDecoded"),at=$("f9mAltTafDecoded");if(am)am.innerHTML=formatMetarDecoded(alt.metar,alt.altimeter_inhg);if(at)at.innerHTML=formatTafDecoded(alt.taf);f9Put("f9mAltMetarRaw",f9RawText(alt.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mAltTafRaw",f9RawText(alt.taf,["raw","rawTAF","raw_text","rawText"]));f9Put("f9mAltTitle",altId);f9Put("f9mAltTitle2",altId);if($("f9mAltMetarPanel"))$("f9mAltMetarPanel").style.display="block";if($("f9mAltTafPanel"))$("f9mAltTafPanel").style.display="block";}else{if($("f9mAltMetarPanel"))$("f9mAltMetarPanel").style.display="none";if($("f9mAltTafPanel"))$("f9mAltTafPanel").style.display="none";}
  const tb=$("f9mRunways");if(tb){tb.innerHTML="";[["DEP",dep],["DEST",dest]].forEach(([label,pt])=>directionalRunwayOptions(pt.runways||[],pt).forEach(q=>{const r=q.runway,w=r.wind_components||{};tb.insertAdjacentHTML("beforeend",`<tr><td>${label}</td><td>${r.runway_id||"—"}</td><td>${Number.isFinite(Number(r.heading))?formatWindDirection(r.heading):"—"}</td><td>${Number(r.length_ft||0).toLocaleString()}</td><td>${Number(r.width_ft||0).toLocaleString()}</td><td>${r.surface||"—"}</td><td>${f9Fmt(w.headwind_kt,1)}</td><td>${f9Fmt(w.tailwind_kt,1)}</td><td>${f9Fmt(w.crosswind_kt,1)}</td></tr>`);}));if(!tb.innerHTML)tb.innerHTML='<tr><td colspan="9">No runway data loaded.</td></tr>';}
  const depNotam=[textOf("depNotamStatus"),textOf("depNotamSource"),textOf("depNotamImpact"),textOf("depNotamList")].filter(Boolean).join(" • ");const destNotam=[textOf("notamStatus"),textOf("notamSource"),textOf("notamRunwayImpact"),textOf("notamList")].filter(Boolean).join(" • ");
  f9Put("f9mDepNotamDetail",depNotam||"No departure NOTAM data loaded.");f9Put("f9mDestNotamDetail",destNotam||"No destination NOTAM data loaded.");f9Put("f9mDepUsableDetail",`Published ${textOf("depPublishedTora")||"—"} • Usable ${textOf("depUsableTora")||"—"}`);f9Put("f9mDestUsableDetail",`Published ${textOf("publishedLda")||"—"} • Usable ${textOf("usableLda")||"—"}`);
  f9Put("f9pV1",textOf("f9mV1"));f9Put("f9pVR",textOf("f9mVR"));f9Put("f9pVFT",textOf("f9mVFT"));f9Put("f9pVFR",textOf("f9mVFR"));f9Put("f9pTrim",textOf("f9mTrim"));f9Put("f9pBFL",textOf("f9mBFL"));f9Put("f9pGCLB2",textOf("f9mGCLB2"));f9Put("f9pLimit",textOf("f9mLimit"));
  const wb=window.f900bWBLatest;if(wb){f9Put("f9sZFW",`${Math.round(wb.zfw).toLocaleString()} lb`);f9Put("f9sRamp",`${Math.round(wb.ramp).toLocaleString()} lb`);f9Put("f9sTOW",`${Math.round(wb.tow).toLocaleString()} lb`);f9Put("f9sLDW",`${Math.round(wb.ldw).toLocaleString()} lb`);f9Put("f9sFOB",`${Math.round(wb.fob).toLocaleString()} lb`);f9Put("f9sTrip",`${Math.round(Number($("f9wbTripBurn")?.value)||0).toLocaleString()} lb`);f9Put("f9sLandingFuel",`${Math.round(wb.ldgFuel).toLocaleString()} lb`);}f9Put("f9sGate",textOf("f9OperationalGate"));
+ if(wb){
+   f9Put("f9LimZFW",`${Math.round(wb.zfw).toLocaleString()} / 30,864 lb`);
+   f9Put("f9LimRamp",`${Math.round(wb.ramp).toLocaleString()} / 46,700 lb`);
+   f9Put("f9LimTO",`${Math.round(wb.tow).toLocaleString()} / 46,500 lb`);
+   f9Put("f9LimLand",`${Math.round(wb.ldw).toLocaleString()} / 42,000 lb`);
+ }
 }
 
 function f9RenderCalculatedWBParity(wb){
@@ -733,12 +764,23 @@ async function f9RecalcWB(){
  const flightPathOK=Array.isArray(burnPath)&&burnPath.length>1&&burnPath.every(p=>inside(p.weight,{pct:p.pct,arm:p.arm}));
  const envOK=flightPathOK;
  const structuralOK=zfw<=d.limits.mzfw_lb&&ramp<=d.limits.mrw_lb&&tow<=d.limits.mtow_lb&&ldw<=d.limits.mlw_lb&&Math.min(zfw,ramp,tow,ldw)>=d.limits.min_flight_weight_lb;
- if($("f9mToWeight"))$("f9mToWeight").value=Math.round(tow);if($("f9mLdgWeight"))$("f9mLdgWeight").value=Math.round(ldw);if($("f9wbLandingFuel"))$("f9wbLandingFuel").value=Math.round(ldgFuel);
+ if($("f9mToWeight"))$("f9mToWeight").value=Math.round(tow);if($("f9mLdgWeight"))$("f9mLdgWeight").value=Math.round(ldw);if($("f9ToWeight"))$("f9ToWeight").value=Math.round(tow);if($("f9LdgWeight"))$("f9LdgWeight").value=Math.round(ldw);if($("legacyF9CanonicalTOW"))$("legacyF9CanonicalTOW").value=Math.round(tow);if($("f9wbLandingFuel"))$("f9wbLandingFuel").value=Math.round(ldgFuel);
  f9Put("f9wbZFW",`${Math.round(zfw).toLocaleString()} lb`);f9Put("f9wbZFWCG",zcg?`${zcg.arm.toFixed(2)} in • ${f9PctFmt(zcg.pct)}`:"—");f9Put("f9wbRamp",`${Math.round(ramp).toLocaleString()} lb • ${rcg?rcg.pct.toFixed(2):"—"}%`);f9Put("f9wbTO",`${Math.round(tow).toLocaleString()} lb • ${tcg?tcg.pct.toFixed(2):"—"}%`);f9Put("f9wbLDG",`${Math.round(ldw).toLocaleString()} lb • ${lcg?lcg.pct.toFixed(2):"—"}%`);
  f9Status("f9wbStruct",structuralOK?"WITHIN STRUCTURAL LIMITS":"CHECK STRUCTURAL LIMITS",structuralOK?"ok":"bad");f9Status("f9wbEnvelope",envOK?"TAKEOFF→LANDING PATH WITHIN CG ENVELOPE":"CHECK TAKEOFF→LANDING CG PATH",envOK?"ok":"bad");f9Status("f9wbLoadStatus",loadOK?"LOAD / FUEL INPUTS VALID":"CHECK LOAD / FUEL INPUTS",loadOK?"ok":"bad");
  const ok=structuralOK&&envOK&&loadOK;f9Status("f9mWBStatus",ok?"READY":"CHECK",ok?"ok":"bad");f9Put("f9mWBNote",ok?`TOW ${Math.round(tow).toLocaleString()} • LDW ${Math.round(ldw).toLocaleString()}`:"Review aircraft loading");
- const tb=$("f9wbDetail");if(tb){tb.innerHTML=`<tr><td>Basic Empty Weight</td><td>${d.empty_weight.weight_lb.toFixed(1)} lb</td><td>${d.empty_weight.arm_in.toFixed(2)} in</td><td>${d.empty_weight.moment_lb_in.toFixed(0)}</td></tr>`;rows.forEach(r=>tb.insertAdjacentHTML('beforeend',`<tr><td>${r.label}</td><td>${r.w.toFixed(0)} lb</td><td>${r.arm.toFixed(2)} in</td><td>${r.m.toFixed(0)}</td></tr>`));if(Number.isFinite(fmr))tb.insertAdjacentHTML('beforeend',`<tr><td>Fuel on Board</td><td>${fob.toFixed(0)} lb</td><td>variable</td><td>${fmr.toFixed(0)}</td></tr>`);}
- window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9RenderCalculatedWBParity(window.f900bWBLatest);f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();scheduleDraftSave();return window.f900bWBLatest;
+ const tb=$("f9wbDetail");if(tb){
+   const esc=v=>String(v??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+   tb.innerHTML="";
+   d.stations.forEach(st=>{const w=n(`f9wb_${st.id}`),moment=w*st.arm_in;let load="Empty";
+     if(/^pax\d+$/.test(st.id))load=w>0?`PAX ${st.id.replace("pax","")}`:"Empty";
+     else if(["pilot","copilot","crew3"].includes(st.id))load=w>0?"Crew":"Empty";
+     else if(/bag/.test(st.id))load=w>0?"Baggage":"Empty";
+     else if(/galley/.test(st.id))load=w>0?"Stores":"Empty";
+     else if(st.id==="water")load=w>0?"Water":"Empty";
+     tb.insertAdjacentHTML("beforeend",`<tr><td>${esc(st.label)}</td><td>${esc(load)}</td><td>${st.arm_in.toFixed(2)} in</td><td>${w.toFixed(0)} lb</td><td>${moment.toFixed(0)}</td></tr>`);
+   });
+ }
+ window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9SyncCanonicalMissionSetup();f9RenderCalculatedWBParity(window.f900bWBLatest);f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();scheduleDraftSave();return window.f900bWBLatest;
 }
 
 async function loadF900BData(){
@@ -962,7 +1004,7 @@ async function f9RunwayChanged(which){
 async function f9LoadOperationalData(refreshNotamsToo=true){
  const dep=cleanICAO($("f9mDep")?.value),dest=cleanICAO($("f9mDest")?.value),alt=cleanICAO($("f9mAlt")?.value);if(!dep||!dest)return;
  if($("dep"))$("dep").value=dep;if($("dest"))$("dest").value=dest;if($("alt"))$("alt").value=alt||"";
- try{await loadMission({quiet:true,preserveManualWeather:true});f9MirrorRunways();if(refreshNotamsToo){try{await Promise.all([refreshDepartureNotams(true),refreshNotams()])}catch(e){}}f9ApplyMissionEnvironment();await refreshF900BMission();}catch(e){f9Put("f9mDepWx",`Mission data error: ${e.message||e}`);}
+ try{if($("f9mMissionStatus"))$("f9mMissionStatus").textContent="Loading mission…";await loadMission({quiet:true,preserveManualWeather:true});f9MirrorRunways();if(refreshNotamsToo){try{await Promise.all([refreshDepartureNotams(true),refreshNotams()])}catch(e){}}f9ApplyMissionEnvironment();await refreshF900BMission();if($("f9mMissionStatus"))$("f9mMissionStatus").textContent="Mission loaded. Runway, weather and NOTAM data synchronized.";}catch(e){f9Put("f9mDepWx",`Mission data error: ${e.message||e}`);if($("f9mMissionStatus"))$("f9mMissionStatus").textContent=`Mission data error: ${e.message||e}`;}
  f9UpdateOperationalGate();
 }
 function f9RenderCG(id,w,cg){const env=f9WBEnvelope(w),band=$("f9cg"+id+"Band"),mark=$("f9cg"+id+"Mark"),txt=$("f9cg"+id+"Text");if(!band||!mark||!txt||!env||!cg){if(txt)txt.textContent="—";return}const lo=14,hi=32,p=x=>Math.max(0,Math.min(100,(x-lo)/(hi-lo)*100));band.style.left=p(env.fwd)+"%";band.style.width=(p(env.aft)-p(env.fwd))+"%";mark.style.left=p(cg.pct)+"%";const ok=cg.pct>=env.fwd&&cg.pct<=env.aft;const fwdMargin=cg.pct-env.fwd,aftMargin=env.aft-cg.pct,nearest=Math.min(fwdMargin,aftMargin);txt.textContent=`${cg.pct.toFixed(2)}% • limits ${env.fwd.toFixed(2)}–${env.aft.toFixed(2)}% • nearest margin ${nearest.toFixed(2)}% MAC`;txt.className=`small ${ok?"ok":"bad"}`;}
@@ -970,9 +1012,41 @@ function f9MetarAgeMinutes(point){
  const m=point?.metar||null;if(!m)return null;const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);if(!obs)return null;const t=new Date(normalizeAviationTime(obs)).getTime();if(!Number.isFinite(t))return null;const age=(Date.now()-t)/60000;return Number.isFinite(age)&&age>=0?age:null;
 }
 function f9DistanceFromText(id){const t=$(id)?.textContent||"";const m=String(t).replace(/,/g,"").match(/-?\d+(?:\.\d+)?/);return m?Number(m[0]):null;}
+// Canonical FlightOps Mission Section 1 synchronization.
+// The Falcon 50 defines the shared Mission Setup structure; aircraft-specific IDs map into the same workflow.
+function f9MissionRouteChanged(){
+ const dep=cleanICAO($("f9mDep")?.value),dest=cleanICAO($("f9mDest")?.value),alt=cleanICAO($("f9mAlt")?.value);
+ if($("dep"))$("dep").value=dep||"";if($("dest"))$("dest").value=dest||"";if($("alt"))$("alt").value=alt||"";scheduleDraftSave();
+}
+function f9Section1FuelChanged(kind){
+ const fob=Math.max(0,Number($("f9mFOB")?.value)||0),mission=Math.max(0,Number($("f9mMissionFuel")?.value)||0),taxi=Math.max(0,Number($("f9mTaxiFuel")?.value)||0);
+ if($("f9wbFuel"))$("f9wbFuel").value=fob;if($("f9wbTripBurn"))$("f9wbTripBurn").value=mission;if($("f9wbTaxi"))$("f9wbTaxi").value=taxi;
+ if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;f9RecalcWB();scheduleDraftSave();
+}
+function f9Section1ReturnBurnChanged(){
+ const v=Math.max(0,Number($("f9mReturnBurn")?.value)||0);if($("f9ReturnBurn"))$("f9ReturnBurn").value=v;refreshF900BMission();scheduleDraftSave();
+}
+function f9Section1CrewChanged(){
+ if($("f9wb_pilot"))$("f9wb_pilot").value=Math.max(0,Number($("f9mCaptainWt")?.value)||0);
+ if($("f9wb_copilot"))$("f9wb_copilot").value=Math.max(0,Number($("f9mFOWt")?.value)||0);
+ f9RecalcWB();scheduleDraftSave();
+}
+function f9Section1BaggageChanged(){
+ const total=Math.max(0,Math.min(2866,Number($("f9mTotalBag")?.value)||0));
+ if($("f9mTotalBag"))$("f9mTotalBag").value=total;
+ const front=Math.min(1213,total),rear=Math.min(1653,Math.max(0,total-front));
+ if($("f9wb_bagfront"))$("f9wb_bagfront").value=front;if($("f9wb_bagrear"))$("f9wb_bagrear").value=rear;
+ f9RecalcWB();scheduleDraftSave();
+}
+function f9SyncCanonicalMissionSetup(){
+ const put=(id,v)=>{const e=$(id);if(e&&document.activeElement!==e)e.value=v};
+ put("f9mFOB",Math.round(Number($("f9wbFuel")?.value)||0));put("f9mMissionFuel",Math.round(Number($("f9wbTripBurn")?.value)||0));put("f9mTaxiFuel",Math.round(Number($("f9wbTaxi")?.value)||0));
+ put("f9mCaptainWt",Math.round(Number($("f9wb_pilot")?.value)||0));put("f9mFOWt",Math.round(Number($("f9wb_copilot")?.value)||0));
+ put("f9mTotalBag",Math.round((Number($("f9wb_bagfront")?.value)||0)+(Number($("f9wb_bagrear")?.value)||0)));
+}
 function f9FuelPlanChanged(kind){
  const fob=Math.max(0,Number($("f9wbFuel")?.value)||0),trip=Math.max(0,Number($("f9wbTripBurn")?.value)||0);
- if($("f9mFOB"))$("f9mFOB").value=Math.round(fob);if($("f9mMissionFuel"))$("f9mMissionFuel").value=Math.round(trip);
+ if($("f9mFOB"))$("f9mFOB").value=Math.round(fob);if($("f9mMissionFuel"))$("f9mMissionFuel").value=Math.round(trip);if($("f9mTaxiFuel"))$("f9mTaxiFuel").value=Math.round(Number($("f9wbTaxi")?.value)||0);
  if($("f9mFOBVerified"))$("f9mFOBVerified").checked=false;
  f9RecalcWB();f9UpdateOperationalGate();scheduleDraftSave();
 }
@@ -1011,11 +1085,42 @@ function f9PassengerCountChanged(){
  f9RecalcWB();scheduleDraftSave();
 }
 function f9SyncPassengerStatus(){
- const req=Math.max(0,Math.min(12,Math.round(Number($("f9mPaxCount")?.value)||0))),loaded=f9PassengerLoadedCount(),ok=req===loaded;
+ const req=Math.max(0,Math.min(12,Math.round(Number($("f9mPaxCount")?.value)||0))),loaded=f9PassengerLoadedCount(),unseated=Math.max(0,req-loaded),ok=req===loaded;
  f9Put("f9mPaxStatus",`${loaded} / ${req} LOADED`);const st=$("f9mPaxStatus");if(st)st.className=ok?"ok":"bad";
  f9Put("f9mPaxNote",ok?(req?`All ${req} entered passengers are assigned to Version 11 passenger positions.`:"No passengers entered."):`Passenger count mismatch — ${req} entered, ${loaded} occupied positions.`);
- return {ok,requested:req,loaded};
+ f9Put("f9PaxRequestedDisplay",String(req));f9Put("f9PaxSeatedDisplay",String(loaded));f9Put("f9PaxUnseatedDisplay",String(unseated));f9Put("f9SeatCheck",ok?"MATCH":"CHECK");const sc=$("f9SeatCheck");if(sc)sc.className=ok?"ok":"bad";
+ return {ok,requested:req,loaded,unseated};
 }
+function f9UpdateManualWeatherStationLabels(){
+ const dep=cleanICAO($("f9mDep")?.value||""),dest=cleanICAO($("f9mDest")?.value||"");
+ const a=$("f9ManualWxDepOption"),b=$("f9ManualWxDestOption");if(a)a.textContent=`Departure${dep?" — "+dep:""}`;if(b)b.textContent=`Destination${dest?" — "+dest:""}`;
+}
+function f9UpdateWeatherSourceBadges(){
+ [["dep","f9DepWxSourceBadge","f9DepWxSourceTime"],["dest","f9DestWxSourceBadge","f9DestWxSourceTime"]].forEach(([which,bid,tid])=>{const w=weatherSourceState(which),b=$(bid),t=$(tid);if(!b)return;b.textContent=w.mode;b.className=w.mode==="LIVE"?"ok":w.mode==="MANUAL"?"warn":"bad";if(t)t.textContent=w.mode==="MANUAL"?(w.time?new Date(w.time).toLocaleString():"Pilot entry"):(w.mode==="LIVE"?(w.time?fmtUtc(w.time):"Reported weather"):(w.note||"No report"));});
+}
+function f9LoadManualWeatherForm(){
+ f9UpdateManualWeatherStationLabels();const which=$("f9ManualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
+ if($("f9ManualWxMode"))$("f9ManualWxMode").value=st?.applied?"MANUAL":"LIVE";const m=p?.metar||{},saved=st?.manual_values||null;const val=(id,v)=>{const e=$(id);if(e)e.value=(v===null||v===undefined||v==="")?"":v};
+ if(st?.applied&&saved){val("f9ManualWxOAT",saved.oat);val("f9ManualWxPA",saved.pa);val("f9ManualWxAlt",saved.alt);val("f9ManualWxDir",formatWindDirectionInput(saved.dir));val("f9ManualWxSpeed",saved.spd);val("f9ManualWxGust",saved.gust);val("f9ManualWxNote",st?.note||"");}
+ else{val("f9ManualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));val("f9ManualWxPA",p?.pressure_altitude_ft);val("f9ManualWxAlt",p?.altimeter_inhg);const w=activeWindValues(m);val("f9ManualWxDir",formatWindDirectionInput(w.dir));val("f9ManualWxSpeed",w.spd);val("f9ManualWxGust",w.gust);val("f9ManualWxNote",st?.note||"");}
+ f9ManualWeatherModeChanged();f9UpdateWeatherSourceBadges();
+}
+function f9UpdateManualWeatherActionButton(){const mode=$("f9ManualWxMode")?.value||"LIVE",b=$("f9ManualWxActionBtn");if(b)b.textContent=mode==="MANUAL"?"UPDATE MANUAL WEATHER":"REFRESH / USE LIVE WEATHER";}
+function f9ManualWeatherModeChanged(){
+ const mode=$("f9ManualWxMode")?.value||"LIVE",which=$("f9ManualWxTarget")?.value||"dep",st=manualWeather[which],p=wxPoint(which);const ids=["f9ManualWxOAT","f9ManualWxPA","f9ManualWxAlt","f9ManualWxDir","f9ManualWxSpeed","f9ManualWxGust","f9ManualWxNote"];ids.forEach(id=>{if($(id))$(id).disabled=mode!=="MANUAL"});
+ if(mode==="MANUAL"&&st?.manual_values){const v=st.manual_values,put=(id,x)=>{if($(id))$(id).value=x??""};put("f9ManualWxOAT",v.oat);put("f9ManualWxPA",v.pa);put("f9ManualWxAlt",v.alt);put("f9ManualWxDir",formatWindDirectionInput(v.dir));put("f9ManualWxSpeed",v.spd);put("f9ManualWxGust",v.gust);put("f9ManualWxNote",st.note||"");}
+ if(mode==="LIVE"&&p){const m=(st?.live?.metar)||p.metar||{},put=(id,x)=>{if($(id))$(id).value=x??""};put("f9ManualWxOAT",firstVal(m,["temp_c","temperature_c","temp","temperature"]));put("f9ManualWxPA",st?.live?.pressure_altitude_ft??p.pressure_altitude_ft??"");put("f9ManualWxAlt",st?.live?.altimeter_inhg??p.altimeter_inhg??"");const w=activeWindValues(m);put("f9ManualWxDir",formatWindDirectionInput(w.dir));put("f9ManualWxSpeed",w.spd);put("f9ManualWxGust",w.gust);}
+ const stxt=$("f9ManualWxStatus");if(stxt)stxt.textContent=mode==="MANUAL"?"MANUAL selected. Enter or revise pilot weather, then press UPDATE MANUAL WEATHER.":"LIVE selected. Press REFRESH / USE LIVE WEATHER to restore the live feed and recalculate.";f9UpdateManualWeatherActionButton();
+}
+async function f9ApplyManualWeather(){
+ const which=$("f9ManualWxTarget")?.value||"dep",mode=$("f9ManualWxMode")?.value||"LIVE";
+ if(!missionData){const dep=cleanICAO($("f9mDep")?.value||""),dest=cleanICAO($("f9mDest")?.value||"");if(!dep||!dest){alert("Enter departure and destination identifiers first.");return}missionData={departure:{icao:dep,airport:{ident:dep},runways:[],metar:null,taf:null},destination:{icao:dest,airport:{ident:dest},runways:[],metar:null,taf:null},alternate:null};}
+ const p=wxPoint(which),st=manualWeather[which];if(!p)return;if(!st.live)st.live={metar:p.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p.pressure_altitude_ft??null,density_altitude_ft:p.density_altitude_ft??null,altimeter_inhg:p.altimeter_inhg??null};
+ if(mode==="LIVE"){const L=st.live||{};p.metar=L.metar||null;p.pressure_altitude_ft=L.pressure_altitude_ft??null;p.density_altitude_ft=L.density_altitude_ft??null;p.altimeter_inhg=L.altimeter_inhg??null;st.mode="LIVE";st.applied=false;if($(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified"))$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified").checked=false;try{await f9LoadOperationalData(true);f9LoadManualWeatherForm();return}catch(e){}}
+ else{const num=id=>{const e=$(id),n=Number(e?.value);return e&&String(e.value).trim()!==""&&Number.isFinite(n)?n:null};const oat=num("f9ManualWxOAT"),alt=num("f9ManualWxAlt"),dir=num("f9ManualWxDir"),spd=num("f9ManualWxSpeed"),gust=num("f9ManualWxGust");let pa=num("f9ManualWxPA");const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}const now=new Date().toISOString();st.manual_values={oat,pa:Math.round(pa),alt:Number.isFinite(alt)?alt:null,dir:Number.isFinite(dir)?dir:null,spd:Number.isFinite(spd)?spd:null,gust:Number.isFinite(gust)?gust:null};p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:st.manual_values.dir,wind_kt:st.manual_values.spd,wind_gust_kt:st.manual_values.gust,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=st.manual_values.alt;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("f9ManualWxNote")?.value||"").trim();const cb=$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified");if(cb)cb.checked=true;}
+ f9ApplyMissionEnvironment();await refreshF900BMission();f9UpdateWeatherSourceBadges();f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();scheduleDraftSave();const ms=$("f9ManualWxStatus");if(ms)ms.textContent=weatherSourceState(which).mode==="MANUAL"?`MANUAL WEATHER UPDATED ${new Date(manualWeather[which].entered_at).toLocaleString()}`:"LIVE weather restored.";f9UpdateManualWeatherActionButton();
+}
+
 function f9UpdateOperationalGate(){
  const wb=window.f900bWBLatest,verified=!!$("f9mFOBVerified")?.checked;f9Put("f9mFOBVerifyText",verified?"VERIFIED":"NOT VERIFIED");const vf=$("f9mFOBVerifyText");if(vf)vf.className=verified?"ok":"warn";
  const pax=f9SyncPassengerStatus();const wbOK=!!wb?.ok&&pax.ok;f9SetTone("f9GateWB",wbOK?"PASS":"CHECK",wbOK?"ok":"bad");f9Put("f9GateWBNote",wbOK?`TOW ${Math.round(wb.tow).toLocaleString()} lb • CG ${wb.tcg?.pct?.toFixed(2)}% MAC • LDG ${Math.round(wb.ldw).toLocaleString()} lb / ${wb.lcg?.pct?.toFixed(2)}% MAC • PAX ${pax.loaded}/${pax.requested}`:(!pax.ok?`Passenger loading mismatch — ${pax.requested} entered / ${pax.loaded} seated`:"Structural/load/CG check incomplete"));
@@ -1054,10 +1159,21 @@ function syncF900BTOLDToMission(){
  pairs.forEach(([a,b])=>{if($(a)&&$(b)&&String($(a).value)!=="")$(b).value=$(a).value});
 }
 function f9MissionCopy(id,val){const e=$(id);if(e)e.textContent=val??"—"}
+function f9SyncVisiblePerformance(){
+ const copy=(dst,src)=>f9Put(dst,textOf(src)||"—");
+ [["f9pV1","f9V1"],["f9pVR","f9VR"],["f9pVFT","f9VFT"],["f9pVFR","f9VFR"],["f9pVREF","f9EmerVref"]].forEach(([d,s])=>copy(d,s));
+ const wb=window.f900bWBLatest;
+ if(wb){f9Put("f9pTOW",`${Math.round(wb.tow).toLocaleString()} lb`);const rb=Math.max(0,Number($("f9mReturnBurn")?.value)||0);f9Put("f9pERW",`${Math.round(Math.max(0,wb.tow-rb)).toLocaleString()} lb`);}
+ const speedOK=["f9pV1","f9pVR","f9pVFT","f9pVFR","f9pVREF"].every(id=>{const t=textOf(id);return t&&t!=="—"&&!/LOCKED|UNAVAILABLE/i.test(t)});
+ f9Status("f9pStatus",speedOK?"SOURCE DATA READY":"SOURCE CHECK",speedOK?"ok":"warn");
+ [["f9mV1","f9V1"],["f9mVR","f9VR"],["f9mVFT","f9VFT"],["f9mVFR","f9VFR"],["f9mTrim","f9Trim"],["f9mBFL","f9BFL"],["f9mGCLB2","f9GCLB2"],["f9mLimit","f9Limit"],["f9mToMargin","f9ToMargin"],["f9mToStatus","f9ToStatus"],["f9mLdgVref","f9LdgVref"],["f9mLdgLD","f9LdgLD"],["f9mLdgRequired","f9LdgRequired"],["f9mLdgMargin","f9LdgMargin"],["f9mLdgStatus","f9LdgStatus"],["f9mEmerVref","f9EmerVref"],["f9mEmerRequired","f9EmerRequired"],["f9mEmerMargin","f9EmerMargin"],["f9mEmerStatus","f9EmerStatus"]].forEach(([d,s])=>copy(d,s));
+}
+
 async function refreshF900BMission(){
  await f9RecalcWB();
  syncF900BMissionToTOLD();
  await refreshF900B();
+ f9SyncVisiblePerformance();
  f9MissionCopy("f9mV1",$("f9V1")?.textContent||"—");
  f9MissionCopy("f9mVR",$("f9VR")?.textContent||"—");
  f9MissionCopy("f9mBFL",$("f9BFL")?.textContent||"—");
@@ -1089,7 +1205,7 @@ async function refreshF900BMission(){
  f9MissionCopy("f9mLdgLCG",$("f9LdgLCG")?.textContent||"—");
  f9MissionCopy("f9mLdgStatus",$("f9LdgStatus")?.textContent||"—");
  f9MissionCopy("f9mLdgSource",$("f9LdgSource")?.textContent||"—");
- f9UpdateOperationalGate();f9RenderMissionParity();f9DrawCGTrace(window.f900bWBLatest);
+ f9SyncVisiblePerformance();f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();f9DrawCGTrace(window.f900bWBLatest);
 }
 function f9RenderToldParity(){
  const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest");
@@ -1354,7 +1470,7 @@ function showPlatformView(view){
  if(bottomActions)bottomActions.style.display=(actualView==="ops")?"flex":"none";
  if(actualView==="told"){recalculate();updateToldCard();}
  if(actualView==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
- if(actualView==="f900bmission"){syncF900BTOLDToMission();refreshF900BMission();setTimeout(()=>{f9DrawCGTrace(window.f900bWBLatest);f9RenderMissionParity();},50);}
+ if(actualView==="f900bmission"){syncF900BTOLDToMission();refreshF900BMission();setTimeout(()=>{f9DrawCGTrace(window.f900bWBLatest);f9RenderMissionParity();f9RenderCanonicalParityFields();},50);}
  if(actualView==="f900b"){syncF900BMissionToTOLD();refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
  if(actualView==="archive")renderArchive();
  if(actualView==="home"){refreshMenuCounts();}
@@ -1434,7 +1550,8 @@ function captureF900BPlanState(){
  return {
    dep,dest,alt,aircraft:"F900B",registration:aircraftRegistration("F900B"),note:val("f9mNote").trim(),trip_date:currentTripDate(),
    f900b:{
-     fob_lb:val("f9mFOB"),mission_fuel_lb:val("f9mMissionFuel"),passenger_count:val("f9mPaxCount"),fob_verified:!!$("f9mFOBVerified")?.checked,
+     fob_lb:val("f9mFOB"),mission_fuel_lb:val("f9mMissionFuel"),taxi_fuel_lb:val("f9mTaxiFuel"),passenger_count:val("f9mPaxCount"),fob_verified:!!$("f9mFOBVerified")?.checked,
+     captain_weight_lb:val("f9mCaptainWt"),first_officer_weight_lb:val("f9mFOWt"),total_baggage_lb:val("f9mTotalBag"),
      return_burn_lb:val("f9mReturnBurn"),takeoff_weight_lb:val("f9mToWeight"),landing_weight_lb:val("f9mLdgWeight"),
      wb:{fuel_lb:val("f9wbFuel"),taxi_lb:val("f9wbTaxi"),trip_burn_lb:val("f9wbTripBurn"),loads:Object.fromEntries((F900B_WB?.stations||[]).map(st=>[st.id,val(`f9wb_${st.id}`)]))},
      takeoff_config:val("f9mToConfig"),takeoff_anti_ice:val("f9mToAI"),takeoff_surface:val("f9mToSurface"),
@@ -1450,7 +1567,8 @@ function applyF900BPlanState(state){
  set("f9mDep",s.dep||"");set("f9mDest",s.dest||"");set("f9mAlt",s.alt||"");set("f9mNote",s.note||"");
  const savedFob=(f.fob_lb!==undefined&&f.fob_lb!==null&&String(f.fob_lb)!=="")?f.fob_lb:f.wb?.fuel_lb;
  const savedMissionFuel=(f.mission_fuel_lb!==undefined&&f.mission_fuel_lb!==null&&String(f.mission_fuel_lb)!=="")?f.mission_fuel_lb:f.wb?.trip_burn_lb;
- set("f9mFOB",savedFob);set("f9mMissionFuel",savedMissionFuel);set("f9mPaxCount",f.passenger_count??Object.values(f.wb?.loads||{}).filter((v,i)=>String(Object.keys(f.wb?.loads||{})[i]||"").startsWith("pax")&&Number(v)>0).length);
+ set("f9mFOB",savedFob);set("f9mMissionFuel",savedMissionFuel);set("f9mTaxiFuel",f.taxi_fuel_lb??f.wb?.taxi_lb??200);set("f9mPaxCount",f.passenger_count??Object.values(f.wb?.loads||{}).filter((v,i)=>String(Object.keys(f.wb?.loads||{})[i]||"").startsWith("pax")&&Number(v)>0).length);
+ set("f9mCaptainWt",f.captain_weight_lb??f.wb?.loads?.pilot??170);set("f9mFOWt",f.first_officer_weight_lb??f.wb?.loads?.copilot??170);set("f9mTotalBag",f.total_baggage_lb??((Number(f.wb?.loads?.bagfront)||0)+(Number(f.wb?.loads?.bagrear)||0)));
  set("f9mReturnBurn",f.return_burn_lb);set("f9mToWeight",f.takeoff_weight_lb);set("f9mLdgWeight",f.landing_weight_lb);
  if(f.wb){set("f9wbFuel",f.wb.fuel_lb??savedFob);set("f9wbTaxi",f.wb.taxi_lb);set("f9wbTripBurn",f.wb.trip_burn_lb??savedMissionFuel);Object.entries(f.wb.loads||{}).forEach(([k,v])=>set(`f9wb_${k}`,v));}
  else{set("f9wbFuel",savedFob);set("f9wbTripBurn",savedMissionFuel);}
@@ -4615,7 +4733,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.61",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.72",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
