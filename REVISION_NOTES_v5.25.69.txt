@@ -1,0 +1,15 @@
+KUSA FlightOps v5.25.69 — Canonical Mission Section 7+
+
+Purpose: normalize Falcon 50 and Falcon 900B Mission formatting from Section 7 through end-of-page.
+
+Changes:
+- Both aircraft now present the same compact Section 7 operational summary structure for Takeoff and Landing.
+- Full performance controls, what-if functions, aircraft-specific extras and detailed source text are retained under a collapsed Advanced detail control.
+- Replaced verbose always-visible source narratives with compact Source Gate / Source Verification tiles.
+- Falcon 900B Emergency Return remains available in advanced performance detail and on the TOLD card; it no longer changes the primary Mission Section 7 layout relative to the Falcon 50.
+- Falcon 900B Fuel Check and System Status cards normalized to the Falcon 50 row structure.
+- Falcon 900B source digitization audit removed from the primary operational flow and reduced to compact verification gates.
+- Falcon 900B Mission bottom actions normalized to Falcon 50.
+- No performance tables, W&B data, station arms, fuel moment data, CG limits, or solver math changed.
+
+DEVELOPMENT / VALIDATION — NOT APPROVED FOR FLIGHT USE.

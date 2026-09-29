@@ -1,0 +1,12 @@
+KUSA FlightOps v5.25.70 — Full Mission Parity Cleanup + Falcon 900B CG Manual Presentation
+
+- Hard side-by-side cleanup from Mission Section 7 through mission end for N33AP and N699BG.
+- Both aircraft now use the same visible Section 7 source gates, takeoff grid, landing grid, card geometry, labels, spacing, and semantic colors.
+- Detailed performance controls remain available only under collapsed Advanced Detail; long source-development narratives no longer dominate the operational page.
+- Corrected an accumulated parity defect where Falcon 900 canonical IDs had leaked into the Falcon 50 visible Section 7.
+- Standardized post-performance cards: Aircraft Reference, Mission Summary, Weight Limits, Fuel Check, System Status, Source Verification, and mission actions.
+- Falcon 900 Weight Limits now uses the same current/limit two-column format as Falcon 50.
+- Falcon 900 CG chart now follows DTM9821 visual orientation: lighter weights at top, heavier weights downward, %MAC left-to-right.
+- Forward/aft limits remain source-controlled; allowable envelope is lightly shaded. Structural/reference lines for minimum flight, full-fuel load, MZFW, MLW, MTOW, and MRW are shown.
+- ZFW and Ramp are standalone reference markers. Only Takeoff to Landing is connected as the in-flight fuel-burn vector, eliminating the prior lightning-bolt presentation.
+- No source W&B values, performance tables, station arms, fuel-moment schedule, structural limits, or DTM9823 solver mathematics were changed.
