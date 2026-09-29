@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.71 — F900B performance recovery + CG cleanup
+
+- Fixes Falcon 900B TOLD/Mission weight synchronization after canonical layout refactor.
+- Restores automatic takeoff/landing calculation inputs from aircraft W&B into TOLD engine.
+- Makes Section 5 V-Speed Card synchronize directly from active TOLD performance outputs.
+- Fixes canonical performance summary mappings that referenced removed IDs.
+- Contains Aircraft Reference cards within canonical page width.
+- Rebuilds Falcon 900B CG chart in DTM9821 visual convention with closed envelope, clean structural labels, and TO→LDG-only flight trace.
+- Simplifies advanced performance sections and hides duplicate source-audit prose from normal pilot workflow.
+- No source performance tables, W&B station arms, fuel moment schedules, structural limits, or DTM9823 numeric correction surfaces changed.
