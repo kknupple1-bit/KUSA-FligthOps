@@ -7,22 +7,32 @@
 <style>
 :root{font-family:Arial,Helvetica,sans-serif;color-scheme:dark}
 body{margin:0;background:#071b33;color:#e8f1fb}
-.wrap{max-width:1180px;margin:0 auto;padding:28px}
+.wrap{max-width:1280px;margin:0 auto;padding:28px}
 .top{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
 h1{margin:0 0 6px;font-size:28px}.sub{color:#a9bed3;margin:0}
 .badge{border:1px solid #31506f;background:#0d2b4b;border-radius:999px;padding:8px 12px;font-weight:700}
 .card{background:#0d2b4b;border:1px solid #31506f;border-radius:14px;padding:18px;margin:14px 0}
-.toolbar{display:flex;gap:10px;flex-wrap:wrap}
-button,a.btn{appearance:none;text-decoration:none;border:1px solid #31506f;border-radius:8px;background:#215d95;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
-a.btn.secondary,button.secondary{background:#061829}
-.status{margin:12px 0;font-weight:700}.ok{color:#47e6a5}.bad{color:#ff6b6b}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,a.btn,select,input{font:inherit}
+button,a.btn{appearance:none;text-decoration:none;border:1px solid #31506f;border-radius:8px;background:#215d95;color:#fff;padding:9px 12px;font-weight:700;cursor:pointer}
+button.secondary,a.btn.secondary{background:#061829}
+button.danger{background:#7b2430}
+button.warn{background:#795a18}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select{background:#061829;color:#fff;border:1px solid #31506f;border-radius:8px;padding:9px}
+.status{margin:12px 0;font-weight:700}.ok{color:#47e6a5}.bad{color:#ff6b6b}.warntext{color:#ffd166}
 .tablewrap{overflow:auto;border:1px solid #31506f;border-radius:10px}
-table{border-collapse:collapse;width:100%;min-width:900px;background:#061829}
+table{border-collapse:collapse;width:100%;min-width:1120px;background:#061829}
 th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #24435f;vertical-align:top}
 th{background:#102f50;color:#cfe1f3;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
 tr:last-child td{border-bottom:0}
 .pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #31506f;margin:2px 4px 2px 0;font-size:12px}
 .muted{color:#9db2c7}.mono{font-family:Consolas,monospace;font-size:12px}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button,.actions select{font-size:12px;padding:6px 8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+label{display:block;font-size:12px;color:#a9bed3;margin-bottom:5px}
+.notice{padding:10px;border:1px solid #6b5a23;background:#3a3013;border-radius:8px;color:#ffe8a3}
+pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;border-radius:8px;border:1px solid #31506f}
 </style>
 </head>
 <body>
@@ -30,79 +40,160 @@ tr:last-child td{border-bottom:0}
   <div class="top">
     <div>
       <h1>KUSA FlightOps — User Administration</h1>
-      <p class="sub">v5.26.2 read-only administrator roster. Write controls will be added only after authorization and audit paths are proven.</p>
+      <p class="sub">v5.26.3 controlled administrator actions with server-side authorization and audit logging.</p>
     </div>
-    <div class="badge">v5.26.2</div>
+    <div class="badge">v5.26.3</div>
   </div>
+
   <div class="toolbar">
-    <button id="refresh">Refresh Users</button>
+    <button id="refresh">Refresh</button>
     <a class="btn secondary" href="/account.html">Account / Session</a>
     <a class="btn secondary" href="/">FlightOps</a>
   </div>
   <div id="status" class="status"></div>
+
   <div class="card">
-    <div id="orgs" class="muted">Loading organization...</div>
+    <strong id="orgs">Loading organization...</strong>
   </div>
+
   <div class="card">
+    <h3>Create Invitation</h3>
+    <div class="notice">v5.26.3 creates the server-side invitation securely, but does not email it or accept it yet. The one-time token is shown only for controlled testing.</div>
+    <div class="grid" style="margin-top:12px">
+      <div><label>Email</label><input id="inviteEmail" type="email" placeholder="pilot@example.com"></div>
+      <div><label>Role</label><select id="inviteRole"><option value="pilot">Pilot</option><option value="viewer">Viewer</option><option value="aircraft_manager">Aircraft Manager</option><option value="administrator">Administrator</option></select></div>
+      <div style="align-self:end"><button id="inviteBtn">Create Invitation</button></div>
+    </div>
+    <pre id="inviteResult" style="display:none"></pre>
+  </div>
+
+  <div class="card">
+    <h3>Users</h3>
     <div class="tablewrap">
       <table>
-        <thead>
-          <tr>
-            <th>User</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Aircraft Access</th>
-            <th>Last Seen</th>
-            <th>Active Sessions</th>
-            <th>Created</th>
-          </tr>
-        </thead>
+        <thead><tr>
+          <th>User</th><th>Role</th><th>Status</th><th>Aircraft Access</th><th>Last Seen</th><th>Sessions</th><th>Admin Actions</th>
+        </tr></thead>
         <tbody id="rows"><tr><td colspan="7" class="muted">Loading...</td></tr></tbody>
       </table>
     </div>
   </div>
+
+  <div class="card">
+    <h3>Recent Administrator Audit</h3>
+    <div id="audit" class="muted">Loading...</div>
+  </div>
 </div>
 <script>
-const statusEl=document.getElementById('status');
-const rowsEl=document.getElementById('rows');
-const orgsEl=document.getElementById('orgs');
+const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=s=>{if(!s)return '—';const d=new Date(s);return Number.isNaN(d.getTime())?esc(s):d.toLocaleString()};
+let model={org:null,users:[],me:null,aircraft:[]};
+
+async function api(url,opt={}){
+  const r=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(opt.headers||{})},...opt});
+  let j={};try{j=await r.json()}catch{}
+  if(!r.ok) throw Object.assign(new Error(j.error||`HTTP_${r.status}`),{code:j.error||`HTTP_${r.status}`,payload:j});
+  return j;
+}
 function pills(list){
-  if(!Array.isArray(list)||!list.length)return '<span class="muted">None assigned</span>';
+  if(!Array.isArray(list)||!list.length)return '<span class="muted">None</span>';
   return list.map(a=>`<span class="pill">${esc(a.registration)} · ${esc(a.access_role||'pilot')}</span>`).join('');
 }
 async function load(){
-  statusEl.className='status';
-  statusEl.textContent='Loading...';
+  $('status').className='status';$('status').textContent='Loading...';
   try{
-    const r=await fetch('/api/admin/users',{credentials:'same-origin',cache:'no-store'});
-    const j=await r.json();
-    if(!r.ok){
-      statusEl.className='status bad';
-      statusEl.textContent=j.error==='AUTH_REQUIRED'?'Sign in on the Account page first.':j.error==='ADMIN_REQUIRED'?'Administrator access is required.':`Error: ${j.error||r.status}`;
-      rowsEl.innerHTML='<tr><td colspan="7" class="muted">No data.</td></tr>';
-      return;
-    }
-    statusEl.className='status ok';
-    statusEl.textContent='Administrator authorization verified.';
-    orgsEl.textContent=(j.organizations||[]).map(o=>`${o.name} — ${o.role}`).join(' · ')||'No organization returned.';
-    rowsEl.innerHTML=(j.users||[]).map(u=>`<tr>
-      <td><strong>${esc(u.display_name)}</strong><br><span class="muted">${esc(u.email)}</span><br><span class="mono">${esc(u.user_id)}</span></td>
-      <td>${esc(u.role)}</td>
-      <td>${esc(u.status)}</td>
-      <td>${pills(u.effective_aircraft_access||u.aircraft_access)}</td>
-      <td>${fmt(u.last_seen_at)}</td>
-      <td>${esc(u.active_session_count)}</td>
-      <td>${fmt(u.created_at)}</td>
-    </tr>`).join('')||'<tr><td colspan="7" class="muted">No users found.</td></tr>';
+    const me=await api('/api/me');
+    model.me=me.user;
+    const j=await api('/api/admin/users');
+    model.org=(j.organizations||[])[0]||null;
+    model.users=j.users||[];
+    model.aircraft=(me.aircraft||[]).filter(a=>!model.org||a.organization_id===model.org.organization_id);
+    $('orgs').textContent=model.org?`${model.org.name} — ${model.org.role}`:'No administrator organization returned.';
+    renderUsers();
+    await loadAudit();
+    $('status').className='status ok';$('status').textContent='Administrator authorization verified.';
   }catch(e){
-    statusEl.className='status bad';
-    statusEl.textContent='Unable to load administrator roster.';
-    rowsEl.innerHTML=`<tr><td colspan="7" class="muted">${esc(e)}</td></tr>`;
+    $('status').className='status bad';
+    $('status').textContent=e.code==='AUTH_REQUIRED'?'Sign in on the Account page first.':e.code==='ADMIN_REQUIRED'?'Administrator access is required.':`Error: ${e.code||e.message}`;
   }
 }
-document.getElementById('refresh').onclick=load;
+function renderUsers(){
+  const body=$('rows');
+  body.innerHTML=model.users.map(u=>{
+    const self=u.user_id===model.me?.id;
+    const effective=u.effective_aircraft_access||u.aircraft_access||[];
+    const checks=model.aircraft.map(a=>{
+      const checked=effective.some(x=>x.aircraft_id===a.id);
+      const inherited=['administrator','aircraft_manager'].includes(u.role);
+      return `<label style="display:inline-block;margin-right:8px"><input type="checkbox" data-ac="${esc(a.id)}" ${checked?'checked':''} ${inherited?'disabled':''}> ${esc(a.registration)}</label>`;
+    }).join('');
+    const roleOpts=['administrator','aircraft_manager','pilot','viewer'].map(r=>`<option value="${r}" ${u.role===r?'selected':''}>${r}</option>`).join('');
+    const statusBtn=u.status==='active'
+      ? `<button class="danger" data-action="status" data-status="disabled" ${self?'disabled':''}>Disable</button>`
+      : `<button data-action="status" data-status="active">Re-enable</button>`;
+    return `<tr data-user="${esc(u.user_id)}">
+      <td><strong>${esc(u.display_name)}</strong><br><span class="muted">${esc(u.email)}</span>${self?'<br><span class="pill">YOU</span>':''}</td>
+      <td><select data-role ${self?'title="Self-demotion is blocked server-side"':''}>${roleOpts}</select><br><button data-action="role" style="margin-top:6px">Save Role</button></td>
+      <td>${esc(u.status)}</td>
+      <td>${checks||pills(effective)}<br>${['administrator','aircraft_manager'].includes(u.role)?'<span class="muted">Role grants all active aircraft in this organization.</span>':'<button data-action="aircraft" style="margin-top:6px">Save Aircraft</button>'}</td>
+      <td>${fmt(u.last_seen_at)}</td>
+      <td>${esc(u.active_session_count)}</td>
+      <td><div class="actions">${statusBtn}<button class="warn" data-action="revoke" ${self?'disabled':''}>Revoke Sessions</button></div></td>
+    </tr>`;
+  }).join('')||'<tr><td colspan="7" class="muted">No users found.</td></tr>';
+}
+async function handleAction(btn){
+  const tr=btn.closest('tr'),userId=tr?.dataset.user,orgId=model.org?.organization_id;
+  if(!userId||!orgId)return;
+  btn.disabled=true;
+  try{
+    const action=btn.dataset.action;
+    if(action==='status'){
+      await api(`/api/admin/users/${encodeURIComponent(userId)}/status`,{method:'PATCH',body:JSON.stringify({organization_id:orgId,status:btn.dataset.status})});
+    }else if(action==='revoke'){
+      if(!confirm('Revoke all active sessions for this user?'))return;
+      await api(`/api/admin/users/${encodeURIComponent(userId)}/revoke-sessions`,{method:'POST',body:JSON.stringify({organization_id:orgId})});
+    }else if(action==='role'){
+      const role=tr.querySelector('[data-role]').value;
+      if(!confirm(`Change this user's role to ${role}?`))return;
+      await api(`/api/admin/users/${encodeURIComponent(userId)}/role`,{method:'PATCH',body:JSON.stringify({organization_id:orgId,role})});
+    }else if(action==='aircraft'){
+      const ids=[...tr.querySelectorAll('[data-ac]:checked')].map(x=>x.dataset.ac);
+      await api(`/api/admin/users/${encodeURIComponent(userId)}/aircraft-access`,{method:'PUT',body:JSON.stringify({organization_id:orgId,aircraft_ids:ids})});
+    }
+    await load();
+  }catch(e){
+    alert(`Action failed: ${e.code||e.message}`);
+  }finally{btn.disabled=false}
+}
+$('rows').addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(b)handleAction(b)});
+
+$('inviteBtn').onclick=async()=>{
+  const orgId=model.org?.organization_id,email=$('inviteEmail').value.trim(),role=$('inviteRole').value;
+  $('inviteBtn').disabled=true;
+  try{
+    const j=await api('/api/admin/invitations',{method:'POST',body:JSON.stringify({organization_id:orgId,email,role})});
+    $('inviteResult').style.display='block';
+    $('inviteResult').textContent=JSON.stringify(j,null,2);
+    $('inviteEmail').value='';
+    await loadAudit();
+  }catch(e){alert(`Invitation failed: ${e.code||e.message}`)}
+  finally{$('inviteBtn').disabled=false}
+};
+
+async function loadAudit(){
+  if(!model.org)return;
+  try{
+    const j=await api(`/api/admin/audit?organization_id=${encodeURIComponent(model.org.organization_id)}`);
+    const rows=j.audit||[];
+    $('audit').innerHTML=rows.slice(0,25).map(a=>`<div style="padding:8px 0;border-bottom:1px solid #24435f">
+      <strong>${esc(a.action)}</strong> · ${fmt(a.created_at)}<br>
+      <span class="muted">By ${esc(a.actor_display_name||a.actor_email)}${a.target_email?` → ${esc(a.target_display_name||a.target_email)}`:''}</span>
+    </div>`).join('')||'<span class="muted">No administrator changes recorded yet.</span>';
+  }catch(e){$('audit').textContent=`Unable to load audit log: ${e.code||e.message}`}
+}
+$('refresh').onclick=load;
 load();
 </script>
 </body>
