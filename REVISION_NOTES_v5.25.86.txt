@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.86 — F50 Cabin Color Specificity Fix
+
+Purpose
+- Correct the Falcon 50 cabin empty-seat color that remained blue because the generic #opsView button rule had higher CSS specificity than the cabin seat classes.
+
+Changes
+- Empty F50 passenger seats now use the same neutral dark cabin-seat color as the Falcon 900B.
+- Occupied F50 passenger seats use the same pronounced aquamarine/cyan treatment as the Falcon 900B.
+- Cockpit, jump seat, fixtures and baggage cells retain the same neutral cabin palette.
+- No seating geometry, passenger logic, W&B arms, performance data, or aircraft calculations changed.
