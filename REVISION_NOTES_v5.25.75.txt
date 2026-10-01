@@ -1,0 +1,7 @@
+KUSA FlightOps v5.25.75
+
+Falcon 50 correction:
+- Removed Takeoff Stabilizer Trim field entirely from the Falcon 50 Mission V-Speed Card.
+- No Falcon 50 trim value is displayed or implied because the current Falcon 50 takeoff performance source does not provide a takeoff trim setting.
+- Falcon 900B trim logic and display are unchanged.
+- No performance, W&B, fuel-moment, CG, or source data changed.

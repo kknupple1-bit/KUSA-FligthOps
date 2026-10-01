@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.74 — N699BG Cabin + Mission V-Speed Parity
+
+- N699BG Version 11 cabin: seats 5/6/7/8 moved to the left-side dining group around the table; right side represented as storage cabinet per supplied layout image. Source-controlled station arms unchanged.
+- Falcon 900B and Falcon 50 Mission V-Speed cards now share the same 3-row operational structure.
+- Both cards include primary speeds, emergency-return VREF, BFL, OEI 2nd segment, takeoff/return weight and status.
+- Falcon 900B card restores automatic stabilizer trim and takeoff limit.
+- Falcon 50 card shows trim as N/A because no calculated stabilizer setting is implemented in the current Falcon 50 source model; no value is invented.
+- Falcon 900B CG graphic uses a clean Takeoff-to-Landing display vector. Full DTM9821 fuel-burn source points remain in the calculation object and continue to control envelope validation.
+- No performance source tables, W&B arms, fuel-moment points, CG limits, structural limits or DTM9823 numeric solver data changed.
