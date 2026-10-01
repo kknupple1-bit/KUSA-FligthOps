@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KUSA FlightOps — Accept Invitation</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color-scheme:dark}
+body{margin:0;background:#071b33;color:#e8f1fb}
+.wrap{max-width:720px;margin:0 auto;padding:36px 20px}
+.card{background:#0d2b4b;border:1px solid #31506f;border-radius:14px;padding:22px;margin:14px 0}
+h1{margin:0 0 8px}.sub{color:#a9bed3}
+label{display:block;margin:14px 0 6px;color:#cfe1f3;font-weight:700}
+input{box-sizing:border-box;width:100%;background:#061829;color:#fff;border:1px solid #31506f;border-radius:8px;padding:12px;font:inherit}
+button{margin-top:16px;width:100%;border:1px solid #31506f;border-radius:8px;background:#215d95;color:#fff;padding:12px;font:inherit;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5}
+.status{font-weight:700;margin:12px 0}.ok{color:#47e6a5}.bad{color:#ff6b6b}
+.pill{display:inline-block;padding:4px 8px;border:1px solid #31506f;border-radius:999px;margin:3px}
+.muted{color:#9db2c7}.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>KUSA FlightOps</h1>
+  <p class="sub">Invitation acceptance · v5.26.4</p>
+  <div class="card">
+    <div id="status" class="status">Validating invitation...</div>
+    <div id="details" class="hidden">
+      <p><strong>Organization:</strong> <span id="org"></span></p>
+      <p><strong>Email:</strong> <span id="email"></span></p>
+      <p><strong>Role:</strong> <span id="role"></span></p>
+      <p><strong>Aircraft:</strong> <span id="aircraft"></span></p>
+      <p class="muted">Invitation expires <span id="expires"></span>.</p>
+
+      <label for="name">Your name</label>
+      <input id="name" autocomplete="name" placeholder="Full name">
+
+      <label for="password">Create password</label>
+      <input id="password" type="password" autocomplete="new-password" placeholder="Minimum 12 characters">
+
+      <label for="confirm">Confirm password</label>
+      <input id="confirm" type="password" autocomplete="new-password">
+
+      <button id="accept">Create Account & Sign In</button>
+    </div>
+  </div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const token=new URLSearchParams(location.search).get('token')||'';
+let invitation=null;
+
+async function getJson(url,opt={}){
+  const r=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(opt.headers||{})},...opt});
+  let j={};try{j=await r.json()}catch{}
+  if(!r.ok)throw Object.assign(new Error(j.error||`HTTP_${r.status}`),{code:j.error||`HTTP_${r.status}`,payload:j});
+  return j;
+}
+function fail(msg){$('status').className='status bad';$('status').textContent=msg;$('details').classList.add('hidden')}
+async function validate(){
+  if(!token)return fail('Invitation token is missing.');
+  try{
+    const j=await getJson(`/api/invitations/${encodeURIComponent(token)}`);
+    invitation=j.invitation;
+    $('status').className='status ok';$('status').textContent='Invitation verified.';
+    $('org').textContent=invitation.organization_name;
+    $('email').textContent=invitation.email;
+    $('role').textContent=invitation.role;
+    $('expires').textContent=new Date(invitation.expires_at).toLocaleString();
+    $('aircraft').innerHTML=(invitation.aircraft||[]).map(a=>`<span class="pill">${a.registration} · ${a.model}</span>`).join('')||'<span class="muted">No explicit aircraft assignment.</span>';
+    $('details').classList.remove('hidden');
+  }catch(e){
+    const map={INVITATION_EXPIRED:'This invitation has expired.',INVITATION_REVOKED:'This invitation has been revoked.',INVITATION_ALREADY_ACCEPTED:'This invitation has already been used.',INVITATION_NOT_FOUND:'This invitation is invalid.'};
+    fail(map[e.code]||`Unable to validate invitation: ${e.code||e.message}`);
+  }
+}
+$('accept').onclick=async()=>{
+  const display_name=$('name').value.trim(),password=$('password').value,confirm=$('confirm').value;
+  if(password!==confirm)return fail('Passwords do not match.');
+  if(password.length<12)return fail('Password must be at least 12 characters.');
+  if(display_name.length<2)return fail('Enter your name.');
+  $('accept').disabled=true;
+  try{
+    const j=await getJson(`/api/invitations/${encodeURIComponent(token)}/accept`,{method:'POST',body:JSON.stringify({display_name,password})});
+    $('status').className='status ok';$('status').textContent='Account created. You are signed in.';
+    setTimeout(()=>{location.href=j.redirect||'/'},700);
+  }catch(e){
+    const map={ACCOUNT_ALREADY_EXISTS:'An account already exists for this email. Contact the KUSA administrator.',PASSWORD_TOO_SHORT:'Password must be at least 12 characters.',INVITATION_ALREADY_ACCEPTED:'This invitation has already been used.'};
+    $('status').className='status bad';$('status').textContent=map[e.code]||`Unable to create account: ${e.code||e.message}`;
+    $('accept').disabled=false;
+  }
+};
+validate();
+</script>
+</body>
+</html>
