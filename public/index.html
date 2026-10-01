@@ -671,7 +671,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.76 — N699BG Version 11 dining-group correction */
+/* v5.25.78 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
+/* v5.25.78 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -730,6 +731,13 @@ details summary{cursor:pointer;margin-top:8px}
 #opsView>#missionBottomActions,#f900bmissionView>#f9MissionBottomActions{width:100%;margin-top:14px}
 #opsView .legacy-performance-detail .canonical-perf-source,#opsView .legacy-performance-detail .canonical-perf-block{display:none!important}
 #opsView .legacy-performance-detail>.card>h2:first-child,#f900bmissionView .legacy-performance-detail>.card>h2:first-child{display:none!important}
+
+.abnormal-landing-card{margin-top:14px;padding:14px 16px;border:1px solid #2c5375;border-radius:12px;background:#0a223c}
+.abnormal-landing-card h3{margin:0;font-size:15px;color:#eaf4ff}
+.abnormal-landing-card .row{align-items:end}
+.abnormal-landing-card .wx{min-height:72px}
+.abnormal-landing-card select{font-weight:700}
+.told-abnormal{margin-bottom:10px}
 </style>
 <style id="v52562-unified-visual-system">
 /* v5.25.62 — UNIFIED FLIGHTOPS VISUAL SYSTEM
@@ -990,7 +998,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.76</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.78</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -2455,6 +2463,22 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="canon-cell"><span class="small">Performance Mode</span><b>MISSION / ACTUAL</b></div>
 <div class="canon-cell"><span class="small">Source Status</span><b class="ok">VERIFIED</b></div>
 </div></div>
+<div class="abnormal-landing-card" id="f9MissionAbnormalBlock">
+<div class="canonical-perf-title"><h3>Abnormal Landing Configuration</h3><span class="small">Use after the checklist establishes the actual aircraft configuration.</span></div>
+<div class="row" style="margin-top:10px">
+<div><label>Condition</label><select id="f9mLdgMode" onchange="syncF900BMissionToTOLD();f9UpdateAbnormalLandingUI();refreshF900BMission()"><option value="NORMAL">Normal</option><option value="HYD1">HYD #1 Loss</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
+<div id="f9mHyd2FlapsBox"><label>Actual Flap Position</label><select id="f9mHyd2Flaps" onchange="refreshF900BMission()"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
+<div id="f9mHyd2AirbrakeBox"><label>Airbrakes</label><select id="f9mHyd2Airbrake" onchange="refreshF900BMission()"><option value="AVAILABLE">Available</option><option value="LOST">Unavailable</option></select></div>
+<div class="wx"><div class="small">Configuration Summary</div><b id="f9mAbnormalConfigSummary">NORMAL LANDING</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Base VREF</div><b id="f9mLdgBaseVref">—</b></div>
+<div class="wx"><div class="small">Adjusted VREF</div><b class="told-vspeed valid" id="f9mLdgAdjustedVref">—</b></div>
+<div class="wx"><div class="small">Base Landing Distance</div><b id="f9mLdgBaseLD">—</b></div>
+<div class="wx"><div class="small">Applied Adjustment</div><b id="f9mLdgAdjustment">None</b></div>
+</div>
+<div class="small" id="f9mAbnormalConfigNote" style="margin-top:8px">Normal landing configuration — no abnormal adjustment applied.</div>
+</div>
 <details class="canonical-advanced"><summary>Advanced performance controls (optional)</summary><div class="canonical-advanced-inner legacy-performance-detail">
 <div class="card" id="legacyF9PerformanceCard">
 <h2>7. Performance Evaluation</h2>
@@ -2492,8 +2516,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">V1</div><b class="told-vspeed valid" id="f9mV1">—</b></div>
 <div class="wx"><div class="small">VR = V2</div><b class="told-vspeed valid" id="f9mVR">—</b></div>
-<div class="wx"><div class="small">VFT</div><b class="told-vspeed valid" id="f9mVFT">—</b></div>
 <div class="wx"><div class="small">VFR</div><b class="told-vspeed valid" id="f9mVFR">—</b></div>
+<div class="wx"><div class="small">VFT</div><b class="told-vspeed valid" id="f9mVFT">—</b></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Balanced Field Length</div><b id="f9mBFLMirror">—</b></div>
@@ -2545,12 +2569,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Runway Available ft</label><input id="f9mLdgRunway" min="0" step="1" type="number"/></div>
 <div><label>Runway Comparison</label><select id="f9mLdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
 </div>
-<div class="row" style="margin-top:10px">
-<div><label>Landing Mode</label><select id="f9mLdgMode"><option value="NORMAL">Normal</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
-<div><label>HYD #2 Landing Flaps</label><select id="f9mHyd2Flaps"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
-<div><label>Airbrakes</label><select id="f9mHyd2Airbrake"><option value="AVAILABLE">Available</option><option value="LOST">Lost (+10%)</option></select></div>
-<div></div>
-</div>
+
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF</div><b class="told-vspeed valid" id="f9mLdgVref">—</b></div>
 <div class="wx"><div class="small">Actual Landing Distance</div><b id="f9mLdgLD">—</b></div>
@@ -2656,11 +2675,10 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Takeoff Weight lb</label><input id="f9ToWeight" min="0" placeholder="28,000 to 45,500" step="10" type="number"/></div>
 <div><label>Emergency Return Burn lb</label><input id="f9ReturnBurn" min="0" step="10" type="number" value="500"/></div>
 </div></details>
+<div style="display:none"><b id="f9V1">—</b><b id="f9VR">—</b></div>
 <div class="f900b-results">
-<div class="f900b-result"><span>V1</span><b class="told-vspeed valid" id="f9V1">—</b></div>
-<div class="f900b-result"><span>VR = V2</span><b class="told-vspeed valid" id="f9VR">—</b></div>
-<div class="f900b-result"><span>VFT</span><b class="told-vspeed valid" id="f9VFT">—</b></div>
 <div class="f900b-result"><span>VFR</span><b class="told-vspeed valid" id="f9VFR">—</b></div>
+<div class="f900b-result"><span>VFT</span><b class="told-vspeed valid" id="f9VFT">—</b></div>
 <div class="f900b-result"><span>Balanced Field Length</span><b id="f9BFL">—</b></div>
 <div class="f900b-result"><span>Stabilizer Trim — TO CG</span><b id="f9Trim">—</b></div>
 <div class="f900b-result"><span>Runway Remaining</span><b id="f9ToMargin">—</b></div>
@@ -2710,6 +2728,22 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-op-metric"><span class="small">Landing Distance Required</span><b id="f9OpLandingRequired">—</b></div>
 <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="f9OpLandingMargin">—</b></div>
 </div>
+<div class="abnormal-landing-card told-abnormal" id="f9ToldAbnormalBlock">
+<div class="canonical-perf-title"><h3>ABNORMAL LANDING CONFIGURATION</h3><span class="small">Quick cross-check after checklist configuration is established.</span></div>
+<div class="row" style="margin-top:10px">
+<div><label>Condition</label><select id="f9LdgMode" onchange="syncF900BTOLDToMission();f9UpdateAbnormalLandingUI();refreshF900B()"><option value="NORMAL">Normal</option><option value="HYD1">HYD #1 Loss</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
+<div id="f9Hyd2FlapsBox"><label>Actual Flap Position</label><select id="f9Hyd2Flaps" onchange="refreshF900B()"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
+<div id="f9Hyd2AirbrakeBox"><label>Airbrakes</label><select id="f9Hyd2Airbrake" onchange="refreshF900B()"><option value="AVAILABLE">Available</option><option value="LOST">Unavailable</option></select></div>
+<div class="wx"><div class="small">Configuration Summary</div><b id="f9AbnormalConfigSummary">NORMAL LANDING</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Base VREF</div><b id="f9LdgBaseVref">—</b></div>
+<div class="wx"><div class="small">Adjusted VREF</div><b class="told-vspeed valid" id="f9LdgAdjustedVref">—</b></div>
+<div class="wx"><div class="small">Base Landing Distance</div><b id="f9LdgBaseLD">—</b></div>
+<div class="wx"><div class="small">Applied Adjustment</div><b id="f9LdgAdjustment">None</b></div>
+</div>
+<div class="small" id="f9AbnormalConfigNote" style="margin-top:8px">Normal landing configuration — no abnormal adjustment applied.</div>
+</div>
 <details class="f9-told-inputs" style="margin-top:10px"><summary class="small">Performance inputs / what-if detail</summary><div class="f900b-inputs" style="margin-top:10px">
 <div><label>Anti-Ice</label><select id="f9LdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
 <div><label>Pressure Altitude ft</label><input id="f9LdgPA" placeholder="0 to 6000" step="1" type="number"/></div>
@@ -2717,9 +2751,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Landing Weight lb</label><input id="f9LdgWeight" min="0" placeholder="20,700 to 42,000" step="10" type="number"/></div>
 <div><label>Runway Available ft</label><input id="f9LdgRunway" min="0" placeholder="e.g. 6500" step="1" type="number"/></div>
 <div><label>Runway Comparison</label><select id="f9LdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
-<div><label>Landing Mode</label><select id="f9LdgMode"><option value="NORMAL">Normal</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
-<div><label>HYD #2 Landing Flaps</label><select id="f9Hyd2Flaps"><option value="40">40°</option><option value="20">20°</option><option value="7">7°</option><option value="0">0° + Slats</option></select></div>
-<div><label>Airbrakes</label><select id="f9Hyd2Airbrake"><option value="AVAILABLE">Available</option><option value="LOST">Lost (+10%)</option></select></div>
+
 </div></details>
 <div class="f900b-results">
 <div class="f900b-result"><span>VREF</span><b class="told-vspeed valid" id="f9LdgVref">—</b></div>
@@ -2730,7 +2762,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="f900b-result"><span>Runway Remaining</span><b id="f9LdgMargin">—</b></div>
 <div class="f900b-result"><span>Approach Climb (OEI)</span><b id="f9LdgACG">—</b></div>
 <div class="f900b-result"><span>Landing Climb (AEO)</span><b id="f9LdgLCG">—</b></div>
-<div class="f900b-result"><span>Abnormal Penalty</span><b id="f9LdgPenalty">None</b></div>
+<div class="f900b-result"><span>Abnormal Landing Adjustment</span><b id="f9LdgPenalty">None</b></div>
 </div>
 <div class="callout small" style="margin-top:10px"><b>Arrival advisory source loaded:</b> DTM20103 TC0171 / Annex 12. Recommended max crosswind by reported braking action: Good 25 kt • Good-to-Medium 20 kt • Medium 15 kt • Medium-to-Poor 10 kt • Poor 5 kt. Icy runway max crosswind 5 kt. Annex 12 numeric LDTA tables remain source-controlled and are not substituted for QRH1 landing calculations in this build.</div>
 <div class="small f900b-source" id="f9LdgSource">Falcon 900B QRH1 Rev02 • 50-25 / 50-28 / 50-29</div>
@@ -2778,8 +2810,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-speeds">
 <div class="told-speed"><span class="small">V1</span><b class="told-vspeed valid" id="f9SupportV1">—</b></div>
 <div class="told-speed"><span class="small">VR=V2</span><b class="told-vspeed valid" id="f9SupportVR">—</b></div>
-<div class="told-speed"><span class="small">VFT</span><b class="told-vspeed valid" id="f9SupportVFT">—</b></div>
 <div class="told-speed"><span class="small">VFR</span><b class="told-vspeed valid" id="f9SupportVFR">—</b></div>
+<div class="told-speed"><span class="small">VFT</span><b class="told-vspeed valid" id="f9SupportVFT">—</b></div>
 <div class="told-speed"><span class="small">Emer VREF</span><b class="told-vspeed emergency-value valid" id="f9SupportEmerVref">—</b></div>
 </div>
 <div class="small" id="f9SupportTakeoffSource">—</div>
@@ -2804,7 +2836,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-row"><span>Runway Availability</span><span id="f9SupportRunwayState">—</span></div>
 <div class="told-row"><span>Approach Climb (OEI)</span><span id="f9SupportLdgACG">—</span></div>
 <div class="told-row"><span>Landing Climb (AEO)</span><span id="f9SupportLdgLCG">—</span></div>
-<div class="told-row"><span>Abnormal Penalty</span><span id="f9SupportLdgPenalty">—</span></div>
+<div class="told-row"><span>Abnormal Landing Adjustment</span><span id="f9SupportLdgPenalty">—</span></div>
 <div class="told-row"><span>Runway Margin</span><span id="f9SupportLdgMargin">—</span></div>
 <div class="told-row"><span>Status</span><span id="f9SupportLdgStatus">—</span></div>
 <div class="told-speed"><span class="small">VREF</span><b class="told-vspeed valid" id="f9SupportLdgVref">—</b></div>
@@ -3456,7 +3488,7 @@ async function loadF900BNumeric(){
 async function loadF900BOverlays(){
  if(F900B_OVERLAYS)return F900B_OVERLAYS;
  if(!F900B_OVERLAY_PROMISE)F900B_OVERLAY_PROMISE=(async()=>{let d=null,apiErr=null;try{const r=await fetch(apiUrl('/api/data/f900b_operational_overlays_v52541'),{cache:'no-store'});if(!r.ok)throw new Error(`HTTP ${r.status}`);d=await r.json()}catch(e){apiErr=e;const r=await fetch('/data/f900b_operational_overlays_v52541.json');if(!r.ok)throw new Error(`900B overlays API/static unavailable: ${apiErr?.message||apiErr} / HTTP ${r.status}`);d=await r.json()}
-   if(d?.schema!=="kusa.f900b.operational_overlays.v5.25.41"||!d?.tc0190?.hyd2_loss)throw new Error("900B overlay integrity check failed");
+   if(d?.schema!=="kusa.f900b.operational_overlays.v5.25.41"||!d?.tc0190?.hyd2_loss||!d?.dtm20103_rev31?.hyd1_loss)throw new Error("900B abnormal-landing overlay integrity check failed");
    F900B_OVERLAYS=d;return d;
  })().catch(e=>{F900B_OVERLAY_PROMISE=null;throw e});
  return F900B_OVERLAY_PROMISE;
@@ -3788,18 +3820,42 @@ function renderF900BTakeoff(out){
  f9Status("f9ToStatus",status,tone);
  f9Put("f9ToSource",`Falcon 900B QRH1 Rev02 + DTM9823 §3A • ${out.filters.flaps_deg}° F+S • A/I ${out.filters.anti_ice} • ${out.filters.surface} • ${out.pa_basis}${out.pa_lookup!==out.pa?` (${Math.round(out.pa)}→${Math.round(out.pa_lookup)} ft)`:""} • wind ${out.wind>=0?"+":""}${out.wind.toFixed(1)} kt • slope ${out.slope>=0?"+":""}${out.slope.toFixed(2)}% • ${out.solver_status}`);
 }
-function f9Hyd2AdjustedLanding(out){
+function f9AbnormalAdjustedLanding(out){
  const mode=$("f9LdgMode")?.value||"NORMAL";
- if(mode!=="HYD2")return{...out,abnormal:false,penalty_text:"None"};
- const flaps=Number($("f9Hyd2Flaps")?.value||40),airbrakeLost=($("f9Hyd2Airbrake")?.value||"AVAILABLE")==="LOST";
- const src=F900B_OVERLAYS?.tc0190?.hyd2_loss?.flap_settings?.[String(flaps)];
- if(!src)return{...out,abnormal:true,source_locked:true,penalty_text:"TC0190 source unavailable"};
- const add=Number(src.landing_distance_add_ft)||0,mult=airbrakeLost?Number(F900B_OVERLAYS?.tc0190?.hyd2_loss?.airbrake_loss_multiplier||1.10):1;
- const adjustedLD=Number.isFinite(out.landing_distance_ft)?(out.landing_distance_ft+add)*mult:null;
- const adjustedVref=Number.isFinite(out.vref_kt)?out.vref_kt+(Number(src.vref_add_kt)||0):null;
- return{...out,abnormal:true,hyd2_flaps:flaps,airbrake_lost:airbrakeLost,landing_distance_ft:adjustedLD,vref_kt:adjustedVref,
-   landing_distance_x_1_67_ft:Number.isFinite(adjustedLD)?adjustedLD*1.67:null,landing_distance_x_1_92_ft:Number.isFinite(adjustedLD)?adjustedLD*1.92:null,
-   penalty_text:`${flaps}°: +${add} ft / VREF +${Number(src.vref_add_kt)||0} kt${airbrakeLost?" • then ×1.10 airbrake":""}`};
+ const baseVref=Number.isFinite(out.vref_kt)?out.vref_kt:null,baseLD=Number.isFinite(out.landing_distance_ft)?out.landing_distance_ft:null;
+ if(mode==="NORMAL")return{...out,abnormal:false,abnormal_mode:"NORMAL",base_vref_kt:baseVref,base_landing_distance_ft:baseLD,penalty_text:"None",configuration_text:"40° Flaps + Slats • Normal"};
+ if(mode==="HYD1"){
+   const src=F900B_OVERLAYS?.dtm20103_rev31?.hyd1_loss||null;
+   const vadd=Number(src?.vref_add_kt??5),mult=Number(src?.landing_distance_multiplier??1.60);
+   if(!src)return{...out,abnormal:true,abnormal_mode:"HYD1",source_locked:true,base_vref_kt:baseVref,base_landing_distance_ft:baseLD,penalty_text:"HYD #1 source unavailable"};
+   const adjustedLD=Number.isFinite(baseLD)?baseLD*mult:null,adjustedVref=Number.isFinite(baseVref)?baseVref+vadd:null;
+   return{...out,abnormal:true,abnormal_mode:"HYD1",base_vref_kt:baseVref,base_landing_distance_ft:baseLD,vref_kt:adjustedVref,landing_distance_ft:adjustedLD,
+     landing_distance_x_1_67_ft:Number.isFinite(adjustedLD)?adjustedLD*1.67:null,landing_distance_x_1_92_ft:Number.isFinite(adjustedLD)?adjustedLD*1.92:null,
+     landing_flaps_deg:40,configuration_text:"HYD #1 LOSS • 40° Flaps + Slats",penalty_text:`HYD #1 LOSS • VREF +${vadd} kt • LD/LFL ×${mult.toFixed(2)} • #2 brakes / antiskid inop`};
+ }
+ if(mode==="HYD2"){
+   const flaps=Number($("f9Hyd2Flaps")?.value||40),airbrakeLost=($("f9Hyd2Airbrake")?.value||"AVAILABLE")==="LOST";
+   const src=F900B_OVERLAYS?.tc0190?.hyd2_loss?.flap_settings?.[String(flaps)];
+   if(!src)return{...out,abnormal:true,abnormal_mode:"HYD2",source_locked:true,base_vref_kt:baseVref,base_landing_distance_ft:baseLD,penalty_text:"TC0190 source unavailable"};
+   const add=Number(src.landing_distance_add_ft)||0,mult=airbrakeLost?Number(F900B_OVERLAYS?.tc0190?.hyd2_loss?.airbrake_loss_multiplier||1.10):1;
+   const adjustedLD=Number.isFinite(baseLD)?(baseLD+add)*mult:null,adjustedVref=Number.isFinite(baseVref)?baseVref+(Number(src.vref_add_kt)||0):null;
+   return{...out,abnormal:true,abnormal_mode:"HYD2",base_vref_kt:baseVref,base_landing_distance_ft:baseLD,hyd2_flaps:flaps,airbrake_lost:airbrakeLost,landing_distance_ft:adjustedLD,vref_kt:adjustedVref,
+     landing_distance_x_1_67_ft:Number.isFinite(adjustedLD)?adjustedLD*1.67:null,landing_distance_x_1_92_ft:Number.isFinite(adjustedLD)?adjustedLD*1.92:null,
+     configuration_text:`HYD #2 LOSS • ${flaps}°${flaps===0?" + Slats":" Flaps + Slats"}${airbrakeLost?" • Airbrakes unavailable":""}`,
+     penalty_text:`HYD #2 LOSS • ${flaps}°: +${add} ft / VREF +${Number(src.vref_add_kt)||0} kt${airbrakeLost?" • then ×1.10 airbrake":""}`};
+ }
+ return{...out,abnormal:false,abnormal_mode:"NORMAL",base_vref_kt:baseVref,base_landing_distance_ft:baseLD,penalty_text:"None"};
+}
+function f9UpdateAbnormalLandingUI(){
+ const apply=(prefix,mode)=>{
+   const hyd2=mode==="HYD2",hyd1=mode==="HYD1";
+   const flapBox=$(prefix+"Hyd2FlapsBox"),airBox=$(prefix+"Hyd2AirbrakeBox");if(flapBox)flapBox.style.display=hyd2?"block":"none";if(airBox)airBox.style.display=hyd2?"block":"none";
+   const summary=mode==="NORMAL"?"NORMAL LANDING":hyd1?"HYD #1 LOSS • 40° FLAPS + SLATS":"HYD #2 LOSS • USE ACTUAL ACHIEVED CONFIGURATION";
+   const note=mode==="NORMAL"?"Normal landing configuration — no abnormal adjustment applied.":hyd1?"AFM/QRH: use EMERG SLATS, land 40° Flaps + Slats at VREF +5 kt; use #2 brakes with antiskid inoperative; increase LD/LFL 60%.":"TC0190: select the actual flap position achieved after checklist completion and whether airbrakes are available. Flap additive is applied before the airbrake multiplier.";
+   f9Put(prefix+"AbnormalConfigSummary",summary);f9Put(prefix+"AbnormalConfigNote",note);
+ };
+ apply("f9m",$("f9mLdgMode")?.value||"NORMAL");
+ apply("f9",$("f9LdgMode")?.value||"NORMAL");
 }
 function renderF900BLanding(prefix,out,factor,structuralGate=true){
  const required=factor===1?out.landing_distance_ft:factor===1.92?out.landing_distance_x_1_92_ft:out.landing_distance_x_1_67_ft;
@@ -3808,6 +3864,7 @@ function renderF900BLanding(prefix,out,factor,structuralGate=true){
    f9Put("f9EmerWeight",f9Fmt(out.weight,0," lb"));f9Put("f9EmerVref",formatVspeed(out.vref_kt));f9Put("f9EmerLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9EmerRequired",f9Fmt(required,0," ft"));f9Put("f9EmerAvailable",f9Fmt(out.runway,0," ft"));f9Put("f9EmerMargin",f9Fmt(margin,0," ft"));f9Put("f9EmerACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9EmerLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));
  }else{
    f9Put("f9LdgVref",formatVspeed(out.vref_kt));f9Put("f9LdgLD",f9Fmt(out.landing_distance_ft,0," ft"));f9Put("f9Ldg167",f9Fmt(out.landing_distance_x_1_67_ft,0," ft"));f9Put("f9Ldg192",f9Fmt(out.landing_distance_x_1_92_ft,0," ft"));f9Put("f9LdgRequired",f9Fmt(required,0," ft"));f9Put("f9LdgMargin",f9Fmt(margin,0," ft"));f9Put("f9LdgACG",f9Fmt(out.approach_climb_gradient_pct,2,"%"));f9Put("f9LdgLCG",f9Fmt(out.landing_climb_gradient_pct,2,"%"));f9Put("f9LdgPenalty",out.penalty_text||"None");
+   f9Put("f9LdgBaseVref",formatVspeed(out.base_vref_kt??out.vref_kt));f9Put("f9LdgAdjustedVref",formatVspeed(out.vref_kt));f9Put("f9LdgBaseLD",f9Fmt(out.base_landing_distance_ft??out.landing_distance_ft,0," ft"));f9Put("f9LdgAdjustment",out.penalty_text||"None");
  }
  const fieldReady=[out.vref_kt,required].every(Number.isFinite);
  const climbReady=[out.approach_climb_gradient_pct,out.landing_climb_gradient_pct].every(Number.isFinite);
@@ -4016,6 +4073,7 @@ function syncF900BMissionToTOLD(){
   ["f9mLdgWeight","f9LdgWeight"],["f9mLdgRunway","f9LdgRunway"],["f9mLdgFactor","f9LdgFactor"],["f9mLdgMode","f9LdgMode"],["f9mHyd2Flaps","f9Hyd2Flaps"],["f9mHyd2Airbrake","f9Hyd2Airbrake"]
  ];
  pairs.forEach(([a,b])=>{if($(a)&&$(b))$(b).value=$(a).value});
+ f9UpdateAbnormalLandingUI();
  if(window.currentMissionMeta&&$("f9mNote"))window.currentMissionMeta.note=$("f9mNote").value.trim();
 }
 function syncF900BTOLDToMission(){
@@ -4026,6 +4084,7 @@ function syncF900BTOLDToMission(){
   ["f9LdgWeight","f9mLdgWeight"],["f9LdgRunway","f9mLdgRunway"],["f9LdgFactor","f9mLdgFactor"],["f9LdgMode","f9mLdgMode"],["f9Hyd2Flaps","f9mHyd2Flaps"],["f9Hyd2Airbrake","f9mHyd2Airbrake"]
  ];
  pairs.forEach(([a,b])=>{if($(a)&&$(b)&&String($(a).value)!=="")$(b).value=$(a).value});
+ f9UpdateAbnormalLandingUI();
 }
 function f9MissionCopy(id,val){const e=$(id);if(e)e.textContent=val??"—"}
 function f9SyncVisiblePerformance(){
@@ -4124,7 +4183,7 @@ function f9RenderToldParity(){
  f9Put("f9SupportLDW",Number.isFinite(Number($("f9LdgWeight")?.value))?`${Math.round(Number($("f9LdgWeight")?.value)).toLocaleString()} lb`:"—");
  f9Put("f9SupportLandingFuel",wb2?`${Math.round(wb2.ldgFuel).toLocaleString()} lb`:"—");
  f9Put("f9SupportLDGCG",wb2?.lcg?.pct!=null?`${wb2.lcg.pct.toFixed(2)}% MAC`:"—");
- f9Put("f9SupportLDGConfig",`40° Flaps + Slats • A/I ${$("f9LdgAI")?.value||"OFF"} • ${$("f9LdgMode")?.value||"NORMAL"}`);
+ {const mode=$("f9LdgMode")?.value||"NORMAL";const cfg=mode==="HYD1"?"HYD #1 Loss • 40° F+S":mode==="HYD2"?`HYD #2 Loss • ${$("f9Hyd2Flaps")?.value||40}°${($("f9Hyd2Airbrake")?.value||"AVAILABLE")==="LOST"?" • Airbrakes unavailable":""}`:"40° Flaps + Slats • Normal";f9Put("f9SupportLDGConfig",`${cfg} • A/I ${$("f9LdgAI")?.value||"OFF"}`);}
  f9Put("f9SupportLdgVrefRow",textOf("f9LdgVref"));f9Put("f9SupportLdgLD",textOf("f9LdgLD"));f9Put("f9SupportLdgRequired",`${textOf("f9LdgRequired")} • LD × ${landingFactor}`);
  f9Put("f9SupportPublishedLDA",dest?.length_ft?`${Math.round(Number(dest.length_ft)).toLocaleString()} ft`:"—");f9Put("f9SupportUsableLDA",Number.isFinite(destAvail)?`${Math.round(destAvail).toLocaleString()} ft`:"—");
  f9Put("f9SupportNotamStatus",currentNotams?.verified?"CHECKED":(currentNotams?"REVIEW":"UNAVAILABLE"));f9Put("f9SupportRunwayState",destCond);
@@ -4141,9 +4200,11 @@ async function refreshF900B(){
  renderF900BLanding("f9Emer",emerg,1.67,true);
  f9Put("f9EmerSource",`Falcon 900B QRH1 Rev02 • 50-25 • 40° F+S • A/I ${emerg.antiIce} • departure PA/OAT • LD × 1.67${emerg.source_weight_floor_applied?` • ${Math.round(emerg.weight).toLocaleString()} lb actual / conservative 28,000-lb published row`:""}`);
  const ldgBase=f9LandingResult(f9Num("f9LdgPA"),f9Num("f9LdgTemp"),f9Num("f9LdgWeight"),$("f9LdgAI")?.value||"OFF",f9Num("f9LdgRunway"));
- const ldg=f9Hyd2AdjustedLanding(ldgBase);
+ const ldg=f9AbnormalAdjustedLanding(ldgBase);
  const factor=Number($("f9LdgFactor")?.value||1.67);renderF900BLanding("f9Ldg",ldg,factor,true);
- const abnormal=ldg.abnormal?` • DTM20103 TC0190 HYD #2 LOSS • ${ldg.penalty_text}`:"";
+ f9Put("f9mLdgBaseVref",formatVspeed(ldg.base_vref_kt??ldg.vref_kt));f9Put("f9mLdgAdjustedVref",formatVspeed(ldg.vref_kt));f9Put("f9mLdgBaseLD",f9Fmt(ldg.base_landing_distance_ft??ldg.landing_distance_ft,0," ft"));f9Put("f9mLdgAdjustment",ldg.penalty_text||"None");
+ f9UpdateAbnormalLandingUI();
+ const abnormal=ldg.abnormal?` • ${ldg.abnormal_mode==="HYD1"?"DTM20103 Rev31 HYD #1 LOSS":"DTM20103 TC0190 HYD #2 LOSS"} • ${ldg.penalty_text}`:"";
  f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • base 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}${ldg.source_weight_floor_applied?` • ${Math.round(ldg.weight).toLocaleString()} lb actual / conservative 28,000-lb published row`:""}${abnormal}`);
  f9RenderToldParity();
 }
@@ -4450,7 +4511,7 @@ function applyF900BPlanState(state){
  if($("dep"))$("dep").value=s.dep||"";if($("dest"))$("dest").value=s.dest||"";if($("alt"))$("alt").value=s.alt||"";
  f9Put("f9Route",`${s.dep||"—"} → ${s.dest||"—"}${s.alt?` • Alternate ${s.alt}`:""}`);
  f9Put("f9mRoute",`${s.dep||"—"} → ${s.dest||"—"}${s.alt?` • Alternate ${s.alt}`:""}`);
- f9RecalcWB();syncF900BMissionToTOLD();
+ f9RecalcWB();syncF900BMissionToTOLD();f9UpdateAbnormalLandingUI();
 }
 function f900bDraftRecord(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
@@ -7607,7 +7668,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.76",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.78",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7691,6 +7752,7 @@ $("landRunwayCondition")?.addEventListener("change",recalculate);
 ["f9ToPA","f9ToTemp","f9ToWeight","f9ToRunway","f9ToWind","f9ToSlope","f9ReturnBurn","f9LdgPA","f9LdgTemp","f9LdgWeight","f9LdgRunway"].forEach(id=>$(id)?.addEventListener("input",scheduleF900BRefresh));
 ["f9mToPA","f9mToTemp","f9mToWeight","f9mToRunway","f9mToWind","f9mToSlope","f9mReturnBurn","f9mLdgPA","f9mLdgTemp","f9mLdgWeight","f9mLdgRunway"].forEach(id=>$(id)?.addEventListener("input",()=>{clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900BMission,120)}));
 ["f9mToConfig","f9mToAI","f9mToSurface","f9mLdgAI","f9mLdgFactor","f9mLdgMode","f9mHyd2Flaps","f9mHyd2Airbrake"].forEach(id=>$(id)?.addEventListener("change",refreshF900BMission));
+document.addEventListener("DOMContentLoaded",()=>setTimeout(f9UpdateAbnormalLandingUI,0));
 ["f9ToConfig","f9ToAI","f9ToSurface","f9EmerAI","f9LdgAI","f9LdgFactor","f9LdgMode","f9Hyd2Flaps","f9Hyd2Airbrake"].forEach(id=>$(id)?.addEventListener("change",refreshF900B));
 
 ["manualUsableLda","manualNotamNote"].forEach(id=>$(id)?.addEventListener("input",()=>{updateLandingRunwayAssessment();syncLandingSection();updateToldCard()}));
@@ -7727,7 +7789,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.76",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.78",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -7807,7 +7869,7 @@ function f9RenderCanonicalParityFields(){
   put('f50CanonLdgConfig',read('landConfig')); put('f50CanonLdgAI',read('landAntiIce')); put('f50CanonLdgSurface',read('landRunwayCondition')); put('f50CanonLdgRunway',read('destNotamRunwaySelect')); put('f50CanonLDW',read('landWt'),' lb'); put('f50CanonLFL',read('landFieldLen'),' ft'); put('f50CanonVREF',read('landVref'),' kt'); put('f50CanonLdgMargin',read('landRwyMargin')); put('f50CanonLdgStatus',read('landStatus'));
   put('f9CanonDepNotam',read('f9DepNotamStatusCanonical')); put('f9CanonDestNotam',read('f9DestNotamStatusCanonical'));
   put('f9CanonToConfig',read('f9mToConfig')); put('f9CanonToAI',read('f9mToAI')); put('f9CanonToSurface',read('f9mToSurface')); put('f9CanonToRunway',read('f9DepRunwayCanonical')); put('f9CanonTOW',read('f9CalcTOW')); put('f9CanonBFL',read('f9pBFL')!=='—'?read('f9pBFL'):read('f9mBFL')); put('f9CanonV1',read('f9pV1')); put('f9CanonVR',read('f9pVR')); put('f9CanonGrad',read('f9mGCLB2')); put('f9CanonToMargin',read('f9mToMargin')); put('f9CanonToStatus',read('f9mToStatus'));
-  put('f9CanonLdgConfig','40° Flaps + Slats'); put('f9CanonLdgAI',read('f9mLdgAI')); put('f9CanonLdgSurface','DRY / SOURCE'); put('f9CanonLdgRunway',read('f9DestRunwayCanonical')); put('f9CanonLDW',read('f9sLDW')); put('f9CanonLFL',read('f9mLdgRequired')); put('f9CanonVREF',read('f9mLdgVref')); put('f9CanonLdgMargin',read('f9mLdgMargin')); put('f9CanonLdgStatus',read('f9mLdgStatus'));
+  put('f9CanonLdgConfig',read('f9mAbnormalConfigSummary')!=='—'?read('f9mAbnormalConfigSummary'):'40° Flaps + Slats'); put('f9CanonLdgAI',read('f9mLdgAI')); put('f9CanonLdgSurface','DRY / SOURCE'); put('f9CanonLdgRunway',read('f9DestRunwayCanonical')); put('f9CanonLDW',read('f9sLDW')); put('f9CanonLFL',read('f9mLdgRequired')); put('f9CanonVREF',read('f9mLdgVref')); put('f9CanonLdgMargin',read('f9mLdgMargin')); put('f9CanonLdgStatus',read('f9mLdgStatus'));
  }
  document.addEventListener('DOMContentLoaded',()=>{sync();setInterval(sync,500)}); document.addEventListener('input',()=>setTimeout(sync,0)); document.addEventListener('change',()=>setTimeout(sync,0));
 })();

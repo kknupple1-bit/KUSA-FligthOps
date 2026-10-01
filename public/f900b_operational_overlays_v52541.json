@@ -63,5 +63,17 @@
     "mac_le_from_nose_in": 392.01,
     "aircraft_specific_wb_active": false,
     "reason": "N699BG aircraft-specific basic operating weight/equipment/configuration applicability not yet validated."
+  },
+  "dtm20103_rev31": {
+    "document": "DTM20103 Rev31 Section 3 Sub-section 10 / QRH2 F900B Hydraulic System",
+    "subject": "Loss of No. 1 hydraulic system \u2014 abnormal landing adjustments",
+    "hyd1_loss": {
+      "landing_flaps_deg": 40,
+      "vref_add_kt": 5,
+      "landing_distance_multiplier": 1.6,
+      "landing_field_length_multiplier": 1.6,
+      "braking_note": "Select #2 braking system; antiskid inoperative.",
+      "slat_note": "Use EMERG SLATS control switch."
+    }
   }
 }
