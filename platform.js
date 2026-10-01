@@ -34,7 +34,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.2 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.3 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -100,6 +100,16 @@ CREATE TABLE IF NOT EXISTS data_packages (
   id TEXT PRIMARY KEY, profile_key TEXT NOT NULL, version TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'approved',
   manifest_json TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL, UNIQUE(profile_key,version)
 );
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id TEXT PRIMARY KEY,
+  organization_id TEXT NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  actor_user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+  target_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  action TEXT NOT NULL,
+  detail_json TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS admin_audit_org_created_idx ON admin_audit_log(organization_id,created_at DESC);
 `);
   seed(db);
   return {ok:true,db};
@@ -156,6 +166,43 @@ function requireAdministrator(req,res,next){
   req.flightopsAdminMemberships=admins;
   next();
 }
+
+function administeredOrganization(req, organizationId){
+  const id=String(organizationId||'');
+  return (req.flightopsAdminMemberships||[]).find(m=>m.organization_id===id)||null;
+}
+
+function targetMembershipInAdminOrg(req,targetUserId,organizationId){
+  const adminOrg=administeredOrganization(req,organizationId);
+  if(!adminOrg) return null;
+  return state.db.prepare(`
+    SELECT m.*,u.email,u.display_name,u.status AS user_status,o.name AS organization_name,o.slug AS organization_slug
+    FROM memberships m
+    JOIN users u ON u.id=m.user_id
+    JOIN organizations o ON o.id=m.organization_id
+    WHERE m.user_id=? AND m.organization_id=?
+  `).get(targetUserId,organizationId)||null;
+}
+
+function writeAdminAudit(req,organizationId,targetUserId,action,detail={}){
+  state.db.prepare(`
+    INSERT INTO admin_audit_log(id,organization_id,actor_user_id,target_user_id,action,detail_json,created_at)
+    VALUES(?,?,?,?,?,?,?)
+  `).run(
+    id('aud'),
+    organizationId,
+    req.flightopsSession.user_id,
+    targetUserId||null,
+    action,
+    JSON.stringify(detail&&typeof detail==='object'?detail:{}),
+    isoNow()
+  );
+}
+
+function normalizeRole(role){
+  const r=String(role||'').trim().toLowerCase();
+  return ['administrator','aircraft_manager','pilot','viewer'].includes(r)?r:null;
+}
 function membershipsFor(userId){
   return state.db.prepare('SELECT m.organization_id,m.role,o.name,o.slug FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.user_id=?').all(userId);
 }
@@ -183,7 +230,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.2'}={}){
+function installPlatform(app,{build='5.26.3'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -285,6 +332,174 @@ function installPlatform(app,{build='5.26.2'}={}){
       organizations:req.flightopsAdminMemberships,
       users
     });
+  });
+
+
+  // v5.26.3 controlled administrator write actions.
+  app.patch('/api/admin/users/:userId/status',requireAuth,requireAdministrator,(req,res)=>{
+    const targetUserId=String(req.params.userId||'');
+    const organizationId=String(req.body?.organization_id||'');
+    const status=String(req.body?.status||'').toLowerCase();
+    if(!['active','disabled'].includes(status)) return res.status(400).json({ok:false,error:'INVALID_STATUS'});
+    const membership=targetMembershipInAdminOrg(req,targetUserId,organizationId);
+    if(!membership) return res.status(404).json({ok:false,error:'USER_NOT_FOUND_IN_ADMIN_ORGANIZATION'});
+    if(targetUserId===req.flightopsSession.user_id && status!=='active')
+      return res.status(409).json({ok:false,error:'SELF_DISABLE_BLOCKED'});
+
+    const now=isoNow();
+    state.db.prepare('UPDATE users SET status=?,updated_at=? WHERE id=?').run(status,now,targetUserId);
+    if(status!=='active'){
+      state.db.prepare('UPDATE sessions SET revoked_at=? WHERE user_id=? AND revoked_at IS NULL').run(now,targetUserId);
+    }
+    writeAdminAudit(req,organizationId,targetUserId,'USER_STATUS_CHANGED',{from:membership.user_status,to:status});
+    res.json({ok:true,user_id:targetUserId,status});
+  });
+
+  app.post('/api/admin/users/:userId/revoke-sessions',requireAuth,requireAdministrator,(req,res)=>{
+    const targetUserId=String(req.params.userId||'');
+    const organizationId=String(req.body?.organization_id||'');
+    const membership=targetMembershipInAdminOrg(req,targetUserId,organizationId);
+    if(!membership) return res.status(404).json({ok:false,error:'USER_NOT_FOUND_IN_ADMIN_ORGANIZATION'});
+    if(targetUserId===req.flightopsSession.user_id)
+      return res.status(409).json({ok:false,error:'SELF_SESSION_REVOKE_BLOCKED'});
+    const now=isoNow();
+    const info=state.db.prepare('UPDATE sessions SET revoked_at=? WHERE user_id=? AND revoked_at IS NULL').run(now,targetUserId);
+    writeAdminAudit(req,organizationId,targetUserId,'SESSIONS_REVOKED',{changes:Number(info?.changes||0)});
+    res.json({ok:true,user_id:targetUserId,revoked_sessions:Number(info?.changes||0)});
+  });
+
+  app.patch('/api/admin/users/:userId/role',requireAuth,requireAdministrator,(req,res)=>{
+    const targetUserId=String(req.params.userId||'');
+    const organizationId=String(req.body?.organization_id||'');
+    const role=normalizeRole(req.body?.role);
+    if(!role) return res.status(400).json({ok:false,error:'INVALID_ROLE'});
+    const membership=targetMembershipInAdminOrg(req,targetUserId,organizationId);
+    if(!membership) return res.status(404).json({ok:false,error:'USER_NOT_FOUND_IN_ADMIN_ORGANIZATION'});
+
+    if(targetUserId===req.flightopsSession.user_id && role!=='administrator')
+      return res.status(409).json({ok:false,error:'SELF_ADMIN_DEMOTION_BLOCKED'});
+
+    if(membership.role==='administrator' && role!=='administrator'){
+      const admins=state.db.prepare(
+        "SELECT COUNT(*) AS n FROM memberships m JOIN users u ON u.id=m.user_id WHERE m.organization_id=? AND m.role='administrator' AND u.status='active'"
+      ).get(organizationId);
+      if(Number(admins?.n||0)<=1) return res.status(409).json({ok:false,error:'LAST_ADMIN_DEMOTION_BLOCKED'});
+    }
+
+    state.db.prepare('UPDATE memberships SET role=? WHERE id=?').run(role,membership.id);
+    writeAdminAudit(req,organizationId,targetUserId,'USER_ROLE_CHANGED',{from:membership.role,to:role});
+    res.json({ok:true,user_id:targetUserId,organization_id:organizationId,role});
+  });
+
+  app.put('/api/admin/users/:userId/aircraft-access',requireAuth,requireAdministrator,(req,res)=>{
+    const targetUserId=String(req.params.userId||'');
+    const organizationId=String(req.body?.organization_id||'');
+    const membership=targetMembershipInAdminOrg(req,targetUserId,organizationId);
+    if(!membership) return res.status(404).json({ok:false,error:'USER_NOT_FOUND_IN_ADMIN_ORGANIZATION'});
+
+    const requested=Array.isArray(req.body?.aircraft_ids)?[...new Set(req.body.aircraft_ids.map(String))]:[];
+    const validAircraft=state.db.prepare(
+      "SELECT id,registration FROM aircraft WHERE organization_id=? AND status='active' ORDER BY registration"
+    ).all(organizationId);
+    const validIds=new Set(validAircraft.map(a=>a.id));
+    if(requested.some(x=>!validIds.has(x)))
+      return res.status(400).json({ok:false,error:'INVALID_AIRCRAFT_FOR_ORGANIZATION'});
+
+    const before=state.db.prepare(`
+      SELECT a.id AS aircraft_id,a.registration,aa.access_role
+      FROM aircraft_access aa JOIN aircraft a ON a.id=aa.aircraft_id
+      WHERE aa.user_id=? AND a.organization_id=?
+      ORDER BY a.registration
+    `).all(targetUserId,organizationId);
+
+    state.db.exec('BEGIN IMMEDIATE');
+    try{
+      state.db.prepare(`
+        DELETE FROM aircraft_access
+        WHERE user_id=? AND aircraft_id IN (SELECT id FROM aircraft WHERE organization_id=?)
+      `).run(targetUserId,organizationId);
+      const ins=state.db.prepare(
+        'INSERT INTO aircraft_access(id,aircraft_id,user_id,access_role,created_at) VALUES(?,?,?,?,?)'
+      );
+      for(const aircraftId of requested) ins.run(id('aac'),aircraftId,targetUserId,'pilot',isoNow());
+      state.db.exec('COMMIT');
+    }catch(e){
+      try{state.db.exec('ROLLBACK')}catch{}
+      throw e;
+    }
+
+    writeAdminAudit(req,organizationId,targetUserId,'AIRCRAFT_ACCESS_CHANGED',{
+      before:before.map(x=>x.aircraft_id),
+      after:requested
+    });
+    res.json({ok:true,user_id:targetUserId,organization_id:organizationId,aircraft_ids:requested});
+  });
+
+  app.post('/api/admin/invitations',requireAuth,requireAdministrator,(req,res)=>{
+    const organizationId=String(req.body?.organization_id||'');
+    const adminOrg=administeredOrganization(req,organizationId);
+    if(!adminOrg) return res.status(403).json({ok:false,error:'ORGANIZATION_ADMIN_REQUIRED'});
+
+    const email=String(req.body?.email||'').trim().toLowerCase();
+    const role=normalizeRole(req.body?.role)||'pilot';
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ok:false,error:'INVALID_EMAIL'});
+
+    const existing=state.db.prepare(`
+      SELECT u.id
+      FROM users u JOIN memberships m ON m.user_id=u.id
+      WHERE u.email=? AND m.organization_id=?
+    `).get(email,organizationId);
+    if(existing) return res.status(409).json({ok:false,error:'USER_ALREADY_MEMBER'});
+
+    const rawToken=crypto.randomBytes(32).toString('base64url');
+    const invitationId=id('inv'),now=isoNow(),expiresAt=addDaysIso(7);
+    state.db.prepare(`
+      INSERT INTO invitations(id,organization_id,email,role,token_hash,expires_at,created_by_user_id,created_at)
+      VALUES(?,?,?,?,?,?,?,?)
+    `).run(invitationId,organizationId,email,role,sha256(rawToken),expiresAt,req.flightopsSession.user_id,now);
+
+    writeAdminAudit(req,organizationId,null,'INVITATION_CREATED',{invitation_id:invitationId,email,role,expires_at:expiresAt});
+    res.status(201).json({
+      ok:true,
+      invitation:{
+        id:invitationId,email,role,organization_id:organizationId,expires_at:expiresAt,
+        token:rawToken
+      },
+      note:'Invitation token is returned once for controlled testing; automated email delivery and acceptance UI are not enabled yet.'
+    });
+  });
+
+  app.get('/api/admin/invitations',requireAuth,requireAdministrator,(req,res)=>{
+    const organizationId=String(req.query.organization_id||req.flightopsAdminMemberships[0]?.organization_id||'');
+    if(!administeredOrganization(req,organizationId)) return res.status(403).json({ok:false,error:'ORGANIZATION_ADMIN_REQUIRED'});
+    const invitations=state.db.prepare(`
+      SELECT id,email,role,expires_at,accepted_at,revoked_at,created_by_user_id,created_at
+      FROM invitations
+      WHERE organization_id=?
+      ORDER BY created_at DESC
+      LIMIT 250
+    `).all(organizationId);
+    res.json({ok:true,organization_id:organizationId,invitations});
+  });
+
+  app.get('/api/admin/audit',requireAuth,requireAdministrator,(req,res)=>{
+    const organizationId=String(req.query.organization_id||req.flightopsAdminMemberships[0]?.organization_id||'');
+    if(!administeredOrganization(req,organizationId)) return res.status(403).json({ok:false,error:'ORGANIZATION_ADMIN_REQUIRED'});
+    const rows=state.db.prepare(`
+      SELECT a.id,a.action,a.detail_json,a.created_at,
+             actor.email AS actor_email,actor.display_name AS actor_display_name,
+             target.email AS target_email,target.display_name AS target_display_name
+      FROM admin_audit_log a
+      JOIN users actor ON actor.id=a.actor_user_id
+      LEFT JOIN users target ON target.id=a.target_user_id
+      WHERE a.organization_id=?
+      ORDER BY a.created_at DESC
+      LIMIT 250
+    `).all(organizationId).map(r=>{
+      let detail={};try{detail=JSON.parse(r.detail_json||'{}')}catch{}
+      const x={...r,detail};delete x.detail_json;return x;
+    });
+    res.json({ok:true,organization_id:organizationId,audit:rows});
   });
 
   app.get('/api/missions',requireAuth,(req,res)=>{
