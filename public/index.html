@@ -672,8 +672,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.81 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
-/* v5.25.81 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
+/* v5.25.82 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
+/* v5.25.82 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -999,7 +999,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52580-parity-refinement">
-/* v5.25.81 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
+/* v5.25.82 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
 #f9mEmerVref,#f9pVREF,#f9SupportEmerVref,#f9EmerVref{color:var(--fo-bad)!important}
 
 /* Canonical cabin visual language: solid fuselage, neutral empty seats, pronounced occupied seats. */
@@ -1027,9 +1027,51 @@ details summary{cursor:pointer;margin-top:8px}
 #f9ToldOverall{margin:0 0 14px!important}
 @media(max-width:700px){.floorplan-cabin{width:100%!important;padding:72px 18px 60px!important;border-radius:34px!important}}
 </style>
+
+<style id="v52582-review-cabin-fix">
+/* v5.25.82 — visible pilot review gate + stronger F50/F900B cabin visual parity */
+#missionPilotReviewPanel{margin-top:14px;border:1px solid var(--fo-warn);background:#0b2034;border-radius:12px;padding:14px}
+#missionPilotReviewPanel h3{margin:0 0 6px;font-size:15px}
+#missionPilotReviewPanel .review-note{color:var(--fo-muted);font-size:12px;margin-bottom:10px}
+#missionPilotReviewPanel #missionObstacleReview{display:grid!important;grid-template-columns:1.25fr 1.25fr .8fr .9fr 1fr!important;gap:10px!important;align-items:end!important;margin-top:0!important}
+#missionPilotReviewPanel #missionObstacleReview>div{min-width:0}
+#missionPilotReviewPanel #perfObs{border-color:var(--fo-warn)!important}
+.mission-attention-flash{outline:3px solid var(--fo-warn)!important;outline-offset:4px!important;box-shadow:0 0 0 7px rgba(255,193,7,.12)!important}
+/* Falcon 50 cabin: keep N33AP geometry, adopt the same modern aircraft visual language as N699BG. */
+.floorplan-cabin{
+  width:min(540px,96%)!important;
+  background:#0a2034!important;
+  border:2px solid #3b6387!important;
+  box-shadow:inset 0 0 0 9px #061522,0 10px 30px rgba(0,0,0,.28)!important;
+}
+.floorplan-cabin .nose-fp{background:transparent!important}
+.floorplan-cabin .cockpit-seat,.floorplan-cabin .jumpseat-inner{
+  background:#12324d!important;border:2px solid #456b8e!important;border-radius:18px 18px 10px 10px!important;
+}
+.floorplan-cabin .seat-row-fp{position:relative!important}
+.floorplan-cabin .seat-row-fp:before,.floorplan-cabin .seat-row-fp:after{
+  content:"";position:absolute;top:50%;transform:translateY(-50%);width:9px;height:28px;border-radius:7px;
+  background:#6d94b5;box-shadow:inset 0 0 0 2px #173a56;opacity:.9;z-index:1
+}
+.floorplan-cabin .seat-row-fp:before{left:-25px}.floorplan-cabin .seat-row-fp:after{right:-25px}
+.floorplan-cabin .tap-seat{
+  background:#12324d!important;border:2px solid #456b8e!important;border-radius:20px 20px 12px 12px!important;
+  min-height:82px!important;box-shadow:inset 0 -7px 0 rgba(255,255,255,.025)!important;
+}
+.floorplan-cabin .tap-seat.occupied{
+  background:#0b7180!important;border-color:#67e8f9!important;
+  box-shadow:0 0 0 3px rgba(103,232,249,.18),inset 0 -8px 0 rgba(255,255,255,.06)!important;
+}
+.floorplan-cabin .tap-seat.occupied .seat-number,.floorplan-cabin .tap-seat.occupied .seat-name,.floorplan-cabin .tap-seat.occupied .seat-occupant{color:#f4ffff!important}
+.floorplan-cabin .fixture,.floorplan-cabin .bag-cell{background:#0d2942!important;border:1px solid #31506f!important;border-radius:10px!important}
+.floorplan-cabin .cabin-aisle-fp{width:36px!important;background:rgba(4,14,24,.26)!important;border-left:1px dashed #31506f!important;border-right:1px dashed #31506f!important}
+.floorplan-cabin .service-grid-fp,.floorplan-cabin .aft-service-fp,.floorplan-cabin .baggage-deck-fp{position:relative;z-index:2}
+@media(max-width:850px){#missionPilotReviewPanel #missionObstacleReview{grid-template-columns:1fr 1fr!important}}
+@media(max-width:560px){#missionPilotReviewPanel #missionObstacleReview{grid-template-columns:1fr!important}.floorplan-cabin .seat-row-fp:before,.floorplan-cabin .seat-row-fp:after{display:none}}
+</style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.81</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.82</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -4408,8 +4450,10 @@ function updateFOBVerifyLabel(){
  else{e.textContent="FOB NOT VERIFIED";e.className="warn";}
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
-function missionAttentionNavigate(targetId,focusId){
- showPlatformView("ops");
+function missionAttentionNavigate(targetId,focusId,aircraftCode){
+ const code=aircraftCode||activeAircraftCode();
+ showPlatformView(missionViewForAircraft(code));
+ if(code!=="F900B")installF50PilotReviewPanel();
  let tries=0;
  const go=()=>{
    const target=$(targetId);
@@ -4427,15 +4471,15 @@ function missionAttentionNavigate(targetId,focusId){
  };
  requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,220)));
 }
-function setToldActionableStatus(el,targetId,focusId){
+function setToldActionableStatus(el,targetId,focusId,aircraftCode){
  if(!el)return;
  const actionable=!!targetId;
  el.classList.toggle("told-nav-link",actionable);
  el.tabIndex=actionable?0:-1;
  el.setAttribute("role",actionable?"button":"status");
  el.title=actionable?"Open the Mission section where this item can be reviewed or satisfied":"";
- el.onclick=actionable?(()=>missionAttentionNavigate(targetId,focusId)):null;
- el.onkeydown=actionable?((e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();missionAttentionNavigate(targetId,focusId)}}):null;
+ el.onclick=actionable?(()=>missionAttentionNavigate(targetId,focusId,aircraftCode)):null;
+ el.onkeydown=actionable?((e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();missionAttentionNavigate(targetId,focusId,aircraftCode)}}):null;
 }
 function renderToldAttentionIssues(items){
  const box=$("toldOverall"); if(!box)return;
@@ -4445,7 +4489,7 @@ function renderToldAttentionIssues(items){
  const list=box.firstElementChild;
  items.forEach(item=>{
    const b=document.createElement("button"); b.type="button"; b.className="told-attention-link"; b.textContent=item.label;
-   b.title="Open Mission review / gate"; b.onclick=()=>missionAttentionNavigate(item.target,item.focus); list.appendChild(b);
+   b.title="Open Mission review / gate"; b.onclick=()=>missionAttentionNavigate(item.target,item.focus,"N33AP"); list.appendChild(b);
  });
 }
 function renderF9ToldAttentionIssues(){
@@ -4461,9 +4505,23 @@ function renderF9ToldAttentionIssues(){
  if(gate("f9GateLocalData")!=="PASS")issues.push({label:"AIRCRAFT DATA VERIFICATION REQUIRED",target:"f9mSpeedCard",focus:null});
  if(!issues.length){box.textContent="TOLD OPERATIONAL SUMMARY CURRENT — review all values before use.";box.className="callout small ok";return;}
  box.className="callout small warn";box.innerHTML='<div class="told-attention-list"></div>';const list=box.firstElementChild;
- issues.forEach(item=>{const b=document.createElement("button");b.type="button";b.className="told-attention-link";b.textContent=item.label;b.title="Open Mission review / gate";b.onclick=()=>missionAttentionNavigate(item.target,item.focus);list.appendChild(b)});
+ issues.forEach(item=>{const b=document.createElement("button");b.type="button";b.className="told-attention-link";b.textContent=item.label;b.title="Open Mission review / gate";b.onclick=()=>missionAttentionNavigate(item.target,item.focus,"F900B");list.appendChild(b)});
 }
 
+
+function installF50PilotReviewPanel(){
+ const src=$("missionObstacleReview"),card=$("f50CanonicalPerformanceCard");
+ if(!src||!card||$("missionPilotReviewPanel"))return;
+ const panel=document.createElement("div"); panel.id="missionPilotReviewPanel";
+ panel.innerHTML='<h3>Pilot Review / Clearance</h3><div class="review-note">Use this block to disposition automated obstacle-NOTAM flags and re-run the takeoff evaluation. A pilot review records whether a flagged obstacle NOTAM creates a conflict; it is not an obstacle-clearance analysis.</div>';
+ const takeoffBlock=card.querySelector(".canonical-perf-block");
+ if(takeoffBlock)takeoffBlock.insertAdjacentElement("afterend",panel); else card.appendChild(panel);
+ panel.appendChild(src);
+ const evalBtn=src.querySelector('button[onclick*="evaluateTakeoff"]'); if(evalBtn)evalBtn.id="missionTakeoffEvaluateBtn";
+}
+function missionViewForAircraft(code){
+ return code==="F900B"?"f900bmission":"ops";
+}
 function showPlatformView(view){
  const requestedView=view;
  const actualView=activeAircraftCode()==="F900B"?(view==="ops"?"f900bmission":view==="told"?"f900b":view):view;
@@ -4475,7 +4533,7 @@ function showPlatformView(view){
  const bottomActions=$("missionBottomActions");
  if(bottomActions)bottomActions.style.display=(actualView==="ops")?"flex":"none";
  if(actualView==="told"){recalculate();updateToldCard();}
- if(actualView==="ops"){requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
+ if(actualView==="ops"){installF50PilotReviewPanel();requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
  if(actualView==="f900bmission"){syncF900BTOLDToMission();refreshF900BMission();setTimeout(()=>{f9DrawCGTrace(window.f900bWBLatest);f9RenderMissionParity();f9RenderCanonicalParityFields();},50);}
  if(actualView==="f900b"){syncF900BMissionToTOLD();refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
  if(actualView==="archive")renderArchive();
@@ -4602,7 +4660,7 @@ async function restoreF900BFlightPlan(record,opts={}){
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  showPlatformView("ops");
  f9UpdateFOBVerificationUI();
- // v5.25.81 — draft resume always requires a fresh, deliberate FOB verification.
+ // v5.25.82 — draft resume always requires a fresh, deliberate FOB verification.
  if(opts.fromDraft&&$("f9mFOBVerifyText")){const e=$("f9mFOBVerifyText");e.textContent="REVERIFY REQUIRED — DRAFT RESUMED";e.className="warn";}
  await f9LoadOperationalData(true);
  saveCurrentDraft();
@@ -5294,7 +5352,7 @@ async function openDraftFlightPlan(i){
  await restoreArchivedFlightPlan(m,i);
  const s=m.state||{};
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
- // v5.25.81 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
+ // v5.25.82 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
  // The aircraft fuel state may have changed since the draft was saved, so both fuel-related confirmations must be deliberate again.
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
@@ -5769,27 +5827,27 @@ function updateToldCard(){
  if(currentNotams.status!=="CHECKED")issues.push({label:"NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
- if(obsEff.state==="CONFLICT")issues.push({label:"PILOT OBSTACLE CONFLICT RECORDED",target:"missionObstacleReview",focus:"perfObs"});
+ if(obsEff.state==="CONFLICT")issues.push({label:"PILOT OBSTACLE CONFLICT RECORDED",target:"missionPilotReviewPanel",focus:"perfObs"});
  else if(!obsEff.cleared){
-   if(obs.status==="FLAGGED")issues.push({label:`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`,target:"missionObstacleReview",focus:"perfObs"});
-   else issues.push({label:"AUTO OBSTACLE NOTAM REVIEW REQUIRED",target:"missionObstacleReview",focus:"perfObs"});
+   if(obs.status==="FLAGGED")issues.push({label:`AUTO OBSTACLE REVIEW: ${obs.items.length} OBSTACLE NOTAM${obs.items.length===1?"":"S"} FLAGGED`,target:"missionPilotReviewPanel",focus:"perfObs"});
+   else issues.push({label:"AUTO OBSTACLE NOTAM REVIEW REQUIRED",target:"missionPilotReviewPanel",focus:"perfObs"});
  }
  if(!$("fobVerified")?.checked)issues.push({label:"FOB VERIFICATION REQUIRED",target:"missionSetupSection",focus:"fobVerified"});
  if(lowFuel&&!confirmed)issues.push({label:"LOW LANDING FUEL CONFIRMATION REQUIRED",target:"lowFuelConfirmBox",focus:"lowFuelConfirm"});
  const ts=textOf("toStatus");
- if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push({label:"TAKEOFF PERFORMANCE REVIEW REQUIRED",target:"missionTakeoffPerformanceSection",focus:"toConfig"});
- else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push({label:"TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE",target:"missionObstacleReview",focus:"perfObs"});
+ if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push({label:"TAKEOFF PERFORMANCE REVIEW REQUIRED",target:"missionPilotReviewPanel",focus:"missionTakeoffEvaluateBtn"});
+ else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push({label:"TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE",target:"missionPilotReviewPanel",focus:"perfObs"});
  const lts=textOf("landStatus");
  if(lts.includes("PENDING")||lts.includes("LOCKED"))issues.push({label:"LANDING LIMITS NOT FULLY EVALUATED",target:"missionLandingPerformanceSection",focus:"landConfig"});
  renderToldAttentionIssues(issues);
 
  // Make section-level warning / no-go badges actionable too.
  let takeoffTarget=null,takeoffFocus=null;
- if(ts.includes("OBSTACLE")){takeoffTarget="missionObstacleReview";takeoffFocus="perfObs";}
- else if(ts.includes("PENDING")||ts.includes("LOCKED")||ts.includes("NO-GO")){takeoffTarget="missionTakeoffPerformanceSection";takeoffFocus="toConfig";}
- setToldActionableStatus($("opTakeoffStatus"),takeoffTarget,takeoffFocus);
+ if(ts.includes("OBSTACLE")){takeoffTarget="missionPilotReviewPanel";takeoffFocus="perfObs";}
+ else if(ts.includes("PENDING")||ts.includes("LOCKED")||ts.includes("NO-GO")){takeoffTarget="missionPilotReviewPanel";takeoffFocus="missionTakeoffEvaluateBtn";}
+ setToldActionableStatus($("opTakeoffStatus"),takeoffTarget,takeoffFocus,"N33AP");
  const landingActionable=lts.includes("PENDING")||lts.includes("LOCKED")||lts.includes("NO-GO");
- setToldActionableStatus($("opLandingStatus"),landingActionable?"missionLandingPerformanceSection":null,landingActionable?"landConfig":null);
+ setToldActionableStatus($("opLandingStatus"),landingActionable?"missionLandingPerformanceSection":null,landingActionable?"landConfig":null,"N33AP");
 }
 const esc=x=>x==null?"—":x;
 function pctMacFromArm(arm){return 25+arm/1.1177}
@@ -7749,7 +7807,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.81",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.82",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7870,7 +7928,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.81",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.82",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -7954,6 +8012,7 @@ function f9RenderCanonicalParityFields(){
  }
  document.addEventListener('DOMContentLoaded',()=>{sync();setInterval(sync,500)}); document.addEventListener('input',()=>setTimeout(sync,0)); document.addEventListener('change',()=>setTimeout(sync,0));
 })();
+try{installF50PilotReviewPanel();}catch(e){}
 </script>
-</body></html>/* v5.25.81 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
+</body></html>/* v5.25.82 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
