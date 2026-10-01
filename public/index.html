@@ -671,7 +671,7 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.75 — N699BG Version 11 dining-group correction */
+/* v5.25.76 — N699BG Version 11 dining-group correction */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -990,7 +990,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.75</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.76</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -2362,7 +2362,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Takeoff Weight</div><b id="f9pTOW">—</b></div>
 <div class="wx"><div class="small">Emer. Return Weight</div><b id="f9pERW">—</b><div class="small">TOW less entered return burn</div></div>
-<div class="wx"><div class="small">Takeoff Limit</div><b id="f9pLimit">—</b></div>
+<div class="wx"><div class="small">N1 S/C</div><b id="f9pN1">—</b><div class="small">Side / Center takeoff setting</div></div>
 <div class="wx"><div class="small">Speed Data Status</div><b class="ok" id="f9pStatus">—</b></div>
 </div>
 </div><div class="card" id="f9LoadingDetailCard">
@@ -2492,20 +2492,20 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">V1</div><b class="told-vspeed valid" id="f9mV1">—</b></div>
 <div class="wx"><div class="small">VR = V2</div><b class="told-vspeed valid" id="f9mVR">—</b></div>
-<div class="wx"><div class="small">2nd Segment Gross Gradient</div><b id="f9mGCLB2">—</b></div>
+<div class="wx"><div class="small">VFT</div><b class="told-vspeed valid" id="f9mVFT">—</b></div>
+<div class="wx"><div class="small">VFR</div><b class="told-vspeed valid" id="f9mVFR">—</b></div>
+</div>
+<div class="row" style="margin-top:10px">
+<div class="wx"><div class="small">Balanced Field Length</div><b id="f9mBFLMirror">—</b></div>
+<div class="wx"><div class="small">OEI 2nd Segment</div><b id="f9mGCLB2">—</b></div>
+<div class="wx"><div class="small">N1 S/C</div><b id="f9mN1">—</b><div class="small">Side / Center takeoff setting</div></div>
 <div class="wx"><div class="small">Stabilizer Trim — AUTO</div><b id="f9mTrim">—</b></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div class="wx"><div class="small">N1 S/C</div><b id="f9mN1">—</b></div>
 <div class="wx"><div class="small">Acceleration</div><b id="f9mAccel">—</b></div>
 <div class="wx"><div class="small">Recommended Pitch</div><b id="f9mPitch">—</b></div>
-<div class="wx"><div class="small">Takeoff Status</div><b id="f9mToStatus">—</b></div>
-</div>
-<div class="row" style="margin-top:10px">
-<div class="wx"><div class="small">VFT</div><b class="told-vspeed valid" id="f9mVFT">—</b></div>
-<div class="wx"><div class="small">VFR</div><b class="told-vspeed valid" id="f9mVFR">—</b></div>
 <div class="wx"><div class="small">Limiting Code</div><b id="f9mLimit">—</b></div>
-<div></div>
+<div class="wx"><div class="small">Takeoff Status</div><b id="f9mToStatus">—</b></div>
 </div>
 <h3 style="font-size:14px;margin-top:18px">Emergency Return</h3>
 <div class="small">Return weight equals takeoff weight less the selected emergency-return fuel burn. Departure weather and runway remain controlling.</div>
@@ -2517,8 +2517,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Runway Remaining</div><b id="f9mEmerMargin">—</b></div>
-<div class="wx"><div class="small">Approach Climb</div><b id="f9mEmerACG">—</b></div>
-<div class="wx"><div class="small">Landing Climb</div><b id="f9mEmerLCG">—</b></div>
+<div class="wx"><div class="small">Approach Climb (OEI)</div><b id="f9mEmerACG">—</b></div>
+<div class="wx"><div class="small">Landing Climb (AEO)</div><b id="f9mEmerLCG">—</b></div>
 <div class="wx"><div class="small">Return Status</div><b id="f9mEmerStatus">—</b></div>
 </div>
 <div class="small" id="f9mEmerSource" style="margin-top:8px">Falcon 900B QRH1 Rev02 • departure PA/OAT • departure runway • emergency-return weight</div>
@@ -2558,8 +2558,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="wx"><div class="small">Runway Remaining</div><b id="f9mLdgMargin">—</b></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div class="wx"><div class="small">Approach Climb</div><b id="f9mLdgACG">—</b></div>
-<div class="wx"><div class="small">Landing Climb</div><b id="f9mLdgLCG">—</b></div>
+<div class="wx"><div class="small">Approach Climb (OEI)</div><b id="f9mLdgACG">—</b></div>
+<div class="wx"><div class="small">Landing Climb (AEO)</div><b id="f9mLdgLCG">—</b></div>
 <div class="wx"><div class="small">Landing Status</div><b id="f9mLdgStatus">—</b></div>
 <div></div>
 </div>
@@ -2638,6 +2638,12 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-op-metric"><span class="small">Takeoff Distance Required</span><b id="f9OpTakeoffRequired">—</b></div>
 <div class="told-op-metric"><span class="small">Runway Remaining</span><b id="f9OpTakeoffMargin">—</b></div>
 </div>
+<div class="told-op-metrics" style="margin-top:10px">
+<div class="told-op-metric"><span class="small">V1</span><b class="told-vspeed valid" id="f9OpV1">—</b></div>
+<div class="told-op-metric"><span class="small">VR = V2</span><b class="told-vspeed valid" id="f9OpVR">—</b></div>
+<div class="told-op-metric"><span class="small">N1 S/C</span><b id="f9OpN1">—</b><span class="small">Side / Center</span></div>
+<div class="told-op-metric"><span class="small">Stabilizer Trim</span><b id="f9OpTrim">—</b></div>
+</div>
 <details class="f9-told-inputs" style="margin-top:10px"><summary class="small">Performance inputs / what-if detail</summary><div class="f900b-inputs" style="margin-top:10px">
 <div><label>Configuration</label><select id="f9ToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
 <div><label>Anti-Ice</label><select id="f9ToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
@@ -2688,8 +2694,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="f900b-result"><span>Landing Distance × 1.67</span><b id="f9EmerRequired">—</b></div>
 <div class="f900b-result"><span>Runway Available</span><b id="f9EmerAvailable">—</b></div>
 <div class="f900b-result"><span>Runway Remaining</span><b id="f9EmerMargin">—</b></div>
-<div class="f900b-result"><span>Approach Climb</span><b id="f9EmerACG">—</b></div>
-<div class="f900b-result"><span>Landing Climb</span><b id="f9EmerLCG">—</b></div>
+<div class="f900b-result"><span>Approach Climb (OEI)</span><b id="f9EmerACG">—</b></div>
+<div class="f900b-result"><span>Landing Climb (AEO)</span><b id="f9EmerLCG">—</b></div>
 </div>
 <div class="small f900b-source" id="f9EmerSource">Falcon 900B QRH1 Rev02 • 50-25</div>
 </section>
@@ -2708,7 +2714,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Anti-Ice</label><select id="f9LdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
 <div><label>Pressure Altitude ft</label><input id="f9LdgPA" placeholder="0 to 6000" step="1" type="number"/></div>
 <div><label>OAT °C</label><input id="f9LdgTemp" placeholder="published range" step="0.1" type="number"/></div>
-<div><label>Landing Weight lb</label><input id="f9LdgWeight" min="0" placeholder="28,000 to 42,000" step="10" type="number"/></div>
+<div><label>Landing Weight lb</label><input id="f9LdgWeight" min="0" placeholder="20,700 to 42,000" step="10" type="number"/></div>
 <div><label>Runway Available ft</label><input id="f9LdgRunway" min="0" placeholder="e.g. 6500" step="1" type="number"/></div>
 <div><label>Runway Comparison</label><select id="f9LdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
 <div><label>Landing Mode</label><select id="f9LdgMode"><option value="NORMAL">Normal</option><option value="HYD2">HYD #2 Loss — TC0190</option></select></div>
@@ -2722,8 +2728,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="f900b-result"><span>Landing Distance × 1.92</span><b id="f9Ldg192">—</b></div>
 <div class="f900b-result"><span>Controlling Comparison</span><b id="f9LdgRequired">—</b></div>
 <div class="f900b-result"><span>Runway Remaining</span><b id="f9LdgMargin">—</b></div>
-<div class="f900b-result"><span>Approach Climb</span><b id="f9LdgACG">—</b></div>
-<div class="f900b-result"><span>Landing Climb</span><b id="f9LdgLCG">—</b></div>
+<div class="f900b-result"><span>Approach Climb (OEI)</span><b id="f9LdgACG">—</b></div>
+<div class="f900b-result"><span>Landing Climb (AEO)</span><b id="f9LdgLCG">—</b></div>
 <div class="f900b-result"><span>Abnormal Penalty</span><b id="f9LdgPenalty">None</b></div>
 </div>
 <div class="callout small" style="margin-top:10px"><b>Arrival advisory source loaded:</b> DTM20103 TC0171 / Annex 12. Recommended max crosswind by reported braking action: Good 25 kt • Good-to-Medium 20 kt • Medium 15 kt • Medium-to-Poor 10 kt • Poor 5 kt. Icy runway max crosswind 5 kt. Annex 12 numeric LDTA tables remain source-controlled and are not substituted for QRH1 landing calculations in this build.</div>
@@ -2796,8 +2802,8 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="told-row"><span>Usable Runway Length</span><span id="f9SupportUsableLDA">—</span></div>
 <div class="told-row"><span>NOTAM Status</span><span id="f9SupportNotamStatus">—</span></div>
 <div class="told-row"><span>Runway Availability</span><span id="f9SupportRunwayState">—</span></div>
-<div class="told-row"><span>Approach Climb</span><span id="f9SupportLdgACG">—</span></div>
-<div class="told-row"><span>Landing Climb</span><span id="f9SupportLdgLCG">—</span></div>
+<div class="told-row"><span>Approach Climb (OEI)</span><span id="f9SupportLdgACG">—</span></div>
+<div class="told-row"><span>Landing Climb (AEO)</span><span id="f9SupportLdgLCG">—</span></div>
 <div class="told-row"><span>Abnormal Penalty</span><span id="f9SupportLdgPenalty">—</span></div>
 <div class="told-row"><span>Runway Margin</span><span id="f9SupportLdgMargin">—</span></div>
 <div class="told-row"><span>Status</span><span id="f9SupportLdgStatus">—</span></div>
@@ -3553,7 +3559,7 @@ function f9RenderMissionParity(){
  const tb=$("f9mRunways");if(tb){tb.innerHTML="";[["DEP",dep],["DEST",dest]].forEach(([label,pt])=>directionalRunwayOptions(pt.runways||[],pt).forEach(q=>{const r=q.runway,w=r.wind_components||{};tb.insertAdjacentHTML("beforeend",`<tr><td>${label}</td><td>${r.runway_id||"—"}</td><td>${Number.isFinite(Number(r.heading))?formatWindDirection(r.heading):"—"}</td><td>${Number(r.length_ft||0).toLocaleString()}</td><td>${Number(r.width_ft||0).toLocaleString()}</td><td>${r.surface||"—"}</td><td>${f9Fmt(w.headwind_kt,1)}</td><td>${f9Fmt(w.tailwind_kt,1)}</td><td>${f9Fmt(w.crosswind_kt,1)}</td></tr>`);}));if(!tb.innerHTML)tb.innerHTML='<tr><td colspan="9">No runway data loaded.</td></tr>';}
  const depNotam=[textOf("depNotamStatus"),textOf("depNotamSource"),textOf("depNotamImpact"),textOf("depNotamList")].filter(Boolean).join(" • ");const destNotam=[textOf("notamStatus"),textOf("notamSource"),textOf("notamRunwayImpact"),textOf("notamList")].filter(Boolean).join(" • ");
  f9Put("f9mDepNotamDetail",depNotam||"No departure NOTAM data loaded.");f9Put("f9mDestNotamDetail",destNotam||"No destination NOTAM data loaded.");f9Put("f9mDepUsableDetail",`Published ${textOf("depPublishedTora")||"—"} • Usable ${textOf("depUsableTora")||"—"}`);f9Put("f9mDestUsableDetail",`Published ${textOf("publishedLda")||"—"} • Usable ${textOf("usableLda")||"—"}`);
- f9Put("f9pV1",textOf("f9mV1"));f9Put("f9pVR",textOf("f9mVR"));f9Put("f9pVFT",textOf("f9mVFT"));f9Put("f9pVFR",textOf("f9mVFR"));f9Put("f9pTrim",textOf("f9mTrim"));f9Put("f9pBFL",textOf("f9mBFL"));f9Put("f9pGCLB2",textOf("f9mGCLB2"));f9Put("f9pLimit",textOf("f9mLimit"));
+ f9Put("f9pV1",textOf("f9mV1"));f9Put("f9pVR",textOf("f9mVR"));f9Put("f9pVFT",textOf("f9mVFT"));f9Put("f9pVFR",textOf("f9mVFR"));f9Put("f9pTrim",textOf("f9mTrim"));f9Put("f9pBFL",textOf("f9mBFL"));f9Put("f9pGCLB2",textOf("f9mGCLB2"));f9Put("f9pN1",textOf("f9mN1"));
  const wb=window.f900bWBLatest;if(wb){f9Put("f9sZFW",`${Math.round(wb.zfw).toLocaleString()} lb`);f9Put("f9sRamp",`${Math.round(wb.ramp).toLocaleString()} lb`);f9Put("f9sTOW",`${Math.round(wb.tow).toLocaleString()} lb`);f9Put("f9sLDW",`${Math.round(wb.ldw).toLocaleString()} lb`);f9Put("f9sFOB",`${Math.round(wb.fob).toLocaleString()} lb`);f9Put("f9sTrip",`${Math.round(Number($("f9wbTripBurn")?.value)||0).toLocaleString()} lb`);f9Put("f9sLandingFuel",`${Math.round(wb.ldgFuel).toLocaleString()} lb`);}f9Put("f9sGate",textOf("f9OperationalGate"));
  if(wb){
    f9Put("f9LimZFW",`${Math.round(wb.zfw).toLocaleString()} / 30,864 lb`);
@@ -3736,14 +3742,17 @@ function f9TakeoffResult(){
 function f9LandingResult(pa,temp,weight,antiIce,runway){
  const filters={anti_ice:antiIce};
  const keys=["landing_distance_ft","landing_distance_x_1_67_ft","landing_distance_x_1_92_ft","approach_climb_gradient_pct","landing_climb_gradient_pct"];
- const paNorm=f9NormalizePublishedPA(pa);const out={pa,temp,weight,runway,antiIce,pa_lookup:paNorm.lookup,pa_basis:paNorm.basis};keys.forEach(key=>out[key]=f9GridValue("landing",filters,pa,temp,weight,key));
- out.vref_kt=f9Speed(F900B_QRH?.vref,weight,"vref_kt");
+ const paNorm=f9NormalizePublishedPA(pa);
+ const lookupWeight=Number.isFinite(weight)&&weight<28000?28000:weight;
+ const out={pa,temp,weight,runway,antiIce,pa_lookup:paNorm.lookup,pa_basis:paNorm.basis,source_weight_lb:lookupWeight,source_weight_floor_applied:Number.isFinite(weight)&&weight<28000};
+ keys.forEach(key=>out[key]=f9GridValue("landing",filters,pa,temp,lookupWeight,key));
+ out.vref_kt=f9Speed(F900B_QRH?.vref,lookupWeight,"vref_kt");
  return out;
 }
 function f9SourceLockText(pa,temp,weight,kind="takeoff",filters={}){
  if(![pa,temp,weight].every(Number.isFinite))return"ENTER PRESSURE ALTITUDE, OAT AND WEIGHT";
  const norm=f9NormalizePublishedPA(pa);if(!norm.ok)return"SOURCE LOCKED — PA OUTSIDE −1,000 TO 6,000 FT SUPPORTED INPUT RANGE";
- if(weight<28000||weight>46500)return"SOURCE LOCKED — WEIGHT OUTSIDE 28,000–46,500 LB";
+ if(kind==="landing"){if(weight<20700||weight>42000)return"SOURCE LOCKED — LANDING WEIGHT OUTSIDE 20,700–42,000 LB";}else if(weight<28000||weight>46500)return"SOURCE LOCKED — WEIGHT OUTSIDE 28,000–46,500 LB";
  const tables=(F900B_QRH?.[kind]||[]).filter(t=>Object.entries(filters||{}).every(([k,v])=>String(t[k])===String(v)));
  if(tables.length){const temps=[...new Set(tables.flatMap(t=>t.temperatures_c||[]).map(Number).filter(Number.isFinite))].sort((a,b)=>a-b);if(temps.length&&(temp<temps[0]||temp>temps[temps.length-1]))return`SOURCE LOCKED — OAT ${temp.toFixed(0)}°C OUTSIDE ${temps[0]} TO ${temps[temps.length-1]}°C SOURCE RANGE`; }
  return"SOURCE LOCKED — SELECTED POINT CROSSES AN UNPUBLISHED SOURCE CELL";
@@ -4040,7 +4049,7 @@ async function refreshF900BMission(){
  f9MissionCopy("f9mTrim",$("f9Trim")?.textContent||"—");
  f9MissionCopy("f9mToMargin",$("f9ToMargin")?.textContent||"—");
  f9MissionCopy("f9mGCLB2",$("f9GCLB2")?.textContent||"—");
- f9MissionCopy("f9mN1",$("f9N1")?.textContent||"—");
+ f9MissionCopy("f9mN1",$("f9N1")?.textContent||"—");f9MissionCopy("f9mBFLMirror",$("f9BFL")?.textContent||"—");
  f9MissionCopy("f9mAccel",$("f9Accel")?.textContent||"—");
  f9MissionCopy("f9mPitch",$("f9Pitch")?.textContent||"—");
  f9MissionCopy("f9mVFT",$("f9VFT")?.textContent||"—");
@@ -4073,7 +4082,7 @@ function f9RenderToldParity(){
  const depCond=departureNotams?.runway_state||"OPEN",destCond=currentNotams?.runway_state||"OPEN";
  const depIcao=cleanICAO($("f9mDep")?.value)||cleanICAO($("dep")?.value)||"—",destIcao=cleanICAO($("f9mDest")?.value)||cleanICAO($("dest")?.value)||"—";
  const depR=dep?.runway_id||"—",destR=dest?.runway_id||"—";
- f9Put("f9OpTakeoffRunway",`${depIcao} • RWY ${depR}`);f9Put("f9OpTakeoffAvailable",Number.isFinite(depAvail)?`${Math.round(depAvail).toLocaleString()} ft • ${depCond}`:`— • ${depCond}`);f9Put("f9OpTakeoffRequired",textOf("f9BFL"));f9Put("f9OpTakeoffMargin",textOf("f9ToMargin"));
+ f9Put("f9OpTakeoffRunway",`${depIcao} • RWY ${depR}`);f9Put("f9OpTakeoffAvailable",Number.isFinite(depAvail)?`${Math.round(depAvail).toLocaleString()} ft • ${depCond}`:`— • ${depCond}`);f9Put("f9OpTakeoffRequired",textOf("f9BFL"));f9Put("f9OpTakeoffMargin",textOf("f9ToMargin"));f9Put("f9OpV1",textOf("f9V1"));f9Put("f9OpVR",textOf("f9VR"));f9Put("f9OpN1",textOf("f9N1"));f9Put("f9OpTrim",textOf("f9Trim"));
  f9Put("f9OpEmerRunway",`${depIcao} • RWY ${depR}`);f9Put("f9OpEmerAvailable",Number.isFinite(depAvail)?`${Math.round(depAvail).toLocaleString()} ft • ${depCond}`:`— • ${depCond}`);f9Put("f9OpEmerRequired",textOf("f9EmerRequired"));f9Put("f9OpEmerMargin",textOf("f9EmerMargin"));
  f9Put("f9OpLandingRunway",`${destIcao} • RWY ${destR}`);f9Put("f9OpLandingAvailable",Number.isFinite(destAvail)?`${Math.round(destAvail).toLocaleString()} ft • ${destCond}`:`— • ${destCond}`);f9Put("f9OpLandingRequired",textOf("f9LdgRequired"));f9Put("f9OpLandingMargin",textOf("f9LdgMargin"));
  const alt=cleanICAO($("f9mAlt")?.value);f9Put("f9PrepRoute",`${depIcao} → ${destIcao}`);f9Put("f9PrepAlternate",`Alternate ${alt||"—"}`);
@@ -4130,12 +4139,12 @@ async function refreshF900B(){
  const returnWeight=Number.isFinite(takeoff.weight)?takeoff.weight-Math.max(0,f9Num("f9ReturnBurn")||0):null;
  const emerg=f9LandingResult(takeoff.pa,takeoff.temp,returnWeight,$("f9EmerAI")?.value||"OFF",takeoff.runway);
  renderF900BLanding("f9Emer",emerg,1.67,true);
- f9Put("f9EmerSource",`Falcon 900B QRH1 Rev02 • 50-25 • 40° F+S • A/I ${emerg.antiIce} • departure PA/OAT • LD × 1.67`);
+ f9Put("f9EmerSource",`Falcon 900B QRH1 Rev02 • 50-25 • 40° F+S • A/I ${emerg.antiIce} • departure PA/OAT • LD × 1.67${emerg.source_weight_floor_applied?` • ${Math.round(emerg.weight).toLocaleString()} lb actual / conservative 28,000-lb published row`:""}`);
  const ldgBase=f9LandingResult(f9Num("f9LdgPA"),f9Num("f9LdgTemp"),f9Num("f9LdgWeight"),$("f9LdgAI")?.value||"OFF",f9Num("f9LdgRunway"));
  const ldg=f9Hyd2AdjustedLanding(ldgBase);
  const factor=Number($("f9LdgFactor")?.value||1.67);renderF900BLanding("f9Ldg",ldg,factor,true);
  const abnormal=ldg.abnormal?` • DTM20103 TC0190 HYD #2 LOSS • ${ldg.penalty_text}`:"";
- f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • base 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}${abnormal}`);
+ f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • base 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}${ldg.source_weight_floor_applied?` • ${Math.round(ldg.weight).toLocaleString()} lb actual / conservative 28,000-lb published row`:""}${abnormal}`);
  f9RenderToldParity();
 }
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
@@ -7598,7 +7607,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.75",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.76",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7718,7 +7727,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.75",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.76",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
