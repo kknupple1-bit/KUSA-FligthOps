@@ -1,0 +1,8 @@
+KUSA FlightOps v5.25.83 — F50 Cabin Visual Parity + Draft FOB Reverify Stability
+
+- Falcon 50 cabin visual presentation brought materially closer to the Falcon 900B aircraft-floorplan language while retaining N33AP seating/station geometry.
+- Empty seats use one neutral aircraft/cabin palette; occupied passenger seats use a pronounced cyan/teal highlight.
+- Empty-seat passenger-type selectors are hidden until a passenger occupies the position, reducing visual clutter.
+- Draft resume now establishes restored FOB and amber REVERIFY REQUIRED state before the Mission view is painted, eliminating the transient red ENTER FOB FIRST flash.
+- Saved FOB quantity still restores; prior verification never restores.
+- No performance, W&B, station-arm, CG-limit, fuel-moment, or source-table changes.
