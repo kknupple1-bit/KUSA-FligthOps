@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.77 — F900B TOLD speed-order / duplication cleanup
+
+Falcon 900B-only presentation revision. No source performance data changed.
+
+1. VFR is now presented before VFT anywhere the two speeds are shown together. Operational order: V1 → VR/V2 → VFR → VFT.
+2. The expandable Takeoff performance detail no longer repeats V1 and VR/V2 that are already displayed in the primary TOLD Takeoff block. The underlying IDs remain hidden for existing calculation bindings. Detail focuses on VFR, VFT, BFL, trim, runway margin, N1, second-segment gradient, acceleration, pitch, and limitation code.
+3. “Abnormal Penalty” is renamed “Abnormal Landing Adjustment” in the landing detail/support sections. Normal mode displays None; abnormal HYD #2 / airbrake cases continue to display the actual source-derived adjustment text.
+
+No changes to QRH1/DTM9823 data, W&B arms, fuel moments, structural limits, or numeric solvers.

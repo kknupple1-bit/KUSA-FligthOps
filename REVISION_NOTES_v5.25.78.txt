@@ -1,0 +1,14 @@
+KUSA FlightOps v5.25.78 — F900B Abnormal Landing Workflow
+
+Scope: Falcon 900B only.
+
+Changes:
+- Adds a prominent ABNORMAL LANDING CONFIGURATION block to both Mission Section 7 and the TOLD Landing section.
+- Landing condition selector: Normal / HYD #1 Loss / HYD #2 Loss.
+- HYD #1 Loss is source-controlled to DTM20103 Rev31 / QRH2: 40° Flaps + Slats, VREF +5 kt, #2 brakes / antiskid inoperative, landing distance and landing field length ×1.60.
+- HYD #2 Loss retains TC0190 actual achieved flap selections (40/20/7/0+Slats) and Airbrakes Available/Unavailable. Flap additive is applied before the ×1.10 airbrake-loss multiplier.
+- Adds pilot-facing Base VREF, Adjusted VREF, Base Landing Distance, and Applied Adjustment readouts.
+- Mission and TOLD abnormal-landing selections remain synchronized and draft-persistent.
+- Source verification detail remains available without changing the underlying QRH1/DTM9823 normal landing model.
+
+No changes to Falcon 50, takeoff tables, W&B station arms, CG limits, fuel moments, or DTM9823 wind/slope solver data.
