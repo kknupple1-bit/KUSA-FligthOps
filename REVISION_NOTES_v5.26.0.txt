@@ -1,0 +1,27 @@
+KUSA FlightOps v5.26.0 — Account & Data Foundation
+
+BASELINE
+- Aircraft/performance UI baseline: v5.25.86.
+- No aircraft performance, W&B, fuel-moment, CG-envelope, or source-table mathematics changed.
+
+NEW PLATFORM FOUNDATION
+- SQLite server database using Node 22 built-in node:sqlite.
+- Organization/user/membership/aircraft/access/session/device schema.
+- Server-backed mission/draft/archive schema with immutable revision history.
+- Optimistic revision checking prevents an older device from silently overwriting a newer mission revision.
+- Seeds KUSA Aviation plus N33AP and N699BG aircraft profile records.
+- Optional bootstrap administrator from environment variables.
+- Persistent HttpOnly secure-capable cookie sessions; normal account access no longer depends on URL tokens.
+- Authenticated APIs: /api/me, /api/aircraft, /api/missions.
+- Transitional mode leaves the existing v5.25.86 UI operational while platform APIs are tested.
+
+NOT YET IN THIS BUILD
+- Mandatory login UI.
+- Invitations/access-request UI.
+- Admin user/device revocation UI.
+- Browser local-draft -> server mission migration/sync bridge.
+- Offline authorization leases.
+- App Store packaging.
+
+DEPLOYMENT
+Read PLATFORM_SETUP_v5.26.0.txt before enabling account authentication.

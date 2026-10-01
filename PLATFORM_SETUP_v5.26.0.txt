@@ -1,0 +1,48 @@
+KUSA FLIGHTOPS v5.26.0 — ACCOUNT & DATA FOUNDATION
+
+PURPOSE
+This build introduces the server-side application platform without changing aircraft performance/W&B math.
+It does NOT yet force login. Existing FlightOps behavior stays available while the new platform is tested.
+
+NODE
+Requires Node.js 22+ because the platform database uses the built-in node:sqlite module.
+
+DATABASE
+Default path: ./data/flightops.sqlite
+Override with: FLIGHTOPS_DB_PATH=/absolute/path/flightops.sqlite
+The DB is automatically created on first server start.
+
+BOOTSTRAP ADMIN
+Set these environment variables before the first start:
+  FLIGHTOPS_ADMIN_EMAIL=your-admin-email
+  FLIGHTOPS_ADMIN_PASSWORD=a-strong-password
+  FLIGHTOPS_ADMIN_NAME=KUSA Administrator   (optional)
+
+AUTHENTICATION
+Normal account sessions use an HttpOnly SameSite=Lax session cookie named flightops_session.
+No URL access token is required for normal account access.
+Default session lifetime: 30 days.
+Override with FLIGHTOPS_SESSION_DAYS.
+
+IMPORTANT TRANSITION SETTING
+  FLIGHTOPS_AUTH_REQUIRED=false
+is the recommended setting for initial deployment/testing. v5.26.0 does not yet replace the existing UI with a mandatory login screen.
+Do not turn mandatory authentication on until the login/admin UI work in the next platform build is complete.
+
+BROWSER TEST PAGE
+Open /account.html after deployment to test sign-in/session persistence without affecting the operational FlightOps UI.
+
+TEST ENDPOINTS
+GET  /api/platform/status
+POST /api/auth/login       JSON: {"email":"...","password":"..."}
+POST /api/auth/logout
+GET  /api/me
+GET  /api/aircraft
+GET  /api/missions?status=draft
+POST /api/missions
+GET  /api/missions/:id
+PUT  /api/missions/:id     requires expected_revision for conflict protection
+POST /api/missions/:id/archive
+
+SEE ALSO
+REVISION_NOTES_v5.26.0.txt

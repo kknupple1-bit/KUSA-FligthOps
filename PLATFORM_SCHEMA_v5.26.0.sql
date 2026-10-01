@@ -1,0 +1,4 @@
+-- KUSA FlightOps v5.26.0 application-platform schema.
+-- Runtime creation is performed by platform.js using node:sqlite.
+-- Tables: organizations, users, memberships, aircraft, aircraft_access, sessions,
+-- devices, missions, mission_revisions, invitations, access_requests, data_packages.
