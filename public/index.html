@@ -261,10 +261,11 @@ details summary{cursor:pointer;margin-top:8px}
 .told-op-title{font-size:20px;font-weight:900;letter-spacing:.035em}
 .told-op-status{border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12px;font-weight:900;text-align:right}
 .told-attention-list{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.told-attention-link{appearance:none;background:rgba(255,187,51,.08);border:1px solid #9b7623;color:#ffd05b;border-radius:999px;padding:7px 10px;font:800 12px Arial;cursor:pointer;text-align:left;line-height:1.2}
-.told-attention-link:hover,.told-attention-link:focus{background:rgba(255,187,51,.18);border-color:#ffc247;outline:none}
+.told-attention-link{appearance:none;background:#7a5200!important;border:1px solid #d69a20!important;color:#fff2bf!important;border-radius:999px;padding:7px 10px;font:800 12px Arial;cursor:pointer;text-align:left;line-height:1.2;box-shadow:inset 0 0 0 1px rgba(255,214,102,.08)}
+.told-attention-link:hover,.told-attention-link:focus{background:#966500!important;border-color:#ffc247!important;outline:2px solid rgba(255,194,71,.24);outline-offset:2px}
 .told-attention-link::after{content:"  →";font-weight:900}
 .told-op-status.told-nav-link{cursor:pointer;transition:filter .15s ease,transform .15s ease}
+.told-op-status.warn.told-nav-link{background:#7a5200!important;border-color:#d69a20!important;color:#fff2bf!important}.told-op-status.bad.told-nav-link{background:#5a1b24!important;border-color:#d35b67!important;color:#ffd7db!important}
 .told-op-status.told-nav-link:hover,.told-op-status.told-nav-link:focus{filter:brightness(1.18);transform:translateY(-1px);outline:2px solid rgba(255,255,255,.16);outline-offset:2px}
 .mission-attention-flash{animation:kusaAttentionFlash 1.8s ease}
 @keyframes kusaAttentionFlash{0%,100%{box-shadow:none}20%,70%{box-shadow:0 0 0 3px rgba(255,193,58,.9),0 0 22px rgba(255,193,58,.35)}}
@@ -671,8 +672,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.80 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
-/* v5.25.80 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
+/* v5.25.81 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
+/* v5.25.81 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -998,7 +999,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52580-parity-refinement">
-/* v5.25.80 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
+/* v5.25.81 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
 #f9mEmerVref,#f9pVREF,#f9SupportEmerVref,#f9EmerVref{color:var(--fo-bad)!important}
 
 /* Canonical cabin visual language: solid fuselage, neutral empty seats, pronounced occupied seats. */
@@ -1028,7 +1029,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.80</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.81</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -4409,15 +4410,22 @@ function updateFOBVerifyLabel(){
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function missionAttentionNavigate(targetId,focusId){
  showPlatformView("ops");
+ let tries=0;
  const go=()=>{
-   const target=$(targetId); if(!target)return;
-   target.scrollIntoView({behavior:"smooth",block:"start"});
+   const target=$(targetId);
+   if(!target){if(++tries<8)setTimeout(go,120);return;}
+   // Ensure collapsed ancestors are open before scrolling to the requested Mission review block.
+   let p=target.parentElement;
+   while(p){if(p.tagName==="DETAILS")p.open=true;p=p.parentElement;}
+   const rect=target.getBoundingClientRect();
+   if((rect.width===0||rect.height===0)&&++tries<8){setTimeout(go,120);return;}
+   target.scrollIntoView({behavior:"smooth",block:"center"});
    target.classList.remove("mission-attention-flash"); void target.offsetWidth; target.classList.add("mission-attention-flash");
    setTimeout(()=>target.classList.remove("mission-attention-flash"),1900);
    const focus=focusId?$(focusId):(target.matches("input,select,button")?target:target.querySelector("input,select,button"));
-   if(focus&&typeof focus.focus==="function")setTimeout(()=>focus.focus({preventScroll:true}),220);
+   if(focus&&typeof focus.focus==="function")setTimeout(()=>focus.focus({preventScroll:true}),260);
  };
- requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,360)));
+ requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,220)));
 }
 function setToldActionableStatus(el,targetId,focusId){
  if(!el)return;
@@ -4594,6 +4602,8 @@ async function restoreF900BFlightPlan(record,opts={}){
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  showPlatformView("ops");
  f9UpdateFOBVerificationUI();
+ // v5.25.81 — draft resume always requires a fresh, deliberate FOB verification.
+ if(opts.fromDraft&&$("f9mFOBVerifyText")){const e=$("f9mFOBVerifyText");e.textContent="REVERIFY REQUIRED — DRAFT RESUMED";e.className="warn";}
  await f9LoadOperationalData(true);
  saveCurrentDraft();
 }
@@ -5284,8 +5294,11 @@ async function openDraftFlightPlan(i){
  await restoreArchivedFlightPlan(m,i);
  const s=m.state||{};
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
- if($("fobVerified"))$("fobVerified").checked=!!s.fob_verified;
- if($("lowFuelConfirm"))$("lowFuelConfirm").checked=!!s.low_fuel_confirmed;
+ // v5.25.81 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
+ // The aircraft fuel state may have changed since the draft was saved, so both fuel-related confirmations must be deliberate again.
+ if($("fobVerified"))$("fobVerified").checked=false;
+ if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
+ updateFOBVerifyLabel();
  window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};syncActiveTripDateInputs();
  updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
 }
@@ -7736,7 +7749,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.80",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.81",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7857,7 +7870,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.80",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.81",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -7942,4 +7955,5 @@ function f9RenderCanonicalParityFields(){
  document.addEventListener('DOMContentLoaded',()=>{sync();setInterval(sync,500)}); document.addEventListener('input',()=>setTimeout(sync,0)); document.addEventListener('change',()=>setTimeout(sync,0));
 })();
 </script>
-</body></html>
+</body></html>/* v5.25.81 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
+
