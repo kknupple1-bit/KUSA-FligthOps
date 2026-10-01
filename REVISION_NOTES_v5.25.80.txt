@@ -1,0 +1,11 @@
+KUSA FlightOps v5.25.80 — Cabin / VFT / TOLD Gate Parity
+
+- Falcon 900B Mission emergency-return VREF forced to emergency red.
+- Falcon 50 cabin styling modernized toward the Falcon 900B aircraft-floorplan language while preserving N33AP seat geometry and station mapping.
+- Both aircraft cabins use a solid common cabin palette; occupied passenger seats receive a pronounced cyan/teal highlight.
+- Falcon 900B seat cards now update occupied-state styling directly from passenger load values.
+- Falcon 50 primary speed presentation replaces legacy 1.5Vs with source-controlled VFT from QRH1 50-05; VFR remains the flap-retraction speed.
+- Falcon 50 TOLD/Mission V-speed terminology now reads V1 / VR=V2 / VFR / VFT / Emer VREF.
+- Falcon 900B TOLD gains the same actionable operational-attention summary used by the Falcon 50.
+- TOLD attention navigation was hardened so obstacle/performance flags land on the intended Mission review section rather than Mission Setup.
+- No Falcon 900B performance tables, DTM9823 numeric surfaces, W&B arms, fuel moments, or structural limits changed.
