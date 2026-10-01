@@ -1,0 +1,13 @@
+KUSA FlightOps v5.25.85 — Seat Placement + Cabin Color Parity
+
+Scope
+- Falcon 900B passenger seating placement reliability.
+- Falcon 50 / Falcon 900B empty-seat and occupied-seat color parity.
+
+Corrections
+1. Falcon 900B seat mover now allows tapping an empty seat to place the next unseated passenger when entered passenger count exceeds occupied positions.
+2. Existing occupied-seat move/swap behavior is retained.
+3. Seat-mover initialization no longer exits early when a previously initialized seat is encountered.
+4. Falcon 50 and Falcon 900B empty passenger seats use the same neutral #0d2a43 cabin-seat color.
+5. Occupied passenger seats use the same aquamarine #0b7180 fill with #67e8f9 border.
+6. No performance, W&B, station-arm, fuel-moment, CG, or source-data values changed.
