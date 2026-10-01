@@ -34,7 +34,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.0 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.1 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -141,6 +141,21 @@ function currentSession(req){
 function requireAuth(req,res,next){
   const s=currentSession(req); if(!s) return res.status(401).json({ok:false,error:'AUTH_REQUIRED'}); req.flightopsSession=s; next();
 }
+
+function administratorMembershipsFor(userId){
+  return state.db.prepare(`SELECT m.organization_id,m.role,o.name,o.slug
+    FROM memberships m
+    JOIN organizations o ON o.id=m.organization_id
+    WHERE m.user_id=? AND m.role='administrator'
+    ORDER BY o.name`).all(userId);
+}
+
+function requireAdministrator(req,res,next){
+  const admins=administratorMembershipsFor(req.flightopsSession.user_id);
+  if(!admins.length) return res.status(403).json({ok:false,error:'ADMIN_REQUIRED'});
+  req.flightopsAdminMemberships=admins;
+  next();
+}
 function membershipsFor(userId){
   return state.db.prepare('SELECT m.organization_id,m.role,o.name,o.slug FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.user_id=?').all(userId);
 }
@@ -153,7 +168,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.0'}={}){
+function installPlatform(app,{build='5.26.1'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -182,6 +197,66 @@ function installPlatform(app,{build='5.26.0'}={}){
   });
 
   app.get('/api/aircraft',requireAuth,(req,res)=>res.json({ok:true,aircraft:allowedAircraft(req.flightopsSession.user_id)}));
+
+  // v5.26.1 administrator foundation: organization-scoped user roster.
+  // Server-side authorization is mandatory; being authenticated alone is insufficient.
+  app.get('/api/admin/users',requireAuth,requireAdministrator,(req,res)=>{
+    const orgIds=req.flightopsAdminMemberships.map(m=>m.organization_id);
+    const placeholders=orgIds.map(()=>'?').join(',');
+    const rows=state.db.prepare(`
+      SELECT
+        u.id AS user_id,
+        u.email,
+        u.display_name,
+        u.status,
+        u.created_at,
+        u.updated_at,
+        m.id AS membership_id,
+        m.organization_id,
+        o.name AS organization_name,
+        o.slug AS organization_slug,
+        m.role,
+        (
+          SELECT MAX(s.last_seen_at)
+          FROM sessions s
+          WHERE s.user_id=u.id
+        ) AS last_seen_at,
+        (
+          SELECT COUNT(*)
+          FROM sessions s
+          WHERE s.user_id=u.id
+            AND s.revoked_at IS NULL
+            AND s.expires_at>?
+        ) AS active_session_count
+      FROM memberships m
+      JOIN users u ON u.id=m.user_id
+      JOIN organizations o ON o.id=m.organization_id
+      WHERE m.organization_id IN (${placeholders})
+      ORDER BY o.name,u.display_name,u.email
+    `).all(isoNow(),...orgIds);
+
+    const users=rows.map(row=>{
+      const aircraftAccess=state.db.prepare(`
+        SELECT
+          a.id AS aircraft_id,
+          a.registration,
+          a.model,
+          aa.access_role
+        FROM aircraft_access aa
+        JOIN aircraft a ON a.id=aa.aircraft_id
+        WHERE aa.user_id=? AND a.organization_id=?
+        ORDER BY a.registration
+      `).all(row.user_id,row.organization_id);
+
+      return {...row,aircraft_access:aircraftAccess};
+    });
+
+    res.json({
+      ok:true,
+      organizations:req.flightopsAdminMemberships,
+      users
+    });
+  });
 
   app.get('/api/missions',requireAuth,(req,res)=>{
     const status=String(req.query.status||'draft');
