@@ -34,7 +34,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.3 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.4 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -111,6 +111,16 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
 );
 CREATE INDEX IF NOT EXISTS admin_audit_org_created_idx ON admin_audit_log(organization_id,created_at DESC);
 `);
+  // v5.26.4 migration-safe invitation payload extension.
+  try{
+    const cols=db.prepare("PRAGMA table_info(invitations)").all();
+    if(!cols.some(c=>c.name==='aircraft_json')) db.exec("ALTER TABLE invitations ADD COLUMN aircraft_json TEXT NOT NULL DEFAULT '[]'");
+    if(!cols.some(c=>c.name==='accepted_user_id')) db.exec("ALTER TABLE invitations ADD COLUMN accepted_user_id TEXT");
+  }catch(e){
+    console.error('[PLATFORM MIGRATION] invitation column migration failed',String(e?.message||e));
+    throw e;
+  }
+
   seed(db);
   return {ok:true,db};
 }
@@ -230,7 +240,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.3'}={}){
+function installPlatform(app,{build='5.26.4'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -451,21 +461,33 @@ function installPlatform(app,{build='5.26.3'}={}){
     `).get(email,organizationId);
     if(existing) return res.status(409).json({ok:false,error:'USER_ALREADY_MEMBER'});
 
+    const requestedAircraft=Array.isArray(req.body?.aircraft_ids)?[...new Set(req.body.aircraft_ids.map(String))]:[];
+    const validAircraft=state.db.prepare(
+      "SELECT id,registration FROM aircraft WHERE organization_id=? AND status='active' ORDER BY registration"
+    ).all(organizationId);
+    const validIds=new Set(validAircraft.map(a=>a.id));
+    if(requestedAircraft.some(x=>!validIds.has(x)))
+      return res.status(400).json({ok:false,error:'INVALID_AIRCRAFT_FOR_ORGANIZATION'});
+
     const rawToken=crypto.randomBytes(32).toString('base64url');
     const invitationId=id('inv'),now=isoNow(),expiresAt=addDaysIso(7);
     state.db.prepare(`
-      INSERT INTO invitations(id,organization_id,email,role,token_hash,expires_at,created_by_user_id,created_at)
-      VALUES(?,?,?,?,?,?,?,?)
-    `).run(invitationId,organizationId,email,role,sha256(rawToken),expiresAt,req.flightopsSession.user_id,now);
+      INSERT INTO invitations(id,organization_id,email,role,token_hash,expires_at,created_by_user_id,created_at,aircraft_json)
+      VALUES(?,?,?,?,?,?,?,?,?)
+    `).run(invitationId,organizationId,email,role,sha256(rawToken),expiresAt,req.flightopsSession.user_id,now,JSON.stringify(requestedAircraft));
 
-    writeAdminAudit(req,organizationId,null,'INVITATION_CREATED',{invitation_id:invitationId,email,role,expires_at:expiresAt});
+    writeAdminAudit(req,organizationId,null,'INVITATION_CREATED',{
+      invitation_id:invitationId,email,role,expires_at:expiresAt,aircraft_ids:requestedAircraft
+    });
     res.status(201).json({
       ok:true,
       invitation:{
         id:invitationId,email,role,organization_id:organizationId,expires_at:expiresAt,
-        token:rawToken
+        aircraft_ids:requestedAircraft,
+        token:rawToken,
+        invite_path:`/invite.html?token=${encodeURIComponent(rawToken)}`
       },
-      note:'Invitation token is returned once for controlled testing; automated email delivery and acceptance UI are not enabled yet.'
+      note:'Invitation email delivery is not enabled yet. Copy the invite_path to the recipient for controlled testing.'
     });
   });
 
@@ -473,13 +495,152 @@ function installPlatform(app,{build='5.26.3'}={}){
     const organizationId=String(req.query.organization_id||req.flightopsAdminMemberships[0]?.organization_id||'');
     if(!administeredOrganization(req,organizationId)) return res.status(403).json({ok:false,error:'ORGANIZATION_ADMIN_REQUIRED'});
     const invitations=state.db.prepare(`
-      SELECT id,email,role,expires_at,accepted_at,revoked_at,created_by_user_id,created_at
+      SELECT id,email,role,expires_at,accepted_at,revoked_at,created_by_user_id,created_at,aircraft_json,accepted_user_id
       FROM invitations
       WHERE organization_id=?
       ORDER BY created_at DESC
       LIMIT 250
-    `).all(organizationId);
+    `).all(organizationId).map(inv=>{
+      let aircraft_ids=[];try{aircraft_ids=JSON.parse(inv.aircraft_json||'[]')}catch{}
+      const x={...inv,aircraft_ids};delete x.aircraft_json;return x;
+    });
     res.json({ok:true,organization_id:organizationId,invitations});
+  });
+
+
+  // v5.26.4 public invitation validation and first-password setup.
+  app.get('/api/invitations/:token',(req,res)=>{
+    if(!state.ok) return res.status(503).json({ok:false,error:state.error});
+    const token=String(req.params.token||'');
+    if(token.length<20) return res.status(404).json({ok:false,error:'INVITATION_NOT_FOUND'});
+    const inv=state.db.prepare(`
+      SELECT i.*,o.name AS organization_name,o.slug AS organization_slug
+      FROM invitations i
+      JOIN organizations o ON o.id=i.organization_id
+      WHERE i.token_hash=?
+    `).get(sha256(token));
+    if(!inv) return res.status(404).json({ok:false,error:'INVITATION_NOT_FOUND'});
+    if(inv.revoked_at) return res.status(410).json({ok:false,error:'INVITATION_REVOKED'});
+    if(inv.accepted_at) return res.status(410).json({ok:false,error:'INVITATION_ALREADY_ACCEPTED'});
+    if(Date.parse(inv.expires_at)<=Date.now()) return res.status(410).json({ok:false,error:'INVITATION_EXPIRED'});
+
+    let aircraftIds=[];try{aircraftIds=JSON.parse(inv.aircraft_json||'[]')}catch{}
+    const aircraft=aircraftIds.length
+      ? state.db.prepare(`SELECT id,registration,model FROM aircraft WHERE organization_id=? AND id IN (${aircraftIds.map(()=>'?').join(',')}) ORDER BY registration`).all(inv.organization_id,...aircraftIds)
+      : [];
+
+    res.json({
+      ok:true,
+      invitation:{
+        email:inv.email,
+        role:inv.role,
+        organization_id:inv.organization_id,
+        organization_name:inv.organization_name,
+        expires_at:inv.expires_at,
+        aircraft
+      }
+    });
+  });
+
+  app.post('/api/invitations/:token/accept',(req,res)=>{
+    if(!state.ok) return res.status(503).json({ok:false,error:state.error});
+    const token=String(req.params.token||'');
+    if(token.length<20) return res.status(404).json({ok:false,error:'INVITATION_NOT_FOUND'});
+
+    const inv=state.db.prepare(`
+      SELECT i.*,o.name AS organization_name
+      FROM invitations i
+      JOIN organizations o ON o.id=i.organization_id
+      WHERE i.token_hash=?
+    `).get(sha256(token));
+    if(!inv) return res.status(404).json({ok:false,error:'INVITATION_NOT_FOUND'});
+    if(inv.revoked_at) return res.status(410).json({ok:false,error:'INVITATION_REVOKED'});
+    if(inv.accepted_at) return res.status(410).json({ok:false,error:'INVITATION_ALREADY_ACCEPTED'});
+    if(Date.parse(inv.expires_at)<=Date.now()) return res.status(410).json({ok:false,error:'INVITATION_EXPIRED'});
+
+    const displayName=String(req.body?.display_name||'').trim();
+    const password=String(req.body?.password||'');
+    if(displayName.length<2 || displayName.length>120) return res.status(400).json({ok:false,error:'INVALID_DISPLAY_NAME'});
+    if(password.length<12) return res.status(400).json({ok:false,error:'PASSWORD_TOO_SHORT',minimum_length:12});
+
+    const existingUser=state.db.prepare('SELECT * FROM users WHERE email=?').get(inv.email);
+    if(existingUser) return res.status(409).json({
+      ok:false,error:'ACCOUNT_ALREADY_EXISTS',
+      message:'An account already exists for this email. Existing-account invitation acceptance is intentionally blocked in v5.26.4.'
+    });
+
+    const now=isoNow();
+    let aircraftIds=[];try{aircraftIds=JSON.parse(inv.aircraft_json||'[]')}catch{}
+    const role=normalizeRole(inv.role)||'pilot';
+    const p=passwordRecord(password);
+    const uid=id('usr');
+
+    state.db.exec('BEGIN IMMEDIATE');
+    try{
+      state.db.prepare(`
+        INSERT INTO users(id,email,display_name,password_salt,password_hash,status,created_at,updated_at)
+        VALUES(?,?,?,?,?,'active',?,?)
+      `).run(uid,String(inv.email).toLowerCase(),displayName,p.salt,p.hash,now,now);
+
+      state.db.prepare(`
+        INSERT INTO memberships(id,organization_id,user_id,role,created_at)
+        VALUES(?,?,?,?,?)
+      `).run(id('mem'),inv.organization_id,uid,role,now);
+
+      if(!['administrator','aircraft_manager'].includes(role)){
+        const valid=state.db.prepare(
+          "SELECT id FROM aircraft WHERE organization_id=? AND status='active'"
+        ).all(inv.organization_id);
+        const validIds=new Set(valid.map(x=>x.id));
+        const ins=state.db.prepare(
+          'INSERT INTO aircraft_access(id,aircraft_id,user_id,access_role,created_at) VALUES(?,?,?,?,?)'
+        );
+        for(const aircraftId of aircraftIds){
+          if(validIds.has(aircraftId)) ins.run(id('aac'),aircraftId,uid,'pilot',now);
+        }
+      }
+
+      state.db.prepare(`
+        UPDATE invitations
+        SET accepted_at=?,accepted_user_id=?
+        WHERE id=? AND accepted_at IS NULL
+      `).run(now,uid,inv.id);
+
+      state.db.prepare(`
+        INSERT INTO admin_audit_log(id,organization_id,actor_user_id,target_user_id,action,detail_json,created_at)
+        VALUES(?,?,?,?,?,?,?)
+      `).run(
+        id('aud'),inv.organization_id,inv.created_by_user_id,uid,'INVITATION_ACCEPTED',
+        JSON.stringify({invitation_id:inv.id,email:inv.email,role,aircraft_ids:aircraftIds}),now
+      );
+
+      state.db.exec('COMMIT');
+    }catch(e){
+      try{state.db.exec('ROLLBACK')}catch{}
+      throw e;
+    }
+
+    // Establish a normal persistent session immediately after successful first-password setup.
+    const raw=crypto.randomBytes(32).toString('base64url'),sid=id('ses'),exp=addDaysIso(SESSION_DAYS);
+    state.db.prepare(`
+      INSERT INTO sessions(id,user_id,token_hash,user_agent,ip,created_at,last_seen_at,expires_at)
+      VALUES(?,?,?,?,?,?,?,?)
+    `).run(
+      sid,uid,sha256(raw),
+      String(req.headers['user-agent']||'').slice(0,500),
+      String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'').split(',')[0].trim(),
+      now,now,exp
+    );
+    setSessionCookie(req,res,raw,exp);
+
+    const u=state.db.prepare('SELECT id,email,display_name,status FROM users WHERE id=?').get(uid);
+    res.status(201).json({
+      ok:true,
+      user:u,
+      memberships:membershipsFor(uid),
+      aircraft:allowedAircraft(uid),
+      redirect:'/'
+    });
   });
 
   app.get('/api/admin/audit',requireAuth,requireAdministrator,(req,res)=>{

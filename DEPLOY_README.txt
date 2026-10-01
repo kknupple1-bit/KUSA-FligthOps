@@ -1,4 +1,4 @@
-KUSA FlightOps v5.26.3 deployment patch
+KUSA FlightOps v5.26.4 deployment patch
 
 ROOT /app:
 - server.js
@@ -9,35 +9,36 @@ ROOT /app:
 - account.html
 - sw.js
 - admin-users.html
+- invite.html
 
-v5.26.3 changes:
-- Controlled administrator write actions.
-- Disable/re-enable users.
-- Revoke all active sessions for another user.
-- Change membership role with safeguards against self-demotion and removing the last active administrator.
-- Assign explicit aircraft access for pilot/viewer users, scoped to the administered organization.
-- Create server-side invitation records (7-day token) for controlled testing.
-- Adds persistent administrator audit log.
-- Tenant isolation from v5.26.2 remains enforced.
-- Browser/server/service-worker versions aligned to 5.26.3.
+v5.26.4 milestone:
+- Completes first-time invitation acceptance workflow.
+- Administrator can assign initial aircraft when creating an invitation.
+- Invitation token is stored only as SHA-256 hash in SQLite.
+- Public invite link validates invitation status/expiration before showing account setup.
+- New user supplies display name and a password of at least 12 characters.
+- Acceptance atomically creates the user, organization membership, and explicit aircraft access.
+- Invitation is marked accepted and linked to the created user.
+- Successful acceptance creates the normal persistent HttpOnly session automatically.
+- Administrator audit log records INVITATION_ACCEPTED.
+- Existing-account takeover is intentionally blocked; if an invited email already has a user account, acceptance stops with ACCOUNT_ALREADY_EXISTS.
+- Browser/server/service-worker versions align to 5.26.4.
 
-Safety controls:
-- Administrator authorization is enforced server-side.
-- All target users must belong to an organization the actor administers.
-- Self-disable is blocked.
-- Self session revocation is blocked.
-- Self administrator demotion is blocked.
-- Last active administrator demotion is blocked.
-- Aircraft IDs are validated against the organization.
-- Disabling a user revokes that user's active sessions.
-
-Important:
-Invitation email delivery and invitation acceptance are NOT enabled yet. v5.26.3 creates the invitation record and returns the raw token once for controlled testing only.
+Still intentionally NOT enabled:
+- Automatic email delivery of invitations.
+- Existing-account join flow.
+- Password reset/recovery.
+- MFA inside FlightOps.
 
 Deploy:
 1. Upload server.js + platform.js to /app and overwrite exact filenames.
-2. Upload all files in /public to /app/public and overwrite exact filenames.
+2. Upload all five files in /public to /app/public; overwrite existing files and add invite.html.
 3. Restart Preview App.
 4. Hard refresh Ctrl+F5.
-5. Verify Browser 5.26.3 / Server 5.26.3.
-6. Sign in, Check Session, then open /admin-users.html.
+5. Verify Browser 5.26.4 / Server 5.26.4.
+6. Sign in as administrator and open /admin-users.html.
+7. Create a TEST invitation using an email address not already in FlightOps.
+8. Choose initial aircraft access and copy the generated invite link.
+9. Open the invite link in a private/incognito browser window.
+10. Set name + 12+ character password and verify automatic sign-in.
+11. Return to admin-users.html and confirm the new user, role, aircraft access, and INVITATION_ACCEPTED audit event.
