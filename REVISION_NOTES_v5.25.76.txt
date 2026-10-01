@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.76 — Falcon 900B landing/takeoff revision
+
+- Falcon 900B only.
+- Landing actual weights below the QRH1 28,000-lb table floor, down to the 20,700-lb minimum flight weight, use the conservative next-higher published 28,000-lb source row rather than extrapolating or source-locking.
+- Mission Section 7 takeoff presentation now groups V1, VR/V2, VFT, VFR together and places BFL, OEI second segment, N1 S/C and stabilizer trim together.
+- Mission V-Speed card adds N1 S/C.
+- TOLD takeoff primary panel adds V1, VR/V2, N1 S/C and stabilizer trim.
+- Emergency-return and landing climb labels clarified: Approach Climb (OEI), Landing Climb (AEO).
+- No source performance values, W&B values, fuel moments, station arms, structural limits, or DTM9823 correction surfaces changed.
