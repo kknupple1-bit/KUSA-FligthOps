@@ -671,8 +671,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.79 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
-/* v5.25.79 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
+/* v5.25.80 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
+/* v5.25.80 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -996,9 +996,39 @@ details summary{cursor:pointer;margin-top:8px}
 #f9FallbackStatusBox.bad{border-color:rgba(255,107,107,.55)!important}
 #f9FallbackStatus.bad{color:var(--fo-bad)!important}
 </style>
+
+<style id="v52580-parity-refinement">
+/* v5.25.80 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
+#f9mEmerVref,#f9pVREF,#f9SupportEmerVref,#f9EmerVref{color:var(--fo-bad)!important}
+
+/* Canonical cabin visual language: solid fuselage, neutral empty seats, pronounced occupied seats. */
+.floorplan-cabin,.f9-cabin-shell{
+  background:#0a2034!important;
+  box-shadow:inset 0 0 0 8px rgba(6,17,29,.62),0 8px 28px rgba(0,0,0,.25)!important;
+}
+.floorplan-cabin{
+  width:min(520px,96%)!important;
+  padding:78px 42px 68px!important;
+  border-radius:50% 50% 24% 24% / 92px 92px 42px 42px!important;
+}
+.floorplan-cabin .cockpit-seat,.floorplan-cabin .jumpseat-inner,.floorplan-cabin .tap-seat,
+.f9-cockpit-seat,.f9-seat{background:#12324d!important;border-color:#456b8e!important;color:var(--fo-text)!important}
+.floorplan-cabin .fixture,.floorplan-cabin .bag-cell,.f9-fixture,.f9-cabinet{
+  background:#0d2942!important;border-color:#31506f!important;color:var(--fo-muted)!important
+}
+.floorplan-cabin .tap-seat.occupied,.f9-seat.occupied{
+  background:#0e6673!important;
+  border-color:#67e8f9!important;
+  box-shadow:0 0 0 2px rgba(103,232,249,.18),inset 0 -7px 0 rgba(255,255,255,.04)!important;
+}
+.floorplan-cabin .tap-seat.occupied .seat-number,.floorplan-cabin .tap-seat.occupied .seat-occupant,.f9-seat.occupied label{color:#eaffff!important}
+.floorplan-cabin .tap-seat:not(.occupied),.f9-seat:not(.occupied){opacity:.96}
+#f9ToldOverall{margin:0 0 14px!important}
+@media(max-width:700px){.floorplan-cabin{width:100%!important;padding:72px 18px 60px!important;border-radius:34px!important}}
+</style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.79</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.80</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1364,7 +1394,7 @@ Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel mom
 <div class="wx"><div class="small">V1</div><b class="ok" id="vsV1">—</b><div class="small" id="vsV1src" style="display:none"></div></div>
 <div class="wx"><div class="small">VR=V2</div><b class="ok" id="vsVR">—</b><div class="small" id="vsVRsrc" style="display:none"></div></div>
 <div class="wx"><div class="small">Vfr</div><b class="ok" id="vsVFT">—</b><div class="small" id="vsVFTsrc" style="display:none"></div></div>
-<div class="wx"><div class="small">1.5Vs</div><b class="ok" id="vsVFS">—</b><div class="small" id="vsVFSsrc" style="display:none"></div></div>
+<div class="wx"><div class="small">VFT</div><b class="ok" id="vsVFS">—</b><div class="small" id="vsVFSsrc" style="display:none"></div></div>
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF / Emer. Return</div><b class="bad" id="vsVREF">—</b><div class="small" id="vsVREFsrc" style="display:none"></div></div>
@@ -1659,7 +1689,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="whatif-cell"><span class="small">Hypothetical BFL</span><b id="whatIfBFL">—</b><span class="small" id="whatIfBFLNote">Published/digitized source grid only.</span></div>
 <div class="whatif-cell"><span class="small">V1</span><b id="whatIfV1">—</b><span class="small">Hypothetical point.</span></div>
 <div class="whatif-cell"><span class="small">VR = V2</span><b id="whatIfVR">—</b><span class="small">Weight-based schedule.</span></div>
-<div class="whatif-cell"><span class="small">Vfr / 1.5Vs</span><b id="whatIfVF">—</b><span class="small">Weight-based schedule.</span></div>
+<div class="whatif-cell"><span class="small">VFR / VFT</span><b id="whatIfVF">—</b><span class="small">Published takeoff speed schedules.</span></div>
 <div class="whatif-cell"><span class="small">Max Weight at Entered OAT</span><b id="whatIfMaxWeight">—</b><span class="small" id="whatIfMaxWeightNote">Field-length limit only unless other limits are evaluated.</span></div>
 <div class="whatif-cell"><span class="small">Max OAT at Entered Weight</span><b id="whatIfMaxTemp">—</b><span class="small" id="whatIfMaxTempNote">Field-length limit only unless other limits are evaluated.</span></div>
 <div class="whatif-cell"><span class="small">Structural MTOW Check</span><b id="whatIfStructural">—</b><span class="small">40,780 lb structural maximum.</span></div>
@@ -1967,7 +1997,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="told-speed"><span class="small">V1</span><b class="told-vspeed" id="opV1">—</b></div>
 <div class="told-speed"><span class="small">VR = V2</span><b class="told-vspeed" id="opVR">—</b></div>
 <div class="told-speed"><span class="small">Vfr</span><b class="told-vspeed" id="opVfr">—</b></div>
-<div class="told-speed"><span class="small">1.5Vs</span><b class="told-vspeed" id="op15Vs">—</b></div>
+<div class="told-speed"><span class="small">VFT</span><b class="told-vspeed" id="op15Vs">—</b></div>
 </div>
 <div class="told-op-details">
 <div class="told-op-detail"><span>Takeoff Weight</span><span id="opTakeoffWeight">—</span></div>
@@ -2109,7 +2139,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="told-speed"><span class="small">V1</span><b class="told-vspeed" id="toldV1">—</b></div>
 <div class="told-speed"><span class="small">VR=V2</span><b class="told-vspeed" id="toldVR">—</b></div>
 <div class="told-speed"><span class="small">Vfr</span><b class="told-vspeed" id="toldVfr">—</b></div>
-<div class="told-speed"><span class="small">1.5Vs</span><b class="told-vspeed" id="told15Vs">—</b></div>
+<div class="told-speed"><span class="small">VFT</span><b class="told-vspeed" id="told15Vs">—</b></div>
 <div class="told-speed"><span class="small">Emer VREF</span><b class="told-vspeed emergency-value" id="toldEmerVref">—</b></div>
 </div>
 </div>
@@ -2646,6 +2676,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="callout small warn"><b>DEVELOPMENT / VALIDATION ONLY.</b> QRH1 Rev02 data are interpolated only inside published pressure-altitude, temperature and weight cells. Airport/runway/weather/NOTAM infrastructure and verification gates are active. DTM9823 wind and runway-slope corrections are active and source-bounded inside the validated chart panels; out-of-panel cases remain source-locked. N699BG aircraft-specific W&amp;B is active using the June 6, 2024 empty-weight revision and DTM9821 Version 11 / no-XTK2 / SB F900-139 loading configuration.</div>
 </div>
+<div class="callout small" id="f9ToldOverall">Falcon 900B operational checks loading…</div>
 <div class="told-operational-stack" style="margin-top:14px">
 <section aria-labelledby="f9TakeoffHeading" class="told-op-panel takeoff">
 <div class="told-op-head">
@@ -3431,6 +3462,8 @@ function currentF50TakeoffN1(){
  return{ok:true,text:`${n.side.toFixed(1)} / ${n.center.toFixed(1)}%`,side:n.side,center:n.center,source:`${n.source} • ${wxSource} • SAT ${temp.toFixed(1)}°C • ${paBasis}`};
 }
 
+const F50_VFT_TABLE={25:151,26:154,27:157,28:160,29:163,30:166,31:168,32:171,33:174,34:176,35:179,36:181,37:184,38:187,39:189,40:192,40.78:194};
+function f50VftFromWeight(wk){return Number.isFinite(wk)?interpScalarN(F50_VFT_TABLE,wk):null}
 function f50VfrFromVr(cfg,vr){
  if(!Number.isFinite(vr))return null;
  const delta=F50_DASSAULT_SOURCE.takeoff[cfg]?.vfrDelta;
@@ -3662,6 +3695,7 @@ async function f9RecalcWB(){
      tb.insertAdjacentHTML("beforeend",`<tr><td>${esc(st.label)}</td><td>${esc(load)}</td><td>${st.arm_in.toFixed(2)} in</td><td>${w.toFixed(0)} lb</td><td>${moment.toFixed(0)}</td></tr>`);
    });
  }
+ for(let i=1;i<=12;i++){const input=f9SeatWeightInput(i),card=input?.closest?.(".f9-seat");if(card)card.classList.toggle("occupied",Number(input?.value)>0);}
  window.f900bWBLatest={zfw,ramp,tow,ldw,fob,toFuel,ldgFuel,zcg,rcg,tcg,lcg,structuralOK,envOK,loadOK,ok,burnPath};f9SyncCanonicalMissionSetup();f9RenderCalculatedWBParity(window.f900bWBLatest);f9DrawCGTrace(window.f900bWBLatest);f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();scheduleDraftSave();return window.f900bWBLatest;
 }
 
@@ -4223,7 +4257,7 @@ async function refreshF900B(){
  f9UpdateAbnormalLandingUI();
  const abnormal=ldg.abnormal?` • ${ldg.abnormal_mode==="HYD1"?"DTM20103 Rev31 HYD #1 LOSS":ldg.abnormal_mode==="HYD2"?"DTM20103 TC0190 HYD #2 LOSS":"QRH2 / DTM9819 LOSS OF BOTH HYDRAULIC SYSTEMS"} • ${ldg.penalty_text}`:"";
  f9Put("f9LdgSource",`Falcon 900B QRH1 Rev02 • DGAC18DSOF182A • 50-25 / 50-28 / 50-29 • base 40° F+S • A/I ${ldg.antiIce} • comparison LD × ${factor}${ldg.source_weight_floor_applied?` • ${Math.round(ldg.weight).toLocaleString()} lb actual / conservative 28,000-lb published row`:""}${abnormal}`);
- f9RenderToldParity();
+ f9RenderToldParity();f9UpdateOperationalGate();renderF9ToldAttentionIssues();
 }
 function scheduleF900BRefresh(){clearTimeout(F900B_REFRESH_TIMER);F900B_REFRESH_TIMER=setTimeout(refreshF900B,120)}
 async function startF900BTrip(dep,dest,alt,tripDate=localISODate(new Date()),fob=0,missionFuel=0){
@@ -4375,14 +4409,15 @@ function updateFOBVerifyLabel(){
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function missionAttentionNavigate(targetId,focusId){
  showPlatformView("ops");
- setTimeout(()=>{
+ const go=()=>{
    const target=$(targetId); if(!target)return;
-   target.scrollIntoView({behavior:"smooth",block:"center"});
+   target.scrollIntoView({behavior:"smooth",block:"start"});
    target.classList.remove("mission-attention-flash"); void target.offsetWidth; target.classList.add("mission-attention-flash");
    setTimeout(()=>target.classList.remove("mission-attention-flash"),1900);
    const focus=focusId?$(focusId):(target.matches("input,select,button")?target:target.querySelector("input,select,button"));
-   if(focus&&typeof focus.focus==="function")setTimeout(()=>focus.focus({preventScroll:true}),280);
- },220);
+   if(focus&&typeof focus.focus==="function")setTimeout(()=>focus.focus({preventScroll:true}),220);
+ };
+ requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(go,360)));
 }
 function setToldActionableStatus(el,targetId,focusId){
  if(!el)return;
@@ -4404,6 +4439,21 @@ function renderToldAttentionIssues(items){
    const b=document.createElement("button"); b.type="button"; b.className="told-attention-link"; b.textContent=item.label;
    b.title="Open Mission review / gate"; b.onclick=()=>missionAttentionNavigate(item.target,item.focus); list.appendChild(b);
  });
+}
+function renderF9ToldAttentionIssues(){
+ const box=$("f9ToldOverall");if(!box)return;
+ const issues=[];
+ const gate=(id)=>String(textOf(id)||"").toUpperCase();
+ if(gate("f9GateWB")!=="PASS")issues.push({label:"W&B / CG REVIEW REQUIRED",target:"f9mWBCard",focus:"f9mPaxCount"});
+ if(gate("f9GateFOB")!=="PASS")issues.push({label:"FOB / FUEL VERIFICATION REQUIRED",target:"f9MissionSetupSection",focus:"f9mFOBVerified"});
+ if(gate("f9GateWx")!=="PASS")issues.push({label:"WEATHER REVIEW REQUIRED",target:"f9mOperationalDataCard",focus:"f9ManualWxTarget"});
+ if(gate("f9GateNotam")!=="PASS")issues.push({label:"NOTAM / RUNWAY REVIEW REQUIRED",target:"f9CanonicalPerformanceCard",focus:"f9mDepRunway"});
+ if(gate("f9GateRunwayPerf")!=="PASS")issues.push({label:"RUNWAY / PERFORMANCE REVIEW REQUIRED",target:"f9CanonicalPerformanceCard",focus:"f9mToConfig"});
+ if(gate("f9GateReturn")!=="PASS")issues.push({label:"EMERGENCY RETURN REVIEW REQUIRED",target:"f9CanonicalPerformanceCard",focus:"f9mReturnBurn"});
+ if(gate("f9GateLocalData")!=="PASS")issues.push({label:"AIRCRAFT DATA VERIFICATION REQUIRED",target:"f9mSpeedCard",focus:null});
+ if(!issues.length){box.textContent="TOLD OPERATIONAL SUMMARY CURRENT — review all values before use.";box.className="callout small ok";return;}
+ box.className="callout small warn";box.innerHTML='<div class="told-attention-list"></div>';const list=box.firstElementChild;
+ issues.forEach(item=>{const b=document.createElement("button");b.type="button";b.className="told-attention-link";b.textContent=item.label;b.title="Open Mission review / gate";b.onclick=()=>missionAttentionNavigate(item.target,item.focus);list.appendChild(b)});
 }
 
 function showPlatformView(view){
@@ -4705,7 +4755,7 @@ function currentMissionSummaryText(){
    `Runway Available / Condition: ${textOf("opTakeoffAvailable")}`,
    `Takeoff Distance Required: ${textOf("opTakeoffRequired")}`,
    `Runway Remaining: ${textOf("opTakeoffMargin")}`,
-   `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | Vfr: ${textOf("vsVFT")} | 1.5Vs: ${textOf("vsVFS")}`,
+   `V1: ${textOf("vsV1")} | VR=V2: ${textOf("vsVR")} | VFR: ${textOf("vsVFT")} | VFT: ${textOf("vsVFS")}`,
    `Takeoff Weight: ${textOf("opTakeoffWeight")} | Configuration: ${toConfig}`,
    `Wind: HW ${dw.headwind_kt??"—"} / TW ${dw.tailwind_kt??"—"} / XW ${dw.crosswind_kt??"—"} kt`,
    `OAT: ${Number.isFinite(depTemp)?depTemp+"°C":"—"} | Pressure Altitude: ${Number.isFinite(depPA)?Math.round(depPA).toLocaleString()+" ft":"—"}`,
@@ -6191,7 +6241,7 @@ function syncTakeoffSection(){
 
 function updateVSpeedCard(tow,landing){
  const toAuto=autoTO();
- const v1=toAuto.v1,vr=toAuto.vr,vfr=toAuto.vfr,v15vs=toAuto.v15vs;
+ const v1=toAuto.v1,vr=toAuto.vr,vfr=toAuto.vfr,vft=toAuto.vft;
 
  const requestedBurn=Math.max(0,num("emerReturnBurn"));
  const takeoffFuel=Math.max(0,Math.min(maxFuel,num("fuel"))-Math.max(0,num("taxiFuel")));
@@ -6207,7 +6257,7 @@ function updateVSpeedCard(tow,landing){
  $("vsV1").textContent=v1==null?"—":formatVspeed(v1);
  $("vsVR").textContent=vr==null?"—":formatVspeed(vr);
  $("vsVFT").textContent=vfr==null?"—":formatVspeed(vfr);
- $("vsVFS").textContent=v15vs==null?"—":formatVspeed(v15vs);
+ $("vsVFS").textContent=vft==null?"—":formatVspeed(vft);
  $("vsVREF").textContent=emerVref==null?"—":formatVspeed(emerVref);
  if($("vsBFL"))$("vsBFL").textContent=toAuto.bfl==null?"—":`${Math.round(toAuto.bfl).toLocaleString()} ft`;
  const grad=valueOrNull("perfGrad");if($("vsGrad"))$("vsGrad").textContent=Number.isFinite(grad)?`${grad.toFixed(2)}%`:"—";
@@ -6216,10 +6266,10 @@ function updateVSpeedCard(tow,landing){
  $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50BflMigrationSource(toAuto.cfg)}`;
  $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":(toAuto.cfg==="S20"?`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`:`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`);
  $("vsVFTsrc").textContent=vfr==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vfr")} • derived from VR=V2`;
- $("vsVFSsrc").textContent=v15vs==null?"Takeoff weight outside published table":`${FS_PERF.takeoff[toAuto.cfg].label} • LEGACY DIGITIZATION • DTM813 §5.30 applicability review pending for N33AP probe configuration`;
+ $("vsVFSsrc").textContent=vft==null?"Takeoff weight outside published VFT table":"Falcon 50 QRH1 • 50-05 VFT-VFR • weight-based VFT schedule";
  $("vsVREFsrc").textContent=emerVref==null?"Emer. return weight outside DTM813 §5.60.5 digitized range":DTM813_S48_VREF_SOURCE;
 
- const vals=[v1,vr,vfr,v15vs,emerVref];
+ const vals=[v1,vr,vfr,vft,emerVref];
  const count=vals.filter(v=>v!=null).length;
  const overweight=emerWt>maxLand;
  if(count===5){
@@ -7408,6 +7458,7 @@ function autoTO(){
  const vr=d?interpScalarN(d.vr,wk):null;
  const vfr=f50VfrFromVr(cfg,vr);
  const v15vs=d?interpScalarN(d.v15vs,wk):null;
+ const vft=f50VftFromWeight(wk);
  if(vr!=null)$("perfVR").value=Math.round(vr);else $("perfVR").value="";
  const runwayCondition=$("toRunwayCondition")?$("toRunwayCondition").value:"DRY";
  const ai=$("toAntiIce")?.value||"OFF";
@@ -7425,7 +7476,7 @@ function autoTO(){
    if(!r)reason="V1/BFL outside legacy digitized table range";else r.paBasis=paBasis
  }
  if(r){$("perfV1").value=Math.round(r.v1);$("perfBFL").value=Math.round(r.bfl)}else{$("perfV1").value="";$("perfBFL").value=""}
- return{ok:vr!=null||vfr!=null||v15vs!=null||!!r,cfg,runwayCondition,vr,vfr,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason,pa,temp:t,weightLb}
+ return{ok:vr!=null||vfr!=null||vft!=null||!!r,cfg,runwayCondition,vr,vfr,vft,v15vs,v1:r?r.v1:null,bfl:r?r.bfl:null,paBasis:r?r.paBasis:null,msg:reason,pa,temp:t,weightLb}
 }
 function takeoffComparisonFor(cfg){
  const d=FS_PERF.takeoff[cfg],weightLb=perfTakeoffWeightLb(),wk=(weightLb||0)/1000;
@@ -7685,7 +7736,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.79",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.80",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7806,7 +7857,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.79",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.80",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
