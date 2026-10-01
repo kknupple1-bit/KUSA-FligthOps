@@ -34,7 +34,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.1 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.2 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -160,15 +160,30 @@ function membershipsFor(userId){
   return state.db.prepare('SELECT m.organization_id,m.role,o.name,o.slug FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.user_id=?').all(userId);
 }
 function allowedAircraft(userId){
-  const memberships=membershipsFor(userId);
-  const isAdmin=memberships.some(m=>['administrator','aircraft_manager'].includes(m.role));
-  if(isAdmin) return state.db.prepare('SELECT * FROM aircraft WHERE status=? ORDER BY registration').all('active');
-  return state.db.prepare(`SELECT a.* FROM aircraft a JOIN aircraft_access aa ON aa.aircraft_id=a.id WHERE aa.user_id=? AND a.status='active' ORDER BY a.registration`).all(userId);
+  // v5.26.2 tenant isolation: a user must belong to the aircraft organization.
+  // Administrators/aircraft managers receive all active aircraft only inside organizations
+  // where they hold that role; other members receive only explicit aircraft_access grants.
+  return state.db.prepare(`
+    SELECT DISTINCT a.*
+    FROM aircraft a
+    JOIN memberships m
+      ON m.organization_id=a.organization_id
+     AND m.user_id=?
+    LEFT JOIN aircraft_access aa
+      ON aa.aircraft_id=a.id
+     AND aa.user_id=?
+    WHERE a.status='active'
+      AND (
+        m.role IN ('administrator','aircraft_manager')
+        OR aa.user_id IS NOT NULL
+      )
+    ORDER BY a.registration
+  `).all(userId,userId);
 }
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.1'}={}){
+function installPlatform(app,{build='5.26.2'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -248,7 +263,21 @@ function installPlatform(app,{build='5.26.1'}={}){
         ORDER BY a.registration
       `).all(row.user_id,row.organization_id);
 
-      return {...row,aircraft_access:aircraftAccess};
+      const effectiveAircraftAccess=['administrator','aircraft_manager'].includes(row.role)
+        ? state.db.prepare(`
+            SELECT id AS aircraft_id,registration,model,
+                   ? AS access_role
+            FROM aircraft
+            WHERE organization_id=? AND status='active'
+            ORDER BY registration
+          `).all(row.role,row.organization_id)
+        : aircraftAccess;
+
+      return {
+        ...row,
+        aircraft_access:aircraftAccess,
+        effective_aircraft_access:effectiveAircraftAccess
+      };
     });
 
     res.json({
