@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KUSA FlightOps — User Administration</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color-scheme:dark}
+body{margin:0;background:#071b33;color:#e8f1fb}
+.wrap{max-width:1180px;margin:0 auto;padding:28px}
+.top{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0 0 6px;font-size:28px}.sub{color:#a9bed3;margin:0}
+.badge{border:1px solid #31506f;background:#0d2b4b;border-radius:999px;padding:8px 12px;font-weight:700}
+.card{background:#0d2b4b;border:1px solid #31506f;border-radius:14px;padding:18px;margin:14px 0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap}
+button,a.btn{appearance:none;text-decoration:none;border:1px solid #31506f;border-radius:8px;background:#215d95;color:#fff;padding:10px 14px;font-weight:700;cursor:pointer}
+a.btn.secondary,button.secondary{background:#061829}
+.status{margin:12px 0;font-weight:700}.ok{color:#47e6a5}.bad{color:#ff6b6b}
+.tablewrap{overflow:auto;border:1px solid #31506f;border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:900px;background:#061829}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid #24435f;vertical-align:top}
+th{background:#102f50;color:#cfe1f3;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:3px 8px;border-radius:999px;border:1px solid #31506f;margin:2px 4px 2px 0;font-size:12px}
+.muted{color:#9db2c7}.mono{font-family:Consolas,monospace;font-size:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>KUSA FlightOps — User Administration</h1>
+      <p class="sub">v5.26.2 read-only administrator roster. Write controls will be added only after authorization and audit paths are proven.</p>
+    </div>
+    <div class="badge">v5.26.2</div>
+  </div>
+  <div class="toolbar">
+    <button id="refresh">Refresh Users</button>
+    <a class="btn secondary" href="/account.html">Account / Session</a>
+    <a class="btn secondary" href="/">FlightOps</a>
+  </div>
+  <div id="status" class="status"></div>
+  <div class="card">
+    <div id="orgs" class="muted">Loading organization...</div>
+  </div>
+  <div class="card">
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Aircraft Access</th>
+            <th>Last Seen</th>
+            <th>Active Sessions</th>
+            <th>Created</th>
+          </tr>
+        </thead>
+        <tbody id="rows"><tr><td colspan="7" class="muted">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+const statusEl=document.getElementById('status');
+const rowsEl=document.getElementById('rows');
+const orgsEl=document.getElementById('orgs');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=s=>{if(!s)return '—';const d=new Date(s);return Number.isNaN(d.getTime())?esc(s):d.toLocaleString()};
+function pills(list){
+  if(!Array.isArray(list)||!list.length)return '<span class="muted">None assigned</span>';
+  return list.map(a=>`<span class="pill">${esc(a.registration)} · ${esc(a.access_role||'pilot')}</span>`).join('');
+}
+async function load(){
+  statusEl.className='status';
+  statusEl.textContent='Loading...';
+  try{
+    const r=await fetch('/api/admin/users',{credentials:'same-origin',cache:'no-store'});
+    const j=await r.json();
+    if(!r.ok){
+      statusEl.className='status bad';
+      statusEl.textContent=j.error==='AUTH_REQUIRED'?'Sign in on the Account page first.':j.error==='ADMIN_REQUIRED'?'Administrator access is required.':`Error: ${j.error||r.status}`;
+      rowsEl.innerHTML='<tr><td colspan="7" class="muted">No data.</td></tr>';
+      return;
+    }
+    statusEl.className='status ok';
+    statusEl.textContent='Administrator authorization verified.';
+    orgsEl.textContent=(j.organizations||[]).map(o=>`${o.name} — ${o.role}`).join(' · ')||'No organization returned.';
+    rowsEl.innerHTML=(j.users||[]).map(u=>`<tr>
+      <td><strong>${esc(u.display_name)}</strong><br><span class="muted">${esc(u.email)}</span><br><span class="mono">${esc(u.user_id)}</span></td>
+      <td>${esc(u.role)}</td>
+      <td>${esc(u.status)}</td>
+      <td>${pills(u.effective_aircraft_access||u.aircraft_access)}</td>
+      <td>${fmt(u.last_seen_at)}</td>
+      <td>${esc(u.active_session_count)}</td>
+      <td>${fmt(u.created_at)}</td>
+    </tr>`).join('')||'<tr><td colspan="7" class="muted">No users found.</td></tr>';
+  }catch(e){
+    statusEl.className='status bad';
+    statusEl.textContent='Unable to load administrator roster.';
+    rowsEl.innerHTML=`<tr><td colspan="7" class="muted">${esc(e)}</td></tr>`;
+  }
+}
+document.getElementById('refresh').onclick=load;
+load();
+</script>
+</body>
+</html>
