@@ -74,6 +74,21 @@
       "landing_field_length_multiplier": 1.6,
       "braking_note": "Select #2 braking system; antiskid inoperative.",
       "slat_note": "Use EMERG SLATS control switch."
+    },
+    "both_hydraulic_loss": {
+      "document": "QRH2 DGAC18DSOF158A / DTM9819 Rev12 Section 1 Sub-section 50",
+      "normal_configuration": "CLEAN",
+      "vref_add_kt_by_configuration": {
+        "CLEAN": 30,
+        "SLATS": 20,
+        "7": 20,
+        "20": 15,
+        "40": 10
+      },
+      "landing_distance_multiplier_approx": 2.0,
+      "landing_distance_note": "QRH/OM states landing distance is practically twice the nominal distance (normal 40\u00b0 Flaps + Slats configuration).",
+      "gear_note": "Free-fall gear extension; checklist controls.",
+      "braking_note": "Use PARK BRAKE at intermediate detent only; checklist controls."
     }
   }
 }
