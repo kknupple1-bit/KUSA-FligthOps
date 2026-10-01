@@ -672,8 +672,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.83 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
-/* v5.25.83 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
+/* v5.25.84 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
+/* v5.25.84 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -999,7 +999,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52580-parity-refinement">
-/* v5.25.83 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
+/* v5.25.84 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
 #f9mEmerVref,#f9pVREF,#f9SupportEmerVref,#f9EmerVref{color:var(--fo-bad)!important}
 
 /* Canonical cabin visual language: solid fuselage, neutral empty seats, pronounced occupied seats. */
@@ -1029,7 +1029,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52582-review-cabin-fix">
-/* v5.25.83 — visible pilot review gate + stronger F50/F900B cabin visual parity */
+/* v5.25.84 — visible pilot review gate + stronger F50/F900B cabin visual parity */
 #missionPilotReviewPanel{margin-top:14px;border:1px solid var(--fo-warn);background:#0b2034;border-radius:12px;padding:14px}
 #missionPilotReviewPanel h3{margin:0 0 6px;font-size:15px}
 #missionPilotReviewPanel .review-note{color:var(--fo-muted);font-size:12px;margin-bottom:10px}
@@ -1071,7 +1071,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52583-cabin-draft-fix">
-/* v5.25.83 — F50 cabin visual parity + deterministic draft fuel re-verification */
+/* v5.25.84 — F50 cabin visual parity + deterministic draft fuel re-verification */
 .floorplan-cabin{
   width:min(520px,96%)!important;
   min-height:0!important;
@@ -1113,9 +1113,30 @@ details summary{cursor:pointer;margin-top:8px}
 #fobVerifyLabel.draft-reverify,#fobVerifyNote.draft-reverify{color:var(--fo-warn)!important}
 @media(max-width:700px){.floorplan-cabin{width:100%!important;padding:74px 18px 54px!important;clip-path:none!important;border-radius:34px!important}.floorplan-cabin .jump-row-fp,.floorplan-cabin .service-grid-fp,.floorplan-cabin .seat-row-fp,.floorplan-cabin .aft-service-fp{gap:28px!important}}
 </style>
+
+<style id="v52584-cabin-fob-parity">
+/* v5.25.84 — simple amber FOB reverify + exact cabin color parity */
+#fobVerifyNote,#f9mFOBNote{display:none!important}
+/* One neutral cabin/fixture/empty-seat palette across both airframes. */
+.floorplan-cabin,.f9-cabin-shell{background:#0a2034!important}
+.floorplan-cabin .cockpit-seat,.floorplan-cabin .jumpseat-inner,.floorplan-cabin .tap-seat,
+.floorplan-cabin .fixture,.floorplan-cabin .bag-cell,
+.f9-cockpit-seat,.f9-seat,.f9-fixture,.f9-cabinet{
+  background:#0d2a43!important;border-color:#456b8e!important;color:var(--fo-text)!important;opacity:1!important
+}
+/* Occupied passenger positions use the same pronounced aquamarine treatment on F50 and F900B. */
+.floorplan-cabin .tap-seat.occupied,.f9-seat.occupied{
+  background:#0b7180!important;border-color:#67e8f9!important;
+  box-shadow:0 0 0 3px rgba(103,232,249,.22),inset 0 -8px 0 rgba(255,255,255,.06)!important
+}
+.floorplan-cabin .tap-seat.occupied .seat-number,
+.floorplan-cabin .tap-seat.occupied .seat-name,
+.floorplan-cabin .tap-seat.occupied .seat-occupant,
+.f9-seat.occupied label,.f9-seat.occupied label span{color:#f4ffff!important}
+</style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.83</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.84</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1242,7 +1263,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Trip Date</label><input id="activeTripDate" onchange="activeTripDateChanged('activeTripDate')" type="date"/><div class="small" id="activeTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input enterkeyhint="done" id="fuel" inputmode="decimal" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote">Enter fuel on board, then verify the quantity.</div></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input enterkeyhint="done" id="fuel" inputmode="decimal" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote"></div></div>
 <div><label>Mission Fuel Required lb</label><input enterkeyhint="done" id="missionFuel" inputmode="decimal" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input enterkeyhint="done" id="taxiFuel" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input enterkeyhint="done" id="emerReturnBurn" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="500"/></div>
@@ -2288,7 +2309,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Trip Date</label><input id="f9mTripDate" onchange="activeTripDateChanged('f9mTripDate')" type="date"/><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="f9mFOB" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote">Enter fuel on board, then verify the quantity.</div></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="f9mFOB" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote"></div></div>
 <div><label>Mission Fuel Required lb</label><input id="f9mMissionFuel" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input id="f9mTaxiFuel" inputmode="decimal" min="0" oninput="f9Section1FuelChanged('taxi')" step="10" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input id="f9mReturnBurn" inputmode="decimal" min="0" oninput="f9Section1ReturnBurnChanged()" step="10" type="number" value="500"/></div>
@@ -4494,11 +4515,10 @@ function updateFOBVerifyLabel(){
  else{e.textContent="FOB NOT VERIFIED";e.className="warn";}
 }
 function markDraftFOBReverify(){
- const fob=Math.max(0,num("fuel"));
  if($("fobVerified"))$("fobVerified").checked=false;
  const e=$("fobVerifyLabel"),n=$("fobVerifyNote");
- if(e){e.textContent="REVERIFY REQUIRED — DRAFT RESUMED";e.className="warn draft-reverify";}
- if(n){n.textContent=fob>0?`Draft restored with ${Math.round(fob).toLocaleString()} lb FOB. Re-verify the current aircraft fuel quantity before mission readiness.`:"Draft resumed. Enter current fuel on board, then verify before mission readiness.";n.className="small warn draft-reverify";}
+ if(e){e.textContent="FOB NOT VERIFIED";e.className="warn";}
+ if(n){n.textContent="";n.className="small";}
 }
 function resetLowFuelConfirmation(){if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;}
 function missionAttentionNavigate(targetId,focusId,aircraftCode){
@@ -4711,8 +4731,8 @@ async function restoreF900BFlightPlan(record,opts={}){
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  showPlatformView("ops");
  f9UpdateFOBVerificationUI();
- // v5.25.83 — draft resume always requires a fresh, deliberate FOB verification.
- if(opts.fromDraft&&$("f9mFOBVerifyText")){const e=$("f9mFOBVerifyText");e.textContent="REVERIFY REQUIRED — DRAFT RESUMED";e.className="warn";}
+ // v5.25.84 — draft resume always requires a fresh, deliberate FOB verification.
+ if(opts.fromDraft&&$("f9mFOBVerifyText")){const e=$("f9mFOBVerifyText");e.textContent="FOB NOT VERIFIED";e.className="warn";}
  await f9LoadOperationalData(true);
  saveCurrentDraft();
 }
@@ -5408,7 +5428,7 @@ async function openDraftFlightPlan(i){
  await restoreArchivedFlightPlan(m,i,{fromDraft:true});
  const s=m.state||{};
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
- // v5.25.83 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
+ // v5.25.84 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
  // The aircraft fuel state may have changed since the draft was saved, so both fuel-related confirmations must be deliberate again.
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
@@ -6430,12 +6450,8 @@ function recalculate(){
  const fvn=$("fobVerifyNote");
  if(fob<=0){
    if($("fobVerified"))$("fobVerified").checked=false;
-   if(fvn)fvn.textContent="ENTER FUEL ON BOARD — verification required before mission readiness.";
- }else if(fobVerified){
-   if(fvn)fvn.textContent=`Verified ${Math.round(fob).toLocaleString()} lb fuel on board.`;
- }else{
-   if(fvn)fvn.textContent=`VERIFY ${Math.round(fob).toLocaleString()} lb fuel on board.`;
  }
+ if(fvn)fvn.textContent="";
  let missionFuel=Math.min(maxFuel,Math.max(0,num("missionFuel")));$("missionFuel").value=missionFuel;
  const taxi=Math.max(0,num("taxiFuel"));
 
@@ -7863,7 +7879,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.83",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.84",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7984,7 +8000,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.83",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.84",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8070,5 +8086,5 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-</body></html>/* v5.25.83 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
+</body></html>/* v5.25.84 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
