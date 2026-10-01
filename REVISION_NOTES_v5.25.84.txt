@@ -1,0 +1,10 @@
+KUSA FlightOps v5.25.84
+
+Scope: FOB verification simplification and cabin color parity.
+
+- Draft resume on both Falcon 50 and Falcon 900B restores fuel quantity but always returns the FOB verification state to simple amber FOB NOT VERIFIED.
+- Removed the dynamic helper sentence beneath Falcon 50 FOB that repeated values such as “Verified 6,500 lb fuel on board.” The checkbox/status badge remains the deliberate verification control.
+- Both aircraft cabins now use the same solid neutral cabin/empty-seat palette.
+- Occupied passenger seats on both aircraft use the same pronounced aquamarine/cyan treatment.
+- Aircraft-specific seat geometry, station arms, and W&B logic are unchanged.
+- No performance, W&B, fuel-moment, CG, or source-table data changed.
