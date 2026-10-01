@@ -670,6 +670,15 @@ details summary{cursor:pointer;margin-top:8px}
 @media(max-width:700px){.f9-cabin-shell{max-width:100%!important;padding:72px 18px 60px!important}.f9-window-strip{display:none}}
 
 
+
+/* v5.25.75 — N699BG Version 11 dining-group correction */
+.f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
+.f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
+.f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
+.f9-dining-table{height:30px;border:2px solid #587a98;border-radius:7px;background:#173b58;color:#b9ccdc;font-size:9px;letter-spacing:.08em;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 12%}
+.f9-dining-storage{display:flex;flex-direction:column;justify-content:center;gap:8px}.f9-dining-storage .f9-cabinet{min-height:150px;display:flex;align-items:center;justify-content:center;font-size:10px;letter-spacing:.08em}.f9-dining-storage .small{text-align:center;color:#829bb2}
+@media(max-width:700px){.f9-dining-zone{grid-template-columns:1fr 26px .72fr}.f9-dining-row{grid-template-columns:1fr 1fr}.f9-dining-storage .f9-cabinet{min-height:130px}}
+
 /* v5.25.73 — canonical mission width/parity */
 #missionResultsStart{grid-template-columns:1fr!important;gap:0!important}
 #missionResultsStart>section,#missionResultsStart>aside{min-width:0;width:100%}
@@ -981,7 +990,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.73</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.75</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1351,13 +1360,17 @@ Fuel is included in ramp, takeoff and landing <b>weight and moment</b>. Fuel mom
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF / Emer. Return</div><b class="bad" id="vsVREF">—</b><div class="small" id="vsVREFsrc" style="display:none"></div></div>
+<div class="wx"><div class="small">Takeoff Stabilizer Trim</div><b id="vsTrim">N/A</b><div class="small">No calculated setting in current Falcon 50 model</div></div>
+<div class="wx"><div class="small">Balanced Field Length</div><b id="vsBFL">—</b></div>
+<div class="wx"><div class="small">OEI 2nd Segment</div><b id="vsGrad">—</b></div>
+</div>
+<div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Takeoff Weight</div><b id="vsTOW">—</b></div>
 <div class="wx"><div class="small">Emer. Return Weight</div><b id="vsLDW">—</b><div class="small" id="vsERWsrc">TOW less entered return burn</div></div>
+<div class="wx"><div class="small">Takeoff Status</div><b id="vsLimit">—</b></div>
 <div class="wx"><div class="small">Speed Data Status</div><b class="warn" id="vsStatus">SOURCE LOCKED</b></div>
 </div>
-<div class="callout small" style="margin-top:12px;display:none">
-<b>Automatic working data:</b> S+Flaps 20° VR=V2 is now source-controlled to Dassault DTM813 §5.45.8, with the 35,000 lb / 117.3 kt AFM example retained as a validation anchor. Vfr is derived from the Dassault transition schedule (V2 + 15 kt for S+Flaps 20°, V2 + 25 kt for Slats). V1/BFL, 1.5Vs and landing-distance grids remain migration-controlled pending direct approved-source replacement / applicability confirmation. Emergency-return / S+48 VREF is now digitized directly from DTM813 §5.60.5 and cross-checked to the AFM 28,500 lb / 112.5 kt example. No extrapolation. DEVELOPMENT / NOT FOR FLIGHT USE.
-</div>
+<div class="callout small" style="margin-top:12px;display:none"><b>Source detail retained in advanced/source verification.</b></div>
 </div>
 <div class="card">
 <h2>Seat &amp; Baggage Loading Detail</h2>
@@ -2217,10 +2230,22 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="f9-seat-row"><div class="f9-seat"><label>Seat 1 <span>−190.88 in</span></label><input id="f9wb_pax1" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 2 <span>−190.88 in</span></label><input id="f9wb_pax2" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
 <div class="f9-mid-row"><div></div><div class="f9-aisle"></div><div class="f9-cabinet">VIDEO CABINET</div></div>
 <div class="f9-seat-row"><div class="f9-seat"><label>Seat 3 <span>−143.24 in</span></label><input id="f9wb_pax3" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 4 <span>−143.24 in</span></label><input id="f9wb_pax4" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
-<div class="f9-zone-label">MID CABIN</div>
-<div class="f9-seat-row"><div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input id="f9wb_pax5" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input id="f9wb_pax6" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
-<div class="f9-mid-row"><div class="f9-cabinet">MID-CABIN CABINET</div><div class="f9-aisle"></div><div></div></div>
-<div class="f9-seat-row"><div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input id="f9wb_pax7" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input id="f9wb_pax8" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
+<div class="f9-zone-label">MID CABIN • DINING GROUP</div>
+<div class="f9-dining-zone">
+  <div class="f9-dining-left">
+    <div class="f9-dining-row">
+      <div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input id="f9wb_pax5" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+      <div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input id="f9wb_pax6" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+    </div>
+    <div class="f9-dining-table">DINING TABLE</div>
+    <div class="f9-dining-row">
+      <div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input id="f9wb_pax7" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+      <div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input id="f9wb_pax8" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+    </div>
+  </div>
+  <div class="f9-aisle">AISLE</div>
+  <div class="f9-dining-storage"><div class="f9-cabinet">STORAGE CABINET</div><div class="small">Version 11 right-side cabinet / storage</div></div>
+</div>
 <div class="f9-zone-label">AFT LOUNGE / SIDE SOFA</div>
 <div class="f9-aft-lounge">
 <div class="f9-divan">
@@ -2330,11 +2355,16 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">VREF / Emer. Return</div><b class="bad" id="f9pVREF">—</b></div>
+<div class="wx"><div class="small">Takeoff Stabilizer Trim</div><b id="f9pTrim">—</b><div class="small">Automatic from takeoff CG</div></div>
+<div class="wx"><div class="small">Balanced Field Length</div><b id="f9pBFL">—</b></div>
+<div class="wx"><div class="small">OEI 2nd Segment</div><b id="f9pGCLB2">—</b></div>
+</div>
+<div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Takeoff Weight</div><b id="f9pTOW">—</b></div>
 <div class="wx"><div class="small">Emer. Return Weight</div><b id="f9pERW">—</b><div class="small">TOW less entered return burn</div></div>
+<div class="wx"><div class="small">Takeoff Limit</div><b id="f9pLimit">—</b></div>
 <div class="wx"><div class="small">Speed Data Status</div><b class="ok" id="f9pStatus">—</b></div>
 </div>
-<!-- Aircraft-specific trim/BFL/gradient/limit remain in Section 7 performance evaluation. -->
 </div><div class="card" id="f9LoadingDetailCard">
 <h2>Seat &amp; Baggage Loading Detail</h2>
 <table>
@@ -3491,9 +3521,8 @@ function f9DrawCGTrace(wb){
  const used=[];
  refs.forEach(([w,a,b,color])=>{w=Number(w);if(!Number.isFinite(w))return;const yy=py(w);x.save();x.strokeStyle=color;x.setLineDash([6,5]);x.beginPath();x.moveTo(L,yy);x.lineTo(plotR,yy);x.stroke();x.setLineDash([]);x.beginPath();x.moveTo(plotR,yy);x.lineTo(plotR+16,yy);x.stroke();let ly=yy;while(used.some(v=>Math.abs(v-ly)<20))ly+=20;used.push(ly);x.fillStyle=color;x.font="bold 9px Arial";x.fillText(a,plotR+22,ly-2);x.font="9px Arial";x.fillText(b,plotR+22,ly+10);x.restore();});
  // Only the actual in-flight fuel burn is connected. ZFW and ramp are standalone references.
- const path=Array.isArray(wb.burnPath)?wb.burnPath.filter(p=>Number.isFinite(p?.pct)&&Number.isFinite(p?.weight)):[];
- if(path.length>1){x.strokeStyle="#8fd3ff";x.lineWidth=2.8;x.beginPath();path.forEach((p,i)=>i?x.lineTo(px(p.pct),py(p.weight)):x.moveTo(px(p.pct),py(p.weight)));x.stroke();}
- else if(wb.tcg&&wb.lcg){x.strokeStyle="#8fd3ff";x.lineWidth=2.8;x.beginPath();x.moveTo(px(wb.tcg.pct),py(wb.tow));x.lineTo(px(wb.lcg.pct),py(wb.ldw));x.stroke();}
+ // Display a clean takeoff-to-landing vector. The full source-point burnPath remains in wb.burnPath for envelope validation.
+ if(wb.tcg&&wb.lcg){x.strokeStyle="#8fd3ff";x.lineWidth=2.8;x.beginPath();x.moveTo(px(wb.tcg.pct),py(wb.tow));x.lineTo(px(wb.lcg.pct),py(wb.ldw));x.stroke();}
  const point=(w,cg,label,color,r=5,dx=8,dy=-7)=>{if(!Number.isFinite(w)||!cg||!Number.isFinite(cg.pct))return;x.fillStyle=color;x.beginPath();x.arc(px(cg.pct),py(w),r,0,Math.PI*2);x.fill();x.fillStyle="#edf5ff";x.font="bold 10px Arial";x.fillText(label,px(cg.pct)+dx,py(w)+dy);};
  point(wb.zfw,wb.zcg,"ZFW","#edf5ff",4,8,13);point(wb.ramp,wb.rcg,"RAMP","#d9a7ff",5,8,-7);point(wb.tow,wb.tcg,"TO","#8fd3ff",6,8,-7);point(wb.ldw,wb.lcg,"LDG","#55d18b",6,8,-7);
  const set=(id,cg)=>f9Put(id,cg?`${cg.pct.toFixed(2)}% MAC`:"—"),setArm=(id,cg)=>f9Put(id,cg?`${cg.arm.toFixed(2)} in`:"—");
@@ -6093,6 +6122,9 @@ function updateVSpeedCard(tow,landing){
  $("vsVFT").textContent=vfr==null?"—":formatVspeed(vfr);
  $("vsVFS").textContent=v15vs==null?"—":formatVspeed(v15vs);
  $("vsVREF").textContent=emerVref==null?"—":formatVspeed(emerVref);
+ if($("vsBFL"))$("vsBFL").textContent=toAuto.bfl==null?"—":`${Math.round(toAuto.bfl).toLocaleString()} ft`;
+ const grad=valueOrNull("perfGrad");if($("vsGrad"))$("vsGrad").textContent=Number.isFinite(grad)?`${grad.toFixed(2)}%`:"—";
+ if($("vsLimit"))$("vsLimit").textContent=textOf("toStatus")||"—";
 
  $("vsV1src").textContent=v1==null?"Requires valid PA / temperature / weight cell":`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50BflMigrationSource(toAuto.cfg)}`;
  $("vsVRsrc").textContent=vr==null?"Takeoff weight outside published table":(toAuto.cfg==="S20"?`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`:`${FS_PERF.takeoff[toAuto.cfg].label} • ${f50TakeoffSpeedSource(toAuto.cfg,"vr")} • weight based`);
@@ -7566,7 +7598,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.73",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.75",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -7686,7 +7718,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.73",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.75",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
