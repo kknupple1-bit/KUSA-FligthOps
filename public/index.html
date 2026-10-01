@@ -672,8 +672,8 @@ details summary{cursor:pointer;margin-top:8px}
 
 
 
-/* v5.25.85 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
-/* v5.25.85 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
+/* v5.25.86 — F900B abnormal landing workflow: Normal / HYD #1 / HYD #2 */
+/* v5.25.86 — Mission/TOLD abnormal landing quick-selection and source-controlled adjustments */
 .f9-dining-zone{display:grid;grid-template-columns:minmax(0,1.45fr) 34px minmax(120px,.75fr);gap:9px;align-items:stretch;margin:8px 0 12px;position:relative;z-index:2}
 .f9-dining-left{border:1px solid #315b7e;border-radius:14px;background:#0a2238;padding:8px;display:grid;gap:7px}
 .f9-dining-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}.f9-dining-row .f9-seat{min-height:62px}
@@ -999,7 +999,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52580-parity-refinement">
-/* v5.25.85 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
+/* v5.25.86 — F50/F900B cabin parity, emergency-speed color, TOLD attention parity */
 #f9mEmerVref,#f9pVREF,#f9SupportEmerVref,#f9EmerVref{color:var(--fo-bad)!important}
 
 /* Canonical cabin visual language: solid fuselage, neutral empty seats, pronounced occupied seats. */
@@ -1029,7 +1029,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52582-review-cabin-fix">
-/* v5.25.85 — visible pilot review gate + stronger F50/F900B cabin visual parity */
+/* v5.25.86 — visible pilot review gate + stronger F50/F900B cabin visual parity */
 #missionPilotReviewPanel{margin-top:14px;border:1px solid var(--fo-warn);background:#0b2034;border-radius:12px;padding:14px}
 #missionPilotReviewPanel h3{margin:0 0 6px;font-size:15px}
 #missionPilotReviewPanel .review-note{color:var(--fo-muted);font-size:12px;margin-bottom:10px}
@@ -1071,7 +1071,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52583-cabin-draft-fix">
-/* v5.25.85 — F50 cabin visual parity + deterministic draft fuel re-verification */
+/* v5.25.86 — F50 cabin visual parity + deterministic draft fuel re-verification */
 .floorplan-cabin{
   width:min(520px,96%)!important;
   min-height:0!important;
@@ -1115,7 +1115,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52584-cabin-fob-parity">
-/* v5.25.85 — simple amber FOB reverify + exact cabin color parity */
+/* v5.25.86 — simple amber FOB reverify + exact cabin color parity */
 #fobVerifyNote,#f9mFOBNote{display:none!important}
 /* One neutral cabin/fixture/empty-seat palette across both airframes. */
 .floorplan-cabin,.f9-cabin-shell{background:#0a2034!important}
@@ -1136,7 +1136,7 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 
 <style id="v52585-seat-parity-fix">
-/* v5.25.85 — deterministic F50/F900B seat placement and exact empty/occupied color parity */
+/* v5.25.86 — deterministic F50/F900B seat placement and exact empty/occupied color parity */
 #missionView .floorplan-cabin button.tap-seat:not(.occupied),
 #f9MissionView .f9-cabin-shell .f9-seat:not(.occupied){
   background:#0d2a43!important;
@@ -1161,9 +1161,38 @@ details summary{cursor:pointer;margin-top:8px}
 /* Empty 50 seats should never inherit the generic blue button treatment. */
 #missionView .floorplan-cabin button.tap-seat:not(.occupied):hover{background:#11314d!important}
 </style>
+
+<style id="v52586-cabin-color-fix">
+/* v5.25.86 — F50 cabin exact visual parity with F900B.
+   Use high-specificity selectors to override the generic #opsView button action color. */
+#opsView .floorplan-cabin button.tap-seat:not(.occupied){
+  background:#0d2a43!important;
+  border-color:#456b8e!important;
+  color:var(--fo-text)!important;
+  opacity:1!important;
+  box-shadow:inset 0 -6px 0 rgba(255,255,255,.025)!important;
+}
+#opsView .floorplan-cabin button.tap-seat.occupied{
+  background:#0b7180!important;
+  border-color:#67e8f9!important;
+  color:#f4ffff!important;
+  opacity:1!important;
+  box-shadow:0 0 0 3px rgba(103,232,249,.22),inset 0 -8px 0 rgba(255,255,255,.06)!important;
+}
+#opsView .floorplan-cabin button.tap-seat.occupied .seat-number,
+#opsView .floorplan-cabin button.tap-seat.occupied .seat-name,
+#opsView .floorplan-cabin button.tap-seat.occupied .seat-occupant{color:#f4ffff!important}
+#opsView .floorplan-cabin .cockpit-seat,
+#opsView .floorplan-cabin .jumpseat-inner,
+#opsView .floorplan-cabin .fixture,
+#opsView .floorplan-cabin .bag-cell{
+  background:#0d2a43!important;
+  border-color:#456b8e!important;
+}
+</style>
 </head>
 <body>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.85</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.25.86</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -4775,7 +4804,7 @@ async function restoreF900BFlightPlan(record,opts={}){
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  showPlatformView("ops");
  f9UpdateFOBVerificationUI();
- // v5.25.85 — draft resume always requires a fresh, deliberate FOB verification.
+ // v5.25.86 — draft resume always requires a fresh, deliberate FOB verification.
  if(opts.fromDraft&&$("f9mFOBVerifyText")){const e=$("f9mFOBVerifyText");e.textContent="FOB NOT VERIFIED";e.className="warn";}
  await f9LoadOperationalData(true);
  saveCurrentDraft();
@@ -5472,7 +5501,7 @@ async function openDraftFlightPlan(i){
  await restoreArchivedFlightPlan(m,i,{fromDraft:true});
  const s=m.state||{};
  if(s.manual_weather)manualWeather=JSON.parse(JSON.stringify(s.manual_weather));
- // v5.25.85 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
+ // v5.25.86 — reopening a draft restores fuel quantities but NEVER a prior pilot verification.
  // The aircraft fuel state may have changed since the draft was saved, so both fuel-related confirmations must be deliberate again.
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
@@ -7923,7 +7952,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.25.85",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.25.86",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8044,7 +8073,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.25.85",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.25.86",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8130,5 +8159,5 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-</body></html>/* v5.25.85 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
+</body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
