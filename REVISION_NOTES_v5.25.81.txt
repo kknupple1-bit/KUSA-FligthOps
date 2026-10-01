@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.81 — Draft Re-Verification / Amber TOLD Review Gates
+
+Scope
+- Draft resume now restores saved fuel quantities but deliberately clears prior FOB verification on both Falcon 50 and Falcon 900B.
+- Low-landing-fuel confirmation is also cleared on Falcon 50 draft resume because it is fuel-state dependent.
+- TOLD review-required buttons and actionable warning pills use a consistent amber treatment.
+- TOLD attention controls deep-link to the specific Mission review section, open collapsed ancestor details, center the target, highlight it, and focus the relevant control.
+
+No performance tables, W&B source data, station arms, fuel moments, CG limits, structural limits, or aircraft solver mathematics were changed.
