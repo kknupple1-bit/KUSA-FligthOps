@@ -1,0 +1,11 @@
+KUSA FlightOps v5.25.79
+Falcon 900B TOLD / abnormal landing refinement
+
+- TOLD Takeoff desktop primary speed row standardized V1 / VR=V2 / VFR / VFT.
+- Second primary row: N1 S/C / stabilizer trim / BFL / OEI second-segment.
+- Removed duplicate speed/support values from expanded takeoff detail.
+- Mission 900 V-speed card order corrected VFR before VFT; emergency-return VREF explicitly red.
+- Added Loss of Both Hydraulic Systems condition to Mission and TOLD abnormal-landing selector.
+- Both-hydraulic workflow uses QRH2/DTM9819 source: normal CLEAN configuration VREF+30; if high lift already extended, actual configuration selector provides published VREF additives; landing distance described as practically twice nominal and modeled as x2.00 for cross-check with explicit approximation wording.
+- Clarified Landing Climb field as Landing Climb Gradient (All Engines Operating).
+- No changes to base QRH takeoff/landing tables, DTM9823 wind/slope solver, W&B station arms, fuel moments, CG limits, or structural limits.
