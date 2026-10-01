@@ -1,0 +1,9 @@
+KUSA FlightOps v5.25.82
+
+Scope: TOLD deep-link recovery, visible pilot obstacle-review gate, and Falcon 50 cabin modernization.
+
+- Moves the actual N33AP Pilot Obstacle Review / Evaluate Takeoff controls out of the hidden advanced block into a visible Section 7 Pilot Review / Clearance panel.
+- TOLD amber gates now deep-link to visible review controls and explicitly target the correct aircraft mission view.
+- Deep-link target is centered, highlighted, and focused.
+- Falcon 50 cabin retains N33AP seat/station geometry but adopts stronger Falcon 900-style fuselage, window, seat, fixture, and occupied-seat visual language.
+- No performance/W&B source data or calculation logic changed.
