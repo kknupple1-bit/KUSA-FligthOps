@@ -1,7 +1,124 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KUSA FlightOps Account Test</title><style>body{font-family:Arial,sans-serif;background:#071b33;color:#e8f1fb;margin:0;padding:32px}.card{max-width:720px;margin:auto;background:#0d2b4b;border:1px solid #31506f;border-radius:14px;padding:24px}input,button{box-sizing:border-box;width:100%;padding:12px;margin:6px 0 14px;border-radius:8px;border:1px solid #31506f;background:#061829;color:white}button{background:#215d95;font-weight:700;cursor:pointer}.ok{color:#47e6a5}.bad{color:#ff6b6b}pre{white-space:pre-wrap;background:#061829;padding:12px;border-radius:8px}</style></head><body><div class="card"><h1>KUSA FlightOps — Account Foundation</h1><p>v5.26.6 platform test page. This is for validating persistent account sessions before mandatory login is enabled.</p><label>Email</label><input id="email" type="email"><label>Password</label><input id="password" type="password"><button id="login">Sign In</button><button id="me">Check Session</button><button id="logout">Sign Out</button><button id="admin" style="display:none">Open User Administration</button><div id="status"></div><pre id="output"></pre></div><script>
-const $=id=>document.getElementById(id), out=(v,ok=true)=>{$('status').className=ok?'ok':'bad';$('status').textContent=ok?'OK':'ERROR';$('output').textContent=JSON.stringify(v,null,2)};
-$('login').onclick=async()=>{try{const r=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({email:$('email').value,password:$('password').value})});const j=await r.json();out(j,r.ok)}catch(e){out({error:String(e)},false)}};
-$('me').onclick=async()=>{try{const r=await fetch('/api/me',{credentials:'same-origin'});const j=await r.json();out(j,r.ok);$('admin').style.display=(r.ok&&Array.isArray(j.memberships)&&j.memberships.some(m=>m.role==='administrator'))?'block':'none'}catch(e){out({error:String(e)},false)}};
-$('logout').onclick=async()=>{try{const r=await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'});const j=await r.json();$('admin').style.display='none';out(j,r.ok)}catch(e){out({error:String(e)},false)}};
-$('admin').onclick=()=>{location.href='/admin-users.html'};
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KUSA FlightOps — Sign In</title>
+<style>
+:root{font-family:Arial,Helvetica,sans-serif;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:#071b33;color:#e8f1fb;display:flex;align-items:center;justify-content:center;padding:28px}
+.card{width:min(720px,100%);background:#0d2b4b;border:1px solid #31506f;border-radius:16px;padding:26px;box-shadow:0 18px 55px rgba(0,0,0,.25)}
+h1{margin:0 0 6px;font-size:28px}.sub{color:#a9bed3;margin:0 0 22px}
+label{display:block;color:#cfe1f3;font-size:13px;font-weight:700;margin:12px 0 6px}
+input,button{width:100%;padding:12px;border-radius:8px;border:1px solid #31506f;background:#061829;color:#fff;font:inherit}
+button{background:#215d95;font-weight:700;cursor:pointer;margin-top:12px}
+button.secondary{background:#061829}button:disabled{opacity:.5;cursor:not-allowed}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.status{font-weight:700;margin:16px 0 0}.ok{color:#47e6a5}.bad{color:#ff6b6b}
+.session{margin-top:18px;padding:14px;background:#061829;border:1px solid #31506f;border-radius:10px}
+.hidden{display:none}.muted{color:#9db2c7}.pill{display:inline-block;border:1px solid #31506f;border-radius:999px;padding:4px 8px;margin:2px 4px 2px 0;font-size:12px}
+@media(max-width:620px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>KUSA FlightOps</h1>
+  <p class="sub">Secure account access · v5.26.7</p>
+
+  <div id="loginPane">
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="username" autofocus>
+    <label for="password">Password</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <button id="login">Sign In</button>
+  </div>
+
+  <div id="sessionPane" class="session hidden">
+    <strong id="who"></strong>
+    <div id="memberships" class="muted" style="margin-top:6px"></div>
+    <div id="aircraft" style="margin-top:8px"></div>
+    <div class="row" style="margin-top:12px">
+      <button id="continueBtn">Continue to FlightOps</button>
+      <button id="adminBtn" class="secondary hidden">User Administration</button>
+    </div>
+    <button id="logout" class="secondary">Sign Out</button>
+  </div>
+
+  <div id="status" class="status"></div>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const qs=new URLSearchParams(location.search);
+const next=qs.get('next')||'/';
+
+function preservePreview(url){
+  const share=qs.get('airoShareToken');
+  if(!share)return url;
+  const u=new URL(url,location.origin);
+  if(!u.searchParams.get('airoShareToken'))u.searchParams.set('airoShareToken',share);
+  return u.pathname+u.search+u.hash;
+}
+function setStatus(msg,ok=true){
+  $('status').className='status '+(ok?'ok':'bad');
+  $('status').textContent=msg||'';
+}
+function renderSession(j){
+  const admin=Array.isArray(j.memberships)&&j.memberships.some(m=>m.role==='administrator');
+  $('loginPane').classList.add('hidden');
+  $('sessionPane').classList.remove('hidden');
+  $('who').textContent=`${j.user.display_name} · ${j.user.email}`;
+  $('memberships').textContent=(j.memberships||[]).map(m=>`${m.name} — ${m.role}`).join(' · ');
+  $('aircraft').innerHTML=(j.aircraft||[]).map(a=>`<span class="pill">${a.registration} · ${a.model}</span>`).join('');
+  $('adminBtn').classList.toggle('hidden',!admin);
+  setStatus('Authenticated session active.',true);
+}
+async function checkSession(){
+  try{
+    const r=await fetch('/api/me',{credentials:'same-origin',cache:'no-store'});
+    const j=await r.json();
+    if(r.ok){renderSession(j);return true}
+  }catch{}
+  $('loginPane').classList.remove('hidden');
+  $('sessionPane').classList.add('hidden');
+  setStatus('',true);
+  return false;
+}
+$('login').onclick=async()=>{
+  $('login').disabled=true;
+  try{
+    const r=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      credentials:'same-origin',
+      body:JSON.stringify({email:$('email').value.trim(),password:$('password').value})
+    });
+    const j=await r.json();
+    if(!r.ok){setStatus(j.error==='INVALID_CREDENTIALS'?'Invalid email or password.':`Sign in failed: ${j.error||r.status}`,false);return}
+    const me=await fetch('/api/me',{credentials:'same-origin',cache:'no-store'});
+    const mj=await me.json();
+    if(me.ok)renderSession(mj);
+    if(next && next!=='/account.html'){
+      setTimeout(()=>{location.href=preservePreview(next)},250);
+    }
+  }catch(e){setStatus(`Sign in failed: ${e}`,false)}
+  finally{$('login').disabled=false}
+};
+$('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('login').click()});
+$('continueBtn').onclick=()=>{location.href=preservePreview(next&&next!=='/account.html'?next:'/')};
+$('adminBtn').onclick=()=>{location.href=preservePreview('/admin-users.html')};
+$('logout').onclick=async()=>{
+  try{await fetch('/api/auth/logout',{method:'POST',credentials:'same-origin'})}catch{}
+  $('sessionPane').classList.add('hidden');
+  $('loginPane').classList.remove('hidden');
+  $('password').value='';
+  setStatus('Signed out.',true);
+};
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/sw.js').catch(()=>{});
+}
+checkSession();
+</script>
+</body>
+</html>
