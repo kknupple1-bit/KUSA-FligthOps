@@ -8,7 +8,8 @@ try { ({ DatabaseSync } = require('node:sqlite')); } catch (_) {}
 
 const SESSION_COOKIE = 'flightops_session';
 const SESSION_DAYS = Math.max(1, Number(process.env.FLIGHTOPS_SESSION_DAYS || 30));
-const AUTH_REQUIRED = String(process.env.FLIGHTOPS_AUTH_REQUIRED || 'false').toLowerCase() === 'true';
+// v5.26.7: mandatory authentication is now the normal operating mode.
+const AUTH_REQUIRED = String(process.env.FLIGHTOPS_AUTH_REQUIRED || 'true').toLowerCase() !== 'false';
 const DB_PATH = process.env.FLIGHTOPS_DB_PATH || path.join(__dirname, 'data', 'flightops.sqlite');
 
 function id(prefix='id') { return `${prefix}_${crypto.randomBytes(12).toString('hex')}`; }
@@ -34,7 +35,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.6 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.7 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -252,7 +253,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.6'}={}){
+function installPlatform(app,{build='5.26.7'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -891,10 +892,46 @@ function installPlatform(app,{build='5.26.6'}={}){
     res.json({ok:true,mission:safeMission(state.db.prepare('SELECT * FROM missions WHERE id=?').get(row.id))});
   });
 
-  // Transitional auth gate: off by default so v5.25.86 operational behavior remains deployable.
-  // Set FLIGHTOPS_AUTH_REQUIRED=true after the login UI/admin bootstrap has been verified.
+  // v5.26.7 mandatory application gate.
+  // Public onboarding/recovery routes are registered above this middleware.
+  // Everything registered after installPlatform() — including the FlightOps static app,
+  // performance data APIs, weather, NOTAM, runway, sharing, and diagnostics — requires
+  // a live server-side session when AUTH_REQUIRED is enabled.
   if(AUTH_REQUIRED){
-    app.use('/api/platform/private',requireAuth);
+    const publicExact=new Set([
+      '/account.html',
+      '/invite.html',
+      '/reset-password.html',
+      '/sw.js',
+      '/manifest.webmanifest',
+      '/api/health'
+    ]);
+    const publicPrefixes=['/icons/'];
+
+    app.use((req,res,next)=>{
+      if(publicExact.has(req.path) || publicPrefixes.some(p=>req.path.startsWith(p))) return next();
+
+      const s=currentSession(req);
+      if(s){
+        req.flightopsSession=s;
+        return next();
+      }
+
+      if(req.path.startsWith('/api/')){
+        return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});
+      }
+
+      if(req.method==='GET' || req.method==='HEAD'){
+        const nextUrl=String(req.originalUrl||'/');
+        const params=new URLSearchParams();
+        params.set('next',nextUrl);
+        const shareToken=String(req.query?.airoShareToken||'').trim();
+        if(shareToken) params.set('airoShareToken',shareToken);
+        return res.redirect(302,`/account.html?${params.toString()}`);
+      }
+
+      return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});
+    });
   }
 }
 
