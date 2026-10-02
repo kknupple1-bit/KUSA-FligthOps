@@ -35,7 +35,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.7 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.8 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -123,6 +123,22 @@ CREATE TABLE IF NOT EXISTS password_resets (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS password_resets_user_created_idx ON password_resets(user_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS offline_signing_keys (
+  id TEXT PRIMARY KEY,
+  private_pem TEXT NOT NULL,
+  public_pem TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS offline_grants (
+  id TEXT PRIMARY KEY,
+  device_id TEXT NOT NULL REFERENCES devices(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  revoked_at TEXT,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS offline_grants_user_created_idx ON offline_grants(user_id,created_at DESC);
 `);
   // v5.26.5 migration-safe invitation payload extension.
   try{
@@ -226,6 +242,33 @@ function normalizeRole(role){
   const r=String(role||'').trim().toLowerCase();
   return ['administrator','aircraft_manager','pilot','viewer'].includes(r)?r:null;
 }
+
+function b64urlEncode(input){
+  return Buffer.from(input).toString('base64').replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+}
+function ensureOfflineSigningKey(){
+  let row=state.db.prepare("SELECT * FROM offline_signing_keys WHERE id='primary'").get();
+  if(row) return row;
+  const kp=crypto.generateKeyPairSync('ec',{namedCurve:'prime256v1'});
+  const privatePem=kp.privateKey.export({type:'pkcs8',format:'pem'}).toString();
+  const publicPem=kp.publicKey.export({type:'spki',format:'pem'}).toString();
+  const now=isoNow();
+  state.db.prepare("INSERT INTO offline_signing_keys(id,private_pem,public_pem,created_at) VALUES('primary',?,?,?)")
+    .run(privatePem,publicPem,now);
+  return {id:'primary',private_pem:privatePem,public_pem:publicPem,created_at:now};
+}
+function signOfflinePayload(payload){
+  const key=ensureOfflineSigningKey();
+  const header={alg:'ES256',typ:'KUSA-OFFLINE',v:1};
+  const h=b64urlEncode(JSON.stringify(header));
+  const p=b64urlEncode(JSON.stringify(payload));
+  const input=`${h}.${p}`;
+  const sig=crypto.sign('sha256',Buffer.from(input),{key:key.private_pem,dsaEncoding:'ieee-p1363'});
+  return `${input}.${b64urlEncode(sig)}`;
+}
+function offlineGrantDays(){
+  return Math.max(1,Math.min(30,Number(process.env.FLIGHTOPS_OFFLINE_GRANT_DAYS||7)));
+}
 function membershipsFor(userId){
   return state.db.prepare('SELECT m.organization_id,m.role,o.name,o.slug FROM memberships m JOIN organizations o ON o.id=m.organization_id WHERE m.user_id=?').all(userId);
 }
@@ -253,7 +296,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.7'}={}){
+function installPlatform(app,{build='5.26.8'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -892,7 +935,88 @@ function installPlatform(app,{build='5.26.7'}={}){
     res.json({ok:true,mission:safeMission(state.db.prepare('SELECT * FROM missions WHERE id=?').get(row.id))});
   });
 
-  // v5.26.7 mandatory application gate.
+
+  // v5.26.8 trusted-device / signed offline authorization foundation.
+  app.get('/api/offline/public-key',(req,res)=>{
+    if(!state.ok) return res.status(503).json({ok:false,error:state.error});
+    const key=ensureOfflineSigningKey();
+    res.json({ok:true,algorithm:'ES256',key_format:'spki-pem',public_key_pem:key.public_pem,build});
+  });
+
+  app.get('/api/offline/status',requireAuth,(req,res)=>{
+    const rows=state.db.prepare(`
+      SELECT d.id,d.device_key,d.label,d.last_seen_at,d.revoked_at,
+             og.expires_at AS grant_expires_at,og.revoked_at AS grant_revoked_at,og.created_at AS grant_created_at
+      FROM devices d
+      LEFT JOIN offline_grants og ON og.id=(
+        SELECT g.id FROM offline_grants g WHERE g.device_id=d.id ORDER BY g.created_at DESC LIMIT 1
+      )
+      WHERE d.user_id=? ORDER BY d.last_seen_at DESC
+    `).all(req.flightopsSession.user_id);
+    res.json({ok:true,grant_days:offlineGrantDays(),devices:rows});
+  });
+
+  app.post('/api/offline/enroll',requireAuth,(req,res)=>{
+    const userId=req.flightopsSession.user_id;
+    const deviceKey=String(req.body?.device_key||'').trim();
+    const label=String(req.body?.label||'This device').trim().slice(0,120)||'This device';
+    if(!/^[A-Za-z0-9_-]{24,160}$/.test(deviceKey)) return res.status(400).json({ok:false,error:'INVALID_DEVICE_KEY'});
+    const now=isoNow();
+    let device=state.db.prepare('SELECT * FROM devices WHERE user_id=? AND device_key=?').get(userId,deviceKey);
+    if(!device){
+      const did=id('dev');
+      state.db.prepare('INSERT INTO devices(id,user_id,device_key,label,last_seen_at,revoked_at) VALUES(?,?,?,?,?,NULL)')
+        .run(did,userId,deviceKey,label,now);
+      device={id:did,user_id:userId,device_key:deviceKey,label,last_seen_at:now,revoked_at:null};
+    }else{
+      state.db.prepare('UPDATE devices SET label=?,last_seen_at=?,revoked_at=NULL WHERE id=?').run(label,now,device.id);
+      device={...device,label,last_seen_at:now,revoked_at:null};
+    }
+    state.db.prepare('UPDATE offline_grants SET revoked_at=? WHERE device_id=? AND revoked_at IS NULL').run(now,device.id);
+
+    const memberships=membershipsFor(userId);
+    const aircraft=allowedAircraft(userId).map(a=>({
+      id:a.id,organization_id:a.organization_id,registration:a.registration,model:a.model,
+      serial_number:a.serial_number,profile_key:a.profile_key,data_package_version:a.data_package_version
+    }));
+    const expiresAt=new Date(Date.now()+offlineGrantDays()*86400000).toISOString();
+    const payload={
+      iss:'KUSA FlightOps',aud:'KUSA FlightOps Offline',version:1,build,
+      user:{id:userId,email:req.flightopsSession.email,display_name:req.flightopsSession.display_name},
+      device:{id:device.id,key:device.device_key,label:device.label},
+      memberships,aircraft,issued_at:now,expires_at:expiresAt
+    };
+    const token=signOfflinePayload(payload);
+    const grantId=id('ofg');
+    state.db.prepare('INSERT INTO offline_grants(id,device_id,user_id,token_hash,expires_at,created_at) VALUES(?,?,?,?,?,?)')
+      .run(grantId,device.id,userId,sha256(token),expiresAt,now);
+
+    for(const m of memberships.filter(x=>x.role==='administrator')){
+      writeAdminAudit(req,m.organization_id,userId,'OFFLINE_DEVICE_AUTHORIZED',{device_id:device.id,label:device.label,grant_id:grantId,expires_at:expiresAt});
+    }
+
+    res.status(201).json({
+      ok:true,
+      device:{id:device.id,key:device.device_key,label:device.label},
+      grant:{id:grantId,token,expires_at:expiresAt,days:offlineGrantDays()},
+      public_key:ensureOfflineSigningKey().public_pem
+    });
+  });
+
+  app.post('/api/offline/devices/:deviceId/revoke',requireAuth,(req,res)=>{
+    const deviceId=String(req.params.deviceId||'');
+    const device=state.db.prepare('SELECT * FROM devices WHERE id=? AND user_id=?').get(deviceId,req.flightopsSession.user_id);
+    if(!device) return res.status(404).json({ok:false,error:'DEVICE_NOT_FOUND'});
+    const now=isoNow();
+    state.db.prepare('UPDATE devices SET revoked_at=? WHERE id=?').run(now,deviceId);
+    state.db.prepare('UPDATE offline_grants SET revoked_at=? WHERE device_id=? AND revoked_at IS NULL').run(now,deviceId);
+    for(const m of membershipsFor(req.flightopsSession.user_id).filter(x=>x.role==='administrator')){
+      writeAdminAudit(req,m.organization_id,req.flightopsSession.user_id,'OFFLINE_DEVICE_REVOKED',{device_id:deviceId,label:device.label});
+    }
+    res.json({ok:true,device_id:deviceId,revoked_at:now});
+  });
+
+  // v5.26.8 mandatory application gate.
   // Public onboarding/recovery routes are registered above this middleware.
   // Everything registered after installPlatform() — including the FlightOps static app,
   // performance data APIs, weather, NOTAM, runway, sharing, and diagnostics — requires
@@ -904,7 +1028,8 @@ function installPlatform(app,{build='5.26.7'}={}){
       '/reset-password.html',
       '/sw.js',
       '/manifest.webmanifest',
-      '/api/health'
+      '/api/health',
+      '/api/offline/public-key'
     ]);
     const publicPrefixes=['/icons/'];
 

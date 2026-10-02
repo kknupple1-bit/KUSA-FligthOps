@@ -1,53 +1,28 @@
-KUSA FlightOps v5.26.7 — Mandatory Login Gate
+KUSA FlightOps v5.26.8 — Trusted Offline Device Foundation
 
-Milestone:
-- Authentication is now the normal operating mode.
-- The main FlightOps application and operational APIs are protected by a server-side session gate.
-- Unauthenticated browser navigation redirects to /account.html.
-- Unauthenticated operational API calls return 401 AUTH_REQUIRED.
-- Account page is now the production sign-in/session page, not a test page.
-- Successful sign-in returns the user to the originally requested FlightOps URL.
-- Main FlightOps header includes an Account button.
-- Public onboarding/recovery pages remain accessible:
-  account.html, invite.html, reset-password.html, manifest/icons.
-- /api/health remains public for service health checks.
-- All previously registered auth/invite/reset routes remain available by design.
+Adds:
+- Per-browser trusted-device enrollment.
+- ECDSA P-256 signing key persisted in SQLite.
+- Signed offline authorization token containing user, memberships, authorized aircraft, profile keys,
+  performance-data-package versions, build, device identity, issue time, and expiration.
+- Default offline grant validity: 7 days.
+- Optional FLIGHTOPS_OFFLINE_GRANT_DAYS override (1–30).
+- Current user can revoke this device.
+- Administrator audit events for authorization/revocation.
+- Account page Trusted Offline Device controls.
 
-Important security change:
-The old service worker could fall back to a cached index.html while offline. Once mandatory authentication is enabled, that would allow a stale cached operational shell to bypass the server gate. v5.26.7 removes protected app/performance data from offline caching and makes protected navigation/API/data network-only.
+Security:
+- This build establishes signed device authorization only.
+- It does NOT yet re-enable the protected operational offline shell.
+- Service worker remains network-only for protected FlightOps navigation/APIs/data.
+- Next build can verify the signed grant before serving an offline operational shell.
 
-Therefore:
-- Secure offline operational mode is TEMPORARILY LOCKED in v5.26.7.
-- This is intentional, not a regression to be ignored.
-- A later build should restore offline capability only with explicit device authorization and secure local-session controls.
-
-Deployment:
-ROOT /app
-- server.js
-- platform.js
-
-/app/public
-- index.html
-- account.html
-- sw.js
-- admin-users.html
-- invite.html
-- reset-password.html
-
-Steps:
-1. Replace server.js and platform.js in /app.
-2. Replace all six public files in /app/public.
+Deploy:
+1. /app: replace server.js and platform.js.
+2. /app/public: replace index.html, account.html, sw.js, admin-users.html, invite.html, reset-password.html.
 3. Restart Preview App.
-4. Hard refresh Ctrl+F5.
-5. Confirm Browser 5.26.7 / Server 5.26.7.
-6. Sign OUT.
-7. Navigate to the FlightOps root URL.
-8. Confirm automatic redirect to account.html.
-9. Sign in.
-10. Confirm automatic return to FlightOps.
-11. Open /api/diagnostics while signed out in a private window and confirm AUTH_REQUIRED.
-12. Confirm /api/health remains available.
-
-Configuration:
-- FLIGHTOPS_AUTH_REQUIRED now defaults to TRUE.
-- Setting FLIGHTOPS_AUTH_REQUIRED=false remains an emergency rollback switch.
+4. Ctrl+F5.
+5. Verify Browser 5.26.8 / Server 5.26.8.
+6. Sign in -> Account -> Authorize This Device.
+7. Confirm expiration appears, refresh and confirm it persists.
+8. Revoke, verify it clears, then authorize again for continued offline-shell testing.
