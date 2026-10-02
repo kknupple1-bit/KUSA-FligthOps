@@ -1,70 +1,31 @@
-const CACHE_NAME="kusa-flightops-public-v5.26.8";
-const PUBLIC_ASSETS=[
-  "/account.html",
-  "/invite.html",
-  "/reset-password.html",
-  "/manifest.webmanifest",
-  "/icons/icon-192.png",
-  "/icons/icon-512.png"
-];
-
-self.addEventListener("install",event=>{
-  event.waitUntil((async()=>{
-    const cache=await caches.open(CACHE_NAME);
-    for(const url of PUBLIC_ASSETS){
-      try{await cache.add(url)}catch(e){}
-    }
-  })());
-  self.skipWaiting();
-});
-
-self.addEventListener("activate",event=>{
-  event.waitUntil((async()=>{
-    for(const key of await caches.keys()){
-      if(key!==CACHE_NAME)await caches.delete(key);
-    }
-    await self.clients.claim();
-  })());
-});
-
-self.addEventListener("fetch",event=>{
-  const req=event.request;
-  if(req.method!=="GET")return;
-  const u=new URL(req.url);
-  if(u.origin!==self.location.origin)return;
-
-  // APIs and protected operational resources are always network-only.
-  if(u.pathname.startsWith("/api/") || u.pathname.startsWith("/data/")){
-    event.respondWith(fetch(req).catch(()=>new Response(
-      JSON.stringify({ok:false,offline:true,error:"NETWORK_REQUIRED"}),
-      {status:503,headers:{"Content-Type":"application/json"}}
-    )));
-    return;
-  }
-
-  // Navigations are network-only so an old cached FlightOps shell can never bypass
-  // the server-side authentication gate. Offline authenticated operations will be
-  // reintroduced only with an explicit device/offline authorization design.
-  if(req.mode==="navigate"){
-    event.respondWith(fetch(req).catch(()=>new Response(
-      `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KUSA FlightOps Offline</title></head><body style="font-family:Arial;background:#071b33;color:#e8f1fb;padding:32px"><h1>KUSA FlightOps</h1><p>Network connection is required for secure sign-in and operational access in v5.26.8.</p></body></html>`,
-      {status:503,headers:{"Content-Type":"text/html; charset=utf-8"}}
-    )));
-    return;
-  }
-
-  // Only public non-operational assets may use cache fallback.
-  event.respondWith((async()=>{
-    const cached=await caches.match(req);
-    try{
-      const r=await fetch(req);
-      if(r&&r.ok&&PUBLIC_ASSETS.some(x=>u.pathname===x||u.pathname.startsWith("/icons/"))){
-        const c=await caches.open(CACHE_NAME);
-        c.put(req,r.clone());
-      }
-      return r;
-    }catch(e){
-      return cached||new Response("Offline",{status:503});
-    }
-  })());
-});
+const BUILD="5.26.9";
+const PUBLIC_CACHE=`kusa-flightops-public-v${BUILD}`;
+const PROTECTED_CACHE=`kusa-flightops-protected-v${BUILD}`;
+const DB_NAME="kusa-flightops-offline", DB_VERSION=1, STORE="meta";
+const PUBLIC_ASSETS=["/account.html","/invite.html","/reset-password.html","/manifest.webmanifest","/icons/icon-192.png","/icons/icon-512.png"];
+const PROTECTED_SHELL=["/index.html","/manifest.webmanifest","/icons/icon-192.png","/icons/icon-512.png"];
+function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
+async function dbGet(k){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readonly"),r=tx.objectStore(STORE).get(k);r.onsuccess=()=>resolve(r.result??null);r.onerror=()=>reject(r.error)})}
+async function dbPut(k,v){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(v,k);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+async function dbDelete(k){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).delete(k);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
+function b64urlBytes(s){s=String(s||"").replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";const raw=atob(s);return Uint8Array.from(raw,c=>c.charCodeAt(0))}
+function b64urlJson(s){return JSON.parse(new TextDecoder().decode(b64urlBytes(s)))}
+function pemToDer(pem){const b64=String(pem||"").replace(/-----BEGIN PUBLIC KEY-----/g,"").replace(/-----END PUBLIC KEY-----/g,"").replace(/\s+/g,"");const raw=atob(b64);return Uint8Array.from(raw,c=>c.charCodeAt(0)).buffer}
+async function importPublicKey(pem){return crypto.subtle.importKey("spki",pemToDer(pem),{name:"ECDSA",namedCurve:"P-256"},false,["verify"])}
+async function verifyGrantRecord(r){try{if(!r?.token||!r?.public_key||!r?.device_key)return{ok:false,error:"MISSING_GRANT"};const parts=r.token.split('.');if(parts.length!==3)return{ok:false,error:"INVALID_TOKEN"};const[h,p,s]=parts,header=b64urlJson(h),payload=b64urlJson(p);if(header.alg!=="ES256"||header.typ!=="KUSA-OFFLINE")return{ok:false,error:"INVALID_HEADER"};const key=await importPublicKey(r.public_key);const valid=await crypto.subtle.verify({name:"ECDSA",hash:"SHA-256"},key,b64urlBytes(s),new TextEncoder().encode(`${h}.${p}`));if(!valid)return{ok:false,error:"BAD_SIGNATURE"};if(payload?.device?.key!==r.device_key)return{ok:false,error:"DEVICE_MISMATCH"};if(!payload.expires_at||Date.parse(payload.expires_at)<=Date.now())return{ok:false,error:"EXPIRED"};return{ok:true,payload}}catch(e){return{ok:false,error:String(e?.message||e||"VERIFY_FAILED")}}}
+async function currentGrant(){const r=await dbGet('grant');if(!r)return{ok:false,error:'NO_GRANT'};const v=await verifyGrantRecord(r);if(!v.ok&&v.error==='EXPIRED'){await dbDelete('grant');await caches.delete(PROTECTED_CACHE)}return{...v,record:r}}
+async function purgeProtected(){await dbDelete('grant');await caches.delete(PROTECTED_CACHE)}
+async function cacheProtectedFoundation(){const g=await currentGrant();if(!g.ok)return false;const c=await caches.open(PROTECTED_CACHE);for(const url of PROTECTED_SHELL){try{const r=await fetch(url,{credentials:'same-origin',cache:'no-store'});if(r.ok)await c.put(url,r.clone())}catch{}}for(const url of ['/api/me','/api/aircraft']){try{const r=await fetch(url,{credentials:'same-origin',cache:'no-store'});if(r.ok)await c.put(url,r.clone())}catch{}}return true}
+function offlineJson(error){return new Response(JSON.stringify({ok:false,offline:true,error}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
+function deniedHtml(msg){return new Response(`<!doctype html><html><body style="font-family:Arial;background:#071b33;color:#e8f1fb;padding:32px"><h1>KUSA FlightOps</h1><h2>Secure offline access unavailable</h2><p>${msg}</p><p>Reconnect and sign in to refresh this device authorization.</p></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}})}
+self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(PUBLIC_CACHE);for(const u of PUBLIC_ASSETS){try{await c.add(u)}catch{}}})());self.skipWaiting()});
+self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==PUBLIC_CACHE&&k!==PROTECTED_CACHE)await caches.delete(k);await self.clients.claim()})()));
+self.addEventListener('message',e=>{const m=e.data||{};if(m.type==='KUSA_OFFLINE_GRANT')e.waitUntil((async()=>{const r=m.grant||{},v=await verifyGrantRecord(r);if(!v.ok){await purgeProtected();return}await dbPut('grant',r);await caches.delete(PROTECTED_CACHE);await cacheProtectedFoundation()})());else if(m.type==='KUSA_OFFLINE_REVOKE')e.waitUntil(purgeProtected());else if(m.type==='KUSA_OFFLINE_REFRESH')e.waitUntil(cacheProtectedFoundation())});
+self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;const u=new URL(req.url);if(u.origin!==self.location.origin)return;
+ if(PUBLIC_ASSETS.includes(u.pathname)||u.pathname.startsWith('/icons/')){e.respondWith((async()=>{const c=await caches.open(PUBLIC_CACHE);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch{return(await c.match(req))||new Response('Offline',{status:503})}})());return}
+ if(u.pathname.startsWith('/api/weather')||u.pathname.startsWith('/api/notams')||u.pathname.startsWith('/api/runway')||u.pathname.startsWith('/api/diagnostics')||u.pathname.startsWith('/api/shared-trips')){e.respondWith(fetch(req).catch(()=>offlineJson('LIVE_DATA_NETWORK_REQUIRED')));return}
+ if(u.pathname.startsWith('/api/data/')||u.pathname.startsWith('/data/')){e.respondWith((async()=>{const g=await currentGrant();if(!g.ok)return fetch(req).catch(()=>offlineJson('OFFLINE_AUTH_REQUIRED'));const c=await caches.open(PROTECTED_CACHE);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch{return(await c.match(req))||offlineJson('OFFLINE_DATA_NOT_CACHED')}})());return}
+ if(u.pathname==='/api/me'||u.pathname==='/api/aircraft'){e.respondWith((async()=>{const g=await currentGrant();if(!g.ok)return fetch(req).catch(()=>offlineJson('OFFLINE_AUTH_REQUIRED'));const c=await caches.open(PROTECTED_CACHE);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch{return(await c.match(req))||offlineJson('OFFLINE_PROFILE_NOT_CACHED')}})());return}
+ if(u.pathname.startsWith('/api/')){e.respondWith(fetch(req).catch(()=>offlineJson('NETWORK_REQUIRED')));return}
+ if(req.mode==='navigate'){e.respondWith((async()=>{try{return await fetch(req)}catch{const g=await currentGrant();if(!g.ok)return deniedHtml('This browser does not have a valid signed offline authorization.');const c=await caches.open(PROTECTED_CACHE);return(await c.match('/index.html'))||deniedHtml('The protected FlightOps shell has not been cached yet.')}})());return}
+ e.respondWith((async()=>{const g=await currentGrant();try{const r=await fetch(req);if(g.ok&&r.ok){const c=await caches.open(PROTECTED_CACHE);await c.put(req,r.clone())}return r}catch{if(!g.ok)return new Response('Offline authorization required',{status:503});const c=await caches.open(PROTECTED_CACHE);return(await c.match(req))||new Response('Offline asset unavailable',{status:503})}})())});
