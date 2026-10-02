@@ -1,4 +1,4 @@
-const CACHE_NAME="kusa-flightops-public-v5.26.7";
+const CACHE_NAME="kusa-flightops-public-v5.26.8";
 const PUBLIC_ASSETS=[
   "/account.html",
   "/invite.html",
@@ -47,7 +47,7 @@ self.addEventListener("fetch",event=>{
   // reintroduced only with an explicit device/offline authorization design.
   if(req.mode==="navigate"){
     event.respondWith(fetch(req).catch(()=>new Response(
-      `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KUSA FlightOps Offline</title></head><body style="font-family:Arial;background:#071b33;color:#e8f1fb;padding:32px"><h1>KUSA FlightOps</h1><p>Network connection is required for secure sign-in and operational access in v5.26.7.</p></body></html>`,
+      `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>KUSA FlightOps Offline</title></head><body style="font-family:Arial;background:#071b33;color:#e8f1fb;padding:32px"><h1>KUSA FlightOps</h1><p>Network connection is required for secure sign-in and operational access in v5.26.8.</p></body></html>`,
       {status:503,headers:{"Content-Type":"text/html; charset=utf-8"}}
     )));
     return;
