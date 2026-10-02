@@ -22,7 +22,7 @@ button:disabled{opacity:.5}
 <body>
 <div class="wrap">
   <h1>KUSA FlightOps</h1>
-  <p class="sub">Invitation acceptance · v5.26.5</p>
+  <p class="sub">Invitation acceptance · v5.26.6</p>
   <div class="card">
     <div id="status" class="status">Validating invitation...</div>
     <div id="details" class="hidden">
@@ -32,14 +32,22 @@ button:disabled{opacity:.5}
       <p><strong>Aircraft:</strong> <span id="aircraft"></span></p>
       <p class="muted">Invitation expires <span id="expires"></span>.</p>
 
-      <label for="name">Your name</label>
-      <input id="name" autocomplete="name" placeholder="Full name">
+      <div id="newAccountFields">
+        <label for="name">Your name</label>
+        <input id="name" autocomplete="name" placeholder="Full name">
 
-      <label for="password">Create password</label>
-      <input id="password" type="password" autocomplete="new-password" placeholder="Minimum 12 characters">
+        <label for="password">Create password</label>
+        <input id="password" type="password" autocomplete="new-password" placeholder="Minimum 12 characters">
 
-      <label for="confirm">Confirm password</label>
-      <input id="confirm" type="password" autocomplete="new-password">
+        <label for="confirm">Confirm password</label>
+        <input id="confirm" type="password" autocomplete="new-password">
+      </div>
+
+      <div id="existingAccountFields" class="hidden">
+        <p class="muted">An existing FlightOps account was found for this email. Enter the current password to join this organization.</p>
+        <label for="currentPassword">Current password</label>
+        <input id="currentPassword" type="password" autocomplete="current-password">
+      </div>
 
       <button id="accept">Create Account & Sign In</button>
     </div>
@@ -75,6 +83,15 @@ async function validate(){
     $('role').textContent=invitation.role;
     $('expires').textContent=new Date(invitation.expires_at).toLocaleString();
     $('aircraft').innerHTML=(invitation.aircraft||[]).map(a=>`<span class="pill">${a.registration} · ${a.model}</span>`).join('')||'<span class="muted">No explicit aircraft assignment.</span>';
+    if(invitation.existing_account){
+      $('newAccountFields').classList.add('hidden');
+      $('existingAccountFields').classList.remove('hidden');
+      $('accept').textContent='Join KUSA & Sign In';
+    }else{
+      $('newAccountFields').classList.remove('hidden');
+      $('existingAccountFields').classList.add('hidden');
+      $('accept').textContent='Create Account & Sign In';
+    }
     $('details').classList.remove('hidden');
   }catch(e){
     const map={INVITATION_EXPIRED:'This invitation has expired.',INVITATION_REVOKED:'This invitation has been revoked.',INVITATION_ALREADY_ACCEPTED:'This invitation has already been used.',INVITATION_NOT_FOUND:'This invitation is invalid.'};
@@ -82,21 +99,40 @@ async function validate(){
   }
 }
 $('accept').onclick=async()=>{
-  const display_name=$('name').value.trim(),password=$('password').value,confirm=$('confirm').value;
-  if(password!==confirm)return fail('Passwords do not match.');
-  if(password.length<12)return fail('Password must be at least 12 characters.');
-  if(display_name.length<2)return fail('Enter your name.');
   $('accept').disabled=true;
   try{
-    const j=await getJson(`/api/invitations/${encodeURIComponent(token)}/accept`,{method:'POST',body:JSON.stringify({display_name,password})});
-    $('status').className='status ok';$('status').textContent='Account created. You are signed in.';
+    let body={};
+    if(invitation?.existing_account){
+      const current_password=$('currentPassword').value;
+      if(!current_password)throw Object.assign(new Error('Enter the current password.'),{code:'CURRENT_PASSWORD_REQUIRED'});
+      body={current_password};
+    }else{
+      const display_name=$('name').value.trim(),password=$('password').value,confirm=$('confirm').value;
+      if(password!==confirm)throw Object.assign(new Error('Passwords do not match.'),{code:'PASSWORD_MISMATCH'});
+      if(password.length<12)throw Object.assign(new Error('Password must be at least 12 characters.'),{code:'PASSWORD_TOO_SHORT'});
+      if(display_name.length<2)throw Object.assign(new Error('Enter your name.'),{code:'INVALID_DISPLAY_NAME'});
+      body={display_name,password};
+    }
+    const j=await getJson(`/api/invitations/${encodeURIComponent(token)}/accept`,{method:'POST',body:JSON.stringify(body)});
+    $('status').className='status ok';
+    $('status').textContent=j.existing_account?'Organization access added. You are signed in.':'Account created. You are signed in.';
     setTimeout(()=>{location.href=j.redirect||'/'},700);
   }catch(e){
-    const map={ACCOUNT_ALREADY_EXISTS:'An account already exists for this email. Contact the KUSA administrator.',PASSWORD_TOO_SHORT:'Password must be at least 12 characters.',INVITATION_ALREADY_ACCEPTED:'This invitation has already been used.'};
-    $('status').className='status bad';$('status').textContent=map[e.code]||`Unable to create account: ${e.code||e.message}`;
+    const map={
+      INVALID_CREDENTIALS:'The current password is incorrect.',
+      ACCOUNT_NOT_ACTIVE:'This FlightOps account is not active.',
+      PASSWORD_TOO_SHORT:'Password must be at least 12 characters.',
+      INVITATION_ALREADY_ACCEPTED:'This invitation has already been used.',
+      USER_ALREADY_MEMBER:'This account already belongs to this organization.',
+      PASSWORD_MISMATCH:'Passwords do not match.',
+      INVALID_DISPLAY_NAME:'Enter your name.',
+      CURRENT_PASSWORD_REQUIRED:'Enter the current password.'
+    };
+    $('status').className='status bad';
+    $('status').textContent=map[e.code]||`Unable to accept invitation: ${e.code||e.message}`;
     $('accept').disabled=false;
   }
-};
+}
 validate();
 </script>
 </body>

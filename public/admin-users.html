@@ -40,9 +40,9 @@ pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;b
   <div class="top">
     <div>
       <h1>KUSA FlightOps — User Administration</h1>
-      <p class="sub">v5.26.5 controlled administrator actions with server-side authorization and audit logging.</p>
+      <p class="sub">v5.26.6 controlled administrator actions with server-side authorization and audit logging.</p>
     </div>
-    <div class="badge">v5.26.5</div>
+    <div class="badge">v5.26.6</div>
   </div>
 
   <div class="toolbar">
@@ -58,7 +58,7 @@ pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;b
 
   <div class="card">
     <h3>Create Invitation</h3>
-    <div class="notice">v5.26.5 creates the server-side invitation securely, but does not email it or accept it yet. The one-time token is shown only for controlled testing.</div>
+    <div class="notice">v5.26.6 creates secure invitation links and supports both new-account and existing-account acceptance. Automatic email delivery is not enabled yet.</div>
     <div class="grid" style="margin-top:12px">
       <div><label>Email</label><input id="inviteEmail" type="email" placeholder="pilot@example.com"></div>
       <div><label>Role</label><select id="inviteRole"><option value="pilot">Pilot</option><option value="viewer">Viewer</option><option value="aircraft_manager">Aircraft Manager</option><option value="administrator">Administrator</option></select></div>
@@ -141,7 +141,7 @@ function renderUsers(){
       <td>${checks||pills(effective)}<br>${['administrator','aircraft_manager'].includes(u.role)?'<span class="muted">Role grants all active aircraft in this organization.</span>':'<button data-action="aircraft" style="margin-top:6px">Save Aircraft</button>'}</td>
       <td>${fmt(u.last_seen_at)}</td>
       <td>${esc(u.active_session_count)}</td>
-      <td><div class="actions">${statusBtn}<button class="warn" data-action="revoke" ${self?'disabled':''}>Revoke Sessions</button></div></td>
+      <td><div class="actions">${statusBtn}<button class="warn" data-action="revoke" ${self?'disabled':''}>Revoke Sessions</button><button data-action="reset">Password Reset</button></div></td>
     </tr>`;
   }).join('')||'<tr><td colspan="7" class="muted">No users found.</td></tr>';
 }
@@ -163,6 +163,18 @@ async function handleAction(btn){
     }else if(action==='aircraft'){
       const ids=[...tr.querySelectorAll('[data-ac]:checked')].map(x=>x.dataset.ac);
       await api(`/api/admin/users/${encodeURIComponent(userId)}/aircraft-access`,{method:'PUT',body:JSON.stringify({organization_id:orgId,aircraft_ids:ids})});
+    }else if(action==='reset'){
+      if(!confirm('Create a 2-hour password reset link for this user?'))return;
+      const j=await api(`/api/admin/users/${encodeURIComponent(userId)}/password-reset`,{method:'POST',body:JSON.stringify({organization_id:orgId})});
+      const relative=j.reset?.reset_path||'';
+      let full='';
+      if(relative){
+        const u=new URL(relative,location.origin);
+        const previewShareToken=new URLSearchParams(location.search).get('airoShareToken');
+        if(previewShareToken) u.searchParams.set('airoShareToken',previewShareToken);
+        full=u.toString();
+      }
+      prompt('Copy this password reset link. It expires in 2 hours:',full);
     }
     await load();
   }catch(e){
