@@ -34,7 +34,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.5 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.6 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -110,6 +110,18 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
   created_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS admin_audit_org_created_idx ON admin_audit_log(organization_id,created_at DESC);
+CREATE TABLE IF NOT EXISTS password_resets (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  organization_id TEXT REFERENCES organizations(id) ON DELETE SET NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  expires_at TEXT NOT NULL,
+  used_at TEXT,
+  revoked_at TEXT,
+  created_by_user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS password_resets_user_created_idx ON password_resets(user_id,created_at DESC);
 `);
   // v5.26.5 migration-safe invitation payload extension.
   try{
@@ -240,7 +252,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.5'}={}){
+function installPlatform(app,{build='5.26.6'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -529,6 +541,7 @@ function installPlatform(app,{build='5.26.5'}={}){
       ? state.db.prepare(`SELECT id,registration,model FROM aircraft WHERE organization_id=? AND id IN (${aircraftIds.map(()=>'?').join(',')}) ORDER BY registration`).all(inv.organization_id,...aircraftIds)
       : [];
 
+    const existingUser=state.db.prepare('SELECT id,status,display_name FROM users WHERE email=?').get(inv.email);
     res.json({
       ok:true,
       invitation:{
@@ -537,7 +550,10 @@ function installPlatform(app,{build='5.26.5'}={}){
         organization_id:inv.organization_id,
         organization_name:inv.organization_name,
         expires_at:inv.expires_at,
-        aircraft
+        aircraft,
+        existing_account:!!existingUser,
+        existing_account_status:existingUser?.status||null,
+        existing_display_name:existingUser?.display_name||null
       }
     });
   });
@@ -558,20 +574,87 @@ function installPlatform(app,{build='5.26.5'}={}){
     if(inv.accepted_at) return res.status(410).json({ok:false,error:'INVITATION_ALREADY_ACCEPTED'});
     if(Date.parse(inv.expires_at)<=Date.now()) return res.status(410).json({ok:false,error:'INVITATION_EXPIRED'});
 
+    let aircraftIds=[];try{aircraftIds=JSON.parse(inv.aircraft_json||'[]')}catch{}
+    const role=normalizeRole(inv.role)||'pilot';
+    const now=isoNow();
+
+    const existingUser=state.db.prepare('SELECT * FROM users WHERE email=?').get(inv.email);
+
+    if(existingUser){
+      if(existingUser.status!=='active') return res.status(409).json({ok:false,error:'ACCOUNT_NOT_ACTIVE'});
+      const currentPassword=String(req.body?.current_password||'');
+      if(!currentPassword || !verifyPassword(currentPassword,existingUser.password_salt,existingUser.password_hash))
+        return res.status(401).json({ok:false,error:'INVALID_CREDENTIALS'});
+
+      const alreadyMember=state.db.prepare(
+        'SELECT id FROM memberships WHERE user_id=? AND organization_id=?'
+      ).get(existingUser.id,inv.organization_id);
+      if(alreadyMember) return res.status(409).json({ok:false,error:'USER_ALREADY_MEMBER'});
+
+      state.db.exec('BEGIN IMMEDIATE');
+      try{
+        state.db.prepare(`
+          INSERT INTO memberships(id,organization_id,user_id,role,created_at)
+          VALUES(?,?,?,?,?)
+        `).run(id('mem'),inv.organization_id,existingUser.id,role,now);
+
+        if(!['administrator','aircraft_manager'].includes(role)){
+          const valid=state.db.prepare(
+            "SELECT id FROM aircraft WHERE organization_id=? AND status='active'"
+          ).all(inv.organization_id);
+          const validIds=new Set(valid.map(x=>x.id));
+          const ins=state.db.prepare(
+            'INSERT OR IGNORE INTO aircraft_access(id,aircraft_id,user_id,access_role,created_at) VALUES(?,?,?,?,?)'
+          );
+          for(const aircraftId of aircraftIds){
+            if(validIds.has(aircraftId)) ins.run(id('aac'),aircraftId,existingUser.id,'pilot',now);
+          }
+        }
+
+        state.db.prepare(`
+          UPDATE invitations SET accepted_at=?,accepted_user_id=? WHERE id=? AND accepted_at IS NULL
+        `).run(now,existingUser.id,inv.id);
+
+        state.db.prepare(`
+          INSERT INTO admin_audit_log(id,organization_id,actor_user_id,target_user_id,action,detail_json,created_at)
+          VALUES(?,?,?,?,?,?,?)
+        `).run(
+          id('aud'),inv.organization_id,inv.created_by_user_id,existingUser.id,'INVITATION_ACCEPTED_EXISTING',
+          JSON.stringify({invitation_id:inv.id,email:inv.email,role,aircraft_ids:aircraftIds}),now
+        );
+        state.db.exec('COMMIT');
+      }catch(e){
+        try{state.db.exec('ROLLBACK')}catch{}
+        throw e;
+      }
+
+      const raw=crypto.randomBytes(32).toString('base64url'),sid=id('ses'),exp=addDaysIso(SESSION_DAYS);
+      state.db.prepare(`
+        INSERT INTO sessions(id,user_id,token_hash,user_agent,ip,created_at,last_seen_at,expires_at)
+        VALUES(?,?,?,?,?,?,?,?)
+      `).run(
+        sid,existingUser.id,sha256(raw),
+        String(req.headers['user-agent']||'').slice(0,500),
+        String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'').split(',')[0].trim(),
+        now,now,exp
+      );
+      setSessionCookie(req,res,raw,exp);
+
+      return res.json({
+        ok:true,
+        existing_account:true,
+        user:{id:existingUser.id,email:existingUser.email,display_name:existingUser.display_name,status:existingUser.status},
+        memberships:membershipsFor(existingUser.id),
+        aircraft:allowedAircraft(existingUser.id),
+        redirect:'/'
+      });
+    }
+
     const displayName=String(req.body?.display_name||'').trim();
     const password=String(req.body?.password||'');
     if(displayName.length<2 || displayName.length>120) return res.status(400).json({ok:false,error:'INVALID_DISPLAY_NAME'});
     if(password.length<12) return res.status(400).json({ok:false,error:'PASSWORD_TOO_SHORT',minimum_length:12});
 
-    const existingUser=state.db.prepare('SELECT * FROM users WHERE email=?').get(inv.email);
-    if(existingUser) return res.status(409).json({
-      ok:false,error:'ACCOUNT_ALREADY_EXISTS',
-      message:'An account already exists for this email. Existing-account invitation acceptance is intentionally blocked in v5.26.5.'
-    });
-
-    const now=isoNow();
-    let aircraftIds=[];try{aircraftIds=JSON.parse(inv.aircraft_json||'[]')}catch{}
-    const role=normalizeRole(inv.role)||'pilot';
     const p=passwordRecord(password);
     const uid=id('usr');
 
@@ -601,9 +684,7 @@ function installPlatform(app,{build='5.26.5'}={}){
       }
 
       state.db.prepare(`
-        UPDATE invitations
-        SET accepted_at=?,accepted_user_id=?
-        WHERE id=? AND accepted_at IS NULL
+        UPDATE invitations SET accepted_at=?,accepted_user_id=? WHERE id=? AND accepted_at IS NULL
       `).run(now,uid,inv.id);
 
       state.db.prepare(`
@@ -620,7 +701,6 @@ function installPlatform(app,{build='5.26.5'}={}){
       throw e;
     }
 
-    // Establish a normal persistent session immediately after successful first-password setup.
     const raw=crypto.randomBytes(32).toString('base64url'),sid=id('ses'),exp=addDaysIso(SESSION_DAYS);
     state.db.prepare(`
       INSERT INTO sessions(id,user_id,token_hash,user_agent,ip,created_at,last_seen_at,expires_at)
@@ -636,11 +716,119 @@ function installPlatform(app,{build='5.26.5'}={}){
     const u=state.db.prepare('SELECT id,email,display_name,status FROM users WHERE id=?').get(uid);
     res.status(201).json({
       ok:true,
+      existing_account:false,
       user:u,
       memberships:membershipsFor(uid),
       aircraft:allowedAircraft(uid),
       redirect:'/'
     });
+  });
+
+
+  // v5.26.6 administrator-issued password recovery.
+  app.post('/api/admin/users/:userId/password-reset',requireAuth,requireAdministrator,(req,res)=>{
+    const targetUserId=String(req.params.userId||'');
+    const organizationId=String(req.body?.organization_id||'');
+    const membership=targetMembershipInAdminOrg(req,targetUserId,organizationId);
+    if(!membership) return res.status(404).json({ok:false,error:'USER_NOT_FOUND_IN_ADMIN_ORGANIZATION'});
+
+    const now=isoNow();
+    state.db.prepare(`
+      UPDATE password_resets SET revoked_at=?
+      WHERE user_id=? AND used_at IS NULL AND revoked_at IS NULL
+    `).run(now,targetUserId);
+
+    const rawToken=crypto.randomBytes(32).toString('base64url');
+    const resetId=id('pwd'),expiresAt=new Date(Date.now()+2*60*60*1000).toISOString();
+    state.db.prepare(`
+      INSERT INTO password_resets(id,user_id,organization_id,token_hash,expires_at,created_by_user_id,created_at)
+      VALUES(?,?,?,?,?,?,?)
+    `).run(resetId,targetUserId,organizationId,sha256(rawToken),expiresAt,req.flightopsSession.user_id,now);
+
+    writeAdminAudit(req,organizationId,targetUserId,'PASSWORD_RESET_CREATED',{reset_id:resetId,expires_at:expiresAt});
+    res.status(201).json({
+      ok:true,
+      reset:{
+        id:resetId,
+        user_id:targetUserId,
+        expires_at:expiresAt,
+        reset_path:`/reset-password.html?token=${encodeURIComponent(rawToken)}`
+      }
+    });
+  });
+
+  app.get('/api/password-resets/:token',(req,res)=>{
+    if(!state.ok) return res.status(503).json({ok:false,error:state.error});
+    const token=String(req.params.token||'');
+    if(token.length<20) return res.status(404).json({ok:false,error:'RESET_NOT_FOUND'});
+    const row=state.db.prepare(`
+      SELECT pr.*,u.email,u.display_name,u.status AS user_status,o.name AS organization_name
+      FROM password_resets pr
+      JOIN users u ON u.id=pr.user_id
+      LEFT JOIN organizations o ON o.id=pr.organization_id
+      WHERE pr.token_hash=?
+    `).get(sha256(token));
+    if(!row) return res.status(404).json({ok:false,error:'RESET_NOT_FOUND'});
+    if(row.revoked_at) return res.status(410).json({ok:false,error:'RESET_REVOKED'});
+    if(row.used_at) return res.status(410).json({ok:false,error:'RESET_ALREADY_USED'});
+    if(Date.parse(row.expires_at)<=Date.now()) return res.status(410).json({ok:false,error:'RESET_EXPIRED'});
+    if(row.user_status!=='active') return res.status(409).json({ok:false,error:'ACCOUNT_NOT_ACTIVE'});
+    res.json({ok:true,reset:{email:row.email,display_name:row.display_name,organization_name:row.organization_name,expires_at:row.expires_at}});
+  });
+
+  app.post('/api/password-resets/:token/accept',(req,res)=>{
+    if(!state.ok) return res.status(503).json({ok:false,error:state.error});
+    const token=String(req.params.token||'');
+    if(token.length<20) return res.status(404).json({ok:false,error:'RESET_NOT_FOUND'});
+    const row=state.db.prepare(`
+      SELECT pr.*,u.email,u.display_name,u.status AS user_status
+      FROM password_resets pr
+      JOIN users u ON u.id=pr.user_id
+      WHERE pr.token_hash=?
+    `).get(sha256(token));
+    if(!row) return res.status(404).json({ok:false,error:'RESET_NOT_FOUND'});
+    if(row.revoked_at) return res.status(410).json({ok:false,error:'RESET_REVOKED'});
+    if(row.used_at) return res.status(410).json({ok:false,error:'RESET_ALREADY_USED'});
+    if(Date.parse(row.expires_at)<=Date.now()) return res.status(410).json({ok:false,error:'RESET_EXPIRED'});
+    if(row.user_status!=='active') return res.status(409).json({ok:false,error:'ACCOUNT_NOT_ACTIVE'});
+
+    const password=String(req.body?.password||'');
+    if(password.length<12) return res.status(400).json({ok:false,error:'PASSWORD_TOO_SHORT',minimum_length:12});
+    const p=passwordRecord(password),now=isoNow();
+
+    state.db.exec('BEGIN IMMEDIATE');
+    try{
+      state.db.prepare('UPDATE users SET password_salt=?,password_hash=?,updated_at=? WHERE id=?')
+        .run(p.salt,p.hash,now,row.user_id);
+      state.db.prepare('UPDATE sessions SET revoked_at=? WHERE user_id=? AND revoked_at IS NULL')
+        .run(now,row.user_id);
+      state.db.prepare('UPDATE password_resets SET used_at=? WHERE id=?').run(now,row.id);
+      state.db.prepare(`
+        INSERT INTO admin_audit_log(id,organization_id,actor_user_id,target_user_id,action,detail_json,created_at)
+        VALUES(?,?,?,?,?,?,?)
+      `).run(
+        id('aud'),row.organization_id,row.created_by_user_id,row.user_id,'PASSWORD_RESET_COMPLETED',
+        JSON.stringify({reset_id:row.id}),now
+      );
+      state.db.exec('COMMIT');
+    }catch(e){
+      try{state.db.exec('ROLLBACK')}catch{}
+      throw e;
+    }
+
+    const raw=crypto.randomBytes(32).toString('base64url'),sid=id('ses'),exp=addDaysIso(SESSION_DAYS);
+    state.db.prepare(`
+      INSERT INTO sessions(id,user_id,token_hash,user_agent,ip,created_at,last_seen_at,expires_at)
+      VALUES(?,?,?,?,?,?,?,?)
+    `).run(
+      sid,row.user_id,sha256(raw),
+      String(req.headers['user-agent']||'').slice(0,500),
+      String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'').split(',')[0].trim(),
+      now,now,exp
+    );
+    setSessionCookie(req,res,raw,exp);
+
+    res.json({ok:true,redirect:'/'});
   });
 
   app.get('/api/admin/audit',requireAuth,requireAdministrator,(req,res)=>{

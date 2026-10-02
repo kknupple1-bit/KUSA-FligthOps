@@ -1,19 +1,45 @@
-KUSA FlightOps v5.26.5 — Preview Invitation Link Hotfix
+KUSA FlightOps v5.26.6 deployment patch
 
-Purpose:
-- Fixes invite links opened in a private/incognito browser against GoDaddy/Airo Preview.
-- Preserves the preview `airoShareToken` in generated invitation links.
-- Also forwards the same preview token on invitation API validation/acceptance requests.
-- No change to production invitation security. The FlightOps invitation token remains separate from the Airo preview-access token.
+ROOT /app:
+- server.js
+- platform.js
+
+/app/public:
+- index.html
+- account.html
+- sw.js
+- admin-users.html
+- invite.html
+- reset-password.html
+
+v5.26.6:
+1. Existing-account invitation handling
+   - Invite validation now detects whether the email already has a FlightOps account.
+   - Existing users authenticate with their current password.
+   - Successful acceptance adds the organization membership and initial aircraft access without creating a duplicate user.
+   - New users still use the first-password setup flow.
+   - Audit records distinguish INVITATION_ACCEPTED_EXISTING from INVITATION_ACCEPTED.
+
+2. Administrator-issued password recovery
+   - Admin can create a one-time reset link from the user roster.
+   - Reset tokens are stored only as SHA-256 hashes.
+   - Reset links expire after 2 hours.
+   - Creating a new reset revokes prior unused reset links for that user.
+   - Completing reset revokes all prior active sessions, updates the password, marks token used, logs PASSWORD_RESET_COMPLETED, and signs the user in with a fresh session.
+
+3. UI cleanup
+   - Invitation banner now accurately states that acceptance is enabled.
+   - Password Reset control added to admin users page.
+   - Airo preview share token is preserved in generated reset links.
+
+Not yet enabled:
+- Automatic email delivery of invitations/reset links.
+- Self-service "forgot password" email workflow.
+- FlightOps MFA.
 
 Deploy:
-1. /app: overwrite server.js and platform.js.
-2. /app/public: overwrite index.html, account.html, sw.js, admin-users.html, invite.html.
+1. /app: replace server.js and platform.js.
+2. /app/public: replace index.html, account.html, sw.js, admin-users.html, invite.html; add reset-password.html.
 3. Restart Preview App.
 4. Ctrl+F5.
-5. Verify Browser 5.26.5 / Server 5.26.5.
-6. Create a NEW test invitation from admin-users.html.
-7. Copy the generated link. It should contain BOTH:
-   ?token=<flightops invitation token>
-   &airoShareToken=<preview share token>
-8. Open that link in Incognito/Private mode and complete account setup.
+5. Verify Browser 5.26.6 / Server 5.26.6.
