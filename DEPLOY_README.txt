@@ -1,16 +1,31 @@
-KUSA FlightOps v5.26.11 — Account Navigation Hotfix
+KUSA FlightOps v5.26.12 — Offline Draft Queue + Cloud Mission Sync
 
-Fix:
-- Account page now has an always-visible "Back to FlightOps" button.
-- The button respects the original ?next= destination when present.
-- Preview share-token compatibility is preserved only on preview hosts.
-- Existing "Continue to FlightOps" and "User Administration" controls remain unchanged.
+Adds:
+- Immediate local draft save remains unchanged.
+- Each local draft save is queued to the authenticated server-backed missions store.
+- Online: automatic cloud sync.
+- Offline: edits queue locally and sync automatically when network returns.
+- First sync creates a server mission.
+- Later syncs use server revision control.
+- Revision conflicts do not overwrite either side silently; the local copy is preserved and the UI shows CLOUD SYNC CONFLICT.
+- Completing a mission locally queues the server archive action.
+- Offline archive actions synchronize after reconnect.
+- Falcon 50 and Falcon 900B draft restores retain their server mission ID/revision.
 
-Deploy:
-1. /app: replace server.js and platform.js.
-2. /app/public: replace index.html, account.html, sw.js, admin-users.html, invite.html, reset-password.html.
-3. Restart Preview App.
-4. Ctrl+F5.
-5. Verify Browser 5.26.11 / Server 5.26.11.
-6. Click Account from FlightOps.
-7. Confirm "Back to FlightOps" returns directly to the app.
+New status:
+- CLOUD SYNCED
+- CLOUD SYNC PENDING
+- OFFLINE • N CHANGES QUEUED
+- SIGN IN REQUIRED FOR CLOUD SYNC
+- CLOUD SYNC CONFLICT
+
+Acceptance test:
+1. Online: create/load mission and make a harmless change.
+2. Wait for local draft save; expect CLOUD SYNCED.
+3. Disconnect network.
+4. Change seating/fuel/baggage; expect OFFLINE • N CHANGES QUEUED.
+5. Reconnect; expect NETWORK RESTORED • SYNCING… then CLOUD SYNCED.
+6. Archive a test mission while offline, reconnect, and confirm the queue clears.
+
+Permanent-link note:
+A token-free saved link still requires publishing/binding FlightOps to a permanent KUSA production/custom-domain URL. The Airo private Preview token is hosting-layer security and cannot be removed by application code.
