@@ -22,7 +22,7 @@ button:disabled{opacity:.5}
 <body>
 <div class="wrap">
   <h1>KUSA FlightOps</h1>
-  <p class="sub">Invitation acceptance · v5.26.9</p>
+  <p class="sub">Invitation acceptance · v5.26.10</p>
   <div class="card">
     <div id="status" class="status">Validating invitation...</div>
     <div id="details" class="hidden">
@@ -59,7 +59,7 @@ const token=new URLSearchParams(location.search).get('token')||'';
 let invitation=null;
 
 function withPreviewShareToken(url){
-  const share=new URLSearchParams(location.search).get('airoShareToken');
+  const share=location.hostname.includes('.preview.')?new URLSearchParams(location.search).get('airoShareToken'):null;
   if(!share)return url;
   const u=new URL(url,location.origin);
   u.searchParams.set('airoShareToken',share);

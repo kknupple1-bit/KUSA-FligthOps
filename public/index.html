@@ -1193,7 +1193,7 @@ details summary{cursor:pointer;margin-top:8px}
 </head>
 <body>
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.9</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.10</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1310,7 +1310,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="mission-actionbar">
 <button onclick="showPlatformView('home')" type="button">← Menu</button>
 <button onclick="completeMission()" type="button">Complete &amp; Archive Flight Plan</button>
-<span class="small" id="draftSaveStatus" style="align-self:center;margin-left:6px">Draft not started</span>
+<span class="small" id="draftSaveStatus" style="align-self:center;margin-left:6px">Draft not started</span><span class="small warn" id="offlineMissionReadiness" style="align-self:center;margin-left:10px">NOT OFFLINE READY — LOAD / REFRESH MISSION ONLINE</span>
 </div>
 <div class="card" id="missionSetupSection">
 <h2>1. Mission Setup</h2>
@@ -4749,6 +4749,55 @@ function getMissionDrafts(){
 }
 function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.stringify(arr));updateHomeDraftCount()}
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
+
+const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.10";
+const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.10";
+function offlineMissionRouteKey(dep,dest,alt=""){
+  return [cleanICAO(dep),cleanICAO(dest),cleanICAO(alt)].join("|");
+}
+function getOfflineMissionPackages(){
+  try{return JSON.parse(localStorage.getItem(OFFLINE_MISSION_PACKAGE_KEY)||"{}")}catch{return{}}
+}
+function saveOfflineMissionPackage(dep,dest,alt,data){
+  if(!data)return null;
+  const key=offlineMissionRouteKey(dep,dest,alt);
+  if(!key.replace(/\|/g,""))return null;
+  const db=getOfflineMissionPackages();
+  db[key]={route_key:key,dep:cleanICAO(dep),dest:cleanICAO(dest),alt:cleanICAO(alt),saved_at:new Date().toISOString(),data:JSON.parse(JSON.stringify(data))};
+  const entries=Object.values(db).sort((a,b)=>String(b.saved_at).localeCompare(String(a.saved_at))).slice(0,25);
+  const trimmed=Object.fromEntries(entries.map(x=>[x.route_key,x]));
+  try{localStorage.setItem(OFFLINE_MISSION_PACKAGE_KEY,JSON.stringify(trimmed))}catch(e){}
+  updateOfflineReadiness();
+  return trimmed[key]||db[key];
+}
+function getOfflineMissionPackage(dep,dest,alt=""){
+  const key=offlineMissionRouteKey(dep,dest,alt),db=getOfflineMissionPackages();
+  return db[key]||null;
+}
+function currentOfflineMissionPackage(){
+  if(!missionData)return null;
+  return {
+    saved_at:new Date().toISOString(),
+    dep:cleanICAO($("dep")?.value||""),
+    dest:cleanICAO($("dest")?.value||""),
+    alt:cleanICAO($("alt")?.value||""),
+    data:JSON.parse(JSON.stringify(missionData))
+  };
+}
+function updateOfflineReadiness(){
+  const el=$("offlineMissionReadiness");
+  if(!el)return;
+  const dep=cleanICAO($("dep")?.value||""),dest=cleanICAO($("dest")?.value||""),alt=cleanICAO($("alt")?.value||"");
+  const pkg=getOfflineMissionPackage(dep,dest,alt);
+  const draft=window.currentMissionMeta&&!window.currentMissionMeta.completed;
+  if(draft&&pkg){
+    el.textContent=`OFFLINE READY — MISSION CACHED ${pkg.saved_at?new Date(pkg.saved_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}):""}`;
+    el.className="ok";
+  }else{
+    el.textContent="NOT OFFLINE READY — LOAD / REFRESH MISSION ONLINE";
+    el.className="warn";
+  }
+}
 let draftSaveTimer=null;
 
 function captureF900BPlanState(){
@@ -4768,7 +4817,8 @@ function captureF900BPlanState(){
      takeoff_runway_ft:val("f9mToRunway"),takeoff_pa_ft:val("f9mToPA"),takeoff_oat_c:val("f9mToTemp"),
      landing_anti_ice:val("f9mLdgAI"),landing_pa_ft:val("f9mLdgPA"),landing_oat_c:val("f9mLdgTemp"),
      landing_runway_ft:val("f9mLdgRunway"),landing_factor:val("f9mLdgFactor"),landing_mode:val("f9mLdgMode"),hyd2_flaps:val("f9mHyd2Flaps"),hyd2_airbrake:val("f9mHyd2Airbrake"),both_hyd_config:val("f9mBothHydConfig"),emergency_anti_ice:val("f9EmerAI")
-   }
+   },
+   offline_mission_package:currentOfflineMissionPackage()
  };
 }
 function applyF900BPlanState(state){
@@ -4808,8 +4858,11 @@ async function restoreF900BFlightPlan(record,opts={}){
  f9UpdateFOBVerificationUI();
  // v5.25.86 — draft resume always requires a fresh, deliberate FOB verification.
  if(opts.fromDraft&&$("f9mFOBVerifyText")){const e=$("f9mFOBVerifyText");e.textContent="FOB NOT VERIFIED";e.className="warn";}
+ window.__offlineMissionRestorePackage=s.offline_mission_package?.data?s.offline_mission_package:null;
  await f9LoadOperationalData(true);
+ window.__offlineMissionRestorePackage=null;
  saveCurrentDraft();
+ updateOfflineReadiness();
 }
 function draftRecord(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return null;
@@ -4824,6 +4877,10 @@ function saveCurrentDraft(){
  const rec=draftRecord();if(!rec)return;
  const arr=getMissionDrafts();const ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionDrafts(arr.slice(0,50));
+ try{localStorage.setItem(OFFLINE_LAST_ACTIVE_KEY,String(rec.id||""))}catch(e){}
+ const pkg=rec.state?.offline_mission_package;
+ if(pkg?.data)saveOfflineMissionPackage(pkg.dep||rec.dep,pkg.dest||rec.dest,pkg.alt||rec.alt,pkg.data);
+ updateOfflineReadiness();
  const txt=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
  const e=$("draftSaveStatus");if(e)e.textContent=txt; const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt; const f9=$("f9mDraftStatus");if(f9&&(window.currentMissionMeta?.aircraft==="F900B"))f9.textContent=txt;
 }
@@ -5252,6 +5309,7 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||$("homeTripNot
      runway_length:valueOrNull("manualTORwyLen")
    },
    manual_weather:JSON.parse(JSON.stringify(manualWeather||{})),
+   offline_mission_package:currentOfflineMissionPackage(),
    fob_verified:!!$("fobVerified")?.checked,
    low_fuel_confirmed:!!$("lowFuelConfirm")?.checked
  };
@@ -5342,7 +5400,10 @@ note:s.note||record.note||"",
  recalculate();updateFOBVerifyLabel();
  if(opts.fromDraft)markDraftFOBReverify();
  showPlatformView("ops");
- try{await loadMission()}catch(e){}
+ const restoredPackage=s.offline_mission_package?.data?s.offline_mission_package:null;
+ try{await loadMission({offlinePackage:restoredPackage,preserveManualWeather:true})}catch(e){
+   if(!navigator.onLine&&$("missionStatus"))$("missionStatus").innerHTML='<span class="bad">OFFLINE PACKAGE UNAVAILABLE.</span> Reconnect and Load / Refresh Mission once before offline use.';
+ }
  setTimeout(()=>{
    selectArchivedRunway("depRunway",s.dep_runway_id||record.dep_runway);
    selectArchivedRunway("destRunway",s.dest_runway_id||record.dest_runway);
@@ -6798,6 +6859,7 @@ function selectedRunwayChanged(whichChanged=null){
 }
 
 async function loadMission(options={}){
+ if(!options.offlinePackage&&window.__offlineMissionRestorePackage)options={...options,offlinePackage:window.__offlineMissionRestorePackage};
  const priorDepRunwayValue=$("depRunway")?.value||"",priorDestRunwayValue=$("destRunway")?.value||"";
  const priorDepRunwayId=selectedRunwayObj("dep")?.runway_id||window.currentMissionMeta?.dep_runway_id||null;
  const priorDestRunwayId=selectedRunwayObj("dest")?.runway_id||window.currentMissionMeta?.dest_runway_id||null;
@@ -6807,7 +6869,19 @@ async function loadMission(options={}){
  $("dep").value=dep;$("dest").value=dest;$("alt").value=alt;if(!quiet)$("missionStatus").textContent="Loading airport and weather data...";
  try{
    const altQuery=alt?`&alt=${encodeURIComponent(alt)}`:"";
-   const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}${altQuery}&_=${Date.now()}`),{cache:"no-store"});if(!r.ok)throw new Error(await r.text());missionData=await r.json();
+   let missionLoadedFromCache=false,networkMissionError=null;
+   try{
+     const r=await fetch(apiUrl(`/api/mission?dep=${encodeURIComponent(dep)}&dest=${encodeURIComponent(dest)}${altQuery}&_=${Date.now()}`),{cache:"no-store"});
+     if(!r.ok)throw new Error(await r.text());
+     missionData=await r.json();
+     saveOfflineMissionPackage(dep,dest,alt,missionData);
+   }catch(fetchError){
+     networkMissionError=fetchError;
+     const packaged=options.offlinePackage?.data?options.offlinePackage:getOfflineMissionPackage(dep,dest,alt);
+     if(!packaged?.data)throw fetchError;
+     missionData=JSON.parse(JSON.stringify(packaged.data));
+     missionLoadedFromCache=true;
+   }
    manualWeather=savedManual||{dep:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null},dest:{mode:"LIVE",applied:false,entered_at:null,note:"",live:null,manual_values:null}};
    if(savedManual){
      ["dep","dest"].forEach(which=>{const p=which==="dep"?missionData.departure:missionData.destination,st=manualWeather[which];st.live={metar:p?.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p?.pressure_altitude_ft??null,density_altitude_ft:p?.density_altitude_ft??null,altimeter_inhg:p?.altimeter_inhg??null};st.mode="LIVE";st.applied=false;});
@@ -6849,7 +6923,12 @@ async function loadMission(options={}){
    $("sumRunwaySource").textContent=sourceLabel;$("sumRunwaySource").className=depCount||destCount?"ok":"warn";
    selectedRunwayChanged();recalculate();populateFallbackRunwayOptions();updateWeatherSourceBadges();loadManualWeatherForm();
    setTimeout(()=>{refreshDepartureNotams(true).catch(()=>{});refreshNotams().catch(()=>{});},150);
-   if(!quiet)$("missionStatus").innerHTML=depCount||destCount?`<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). Pilot-selected runway preserved when available; otherwise best available runway auto-selected.`:`<span class="warn">Weather request completed, but no runway data was returned from the packaged cache or the nationwide FAA NASR-derived lookup for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
+   updateOfflineReadiness();
+   if(!quiet)$("missionStatus").innerHTML=depCount||destCount
+     ? (missionLoadedFromCache
+        ? `<span class="warn">OFFLINE MISSION RESTORED.</span> Cached runway/mission package loaded for ${dep} → ${dest}. Live weather/NOTAM/NASR updates are unavailable until network returns.`
+        : `<span class="ok">Mission loaded.</span> Runway data: ${dep} ${depCount} (${depSrc}) • ${dest} ${destCount} (${destSrc}). <b>OFFLINE READY — MISSION CACHED.</b>`)
+     : `<span class="warn">Mission data loaded, but no runway data is available for ${dep} or ${dest}. Use the manual runway fallback and verify current airport data.</span>`;
  }catch(e){if(!quiet)$("missionStatus").innerHTML='<span class="bad">'+e+'</span>';throw e}
 }
 
@@ -7947,6 +8026,25 @@ async function fetchJsonWithTimeout(url,ms=8000){
  try{const r=await fetch(url,{cache:"no-store",signal:ctrl.signal});const j=await r.json();if(!r.ok)throw new Error(j?.message||`HTTP ${r.status}`);return j}
  finally{clearTimeout(t)}
 }
+async function autoResumeOfflineMission(){
+ if(navigator.onLine||window.currentMissionMeta)return false;
+ const drafts=getMissionDrafts();
+ if(!drafts.length)return false;
+ let wanted="";try{wanted=localStorage.getItem(OFFLINE_LAST_ACTIVE_KEY)||""}catch(e){}
+ let ix=wanted?drafts.findIndex(x=>String(x.id)===wanted):-1;
+ if(ix<0)ix=0;
+ const d=drafts[ix],pkg=d?.state?.offline_mission_package;
+ if(!pkg?.data)return false;
+ try{
+   await openDraftFlightPlan(ix);
+   if($("missionStatus"))$("missionStatus").innerHTML='<span class="warn">SECURE OFFLINE MISSION RESTORED.</span> Cached mission/runway/performance inputs loaded from this device.';
+   updateOfflineReadiness();
+   return true;
+ }catch(e){
+   console.warn("Offline mission auto-resume failed",e);
+   return false;
+ }
+}
 function refreshMenuCounts(){
  updateHomeDraftCount();updateHomeArchiveCount();
  // One deferred pass catches Safari/localStorage availability after initial paint/pageshow.
@@ -7954,7 +8052,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.9",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.10",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8008,12 +8106,29 @@ async function startupCheck(manual=false){
      if(notice&&buildOk&&runwayCount>0)notice.innerHTML='<span class="warn"><b>LOCAL DATA READY.</b> Live-service verification timed out; mission may continue with manual weather / independent NOTAM verification as required.</span>';
    }
  }catch(e){
-   if(bs){bs.textContent="SERVER UNAVAILABLE";bs.className="bad"}if(bn)bn.textContent="Could not verify server build.";
-   if(rs){rs.textContent="LOCAL APP ONLY";rs.className="warn"}if(rn)rn.textContent="Packaged runway cache status could not be verified.";
+   if(bs){bs.textContent="SERVER UNAVAILABLE";bs.className="bad"}if(bn)bn.textContent="Could not verify server build while offline.";
+   try{
+     const [f9,f9wb]=await Promise.all([loadF900BData(),loadF900BWB()]);
+     const perfReady=f9?.takeoff?.length===32&&f9?.landing?.length===8&&f9wb?.aircraft?.registration==="N699BG";
+     if(ps){ps.textContent=perfReady?"LOCAL DATA LOADED":"LOCAL DATA INCOMPLETE";ps.className=perfReady?"ok":"bad"}
+     if(pn)pn.textContent=perfReady?"Cached/embedded N33AP + N699BG performance/W&B data available on this trusted device.":"One or more deterministic performance datasets are not cached locally.";
+   }catch(perfOfflineError){
+     if(ps){ps.textContent="LOCAL DATA INCOMPLETE";ps.className="bad"}if(pn)pn.textContent=String(perfOfflineError?.message||perfOfflineError);
+   }
+   if(rs){rs.textContent="MISSION CACHE";rs.className="warn"}if(rn)rn.textContent="Runway availability comes from the saved Offline Mission Package; live FAA NASR is unavailable.";
    if(ls){ls.textContent="OFFLINE";ls.className="warn"}if(ln)ln.textContent="Live weather / FAA NMS unavailable";
-   if(notice)notice.innerHTML='<span class="warn"><b>OFFLINE MODE.</b> Embedded Performance + W&amp;B logic remains available after the app is loaded, but live weather, NOTAM, and FAA NASR requests are unavailable. Use manual inputs and independent source verification.</span>';
+   const dep=cleanICAO($("dep")?.value||""),dest=cleanICAO($("dest")?.value||""),alt=cleanICAO($("alt")?.value||"");
+   const pkg=getOfflineMissionPackage(dep,dest,alt);
+   if(notice)notice.innerHTML=pkg
+     ? '<span class="ok"><b>SECURE OFFLINE MODE • MISSION PACKAGE READY.</b></span> Cached mission, runway and deterministic performance inputs are available. Live weather, NOTAM and FAA NASR remain unavailable.'
+     : '<span class="warn"><b>SECURE OFFLINE MODE.</b> No active Offline Mission Package is loaded yet. Resume a cached draft or reconnect and Load / Refresh Mission once.';
  }
- finally{if(btn)btn.disabled=false;refreshMenuCounts()}
+ finally{
+   if(btn)btn.disabled=false;
+   refreshMenuCounts();
+   updateOfflineReadiness();
+   if(!navigator.onLine)setTimeout(()=>{autoResumeOfflineMission()},250);
+ }
 }
 
 document.querySelectorAll(".tap-seat[data-seat-index]").forEach(btn=>btn.addEventListener("click",()=>seatTapped(+btn.dataset.seatIndex)));
@@ -8075,7 +8190,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.9",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.10",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8161,6 +8276,6 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.9'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.10'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 </body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
