@@ -1193,7 +1193,7 @@ details summary{cursor:pointer;margin-top:8px}
 </head>
 <body>
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.11</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.12</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1310,7 +1310,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="mission-actionbar">
 <button onclick="showPlatformView('home')" type="button">← Menu</button>
 <button onclick="completeMission()" type="button">Complete &amp; Archive Flight Plan</button>
-<span class="small" id="draftSaveStatus" style="align-self:center;margin-left:6px">Draft not started</span><span class="small warn" id="offlineMissionReadiness" style="align-self:center;margin-left:10px">NOT OFFLINE READY — LOAD / REFRESH MISSION ONLINE</span>
+<span class="small" id="draftSaveStatus" style="align-self:center;margin-left:6px">Draft not started</span><span class="small warn" id="offlineMissionReadiness" style="align-self:center;margin-left:10px">NOT OFFLINE READY — LOAD / REFRESH MISSION ONLINE</span><span class="small warn" id="cloudSyncStatus" style="align-self:center;margin-left:10px">CLOUD SYNC PENDING</span>
 </div>
 <div class="card" id="missionSetupSection">
 <h2>1. Mission Setup</h2>
@@ -4750,8 +4750,128 @@ function getMissionDrafts(){
 function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.stringify(arr));updateHomeDraftCount()}
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
 
-const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.11";
-const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.11";
+
+const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v5.26.12";
+let missionSyncTimer=null;
+let aircraftDirectoryCache=null;
+
+function getMissionSyncQueue(){
+  try{return JSON.parse(localStorage.getItem(MISSION_SYNC_QUEUE_KEY)||"[]")}catch{return[]}
+}
+function saveMissionSyncQueue(q){
+  try{localStorage.setItem(MISSION_SYNC_QUEUE_KEY,JSON.stringify(q.slice(-100)))}catch{}
+  updateCloudSyncStatus();
+}
+function enqueueMissionSync(localId,action="upsert"){
+  if(!localId)return;
+  const q=getMissionSyncQueue().filter(x=>!(x.local_id===localId&&x.action===action));
+  q.push({local_id:localId,action,queued_at:new Date().toISOString()});
+  saveMissionSyncQueue(q);
+  if(navigator.onLine){
+    clearTimeout(missionSyncTimer);
+    missionSyncTimer=setTimeout(()=>flushMissionSyncQueue(),350);
+  }
+}
+function findLocalMissionRecord(id){
+  if(!id)return null;
+  return getMissionDrafts().find(x=>x.id===id)||getMissionArchive().find(x=>x.id===id)||null;
+}
+function updateLocalMissionRecord(id,patch){
+  const drafts=getMissionDrafts(),di=drafts.findIndex(x=>x.id===id);
+  if(di>=0){drafts[di]={...drafts[di],...patch};saveMissionDrafts(drafts)}
+  const arch=getMissionArchive(),ai=arch.findIndex(x=>x.id===id);
+  if(ai>=0){arch[ai]={...arch[ai],...patch};saveMissionArchive(arch)}
+  if(window.currentMissionMeta?.id===id)Object.assign(window.currentMissionMeta,patch);
+  updateCloudSyncStatus();
+}
+function updateCloudSyncStatus(text=null,kind=null){
+  const el=$("cloudSyncStatus");if(!el)return;
+  if(text){el.textContent=text;el.className="small "+(kind||"warn");return}
+  const q=getMissionSyncQueue();
+  const rec=window.currentMissionMeta?findLocalMissionRecord(window.currentMissionMeta.id):null;
+  if(rec?.server_sync_state==="conflict"){el.textContent="CLOUD SYNC CONFLICT";el.className="small bad"}
+  else if(!navigator.onLine){el.textContent=q.length?`OFFLINE • ${q.length} CHANGE${q.length===1?"":"S"} QUEUED`:"OFFLINE • LOCAL ONLY";el.className="small warn"}
+  else if(q.length){el.textContent=`CLOUD SYNC PENDING • ${q.length}`;el.className="small warn"}
+  else if(rec?.server_mission_id){el.textContent="CLOUD SYNCED";el.className="small ok"}
+  else{el.textContent="LOCAL DRAFT • NOT YET SYNCED";el.className="small warn"}
+}
+function aircraftRegistrationForSync(rec){
+  return (rec?.aircraft==="F900B"||rec?.registration==="N699BG")?"N699BG":"N33AP";
+}
+async function getAircraftDirectory(){
+  if(aircraftDirectoryCache)return aircraftDirectoryCache;
+  const r=await fetch("/api/aircraft",{credentials:"same-origin",cache:"no-store"});
+  if(!r.ok)throw Object.assign(new Error(r.status===401?"AUTH_REQUIRED":`AIRCRAFT_DIRECTORY_HTTP_${r.status}`),{status:r.status});
+  const j=await r.json();aircraftDirectoryCache=j.aircraft||[];return aircraftDirectoryCache;
+}
+function serverPayloadForRecord(rec){
+  return {local_mission_id:rec.id,local_updated_at:rec.updated_at||new Date().toISOString(),aircraft:rec.aircraft,registration:aircraftRegistrationForSync(rec),leg_number:rec.leg_number||1,note:rec.note||"",state:rec.state||{},archive_summary:rec.summary||null,completed_at:rec.completed_at||null};
+}
+async function createServerMissionForRecord(rec){
+  const directory=await getAircraftDirectory(),reg=aircraftRegistrationForSync(rec);
+  const ac=directory.find(a=>String(a.registration||"").toUpperCase()===reg);
+  if(!ac)throw new Error(`AIRCRAFT_NOT_AUTHORIZED_${reg}`);
+  const r=await fetch("/api/missions",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    aircraft_id:ac.id,trip_number:rec.trip_number||null,mission_date:rec.trip_date||null,
+    departure:rec.dep||null,destination:rec.dest||null,alternate:rec.alt||null,payload:serverPayloadForRecord(rec)
+  })});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok)throw Object.assign(new Error(j.error||`MISSION_CREATE_HTTP_${r.status}`),{code:j.error,status:r.status});
+  return j.mission;
+}
+async function updateServerMissionForRecord(rec){
+  const r=await fetch(`/api/missions/${encodeURIComponent(rec.server_mission_id)}`,{method:"PUT",credentials:"same-origin",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+    expected_revision:Number(rec.server_revision||1),trip_number:rec.trip_number||null,mission_date:rec.trip_date||null,
+    departure:rec.dep||null,destination:rec.dest||null,alternate:rec.alt||null,payload:serverPayloadForRecord(rec)
+  })});
+  const j=await r.json().catch(()=>({}));
+  if(r.status===409&&j.error==="REVISION_CONFLICT")throw Object.assign(new Error("REVISION_CONFLICT"),{code:"REVISION_CONFLICT",current_revision:j.current_revision});
+  if(!r.ok)throw Object.assign(new Error(j.error||`MISSION_UPDATE_HTTP_${r.status}`),{code:j.error,status:r.status});
+  return j.mission;
+}
+async function syncOneMissionQueueItem(item){
+  const rec=findLocalMissionRecord(item.local_id);
+  if(!rec)return {done:true};
+  if(!navigator.onLine)return {done:false};
+  updateCloudSyncStatus("SYNCING TO CLOUD…","warn");
+  try{
+    const serverMission=rec.server_mission_id?await updateServerMissionForRecord(rec):await createServerMissionForRecord(rec);
+    updateLocalMissionRecord(rec.id,{server_mission_id:serverMission.id,server_revision:serverMission.revision,server_synced_at:new Date().toISOString(),server_sync_state:"synced",server_sync_error:null});
+    if(item.action==="archive"){
+      const rr=await fetch(`/api/missions/${encodeURIComponent(serverMission.id)}/archive`,{method:"POST",credentials:"same-origin"});
+      const jj=await rr.json().catch(()=>({}));
+      if(!rr.ok)throw Object.assign(new Error(jj.error||`MISSION_ARCHIVE_HTTP_${rr.status}`),{code:jj.error,status:rr.status});
+      updateLocalMissionRecord(rec.id,{server_revision:jj.mission?.revision||serverMission.revision,server_archived_at:new Date().toISOString(),server_sync_state:"synced"});
+    }
+    return {done:true};
+  }catch(e){
+    if(e?.code==="REVISION_CONFLICT"){
+      updateLocalMissionRecord(rec.id,{server_sync_state:"conflict",server_sync_error:"REVISION_CONFLICT",server_current_revision:e.current_revision||null});
+      updateCloudSyncStatus("CLOUD SYNC CONFLICT — LOCAL COPY PRESERVED","bad");
+      return {done:true};
+    }
+    if(e?.status===401||e?.code==="AUTH_REQUIRED"){
+      updateLocalMissionRecord(rec.id,{server_sync_state:"auth_required",server_sync_error:"AUTH_REQUIRED"});
+      updateCloudSyncStatus("SIGN IN REQUIRED FOR CLOUD SYNC","warn");
+      return {done:false};
+    }
+    updateLocalMissionRecord(rec.id,{server_sync_state:"queued",server_sync_error:String(e?.code||e?.message||e)});
+    updateCloudSyncStatus("CLOUD SYNC PENDING","warn");
+    return {done:false};
+  }
+}
+async function flushMissionSyncQueue(){
+  if(!navigator.onLine){updateCloudSyncStatus();return}
+  const q=getMissionSyncQueue();if(!q.length){updateCloudSyncStatus();return}
+  const remaining=[];
+  for(const item of q){const result=await syncOneMissionQueueItem(item);if(!result.done)remaining.push(item)}
+  saveMissionSyncQueue(remaining);updateCloudSyncStatus();
+}
+window.addEventListener("online",()=>{aircraftDirectoryCache=null;updateCloudSyncStatus("NETWORK RESTORED • SYNCING…","warn");setTimeout(()=>flushMissionSyncQueue(),500)});
+window.addEventListener("offline",()=>updateCloudSyncStatus());
+
+const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.12";
+const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.12";
 function offlineMissionRouteKey(dep,dest,alt=""){
   return [cleanICAO(dep),cleanICAO(dest),cleanICAO(alt)].join("|");
 }
@@ -4852,7 +4972,7 @@ async function restoreF900BFlightPlan(record,opts={}){
  const state=record.state||record;
  applyF900BPlanState(state);
  const newId=opts.newCopy?newMissionId():(record.id||newMissionId());
- window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(record.trip_date||state.trip_date||(opts.newCopy?localISODate(new Date()):(record.started_at||new Date()))),trip_date:record.trip_date||state.trip_date||localISODate(new Date()),leg_number:record.leg_number||1,aircraft:"F900B",registration:record.registration||state.registration||aircraftRegistration("F900B"),note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy};syncActiveTripDateInputs();
+ window.currentMissionMeta={id:newId,trip_number:record.trip_number||allocateTripNumber(record.trip_date||state.trip_date||(opts.newCopy?localISODate(new Date()):(record.started_at||new Date()))),trip_date:record.trip_date||state.trip_date||localISODate(new Date()),leg_number:record.leg_number||1,aircraft:"F900B",registration:record.registration||state.registration||aircraftRegistration("F900B"),note:state.note||record.note||"",started_at:opts.newCopy?new Date().toISOString():(record.started_at||new Date().toISOString()),completed:false,reopened_from_draft:!!opts.fromDraft,imported_editable_copy:!!opts.newCopy,server_mission_id:opts.newCopy?null:(record.server_mission_id||null),server_revision:opts.newCopy?null:(record.server_revision||null),server_sync_state:opts.newCopy?null:(record.server_sync_state||null)};syncActiveTripDateInputs();
  if($("homeAircraft"))$("homeAircraft").value="F900B";
  showPlatformView("ops");
  f9UpdateFOBVerificationUI();
@@ -4874,15 +4994,19 @@ function draftRecord(){
  return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),trip_date:currentTripDate(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
 }
 function saveCurrentDraft(){
- const rec=draftRecord();if(!rec)return;
- const arr=getMissionDrafts();const ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
+ let rec=draftRecord();if(!rec)return;
+ const arr=getMissionDrafts(),ix=arr.findIndex(x=>x.id===rec.id),prior=ix>=0?arr[ix]:null;
+ if(prior)["server_mission_id","server_revision","server_synced_at","server_sync_state","server_sync_error","server_current_revision"].forEach(k=>{if(prior[k]!=null&&rec[k]==null)rec[k]=prior[k]});
+ if(rec.server_sync_state!=="conflict")rec.server_sync_state=navigator.onLine?"queued":"queued_offline";
+ if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
  saveMissionDrafts(arr.slice(0,50));
  try{localStorage.setItem(OFFLINE_LAST_ACTIVE_KEY,String(rec.id||""))}catch(e){}
  const pkg=rec.state?.offline_mission_package;
  if(pkg?.data)saveOfflineMissionPackage(pkg.dep||rec.dep,pkg.dest||rec.dest,pkg.alt||rec.alt,pkg.data);
- updateOfflineReadiness();
+ updateOfflineReadiness();enqueueMissionSync(rec.id,"upsert");
  const txt=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
- const e=$("draftSaveStatus");if(e)e.textContent=txt; const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt; const f9=$("f9mDraftStatus");if(f9&&(window.currentMissionMeta?.aircraft==="F900B"))f9.textContent=txt;
+ const e=$("draftSaveStatus");if(e)e.textContent=txt;const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt;const f9=$("f9mDraftStatus");if(f9&&(window.currentMissionMeta?.aircraft==="F900B"))f9.textContent=txt;
+ updateCloudSyncStatus();
 }
 function scheduleDraftSave(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
@@ -5473,6 +5597,11 @@ note:(window.currentMissionMeta&&window.currentMissionMeta.note)||state.note||""
    state
  };
 }
+function preserveServerSyncMetadata(rec){
+ const prior=findLocalMissionRecord(rec?.id);
+ if(prior)["server_mission_id","server_revision","server_synced_at","server_sync_state","server_sync_error","server_current_revision"].forEach(k=>{if(prior[k]!=null&&rec[k]==null)rec[k]=prior[k]});
+ return rec;
+}
 async function completeMission(){
  const isF900B=window.currentMissionMeta?.aircraft==="F900B";
  const dep=isF900B?cleanICAO($("f9mDep")?.value):cleanICAO($("dep").value),dest=isF900B?cleanICAO($("f9mDest")?.value):cleanICAO($("dest").value);
@@ -5480,8 +5609,8 @@ async function completeMission(){
  if(isF900B){
    syncF900BMissionToTOLD();await refreshF900BMission();
    if(!f9UpdateOperationalGate()){const ok=confirm("Falcon 900B operational verification gate is NOT READY.\n\nThis includes W&B/CG, FOB verification, weather/runway, or NOTAM review.\n\nArchive the flight plan anyway?");if(!ok)return;}
-   const rec=buildF900BArchiveRecord(),arr=getMissionArchive(),ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
-   saveMissionArchive(arr.slice(0,100));window.currentMissionMeta.completed=true;removeMissionDraft(window.currentMissionMeta.id);renderArchive();alert("Falcon 900B flight plan saved to Archive on this device/browser.");showPlatformView("archive");return;
+   const rec=preserveServerSyncMetadata(buildF900BArchiveRecord()),arr=getMissionArchive(),ix=arr.findIndex(x=>x.id===rec.id);if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
+   saveMissionArchive(arr.slice(0,100));enqueueMissionSync(rec.id,"archive");window.currentMissionMeta.completed=true;removeMissionDraft(window.currentMissionMeta.id);renderArchive();alert(navigator.onLine?"Falcon 900B flight plan saved locally and queued for cloud archive.":"Falcon 900B flight plan archived locally. Cloud archive will sync when network returns.");showPlatformView("archive");return;
  }
  const problems=[];
  if(!$("fobVerified")?.checked)problems.push("FOB is not verified");
@@ -5490,13 +5619,13 @@ async function completeMission(){
    const ok=confirm("Flight plan has unresolved safety confirmations:\n\n• "+problems.join("\n• ")+"\n\nArchive the flight plan anyway?");
    if(!ok)return;
  }
- const rec=buildArchiveRecord(),arr=getMissionArchive();
+ const rec=preserveServerSyncMetadata(buildArchiveRecord()),arr=getMissionArchive();
  const ix=arr.findIndex(x=>x.id===rec.id);
  if(ix>=0)arr[ix]=rec;else arr.unshift(rec);
- saveMissionArchive(arr.slice(0,100));
+ saveMissionArchive(arr.slice(0,100));enqueueMissionSync(rec.id,"archive");
  if(window.currentMissionMeta){window.currentMissionMeta.completed=true;removeMissionDraft(window.currentMissionMeta.id)}
  renderArchive();
- alert("Flight plan saved to Archive on this device/browser.");
+ alert(navigator.onLine?"Flight plan saved locally and queued for cloud archive.":"Flight plan archived locally. Cloud archive will sync when network returns.");
  showPlatformView("archive");
 }
 
@@ -5569,7 +5698,7 @@ async function openDraftFlightPlan(i){
  if($("fobVerified"))$("fobVerified").checked=false;
  if($("lowFuelConfirm"))$("lowFuelConfirm").checked=false;
  markDraftFOBReverify();
- window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true};syncActiveTripDateInputs();
+ window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true,server_mission_id:m.server_mission_id||null,server_revision:m.server_revision||null,server_sync_state:m.server_sync_state||null};syncActiveTripDateInputs();
  updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
 }
 function deleteDraftFlightPlan(i){const arr=getMissionDrafts(),m=arr[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"}?`))return;arr.splice(i,1);saveMissionDrafts(arr);renderDrafts()}
@@ -8046,13 +8175,13 @@ async function autoResumeOfflineMission(){
  }
 }
 function refreshMenuCounts(){
- updateHomeDraftCount();updateHomeArchiveCount();
+ updateHomeDraftCount();updateHomeArchiveCount();updateCloudSyncStatus();
  // One deferred pass catches Safari/localStorage availability after initial paint/pageshow.
  requestAnimationFrame(()=>{updateHomeDraftCount();updateHomeArchiveCount()});
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.11",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.12",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8190,7 +8319,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.11",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.12",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8276,6 +8405,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.11'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.12'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 

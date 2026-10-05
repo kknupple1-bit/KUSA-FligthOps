@@ -1,4 +1,4 @@
-const BUILD="5.26.11";
+const BUILD="5.26.12";
 const PUBLIC_CACHE=`kusa-flightops-public-v${BUILD}`;
 const PROTECTED_CACHE=`kusa-flightops-protected-v${BUILD}`;
 const DB_NAME="kusa-flightops-offline", DB_VERSION=1, STORE="meta";
