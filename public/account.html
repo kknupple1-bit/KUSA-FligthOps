@@ -24,7 +24,11 @@ button.secondary{background:#061829}button:disabled{opacity:.5;cursor:not-allowe
 <body>
 <div class="card">
   <h1>KUSA FlightOps</h1>
-  <p class="sub">Secure account access · v5.26.10</p>
+  <p class="sub">Secure account access · v5.26.11</p>
+
+  <div style="margin-bottom:14px">
+    <button id="backToApp" class="secondary" type="button">← Back to FlightOps</button>
+  </div>
 
   <div id="loginPane">
     <label for="email">Email</label>
@@ -97,7 +101,7 @@ async function postToServiceWorker(message){
 async function syncOfflineGrantToServiceWorker(){
   const g=offlineGrant();
   if(!g){await postToServiceWorker({type:'KUSA_OFFLINE_REVOKE'});return}
-  await postToServiceWorker({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.10'}});
+  await postToServiceWorker({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.11'}});
 }
 function renderOfflineState(){
   const g=offlineGrant();
@@ -156,6 +160,7 @@ $('login').onclick=async()=>{
   finally{$('login').disabled=false}
 };
 $('password').addEventListener('keydown',e=>{if(e.key==='Enter')$('login').click()});
+$('backToApp').onclick=()=>{location.href=preservePreview(next&&next!=='/account.html'?next:'/')};
 $('continueBtn').onclick=()=>{location.href=preservePreview(next&&next!=='/account.html'?next:'/')};
 $('adminBtn').onclick=()=>{location.href=preservePreview('/admin-users.html')};
 $('offlineEnroll').onclick=async()=>{
@@ -171,7 +176,7 @@ $('offlineEnroll').onclick=async()=>{
     if(!r.ok){setStatus(`Offline authorization failed: ${j.error||r.status}`,false);return}
     localStorage.setItem('kusa_offline_grant',JSON.stringify({
       token:j.grant.token,expires_at:j.grant.expires_at,device_id:j.device.id,device_key:j.device.key,
-      public_key:j.public_key,build:'5.26.10'
+      public_key:j.public_key,build:'5.26.11'
     }));
     await syncOfflineGrantToServiceWorker();
     renderOfflineState();

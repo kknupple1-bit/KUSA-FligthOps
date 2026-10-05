@@ -1193,7 +1193,7 @@ details summary{cursor:pointer;margin-top:8px}
 </head>
 <body>
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.10</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.11</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -4750,8 +4750,8 @@ function getMissionDrafts(){
 function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.stringify(arr));updateHomeDraftCount()}
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
 
-const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.10";
-const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.10";
+const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.11";
+const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.11";
 function offlineMissionRouteKey(dep,dest,alt=""){
   return [cleanICAO(dep),cleanICAO(dest),cleanICAO(alt)].join("|");
 }
@@ -8052,7 +8052,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.10",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.11",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8190,7 +8190,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.10",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.11",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8276,6 +8276,6 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.10'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.11'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 </body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
