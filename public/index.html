@@ -1195,7 +1195,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.13 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.14 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1217,7 +1217,7 @@ details summary{cursor:pointer;margin-top:8px}
   #toldView .told-speeds,#f900bView .told-speeds,#opsView .told-speeds,#f900bmissionView .told-speeds{grid-template-columns:1fr!important}
 }
 </style>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.13</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.14</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -4692,7 +4692,7 @@ function installF50PilotReviewPanel(){
 function missionViewForAircraft(code){
  return code==="F900B"?"f900bmission":"ops";
 }
-const REFRESH_VIEW_KEY="kusaFlightOpsActiveView:v5.26.13";
+const REFRESH_VIEW_KEY="kusaFlightOpsActiveView:v5.26.14";
 function showPlatformView(view){
  const requestedView=view;
  try{sessionStorage.setItem(REFRESH_VIEW_KEY,requestedView)}catch(e){}
@@ -4708,7 +4708,7 @@ function showPlatformView(view){
  if(actualView==="ops"){installF50PilotReviewPanel();requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
  if(actualView==="f900bmission"){syncF900BTOLDToMission();refreshF900BMission();setTimeout(()=>{f9DrawCGTrace(window.f900bWBLatest);f9RenderMissionParity();f9RenderCanonicalParityFields();},50);}
  if(actualView==="f900b"){syncF900BMissionToTOLD();refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
- if(actualView==="archive"){renderArchive();if(navigator.onLine)hydrateCloudDrafts({render:true});}
+ if(actualView==="archive"){renderArchive();if(navigator.onLine)reconcileCloudDrafts({render:true});}
  if(actualView==="home"){refreshMenuCounts();}
  window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -4777,7 +4777,7 @@ function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
 
 
-const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v5.26.13";
+const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v5.26.14";
 let missionSyncTimer=null;
 let aircraftDirectoryCache=null;
 
@@ -4940,11 +4940,47 @@ async function hydrateCloudDrafts({render=false}={}){
     return true;
   }catch(e){console.warn("Cloud draft hydration failed",e);return false}
 }
-window.addEventListener("online",()=>{aircraftDirectoryCache=null;updateCloudSyncStatus("NETWORK RESTORED • SYNCING…","warn");setTimeout(async()=>{await flushMissionSyncQueue();await hydrateCloudDrafts({render:$("archiveView")?.style.display!=="none"})},500)});
+function migrateMissionSyncQueues(){
+ const current=getMissionSyncQueue();
+ const merged=[...current];
+ ["kusaFlightOpsMissionSyncQueue:v5.26.12","kusaFlightOpsMissionSyncQueue:v5.26.13"].forEach(key=>{
+   try{
+     const prior=JSON.parse(localStorage.getItem(key)||"[]");
+     if(Array.isArray(prior))for(const item of prior){
+       if(item?.local_id&&!merged.some(x=>x.local_id===item.local_id&&x.action===item.action))merged.push(item);
+     }
+     localStorage.removeItem(key);
+   }catch(e){}
+ });
+ saveMissionSyncQueue(merged);
+}
+function queueUnsyncedLocalDrafts(){
+ const queued=new Set(getMissionSyncQueue().map(x=>x.local_id));
+ for(const rec of getMissionDrafts()){
+   if(!rec?.id)continue;
+   const neverSynced=!rec.server_mission_id;
+   const localMs=Date.parse(rec.updated_at||0)||0;
+   const syncedMs=Date.parse(rec.server_synced_at||0)||0;
+   const locallyNewer=!!rec.server_mission_id&&localMs>syncedMs+1000;
+   if((neverSynced||locallyNewer||rec.server_sync_state==="queued"||rec.server_sync_state==="queued_offline")&&!queued.has(rec.id)){
+     const q=getMissionSyncQueue();q.push({local_id:rec.id,action:"upsert",queued_at:new Date().toISOString()});saveMissionSyncQueue(q);queued.add(rec.id);
+   }
+ }
+}
+async function reconcileCloudDrafts({render=false}={}){
+ if(!navigator.onLine)return false;
+ migrateMissionSyncQueues();
+ queueUnsyncedLocalDrafts();
+ await flushMissionSyncQueue();
+ const ok=await hydrateCloudDrafts({render});
+ refreshMenuCounts();
+ return ok;
+}
+window.addEventListener("online",()=>{aircraftDirectoryCache=null;updateCloudSyncStatus("NETWORK RESTORED • SYNCING…","warn");setTimeout(async()=>{await reconcileCloudDrafts({render:$("archiveView")?.style.display!=="none"})},500)});
 window.addEventListener("offline",()=>updateCloudSyncStatus());
 
-const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.13";
-const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.13";
+const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.14";
+const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.14";
 function offlineMissionRouteKey(dep,dest,alt=""){
   return [cleanICAO(dep),cleanICAO(dest),cleanICAO(alt)].join("|");
 }
@@ -8254,7 +8290,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.13",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.14",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8368,14 +8404,35 @@ $("manualWxDir")?.addEventListener("blur",()=>{const el=$("manualWxDir");if(el&&
 $("perfObs")?.addEventListener("change",()=>{renderDepartureObstacleReview();recalculate();updateToldCard();});
 
 function configureNumericKeypads(){
- document.querySelectorAll('input[type="number"]').forEach(el=>{
-   const step=String(el.getAttribute("step")||"").toLowerCase();
-   const min=Number(el.getAttribute("min"));
-   const whole=(step==="1"||step==="10"||step==="50"||step==="100")&&(!Number.isFinite(min)||min>=0);
+ const ua=String(navigator.userAgent||"");
+ const appleTouch=/iPad|iPhone|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&Number(navigator.maxTouchPoints||0)>1);
+ document.querySelectorAll('input[type="number"],input[data-flightops-number="true"]').forEach(el=>{
+   if(el.readOnly||el.disabled)return;
+   const stepRaw=String(el.getAttribute("step")||"1").toLowerCase();
+   const minRaw=el.getAttribute("min");
+   const min=minRaw==null?NaN:Number(minRaw);
+   const allowsDecimal=stepRaw==="any"||stepRaw.includes(".");
+   const allowsNegative=Number.isFinite(min)&&min<0;
+   const whole=!allowsDecimal&&!allowsNegative;
    el.setAttribute("inputmode",whole?"numeric":"decimal");
+   if(whole)el.setAttribute("pattern","[0-9]*");
+   else el.removeAttribute("pattern");
+   if(!el.getAttribute("enterkeyhint"))el.setAttribute("enterkeyhint","done");
+   // iPadOS/Safari does not consistently honor inputmode on type=number.
+   // For touch Apple devices use a text control with numeric/decimal inputmode;
+   // existing FlightOps calculations already coerce .value with Number().
+   if(appleTouch&&el.getAttribute("type")==="number"){
+     el.dataset.flightopsNumber="true";
+     el.dataset.nativeNumberType="number";
+     el.setAttribute("type","text");
+     el.setAttribute("autocomplete","off");
+   }
+ });
+ document.querySelectorAll('input[pattern*="0-9"],input[data-numeric-only="true"]').forEach(el=>{
+   if(el.readOnly||el.disabled)return;
+   if(!el.getAttribute("inputmode"))el.setAttribute("inputmode","numeric");
    if(!el.getAttribute("enterkeyhint"))el.setAttribute("enterkeyhint","done");
  });
- document.querySelectorAll('input[pattern*="0-9"],input[data-numeric-only="true"]').forEach(el=>{if(!el.getAttribute("inputmode"))el.setAttribute("inputmode","numeric")});
 }
 function classifyOperationalGates(root=document){
  root.querySelectorAll?.('.source-gate,.runway-gate,.whatif-gate,.f9-gate,.f9-gate-summary').forEach(box=>{
@@ -8397,7 +8454,7 @@ function isBrowserReload(){
 }
 async function restoreRefreshContext(){
  configureNumericKeypads();classifyOperationalGates(document);
- if(navigator.onLine)await hydrateCloudDrafts();
+ if(navigator.onLine)await reconcileCloudDrafts();
  if(!isBrowserReload()){refreshMenuCounts();showPlatformView("home");return}
  let wantedView="home",wantedMission="";
  try{wantedView=sessionStorage.getItem(REFRESH_VIEW_KEY)||"home";wantedMission=localStorage.getItem(OFFLINE_LAST_ACTIVE_KEY)||""}catch(e){}
@@ -8420,7 +8477,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.13: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.14: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{if(!openSharedContentFromHash())restoreRefreshContext()});
 // Debounced local draft persistence for active, incomplete missions.
 document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
@@ -8436,7 +8493,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.13",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.14",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8522,7 +8579,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.13'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.14'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
