@@ -1,20 +1,23 @@
-KUSA FlightOps v5.26.14 HOTFIX
+KUSA FlightOps v5.26.15 FULL PATCH
 
-Supersedes v5.26.13.
+Base: v5.26.14
 
-Fixes two acceptance-test failures reported after v5.26.13:
-1. iPad numeric-entry keypad: editable numeric fields use iPadOS/Safari-compatible text controls with inputmode=numeric or inputmode=decimal while preserving FlightOps numeric coercion. Whole-number fields also use [0-9]* pattern.
-2. Cross-device draft continuity: startup now migrates prior v5.26.12/v5.26.13 sync queues, automatically queues legacy/unsynced local drafts, flushes them to cloud, then hydrates the signed-in user's cloud drafts before updating menu counts. Archive/Drafts view and reconnect use the same reconciliation path.
+Acceptance status carried forward:
+- Cross-device draft sharing: PASSED in field test.
+- v5.26.14 numeric keypad request: FAILED on iPad.
 
-Retains v5.26.13 punch-list work:
-- pull-down/browser refresh restores active mission/view in place
-- warning-gate severity hierarchy
-- responsive V-speed card layout
-- cross-airframe implementation for N33AP and N699BG
+v5.26.15 change:
+- iPad/iPhone positive whole-number operational fields now use type=tel + inputmode=numeric + [0-9]* to force the Apple numeric keypad more reliably.
+- Decimal/negative operational fields use type=text + inputmode=decimal.
+- Numeric sanitizers prevent accidental nonnumeric characters while preserving decimal/minus where permitted.
+- Applies to both N33AP Falcon 50-4 and N699BG Falcon 900B.
+- Desktop/Android retain native number inputs with inputmode hints.
 
-Deploy all files over the current app, restart Published App, then hard refresh/reopen FlightOps on each test device.
-
-Acceptance checks:
-- iPad: tap editable whole-number and decimal fields and verify numeric/decimal keypad appears.
-- Device A: open/save a draft online and wait for CLOUD SYNCED.
-- Device B: sign in with the same user credentials, reopen FlightOps while online, then open Draft Flight Plans. The Device A draft should be present without manual sharing.
+Deploy:
+1. Upload server.js and platform.js to /app and overwrite.
+2. Upload all files under /public to /app/public and overwrite.
+3. Restart Published App.
+4. On iPad, fully close/reopen Safari/PWA or hard refresh to replace cached v5.26.14 assets.
+5. Verify Browser / Server v5.26.15.
+6. Tap a positive whole-number field such as passenger count, weight, baggage, fuel, or runway length. The Apple numeric keypad should display.
+7. Verify a decimal/negative field such as temperature, wind component, slope, or altimeter still permits required decimal/negative entry.
