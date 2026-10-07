@@ -1195,7 +1195,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.14 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.15 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1217,7 +1217,7 @@ details summary{cursor:pointer;margin-top:8px}
   #toldView .told-speeds,#f900bView .told-speeds,#opsView .told-speeds,#f900bmissionView .told-speeds{grid-template-columns:1fr!important}
 }
 </style>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.14</div>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.15</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -4692,7 +4692,7 @@ function installF50PilotReviewPanel(){
 function missionViewForAircraft(code){
  return code==="F900B"?"f900bmission":"ops";
 }
-const REFRESH_VIEW_KEY="kusaFlightOpsActiveView:v5.26.14";
+const REFRESH_VIEW_KEY="kusaFlightOpsActiveView:v5.26.15";
 function showPlatformView(view){
  const requestedView=view;
  try{sessionStorage.setItem(REFRESH_VIEW_KEY,requestedView)}catch(e){}
@@ -4777,7 +4777,7 @@ function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
 
 
-const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v5.26.14";
+const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v5.26.15";
 let missionSyncTimer=null;
 let aircraftDirectoryCache=null;
 
@@ -4979,8 +4979,8 @@ async function reconcileCloudDrafts({render=false}={}){
 window.addEventListener("online",()=>{aircraftDirectoryCache=null;updateCloudSyncStatus("NETWORK RESTORED • SYNCING…","warn");setTimeout(async()=>{await reconcileCloudDrafts({render:$("archiveView")?.style.display!=="none"})},500)});
 window.addEventListener("offline",()=>updateCloudSyncStatus());
 
-const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.14";
-const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.14";
+const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.15";
+const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.15";
 function offlineMissionRouteKey(dep,dest,alt=""){
   return [cleanICAO(dep),cleanICAO(dest),cleanICAO(alt)].join("|");
 }
@@ -8290,7 +8290,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.14",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.15",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8406,7 +8406,8 @@ $("perfObs")?.addEventListener("change",()=>{renderDepartureObstacleReview();rec
 function configureNumericKeypads(){
  const ua=String(navigator.userAgent||"");
  const appleTouch=/iPad|iPhone|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&Number(navigator.maxTouchPoints||0)>1);
- document.querySelectorAll('input[type="number"],input[data-flightops-number="true"]').forEach(el=>{
+ const fields=[...document.querySelectorAll('input[type="number"],input[data-flightops-number="true"],input[data-native-number-type="number"]')];
+ fields.forEach(el=>{
    if(el.readOnly||el.disabled)return;
    const stepRaw=String(el.getAttribute("step")||"1").toLowerCase();
    const minRaw=el.getAttribute("min");
@@ -8414,23 +8415,59 @@ function configureNumericKeypads(){
    const allowsDecimal=stepRaw==="any"||stepRaw.includes(".");
    const allowsNegative=Number.isFinite(min)&&min<0;
    const whole=!allowsDecimal&&!allowsNegative;
-   el.setAttribute("inputmode",whole?"numeric":"decimal");
-   if(whole)el.setAttribute("pattern","[0-9]*");
-   else el.removeAttribute("pattern");
-   if(!el.getAttribute("enterkeyhint"))el.setAttribute("enterkeyhint","done");
-   // iPadOS/Safari does not consistently honor inputmode on type=number.
-   // For touch Apple devices use a text control with numeric/decimal inputmode;
-   // existing FlightOps calculations already coerce .value with Number().
-   if(appleTouch&&el.getAttribute("type")==="number"){
-     el.dataset.flightopsNumber="true";
-     el.dataset.nativeNumberType="number";
-     el.setAttribute("type","text");
-     el.setAttribute("autocomplete","off");
+
+   el.dataset.flightopsNumber="true";
+   el.dataset.nativeNumberType="number";
+   el.setAttribute("enterkeyhint","done");
+   el.setAttribute("autocomplete","off");
+
+   if(appleTouch){
+     // iPadOS Safari is most reliable with TEL for positive whole-number fields.
+     // Decimal/negative fields stay text+decimal so decimal point/minus remain available.
+     if(whole){
+       el.setAttribute("type","tel");
+       el.setAttribute("inputmode","numeric");
+       el.setAttribute("pattern","[0-9]*");
+       el.dataset.keypadMode="whole";
+     }else{
+       el.setAttribute("type","text");
+       el.setAttribute("inputmode","decimal");
+       el.removeAttribute("pattern");
+       el.dataset.keypadMode="decimal";
+     }
+   }else{
+     // Preserve native number semantics on desktop/Android while still hinting the best keypad.
+     if(el.getAttribute("type")!=="number")el.setAttribute("type","number");
+     el.setAttribute("inputmode",whole?"numeric":"decimal");
+     if(whole)el.setAttribute("pattern","[0-9]*"); else el.removeAttribute("pattern");
+   }
+
+   if(!el.dataset.keypadSanitizer){
+     el.addEventListener("input",()=>{
+       if(!appleTouch)return;
+       if(el.dataset.keypadMode==="whole"){
+         const clean=String(el.value||"").replace(/\D+/g,"");
+         if(clean!==el.value)el.value=clean;
+       }else{
+         let v=String(el.value||"").replace(/,/g,".").replace(/[^0-9.\-]/g,"");
+         const neg=v.startsWith("-");
+         v=v.replace(/-/g,"");
+         const parts=v.split(".");
+         v=parts.shift()+(parts.length?"."+parts.join(""):"");
+         if(neg)v="-"+v;
+         if(v!==el.value)el.value=v;
+       }
+     });
+     el.dataset.keypadSanitizer="1";
    }
  });
+
+ // Text controls intentionally used for numeric-only data (e.g. wind direction).
  document.querySelectorAll('input[pattern*="0-9"],input[data-numeric-only="true"]').forEach(el=>{
    if(el.readOnly||el.disabled)return;
-   if(!el.getAttribute("inputmode"))el.setAttribute("inputmode","numeric");
+   if(appleTouch&&el.getAttribute("type")==="text")el.setAttribute("type","tel");
+   el.setAttribute("inputmode","numeric");
+   el.setAttribute("pattern","[0-9]*");
    if(!el.getAttribute("enterkeyhint"))el.setAttribute("enterkeyhint","done");
  });
 }
@@ -8477,7 +8514,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.14: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.15: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{if(!openSharedContentFromHash())restoreRefreshContext()});
 // Debounced local draft persistence for active, incomplete missions.
 document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
@@ -8493,7 +8530,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.14",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.15",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8579,7 +8616,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.14'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.15'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
 
