@@ -35,7 +35,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.13 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.14 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -296,7 +296,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.13'}={}){
+function installPlatform(app,{build='5.26.14'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});

@@ -1,45 +1,20 @@
-KUSA FlightOps v5.26.13 FULL PATCH
+KUSA FlightOps v5.26.14 HOTFIX
 
-Baseline: v5.26.12
-Performance/W&B source package remains 5.25.86.
+Supersedes v5.26.13.
 
-v5.26.13 punch-list implementation (both N33AP Falcon 50-4 and N699BG Falcon 900B):
-1. Mobile numeric-entry cleanup
-   - Number fields receive mobile numeric/decimal keypad hints automatically.
-   - Whole non-negative integer fields prefer numeric keypad; decimal/signed fields prefer decimal keypad.
-2. Cross-device draft continuity
-   - Online startup/Flight Plans view hydrates the signed-in user's cloud drafts from /api/missions?status=draft.
-   - Cloud-synced drafts appear on another authorized device after sign-in.
-   - Pending offline edits and conflict-marked local copies are never silently overwritten by cloud hydration.
-   - Existing revision-conflict protection remains active.
-3. iPad pull-down/browser refresh continuity
-   - Reload restores the prior FlightOps view and last active draft instead of forcing Menu/Home.
-   - Cached/local mission state is retained; online startup then reconciles cloud drafts.
-4. Operational warning-gate hierarchy
-   - Clear = green treatment, review/caution = amber, blocking/no-go = red.
-   - Gates use border/background/badge treatment in addition to color.
-5. Responsive V-speed layout
-   - Desktop + iPad/tablet: V-speeds stay in one horizontal left-to-right row.
-   - iPhone/narrow screens (<=600 px): V-speeds stack vertically.
+Fixes two acceptance-test failures reported after v5.26.13:
+1. iPad numeric-entry keypad: editable numeric fields use iPadOS/Safari-compatible text controls with inputmode=numeric or inputmode=decimal while preserving FlightOps numeric coercion. Whole-number fields also use [0-9]* pattern.
+2. Cross-device draft continuity: startup now migrates prior v5.26.12/v5.26.13 sync queues, automatically queues legacy/unsynced local drafts, flushes them to cloud, then hydrates the signed-in user's cloud drafts before updating menu counts. Archive/Drafts view and reconnect use the same reconciliation path.
 
-DEPLOY
-ROOT /app:
-- server.js
-- platform.js
+Retains v5.26.13 punch-list work:
+- pull-down/browser refresh restores active mission/view in place
+- warning-gate severity hierarchy
+- responsive V-speed card layout
+- cross-airframe implementation for N33AP and N699BG
 
-/app/public:
-- index.html
-- account.html
-- admin-users.html
-- invite.html
-- reset-password.html
-- sw.js
+Deploy all files over the current app, restart Published App, then hard refresh/reopen FlightOps on each test device.
 
-After upload/overwrite, restart the Published App, hard refresh once, and verify Browser/Server 5.26.13.
-
-ACCEPTANCE CHECKS
-- iPad: tap number fields and confirm numeric/decimal keypad behavior.
-- Device A: create/sync draft; Device B: sign in and open Flight Plans; confirm draft appears.
-- iPad: open active mission, pull down to refresh; confirm same mission/view returns, not Menu.
-- Confirm green/amber/red gate distinction on both airframes.
-- Confirm V-speeds are one row on desktop/iPad and vertical on iPhone.
+Acceptance checks:
+- iPad: tap editable whole-number and decimal fields and verify numeric/decimal keypad appears.
+- Device A: open/save a draft online and wait for CLOUD SYNCED.
+- Device B: sign in with the same user credentials, reopen FlightOps while online, then open Draft Flight Plans. The Device A draft should be present without manual sharing.
