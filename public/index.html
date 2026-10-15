@@ -501,7 +501,6 @@ details summary{cursor:pointer;margin-top:8px}
   .notam-list{max-height:240px}
   .notam-item{overflow-wrap:anywhere}
   .runway-gate{padding:10px}
-  #buildBadge{right:6px!important;bottom:58px!important;font-size:9px!important;padding:3px 6px!important;opacity:.75!important}
 }
 @media(max-width:430px){
   #startupDataPanel .row{grid-template-columns:1fr!important}
@@ -1195,7 +1194,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.16 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.17 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1218,7 +1217,16 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.16 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.17 — build identification stays in the header, clear of navigation. */
+#buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
+  background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
+  line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
+@media screen and (max-width:700px){
+  /* Six actual actions need six slots; Account must not spill into a second row. */
+  .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
+}
+
+/* v5.26.17 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1292,9 +1300,9 @@ canvas,svg,img{max-width:100%}
 }
 
 </style>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.16</div>
+
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.17</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -8452,7 +8460,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.16",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.17",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8706,7 +8714,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.16: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.17: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8725,7 +8733,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.16",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.17",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8811,7 +8819,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.16'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.17'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 
