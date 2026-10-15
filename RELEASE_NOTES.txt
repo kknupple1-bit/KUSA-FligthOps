@@ -1,0 +1,95 @@
+KUSA FlightOps 5.26.16 — Mobile / Responsive Stabilization
+Base: supplied KUSA_FlightOps_v5.26.15_FULL_PATCH.zip
+Base ZIP SHA-256:
+AE51E513813AB7325B35B50C1A54C52E52EED107DED964609C2B71B709ABEEDE
+
+public/index.html
+
+1. Responsive results
+   A final shared stylesheet overrides conflicting older grid rules. At widths
+   <=700 CSS pixels, both aircraft's TOLD metric grids, source grids, detail pairs,
+   preparation grids and Mission rows stack into one column. TOLD V-speeds stack
+   vertically, label/value pairs align left, and status headers wrap separately.
+   Above 700px, speed groups fit a horizontal row using available card width.
+   Aircraft-specific labels, speeds, configurations and sources are retained.
+
+2. Overflow, typography and touch
+   Added max-width:100%, min-width:0 and box-sizing rules to major cards, grids,
+   flex children and controls. Long source/status text, including unbroken strings,
+   wraps without shortening it. Phone tables have fixed layout and wrapping.
+   Phone main padding is 10px, TOLD panel padding 12px and large result type 19px.
+   Touch controls/buttons have a 44px minimum height; touch input text is 16px to
+   avoid Safari focus zoom. Bottom spacing includes the device safe-area inset.
+   Fixed additional 320px N699BG dining/storage overflow found during validation.
+
+3. Numeric entry
+   Replaced keypad configuration with whole/decimal/signed classification. Static
+   numeric markup has matching inputmode hints. Temperature, pressure altitude,
+   wind and slope are explicitly signed where appropriate, even without min<0.
+   Decimal permission follows step/any; signed integers remain integers.
+   Apple touch devices (including iPadOS MacIntel mode) use tel/numeric for
+   unsigned integers and text/decimal for decimals or signed numbers. Signed
+   fields have an accessible 44px +/- button supplying a minus-entry path.
+   Other devices retain existing native control types. A capturing sanitizer runs
+   before inline calculations: it normalizes comma decimals, removes unwanted
+   characters, limits decimal points and permits only an allowed leading minus.
+   Whole fields discard fractional suffixes instead of concatenating their digits.
+   Wind-direction text controls and dynamically inserted inputs are covered.
+   Disabled editable fields are prepared for later activation; readonly outputs
+   are excluded. Existing airframe validation/calculation logic remains unchanged.
+
+4. Refresh continuity
+   Startup no longer overwrites the saved tab with Menu before restoration.
+   A session snapshot retains mission metadata, editable fields, runway options
+   and selections, W&B passengers/seats/loads, cached mission/weather/NOTAM state,
+   what-if dirty state, open details and scroll position. Saves cover input/change,
+   tab changes, draft saves, pagehide, background transition and beforeunload.
+   Restore hydrates locally before cloud reconciliation, repopulates cached reports
+   and recalculates without a mission-network request or draft-open reset.
+   Reload/back-forward/retained active sessions resume the saved view. A fresh
+   session without context retains Menu behavior; shared links remain explicit.
+   Restore errors keep the requested view visible and show a review message.
+   Removed competing startup offline auto-resume scheduling. Deliberate Draft
+   reopening retains pilot fuel re-verification; current-session reload preserves
+   its checkbox state. Cached reports retain their original timestamps.
+
+5. Draft/queue/upgrade retention
+   Queue, mission-package and last-active keys use stable continuity schema v1,
+   independent of build number. Legacy 5.26.12–15 data migrates once; each tab's
+   5.26.15 view migrates independently. Old storage is retained for recovery and
+   no longer repeatedly replays drained entries. Removed silent 100-entry queue
+   truncation. Each new edit has a unique ID. Flushes serialize and remove only
+   the exact revision sent, preserving edits queued while a request is in flight.
+   N699BG draft capture respects whether TOLD or Mission is the active edit surface.
+
+6. Warning hierarchy
+   Red border/background + symbol/text BLOCKING; amber + REVIEW / CAUTION;
+   green + CLEARED. Actual in-flow text replaces absolutely positioned badges,
+   so labels cannot cover values and remain available to assistive technology.
+   Primary status and bad/warn/ok tones determine severity: required review is
+   amber; NO-GO, NOT READY, unavailable or missing evaluation is red. Presentation
+   classification does not change calculation gates. Observer updates disconnect
+   while applying their own changes to avoid a self-triggering mutation loop.
+   Removed a stray comment rendered after the closing HTML document.
+
+public/sw.js
+   Build/cache namespace is 5.26.16. Activation copies authorized protected data
+   and public fallback assets before retiring old FlightOps caches, then refreshes
+   the protected foundation where possible. Protected migration requires a valid
+   signed grant. New public assets take precedence; unrelated caches remain.
+   Existing grant verification/revocation logic remains unchanged.
+
+Version-only files
+   server.js: health/diagnostics/platform builds and request User-Agent.
+   platform.js: default build and runtime-version message.
+   public/account.html: displayed version and grant metadata.
+   public/admin-users.html: displayed version references.
+   public/invite.html and public/reset-password.html: displayed versions.
+   index.html browser badge/startup comparison, worker registration and grant
+   fallbacks also report 5.26.16. Historic data revisions and legacy storage-key
+   identifiers intentionally keep their original values.
+
+Scope
+   Both N33AP and N699BG use the shared stabilization rules. Aircraft datasets,
+   limits, interpolation, W&B math, weather/NMS integrations, access control and
+   platform database behavior retain the supplied baseline logic. Not deployed live.

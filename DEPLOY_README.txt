@@ -1,23 +1,26 @@
-KUSA FlightOps v5.26.15 FULL PATCH
+KUSA FlightOps v5.26.16 FULL PATCH
+Mobile / Responsive Stabilization
+Built October 15, 2026, from the supplied v5.26.15 FULL_PATCH ZIP.
 
-Base: v5.26.14
+Deployment
+1. Back up current application files and retain the existing platform database.
+2. Save active missions as Drafts before upgrading. The complete session snapshot
+   starts with v5.26.16; the first upgrade reload can recover only what v5.26.15 saved.
+3. Overwrite /app/server.js and /app/platform.js with the supplied replacements.
+4. Overwrite the six matching files under /app/public with this public/ folder.
+   Retain existing data/, icons/, manifest, dependencies and platform database.
+   This is a replacement patch for the supplied files, not a fresh-site installer.
+5. Restart the Published App using its existing Node 22+ runtime/configuration.
+6. Reconnect Safari/PWA installations online and reload. Confirm browser badge and
+   /api/health both report 5.26.16; check account/admin/invite/reset pages as well.
+7. Load/refresh a mission online and confirm offline readiness before installed-PWA
+   offline testing. Do not clear site data: it holds drafts, cached missions,
+   device authorization and queued edits.
+8. Run ACCEPTANCE_TESTS.txt on both airframes before accepting the release.
 
-Acceptance status carried forward:
-- Cross-device draft sharing: PASSED in field test.
-- v5.26.14 numeric keypad request: FAILED on iPad.
+No live deployment was performed. Database schema, credentials, aircraft datasets
+and calculation algorithms were not changed. Assets absent from the supplied
+baseline ZIP remain prerequisites on the existing production installation.
 
-v5.26.15 change:
-- iPad/iPhone positive whole-number operational fields now use type=tel + inputmode=numeric + [0-9]* to force the Apple numeric keypad more reliably.
-- Decimal/negative operational fields use type=text + inputmode=decimal.
-- Numeric sanitizers prevent accidental nonnumeric characters while preserving decimal/minus where permitted.
-- Applies to both N33AP Falcon 50-4 and N699BG Falcon 900B.
-- Desktop/Android retain native number inputs with inputmode hints.
-
-Deploy:
-1. Upload server.js and platform.js to /app and overwrite.
-2. Upload all files under /public to /app/public and overwrite.
-3. Restart Published App.
-4. On iPad, fully close/reopen Safari/PWA or hard refresh to replace cached v5.26.14 assets.
-5. Verify Browser / Server v5.26.15.
-6. Tap a positive whole-number field such as passenger count, weight, baggage, fuel, or runway length. The Apple numeric keypad should display.
-7. Verify a decimal/negative field such as temperature, wind component, slope, or altimeter still permits required decimal/negative entry.
+See RELEASE_NOTES.txt for exact changes and VALIDATION_REPORT.txt for completed
+checks and the distinction between local verification and device acceptance.

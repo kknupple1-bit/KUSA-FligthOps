@@ -1,0 +1,79 @@
+KUSA FlightOps 5.26.16 — Device / Production Acceptance
+
+Run each operational case on N33AP and N699BG. Record device, OS, browser/PWA,
+aircraft, case, result and PASS/FAIL. Compare calculations with recorded v5.26.15
+outputs at identical controlled input points.
+
+1. Build/access
+   Browser badge and server /api/health show 5.26.16. Account/admin/invite/reset
+   pages show 5.26.16. Login, trusted-device access, permissions and both aircraft
+   datasets work as before. Source-data revision labels remain unchanged.
+
+2. iPhone layout
+   Use small/large iPhones, Safari and installed PWA (approximately 320/375/390/
+   430 CSS px). Inspect Mission and TOLD takeoff, emergency return and landing.
+   Metrics/detail pairs/V-speeds stack. Labels stay paired; configuration, weight,
+   wind, gradient, accelerate-stop and full source/status text are readable.
+   Expand comparisons/advanced details and loading tables. No overlap, clipping
+   or horizontal page scroll. Rotate and verify the available-width layout.
+
+3. iPad/desktop layout
+   Check iPad portrait/landscape/split view and desktop at 768/820/1024/1440px.
+   Applicable speeds occupy one row where the card has room; narrow split view
+   switches to the phone stack. Long sources wrap. Test zoom/larger text as well.
+
+4. Integer keypad
+   On physical iPhone/iPad tap passenger count, crew/seat weight, fuel, baggage,
+   runway length and heading. Confirm number-oriented keypad and replacement
+   entry. Type/delete/paste letters and punctuation: calculation inputs remain
+   sanitized. Existing capacity/weight/fuel bounds still behave as before.
+   Enable a previously disabled field and repeat.
+
+5. Decimal/sign entry
+   Enter altimeter 29.92, temperature -12.5 where decimal steps permit, PA -500,
+   wind -3.5 and slope -0.25 in applicable fields. Verify decimal entry and +/-
+   on physical iPhone/iPad, including iPad desktop-site mode. Paste comma decimals.
+   Unsigned fields cannot retain minus; integer fields do not concatenate fraction
+   digits. Existing source-range gates still apply.
+
+6. Online refresh
+   Start a mission; select non-default departure/destination runways; enter fuel,
+   passengers/seats/baggage, manual weather and W&B/TOLD/what-if configurations.
+   Open a lower Mission section and detail. Pull down/reload in Safari and PWA.
+   Same mission/trip/aircraft, tab, section/scroll, open detail, runways, fields and
+   checkbox state must remain. Repeat from TOLD, editing N699BG TOLD directly
+   just before reload. Never jump to Menu/Home. Cached reports retain timestamps;
+   explicit Load / Refresh Mission still obtains live data.
+
+7. Offline/reconnection
+   First confirm signed trusted-device authorization and OFFLINE READY online.
+   Go offline, edit, immediately reload, background/foreground and repeat. Mission,
+   tab, runway/W&B/TOLD state and queued edits remain. Reconnect: edits sync,
+   conflicts preserve the local copy, no duplicate trip appears, and a second
+   signed-in device sees the draft. Edit during a slow sync and reload; newest
+   queued changes survive. This requires installed-PWA testing with real storage.
+
+8. Upgrade/worker
+   Save a controlled v5.26.15 Draft and queued offline edit before upgrading.
+   Upgrade without clearing site data. Verify old drafts, route packages,
+   last-active mission and queue entries remain, including another open tab.
+   The first upgrade reload restores only fields v5.26.15 actually saved; after
+   v5.26.16 captures the session, repeat case 6 for full in-place retention.
+   Synced migrated entries must not reappear. Check offline assets after worker
+   update and the existing expired/revoked-grant access flow.
+
+9. Warning gates
+   Exercise red NO-GO/closed-runway/unavailable evaluation, amber review/incomplete
+   review, and green passed/verified states. Top source/runway/what-if/N699BG gates
+   show a border, symbol and text label without covering data. Meaning remains
+   obvious without color. A source lock must never appear as a false clearance.
+
+10. Touch/navigation/regression
+   Tabs, selectors, +/- and actions are readable/tappable, without focus zoom or
+   crowding; check bottom safe area. Check explicit Menu, New Trip, Draft reopen,
+   Archive and shared links. Deliberate Draft reopen still requires baseline fuel
+   re-verification. Compare W&B/CG/weights, speeds, distances/margins, limits and
+   source-gated outputs with v5.26.15 on both aircraft. Check weather/NMS refresh,
+   abnormal landing modes and printing.
+
+Acceptance remains pending until physical-device and deployed-service checks pass.

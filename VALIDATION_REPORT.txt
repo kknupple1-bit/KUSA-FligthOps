@@ -1,0 +1,38 @@
+KUSA FlightOps 5.26.16 — Local Validation Results, October 15, 2026
+
+PASS: Node syntax checks for server.js, platform.js and public/sw.js.
+PASS: All nine executable inline scripts across the five HTML files compile.
+PASS: Headless Chromium loads without uncaught JavaScript errors.
+PASS: 20 TOLD layout checks: both airframes at 320/375/390/430/600/700/768/820/
+      1024/1440px. No off-screen visible descendants/page-width overflow. Phone
+      metrics and speeds have one column. Long unbroken source text was included.
+PASS: 10 Mission layout checks: both aircraft at 320/390/700/768/1024px, including
+      cabin layouts. No off-screen visible descendants.
+PASS: Apple-UA field types/input modes, integer/decimal/signed classification,
+      +/- controls and input sanitization before inline handlers.
+PASS: iPadOS MacIntel/multi-touch detection and desktop native-number retention.
+PASS: Per-tab active-view migration after local data has already migrated.
+PASS: Blocking/review/cleared gate labels and NOT READY severity precedence.
+PASS: Both-airframe reload fixture: mission ID/TOLD tab, cached route/weather,
+      selected runways, fuel/crew/signed inputs, manual altimeter, seats/passengers,
+      checkbox states and queued edits remain. Mission tab/lower scroll restored.
+PASS: v5.26.15 queue/package-key migration; drained entries do not resurrect.
+PASS: Queue race regression: flushes serialize and edits queued during sends survive.
+PASS: Worker activation simulation: protected data migrates only with valid grant,
+      new public assets take precedence, old app caches retire, unrelated caches stay.
+PASS: server.js/platform.js/account/admin/invite/reset differ from baseline only
+      by 5.26.15 -> 5.26.16 replacement. Backend embedded data is unchanged.
+PASS: 13 unchanged calculation blocks: fsTakeoff, fsLanding, f9WBInterpSchedule,
+      f9WBEnvelope, f9RecalcWB, f9GridValue, f9DTMCorrect, f9TakeoffResult,
+      f9LandingResult, f9AbnormalAdjustedLanding, recalculate, takeoffAt and
+      solveMaxWeightForRunway.
+
+Environment/limits
+Browser checks used local headless Chromium with Apple UA/touch emulation, a local
+HTTP fixture server, actual N699BG embedded datasets extracted from the supplied
+server, synthetic airport/mission data and unavailable live-service responses.
+UI tests blocked browser service workers; activation/migration used a separate
+isolated mock cache store and controlled grant states.
+These checks do not certify Safari/WebKit, the physical Apple keyboard, installed
+PWA offline fetch/auth, production login/database/NMS/weather or real cross-device
+sync. Run ACCEPTANCE_TESTS.txt for those. No live deployment was performed.

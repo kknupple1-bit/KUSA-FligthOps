@@ -1,0 +1,67 @@
+{
+  "build": "5.26.16",
+  "release": "Mobile / Responsive Stabilization",
+  "base_zip_sha256": "AE51E513813AB7325B35B50C1A54C52E52EED107DED964609C2B71B709ABEEDE",
+  "files": [
+    {
+      "path": "ACCEPTANCE_TESTS.txt",
+      "bytes": 4596,
+      "sha256": "bc92ae243f6e6999c328534f95a64c2b6c2d3bcd5f57805b5e2149bef75e4b03"
+    },
+    {
+      "path": "DEPLOY_README.txt",
+      "bytes": 1642,
+      "sha256": "3da21c1cb1019a220316e02cc849fdef7740056357692c2e21ffe24c76194d1c"
+    },
+    {
+      "path": "RELEASE_NOTES.txt",
+      "bytes": 5968,
+      "sha256": "9c02eb690fa65b4d466dbde0d3467f99ecc5637bdf30f86c114a405d902a8291"
+    },
+    {
+      "path": "VALIDATION_REPORT.txt",
+      "bytes": 2684,
+      "sha256": "aac0552fa4896a71316113a78810109b673935ff52c1155849465cd75e6682b4"
+    },
+    {
+      "path": "platform.js",
+      "bytes": 53966,
+      "sha256": "3aa09cb9335abe1a179fb19537709cba1357d55b6d6952e97c87379d1bbe7c3a"
+    },
+    {
+      "path": "public/account.html",
+      "bytes": 9677,
+      "sha256": "0d17751c60e488666da277c66e269f89d445da7dca543b78068a30166eb80d4f"
+    },
+    {
+      "path": "public/admin-users.html",
+      "bytes": 12690,
+      "sha256": "bcd94bb69a93e86224b1ac82bd227de87874c50f5256f4d1984b982d1cf16fff"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 671823,
+      "sha256": "19635e4ab880e317ec204afec2be9a884cce5cda5fd1dc2a703a07f3e4c7fe28"
+    },
+    {
+      "path": "public/invite.html",
+      "bytes": 6957,
+      "sha256": "5cdbba73abeec1a3398647a473cf090990bd7054f2166f72eb4a313c7639816a"
+    },
+    {
+      "path": "public/reset-password.html",
+      "bytes": 4279,
+      "sha256": "c27f07a3cb2f769865a02eb99a2dcb2c3e2fa1ba5a36d5efe107d17cfde2193a"
+    },
+    {
+      "path": "public/sw.js",
+      "bytes": 8230,
+      "sha256": "549e1f9fc6ea5ee5d31390de79e0d7e510c8d21b093e623709dcc891751d5f2b"
+    },
+    {
+      "path": "server.js",
+      "bytes": 840753,
+      "sha256": "edad209809bbf46e42e7e2ee798c695b3a5d436cc9a10ff70c5cc712ed96ea00"
+    }
+  ]
+}
