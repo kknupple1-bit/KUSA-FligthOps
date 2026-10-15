@@ -1195,7 +1195,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.15 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.16 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1217,7 +1217,82 @@ details summary{cursor:pointer;margin-top:8px}
   #toldView .told-speeds,#f900bView .told-speeds,#opsView .told-speeds,#f900bmissionView .told-speeds{grid-template-columns:1fr!important}
 }
 </style>
-<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.15</div>
+<style id="v52616-mobile-stabilization">
+/* v5.26.16 — shared Mobile / Responsive Stabilization; final cascade. */
+main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
+.row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
+.canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
+  box-sizing:border-box;max-width:100%!important;min-width:0!important;
+}
+.row>*,.told-grid>*,.told-op-metrics>*,.told-op-grid>*,.told-op-details>*,
+.told-speeds>*,.canonical-perf-source>*,.canonical-perf-grid>*,.told-op-head>*,
+.told-op-heading>*,.canonical-perf-title>*,.f900b-inputs>*,.f900b-results>*{
+  min-width:0!important;max-width:100%;box-sizing:border-box;
+}
+.told-row,.told-op-detail,.told-op-metric,.canon-cell,.source-gate,.runway-gate,
+.whatif-gate,.f9-gate,.f9-gate-summary,.told-op-status,.told-pill,.callout,
+.canonical-perf-title,.takeoff-compare-value,.wx,.archive-meta{
+  overflow-wrap:anywhere;white-space:normal!important;word-break:normal;
+}
+.told-op-detail>*,.told-row>*,.told-op-metric b,.canon-cell b{min-width:0;max-width:100%;white-space:normal!important;overflow-wrap:anywhere}
+input,select,textarea{box-sizing:border-box;max-width:100%;min-width:0}
+canvas,svg,img{max-width:100%}
+.canonical-perf-title,.told-op-head,.takeoff-compare-head{flex-wrap:wrap}
+/* A real, in-flow label is readable by assistive technology and cannot cover values. */
+.gate-clear::after,.gate-caution::after,.gate-stop::after{content:none!important}
+.source-gate,.runway-gate,.whatif-gate,.f9-gate,.f9-gate-summary{overflow:visible}
+.gate-state-label{display:block;position:static;align-self:flex-start;width:fit-content;max-width:100%;
+  margin:0 0 6px;padding:3px 7px;border:1px solid currentColor;border-radius:5px;
+  font-size:11px;font-weight:800;line-height:1.4;letter-spacing:.04em;overflow-wrap:anywhere}
+.gate-stop>.gate-state-label{color:#ffd0d0}.gate-caution>.gate-state-label{color:#ffe1a0}.gate-clear>.gate-state-label{color:#baf4d7}
+.numeric-sign-toggle{display:inline-block;min-height:44px;min-width:44px;margin:5px 0 0;padding:6px 10px;font-size:16px;touch-action:manipulation}
+@media(pointer:coarse){
+  button,select,input:not([type=checkbox]):not([type=radio]),summary,.tap-seat{min-height:44px}
+  input:not([type=checkbox]):not([type=radio]),select,textarea{font-size:16px!important}
+  .fob-verify{min-height:44px}.fob-verify input{min-width:24px;min-height:24px}
+}
+/* Auto-fit uses the actual card width: one speed row on desktop / iPad where it fits. */
+#toldView .told-speeds,#f900bView .told-speeds,#opsView .told-speeds,#f900bmissionView .told-speeds{
+  display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(100%,100px),1fr))!important;
+}
+@media screen and (max-width:700px){
+  .f9-dining-zone{grid-template-columns:minmax(0,1fr) 20px minmax(0,.72fr)!important;gap:6px!important}
+  .f9-dining-zone>*,.f9-dining-row>*{min-width:0;max-width:100%;overflow-wrap:anywhere}
+  html,body{width:100%;max-width:100%;margin-left:0;margin-right:0}
+  main{padding:10px!important}
+  #opsView,#f900bmissionView,#toldView,#f900bView{min-width:0;max-width:100%}
+  #opsView .row,#f900bmissionView .row,
+  #opsView .canonical-perf-source,#f900bmissionView .canonical-perf-source,
+  #opsView .canonical-perf-grid,#f900bmissionView .canonical-perf-grid,
+  #f900bmissionView .f9-parity-grid,
+  #toldView .told-grid,#f900bView .told-grid,
+  #toldView .told-op-metrics,#f900bView .told-op-metrics,#f900bView .told-op-grid,
+  #toldView .told-op-details,#f900bView .told-op-details,
+  #toldView .told-prep-grid,#f900bView .told-prep-grid,#f900bView .told-prep-columns,
+  .told-runway-quick,.f900b-inputs,.f900b-results,.takeoff-compare-values{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  #toldView .told-speeds,#f900bView .told-speeds,#opsView .told-speeds,#f900bmissionView .told-speeds{
+    grid-template-columns:minmax(0,1fr)!important;
+  }
+  #toldView .told-row,#f900bView .told-row,.told-op-detail{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:4px!important}
+  #toldView .told-row span:last-child,#f900bView .told-row span:last-child,.told-op-detail>span:last-child{text-align:left!important}
+  #toldView .told-op-head,#f900bView .told-op-head{display:flex!important;flex-direction:column;align-items:stretch;gap:8px}
+  #toldView .told-op-status,#f900bView .told-op-status{align-self:flex-start;text-align:left}
+  #toldView .told-op-panel,#f900bView .told-op-panel,#toldView .told-panel,#f900bView .told-panel{padding:12px!important}
+  #toldView .told-op-metric b,#f900bView .told-op-metric b{font-size:19px!important;line-height:1.25!important}
+  #toldView .told-title,#f900bView .told-title{font-size:22px!important}
+  .small{line-height:1.45}.told-op-detail,.told-row{font-size:13px;line-height:1.4}
+  button,summary{min-height:44px;white-space:normal!important;overflow-wrap:anywhere}
+  .told-actions,.archive-actions,.mission-actionbar{gap:8px;flex-wrap:wrap}
+  table{width:100%;table-layout:fixed}th,td{overflow-wrap:anywhere;white-space:normal!important}
+  .told-menu-panel{box-sizing:border-box;max-width:calc(100vw - 24px)}
+  body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+  .platform-tabs button{min-width:0!important;font-size:12px!important;padding:10px 3px!important}
+}
+
+</style>
+<div id="buildBadge" style="position:fixed;right:10px;bottom:10px;z-index:99999;background:#061829;border:1px solid #31506f;border-radius:8px;padding:5px 8px;font:11px Arial;color:#9db6cf;opacity:.9">FlightOps v5.26.16</div>
 <header>
 <div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div></div>
 <div class="platform-tabs">
@@ -1310,11 +1385,11 @@ details summary{cursor:pointer;margin-top:8px}
 <div class="row">
 <div class="fuel-big">
 <label>FOB lb</label>
-<input enterkeyhint="done" id="homeFOB" inputmode="decimal" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
+<input inputmode="numeric" enterkeyhint="done" id="homeFOB" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
 </div>
 <div class="fuel-big">
 <label>Mission Fuel lb</label>
-<input enterkeyhint="done" id="homeMissionFuel" inputmode="decimal" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
+<input inputmode="numeric" enterkeyhint="done" id="homeMissionFuel" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
 </div>
 </div>
 <div class="newtrip-fuel-note">Enter FOB and mission fuel. Tap a 0000 field to replace the value.</div>
@@ -1345,13 +1420,13 @@ details summary{cursor:pointer;margin-top:8px}
 <div><label>Trip Date</label><input id="activeTripDate" onchange="activeTripDateChanged('activeTripDate')" type="date"/><div class="small" id="activeTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input enterkeyhint="done" id="fuel" inputmode="decimal" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote"></div></div>
-<div><label>Mission Fuel Required lb</label><input enterkeyhint="done" id="missionFuel" inputmode="decimal" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
-<div><label>Taxi Fuel lb</label><input enterkeyhint="done" id="taxiFuel" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="200"/></div>
-<div><label>Emer. Return Fuel Burn lb</label><input enterkeyhint="done" id="emerReturnBurn" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="500"/></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input inputmode="numeric" enterkeyhint="done" id="fuel" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote"></div></div>
+<div><label>Mission Fuel Required lb</label><input inputmode="numeric" enterkeyhint="done" id="missionFuel" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
+<div><label>Taxi Fuel lb</label><input inputmode="numeric" enterkeyhint="done" id="taxiFuel" min="0" oninput="recalculate()" type="number" value="200"/></div>
+<div><label>Emer. Return Fuel Burn lb</label><input inputmode="numeric" enterkeyhint="done" id="emerReturnBurn" min="0" oninput="recalculate()" type="number" value="500"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Number of Passengers</label><input enterkeyhint="done" id="paxRequested" inputmode="numeric" max="9" min="0" step="1" type="number" value="0"/></div>
+<div><label>Number of Passengers</label><input inputmode="numeric" enterkeyhint="done" id="paxRequested" max="9" min="0" step="1" type="number" value="0"/></div>
 <div><label>Departure Runway</label><select id="depRunway" onchange="selectedRunwayChanged('dep')"><option value="">Load mission first</option></select></div>
 <div><label>Destination Runway</label><select id="destRunway" onchange="selectedRunwayChanged('dest')"><option value="">Load mission first</option></select></div>
 <div><label>Load Airport / Weather Data</label><button onclick="loadMission()">Load / Refresh Mission</button></div>
@@ -1367,9 +1442,9 @@ details summary{cursor:pointer;margin-top:8px}
 </div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Captain Weight lb</label><input enterkeyhint="done" id="captWt" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="190"/></div>
-<div><label>First Officer Weight lb</label><input enterkeyhint="done" id="foWt" inputmode="decimal" min="0" oninput="recalculate()" type="number" value="190"/></div>
-<div><label>Total Baggage lb</label><input enterkeyhint="done" id="totalBag" inputmode="decimal" min="0" oninput="onTotalBagInput()" type="number" value="0"/></div>
+<div><label>Captain Weight lb</label><input inputmode="numeric" enterkeyhint="done" id="captWt" min="0" oninput="recalculate()" type="number" value="190"/></div>
+<div><label>First Officer Weight lb</label><input inputmode="numeric" enterkeyhint="done" id="foWt" min="0" oninput="recalculate()" type="number" value="190"/></div>
+<div><label>Total Baggage lb</label><input inputmode="numeric" enterkeyhint="done" id="totalBag" min="0" oninput="onTotalBagInput()" type="number" value="0"/></div>
 <div></div>
 </div>
 <div class="small" id="missionStatus" style="margin-top:10px">Ready.</div>
@@ -1439,17 +1514,17 @@ FlightOps preloads the entered passenger count beginning with Seat 1 and default
 <div class="bag-cell">
 <div class="bag-title">BAG I</div>
 <div class="bag-limit">Arm 82.65 • Max 681 lb</div>
-<input class="bag-input" enterkeyhint="done" id="bagComp0" inputmode="decimal" max="681" min="0" type="number" value="0"/>
+<input inputmode="numeric" class="bag-input" enterkeyhint="done" id="bagComp0" max="681" min="0" type="number" value="0"/>
 </div>
 <div class="bag-cell">
 <div class="bag-title">BAG II</div>
 <div class="bag-limit">Arm 101.71 • Max 762 lb</div>
-<input class="bag-input" enterkeyhint="done" id="bagComp1" inputmode="decimal" max="762" min="0" type="number" value="0"/>
+<input inputmode="numeric" class="bag-input" enterkeyhint="done" id="bagComp1" max="762" min="0" type="number" value="0"/>
 </div>
 <div class="bag-cell">
 <div class="bag-title">BAG III</div>
 <div class="bag-limit">Arm 123.95 • Max 762 lb</div>
-<input class="bag-input" enterkeyhint="done" id="bagComp2" inputmode="decimal" max="762" min="0" type="number" value="0"/>
+<input inputmode="numeric" class="bag-input" enterkeyhint="done" id="bagComp2" max="762" min="0" type="number" value="0"/>
 </div>
 </div>
 <div class="bag-summary-fp" id="bagStatusNote">Total loaded baggage 0 / 2,205 lb</div>
@@ -1480,14 +1555,14 @@ PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplet
 <div class="wx"><div class="small">Destination Weather</div><b id="destWxSourceBadge">UNAVAILABLE</b><div class="small" id="destWxSourceTime">—</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>OAT °C</label><input id="manualWxOAT" inputmode="decimal" placeholder="Required" step="0.1" type="number"/></div>
-<div><label>Pressure Altitude ft</label><input id="manualWxPA" inputmode="decimal" placeholder="Required or derive from altimeter" step="1" type="number"/></div>
-<div><label>Altimeter inHg</label><input id="manualWxAlt" inputmode="decimal" placeholder="Optional" step="0.01" type="number"/></div>
+<div><label>OAT °C</label><input inputmode="decimal" data-allow-negative="true" id="manualWxOAT" placeholder="Required" step="0.1" type="number"/></div>
+<div><label>Pressure Altitude ft</label><input inputmode="decimal" data-allow-negative="true" id="manualWxPA" placeholder="Required or derive from altimeter" step="1" type="number"/></div>
+<div><label>Altimeter inHg</label><input inputmode="decimal" id="manualWxAlt" placeholder="Optional" step="0.01" type="number"/></div>
 <div><label>Wind Direction °</label><input id="manualWxDir" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="Optional (e.g. 040)" type="text"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Wind Speed kt</label><input id="manualWxSpeed" inputmode="decimal" min="0" placeholder="Optional" step="1" type="number"/></div>
-<div><label>Wind Gust kt</label><input id="manualWxGust" inputmode="decimal" min="0" placeholder="Optional" step="1" type="number"/></div>
+<div><label>Wind Speed kt</label><input inputmode="numeric" id="manualWxSpeed" min="0" placeholder="Optional" step="1" type="number"/></div>
+<div><label>Wind Gust kt</label><input inputmode="numeric" id="manualWxGust" min="0" placeholder="Optional" step="1" type="number"/></div>
 <div><label>Manual Weather Note</label><input id="manualWxNote" placeholder="Optional source / remarks"/></div>
 <div><label>Update / Toggle</label><button id="manualWxActionBtn" onclick="applyManualWeather()" type="button">REFRESH / USE LIVE WEATHER</button></div>
 </div>
@@ -1643,17 +1718,17 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 <div>
 <label>Runway Length ft</label>
-<input enterkeyhint="done" id="manualRunwayLength" inputmode="decimal" min="1" placeholder="e.g. 6500" type="number"/>
+<input inputmode="numeric" enterkeyhint="done" id="manualRunwayLength" min="1" placeholder="e.g. 6500" type="number"/>
 </div>
 </div>
 <div class="row" style="margin-top:10px">
 <div>
 <label>Runway Heading °</label>
-<input enterkeyhint="done" id="manualRunwayHeading" inputmode="decimal" max="359" min="0" placeholder="e.g. 180" type="number"/>
+<input inputmode="numeric" enterkeyhint="done" id="manualRunwayHeading" max="359" min="0" placeholder="e.g. 180" type="number"/>
 </div>
 <div>
 <label>Runway Width ft</label>
-<input enterkeyhint="done" id="manualRunwayWidth" inputmode="decimal" min="1" type="number" value="100"/>
+<input inputmode="numeric" enterkeyhint="done" id="manualRunwayWidth" min="1" type="number" value="100"/>
 </div>
 <div>
 <label>Surface</label>
@@ -1842,21 +1917,21 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 <div>
 <label>Hypothetical OAT °C</label>
-<input enterkeyhint="done" id="manualTOTemp" inputmode="decimal" step="1" type="number" value="20"/>
+<input inputmode="decimal" data-allow-negative="true" enterkeyhint="done" id="manualTOTemp" step="1" type="number" value="20"/>
 </div>
 <div>
 <label>Hypothetical Aircraft Weight lb</label>
-<input enterkeyhint="done" id="manualTOWeight" inputmode="decimal" max="40780" min="18000" step="100" type="number" value="30000"/>
+<input inputmode="numeric" enterkeyhint="done" id="manualTOWeight" max="40780" min="18000" step="100" type="number" value="30000"/>
 </div>
 </div>
 <div class="row whatif-process-row">
 <div>
 <label>Pressure Altitude ft</label>
-<input enterkeyhint="done" id="manualTOPA" inputmode="decimal" step="100" type="number" value="0"/>
+<input inputmode="decimal" data-allow-negative="true" enterkeyhint="done" id="manualTOPA" step="100" type="number" value="0"/>
 </div>
 <div>
 <label>Runway Length ft</label>
-<input enterkeyhint="done" id="manualTORwyLen" inputmode="decimal" min="1" step="1" type="number" value="6000"/>
+<input inputmode="numeric" enterkeyhint="done" id="manualTORwyLen" min="1" step="1" type="number" value="6000"/>
 </div>
 <div>
 <label>Process Hypothetical Point</label>
@@ -1983,7 +2058,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 </div>
 <div class="small" id="notamRunwayImpact" style="margin-top:8px">Runway impact: not evaluated.</div>
 <div class="row" style="margin-top:10px">
-<div><label>Manual Usable Runway Length ft</label><input enterkeyhint="done" id="manualUsableLda" inputmode="decimal" min="1" placeholder="Optional override" type="number"/></div>
+<div><label>Manual Usable Runway Length ft</label><input inputmode="numeric" enterkeyhint="done" id="manualUsableLda" min="1" placeholder="Optional override" type="number"/></div>
 <div><label>Manual Runway Status</label><select id="manualRunwayStatusOverride"><option value="">Use NOTAM / published status</option><option value="OPEN">OPEN</option><option value="CLOSED">CLOSED</option><option value="RESTRICTED">RESTRICTED</option></select></div>
 <div><label>Manual Restriction Note</label><input id="manualNotamNote" placeholder="e.g. RWY 14 usable 6200 ft"/></div>
 <div class="runway-gate" id="landingRunwayGateBox"><span class="small">LANDING RUNWAY GATE</span><b id="landingRunwayGate">NOT EVALUATED</b><span class="small" id="landingRunwayGateNote">Load destination runway and NOTAM status.</span></div>
@@ -2391,13 +2466,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Trip Date</label><input id="f9mTripDate" onchange="activeTripDateChanged('f9mTripDate')" type="date"/><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input id="f9mFOB" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote"></div></div>
-<div><label>Mission Fuel Required lb</label><input id="f9mMissionFuel" inputmode="decimal" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
-<div><label>Taxi Fuel lb</label><input id="f9mTaxiFuel" inputmode="decimal" min="0" oninput="f9Section1FuelChanged('taxi')" step="10" type="number" value="200"/></div>
-<div><label>Emer. Return Fuel Burn lb</label><input id="f9mReturnBurn" inputmode="decimal" min="0" oninput="f9Section1ReturnBurnChanged()" step="10" type="number" value="500"/></div>
+<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input inputmode="numeric" id="f9mFOB" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote"></div></div>
+<div><label>Mission Fuel Required lb</label><input inputmode="numeric" id="f9mMissionFuel" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
+<div><label>Taxi Fuel lb</label><input inputmode="numeric" id="f9mTaxiFuel" min="0" oninput="f9Section1FuelChanged('taxi')" step="10" type="number" value="200"/></div>
+<div><label>Emer. Return Fuel Burn lb</label><input inputmode="numeric" id="f9mReturnBurn" min="0" oninput="f9Section1ReturnBurnChanged()" step="10" type="number" value="500"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Number of Passengers</label><input id="f9mPaxCount" inputmode="numeric" max="12" min="0" onchange="f9PassengerCountChanged()" step="1" type="number" value="0"/><div class="small">N699BG Version 11 capacity: 12 passenger positions.</div></div>
+<div><label>Number of Passengers</label><input inputmode="numeric" id="f9mPaxCount" max="12" min="0" onchange="f9PassengerCountChanged()" step="1" type="number" value="0"/><div class="small">N699BG Version 11 capacity: 12 passenger positions.</div></div>
 <div><label>Departure Runway</label><select id="f9mDepRunway" onchange="f9RunwayChanged('dep')"><option value="">Load mission first</option></select></div>
 <div><label>Destination Runway</label><select id="f9mDestRunway" onchange="f9RunwayChanged('dest')"><option value="">Load mission first</option></select></div>
 <div><label>Load Airport / Weather Data</label><button onclick="f9LoadOperationalData(true)" type="button">Load / Refresh Mission</button></div>
@@ -2410,18 +2485,18 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Captain Weight lb</label><input id="f9mCaptainWt" inputmode="decimal" min="0" oninput="f9Section1CrewChanged()" type="number" value="170"/></div>
-<div><label>First Officer Weight lb</label><input id="f9mFOWt" inputmode="decimal" min="0" oninput="f9Section1CrewChanged()" type="number" value="170"/></div>
-<div><label>Total Baggage lb</label><input id="f9mTotalBag" inputmode="decimal" max="2866" min="0" oninput="f9Section1BaggageChanged()" type="number" value="0"/></div>
+<div><label>Captain Weight lb</label><input inputmode="numeric" id="f9mCaptainWt" min="0" oninput="f9Section1CrewChanged()" type="number" value="170"/></div>
+<div><label>First Officer Weight lb</label><input inputmode="numeric" id="f9mFOWt" min="0" oninput="f9Section1CrewChanged()" type="number" value="170"/></div>
+<div><label>Total Baggage lb</label><input inputmode="numeric" id="f9mTotalBag" max="2866" min="0" oninput="f9Section1BaggageChanged()" type="number" value="0"/></div>
 <div></div>
 </div>
 <div class="small" id="f9mMissionStatus" style="margin-top:10px">Ready.</div>
 <!-- Canonical 900B fuel-plan backing state. These values mirror Section 1 and are retained for W&B/TOLD/draft logic. -->
 <div aria-hidden="true" style="display:none">
-<input id="f9wbFuel" type="number" value="0"/>
-<input id="f9wbTaxi" type="number" value="200"/>
-<input id="f9wbTripBurn" type="number" value="0"/>
-<input id="f9wbLandingFuel" type="number" value="0"/>
+<input inputmode="numeric" id="f9wbFuel" type="number" value="0"/>
+<input inputmode="numeric" id="f9wbTaxi" type="number" value="200"/>
+<input inputmode="numeric" id="f9wbTripBurn" type="number" value="0"/>
+<input inputmode="numeric" id="f9wbLandingFuel" type="number" value="0"/>
 </div>
 </div>
 <div class="card" id="f9mWBCard">
@@ -2441,34 +2516,34 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="f9-centerline"></div>
 <div class="f9-zone-label">FLIGHT DECK</div>
 <div class="f9-flightdeck">
-<div class="f9-cockpit-seat"><b>PILOT • −311.18 in</b><input id="f9wb_pilot" min="0" oninput="f9RecalcWB()" step="1" type="number" value="170"/></div>
-<div class="f9-cockpit-seat"><b>COPILOT • −311.18 in</b><input id="f9wb_copilot" min="0" oninput="f9RecalcWB()" step="1" type="number" value="170"/></div>
+<div class="f9-cockpit-seat"><b>PILOT • −311.18 in</b><input inputmode="numeric" id="f9wb_pilot" min="0" oninput="f9RecalcWB()" step="1" type="number" value="170"/></div>
+<div class="f9-cockpit-seat"><b>COPILOT • −311.18 in</b><input inputmode="numeric" id="f9wb_copilot" min="0" oninput="f9RecalcWB()" step="1" type="number" value="170"/></div>
 </div>
 <div class="f9-forward-service">
 <div class="f9-service-stack">
-<div class="f9-fixture"><label>3RD CREW • −274.12 in</label><input id="f9wb_crew3" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-<div class="f9-fixture"><label>BAGGAGE + DOC • −278.26 in</label><input id="f9wb_bagdocs" max="92" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-fixture"><label>3RD CREW • −274.12 in</label><input inputmode="numeric" id="f9wb_crew3" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-fixture"><label>BAGGAGE + DOC • −278.26 in</label><input inputmode="numeric" id="f9wb_bagdocs" max="92" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
 </div>
 <div class="f9-service-stack">
-<div class="f9-fixture"><label>RIGHT GALLEY • −225.0 in</label><input id="f9wb_rightgalley" max="200" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-<div class="f9-fixture"><label>LEFT GALLEY • −223.0 in</label><input id="f9wb_leftgalley" max="200" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-fixture"><label>RIGHT GALLEY • −225.0 in</label><input inputmode="numeric" id="f9wb_rightgalley" max="200" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-fixture"><label>LEFT GALLEY • −223.0 in</label><input inputmode="numeric" id="f9wb_leftgalley" max="200" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
 </div>
 </div>
 <div class="f9-zone-label">FORWARD LOUNGE</div>
-<div class="f9-seat-row"><div class="f9-seat"><label>Seat 1 <span>−190.88 in</span></label><input id="f9wb_pax1" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 2 <span>−190.88 in</span></label><input id="f9wb_pax2" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
+<div class="f9-seat-row"><div class="f9-seat"><label>Seat 1 <span>−190.88 in</span></label><input inputmode="numeric" id="f9wb_pax1" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 2 <span>−190.88 in</span></label><input inputmode="numeric" id="f9wb_pax2" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
 <div class="f9-mid-row"><div></div><div class="f9-aisle"></div><div class="f9-cabinet">VIDEO CABINET</div></div>
-<div class="f9-seat-row"><div class="f9-seat"><label>Seat 3 <span>−143.24 in</span></label><input id="f9wb_pax3" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 4 <span>−143.24 in</span></label><input id="f9wb_pax4" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
+<div class="f9-seat-row"><div class="f9-seat"><label>Seat 3 <span>−143.24 in</span></label><input inputmode="numeric" id="f9wb_pax3" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-aisle">AISLE</div><div class="f9-seat"><label>Seat 4 <span>−143.24 in</span></label><input inputmode="numeric" id="f9wb_pax4" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div></div>
 <div class="f9-zone-label">MID CABIN • DINING GROUP</div>
 <div class="f9-dining-zone">
   <div class="f9-dining-left">
     <div class="f9-dining-row">
-      <div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input id="f9wb_pax5" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-      <div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input id="f9wb_pax6" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+      <div class="f9-seat"><label>Seat 5 <span>−89.41 in</span></label><input inputmode="numeric" id="f9wb_pax5" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+      <div class="f9-seat"><label>Seat 6 <span>−89.41 in</span></label><input inputmode="numeric" id="f9wb_pax6" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
     </div>
     <div class="f9-dining-table">DINING TABLE</div>
     <div class="f9-dining-row">
-      <div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input id="f9wb_pax7" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-      <div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input id="f9wb_pax8" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+      <div class="f9-seat"><label>Seat 7 <span>−45.00 in</span></label><input inputmode="numeric" id="f9wb_pax7" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+      <div class="f9-seat"><label>Seat 8 <span>−45.00 in</span></label><input inputmode="numeric" id="f9wb_pax8" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
     </div>
   </div>
   <div class="f9-aisle">AISLE</div>
@@ -2477,16 +2552,16 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="f9-zone-label">AFT LOUNGE / SIDE SOFA</div>
 <div class="f9-aft-lounge">
 <div class="f9-divan">
-<div class="f9-seat"><label>Seat 9 <span>+1.76 in</span></label><input id="f9wb_pax9" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-<div class="f9-seat"><label>Seat 11 <span>+27.65 in</span></label><input id="f9wb_pax11" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-<div class="f9-seat"><label>Seat 12 <span>+52.94 in</span></label><input id="f9wb_pax12" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-seat"><label>Seat 9 <span>+1.76 in</span></label><input inputmode="numeric" id="f9wb_pax9" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-seat"><label>Seat 11 <span>+27.65 in</span></label><input inputmode="numeric" id="f9wb_pax11" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-seat"><label>Seat 12 <span>+52.94 in</span></label><input inputmode="numeric" id="f9wb_pax12" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
 </div>
 <div class="f9-aisle">AISLE</div>
-<div class="f9-aft-right"><div class="f9-cabinet">CABINET</div><div class="f9-seat"><label>Seat 10 <span>+23.53 in</span></label><input id="f9wb_pax10" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-fixture">AFT LAV</div></div>
+<div class="f9-aft-right"><div class="f9-cabinet">CABINET</div><div class="f9-seat"><label>Seat 10 <span>+23.53 in</span></label><input inputmode="numeric" id="f9wb_pax10" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div><div class="f9-fixture">AFT LAV</div></div>
 </div>
 <div class="f9-baggage-deck">
-<div class="f9-fixture"><label>FRONT BAGGAGE</label><input id="f9wb_bagfront" max="1213" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
-<div class="f9-fixture"><label>REAR BAGGAGE</label><input id="f9wb_bagrear" max="1653" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-fixture"><label>FRONT BAGGAGE</label><input inputmode="numeric" id="f9wb_bagfront" max="1213" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
+<div class="f9-fixture"><label>REAR BAGGAGE</label><input inputmode="numeric" id="f9wb_bagrear" max="1653" min="0" oninput="f9RecalcWB()" step="1" type="number" value="0"/></div>
 </div>
 </div>
 <div class="small f900b-source" id="f9wbSource">N699BG • Duncan W&amp;B 06/06/2024 • DTM9821 Rev59 / Version 11 • no XTK2 • SB F900-139 • DTM9819 Rev12 §3-40 takeoff trim</div>
@@ -2501,14 +2576,14 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="wx"><div class="small">Destination Weather</div><b id="f9DestWxSourceBadge">UNAVAILABLE</b><div class="small" id="f9DestWxSourceTime">—</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>OAT °C</label><input id="f9ManualWxOAT" inputmode="decimal" placeholder="Required" step="0.1" type="number"/></div>
-<div><label>Pressure Altitude ft</label><input id="f9ManualWxPA" inputmode="decimal" placeholder="Required or derive from altimeter" step="1" type="number"/></div>
-<div><label>Altimeter inHg</label><input id="f9ManualWxAlt" inputmode="decimal" placeholder="Optional" step="0.01" type="number"/></div>
+<div><label>OAT °C</label><input inputmode="decimal" data-allow-negative="true" id="f9ManualWxOAT" placeholder="Required" step="0.1" type="number"/></div>
+<div><label>Pressure Altitude ft</label><input inputmode="decimal" data-allow-negative="true" id="f9ManualWxPA" placeholder="Required or derive from altimeter" step="1" type="number"/></div>
+<div><label>Altimeter inHg</label><input inputmode="decimal" id="f9ManualWxAlt" placeholder="Optional" step="0.01" type="number"/></div>
 <div><label>Wind Direction °</label><input id="f9ManualWxDir" inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}" placeholder="Optional (e.g. 040)" type="text"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Wind Speed kt</label><input id="f9ManualWxSpeed" inputmode="decimal" min="0" placeholder="Optional" step="1" type="number"/></div>
-<div><label>Wind Gust kt</label><input id="f9ManualWxGust" inputmode="decimal" min="0" placeholder="Optional" step="1" type="number"/></div>
+<div><label>Wind Speed kt</label><input inputmode="numeric" id="f9ManualWxSpeed" min="0" placeholder="Optional" step="1" type="number"/></div>
+<div><label>Wind Gust kt</label><input inputmode="numeric" id="f9ManualWxGust" min="0" placeholder="Optional" step="1" type="number"/></div>
 <div><label>Manual Weather Note</label><input id="f9ManualWxNote" placeholder="Optional source / remarks"/></div>
 <div><label>Update / Toggle</label><button id="f9ManualWxActionBtn" onclick="f9ApplyManualWeather()" type="button">REFRESH / USE LIVE WEATHER</button></div>
 </div>
@@ -2621,11 +2696,11 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Use For</label><select id="f9ManualRunwayTarget" onchange="f9PopulateFallbackRunwayOptions()"><option value="DEP">Departure</option><option value="DEST">Destination</option></select></div>
 <div><label>Runway Option</label><select id="f9ManualRunwayOption" onchange="f9FallbackRunwayChanged()"><option value="">Load mission first</option></select></div>
 <div><label>Runway ID</label><input id="f9ManualRunwayId" placeholder="e.g. 12"/></div>
-<div><label>Runway Length ft</label><input id="f9ManualRunwayLen" min="1" placeholder="e.g. 6750" type="number"/></div>
+<div><label>Runway Length ft</label><input inputmode="numeric" id="f9ManualRunwayLen" min="1" placeholder="e.g. 6750" type="number"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Runway Heading °</label><input id="f9ManualRunwayHdg" max="360" min="0" placeholder="e.g. 120" type="number"/></div>
-<div><label>Runway Width ft</label><input id="f9ManualRunwayWidth" min="0" placeholder="optional" type="number"/></div>
+<div><label>Runway Heading °</label><input inputmode="numeric" id="f9ManualRunwayHdg" max="360" min="0" placeholder="e.g. 120" type="number"/></div>
+<div><label>Runway Width ft</label><input inputmode="numeric" id="f9ManualRunwayWidth" min="0" placeholder="optional" type="number"/></div>
 <div><label>Surface</label><input id="f9ManualRunwaySurface" placeholder="e.g. Asphalt"/></div>
 <div><label>Process</label><button onclick="f9ProcessFallbackRunway()" type="button">PROCESS RUNWAY / WEATHER</button></div>
 </div>
@@ -2723,14 +2798,14 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="small" id="f9mDepNotamDetail" style="margin-top:8px">No departure NOTAM data loaded.</div><div class="small" id="f9mDepUsableDetail" style="margin-top:8px">—</div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Runway Available ft</label><input id="f9mToRunway" min="0" step="1" type="number"/></div>
+<div><label>Runway Available ft</label><input inputmode="numeric" id="f9mToRunway" min="0" step="1" type="number"/></div>
 <div><label>Actual Takeoff Weight lb</label><input id="legacyF9CanonicalTOW" readonly="" type="number"/></div>
-<div><label>Pressure Altitude ft</label><input id="f9mToPA" step="1" type="number"/></div>
-<div><label>OAT °C</label><input id="f9mToTemp" step="0.1" type="number"/></div>
+<div><label>Pressure Altitude ft</label><input inputmode="decimal" data-allow-negative="true" id="f9mToPA" step="1" type="number"/></div>
+<div><label>OAT °C</label><input inputmode="decimal" data-allow-negative="true" id="f9mToTemp" step="0.1" type="number"/></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Headwind (+) / Tailwind (−) kt</label><input id="f9mToWind" max="50" min="-10" step="0.1" type="number" value="0"/></div>
-<div><label>Runway Slope % (+ uphill)</label><input id="f9mToSlope" max="2" min="-2" step="0.01" type="number" value="0"/></div>
+<div><label>Headwind (+) / Tailwind (−) kt</label><input inputmode="decimal" data-allow-negative="true" id="f9mToWind" max="50" min="-10" step="0.1" type="number" value="0"/></div>
+<div><label>Runway Slope % (+ uphill)</label><input inputmode="decimal" data-allow-negative="true" id="f9mToSlope" max="2" min="-2" step="0.01" type="number" value="0"/></div>
 <div class="wx"><div class="small">Balanced Field Length</div><b id="f9mBFL">—</b></div>
 <div class="wx"><div class="small">Runway Remaining</div><b id="f9mToMargin">—</b></div>
 </div>
@@ -2785,9 +2860,9 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="small" id="f9mDestNotamDetail" style="margin-top:8px">No destination NOTAM data loaded.</div><div class="small" id="f9mDestUsableDetail" style="margin-top:8px">—</div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Pressure Altitude ft</label><input id="f9mLdgPA" step="1" type="number"/></div>
-<div><label>OAT °C</label><input id="f9mLdgTemp" step="0.1" type="number"/></div>
-<div><label>Runway Available ft</label><input id="f9mLdgRunway" min="0" step="1" type="number"/></div>
+<div><label>Pressure Altitude ft</label><input inputmode="decimal" data-allow-negative="true" id="f9mLdgPA" step="1" type="number"/></div>
+<div><label>OAT °C</label><input inputmode="decimal" data-allow-negative="true" id="f9mLdgTemp" step="0.1" type="number"/></div>
+<div><label>Runway Available ft</label><input inputmode="numeric" id="f9mLdgRunway" min="0" step="1" type="number"/></div>
 <div><label>Runway Comparison</label><select id="f9mLdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
 </div>
 
@@ -2895,13 +2970,13 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Configuration</label><select id="f9ToConfig"><option value="20">20° Flaps + Slats</option><option value="7">7° Flaps + Slats</option></select></div>
 <div><label>Anti-Ice</label><select id="f9ToAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
 <div><label>Runway</label><select id="f9ToSurface"><option value="DRY">DRY</option><option value="WET">WET</option></select></div>
-<div><label>Runway Available ft</label><input id="f9ToRunway" min="0" placeholder="e.g. 7000" step="1" type="number"/></div>
-<div><label>Headwind (+) / Tailwind (−) kt</label><input id="f9ToWind" max="50" min="-10" step="0.1" type="number" value="0"/></div>
-<div><label>Runway Slope % (+ uphill)</label><input id="f9ToSlope" max="2" min="-2" step="0.01" type="number" value="0"/></div>
-<div><label>Pressure Altitude ft</label><input id="f9ToPA" placeholder="0 to 6000" step="1" type="number"/></div>
-<div><label>OAT °C</label><input id="f9ToTemp" placeholder="published range" step="0.1" type="number"/></div>
-<div><label>Takeoff Weight lb</label><input id="f9ToWeight" min="0" placeholder="28,000 to 45,500" step="10" type="number"/></div>
-<div><label>Emergency Return Burn lb</label><input id="f9ReturnBurn" min="0" step="10" type="number" value="500"/></div>
+<div><label>Runway Available ft</label><input inputmode="numeric" id="f9ToRunway" min="0" placeholder="e.g. 7000" step="1" type="number"/></div>
+<div><label>Headwind (+) / Tailwind (−) kt</label><input inputmode="decimal" data-allow-negative="true" id="f9ToWind" max="50" min="-10" step="0.1" type="number" value="0"/></div>
+<div><label>Runway Slope % (+ uphill)</label><input inputmode="decimal" data-allow-negative="true" id="f9ToSlope" max="2" min="-2" step="0.01" type="number" value="0"/></div>
+<div><label>Pressure Altitude ft</label><input inputmode="decimal" data-allow-negative="true" id="f9ToPA" placeholder="0 to 6000" step="1" type="number"/></div>
+<div><label>OAT °C</label><input inputmode="decimal" data-allow-negative="true" id="f9ToTemp" placeholder="published range" step="0.1" type="number"/></div>
+<div><label>Takeoff Weight lb</label><input inputmode="numeric" id="f9ToWeight" min="0" placeholder="28,000 to 45,500" step="10" type="number"/></div>
+<div><label>Emergency Return Burn lb</label><input inputmode="numeric" id="f9ReturnBurn" min="0" step="10" type="number" value="500"/></div>
 </div></details>
 <div style="display:none"><b id="f9V1">—</b><b id="f9VR">—</b></div>
 <div class="f900b-results">
@@ -2970,10 +3045,10 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <details class="f9-told-inputs" style="margin-top:10px"><summary class="small">Performance inputs / what-if detail</summary><div class="f900b-inputs" style="margin-top:10px">
 <div><label>Anti-Ice</label><select id="f9LdgAI"><option value="OFF">OFF</option><option value="ON">ON</option></select></div>
-<div><label>Pressure Altitude ft</label><input id="f9LdgPA" placeholder="0 to 6000" step="1" type="number"/></div>
-<div><label>OAT °C</label><input id="f9LdgTemp" placeholder="published range" step="0.1" type="number"/></div>
-<div><label>Landing Weight lb</label><input id="f9LdgWeight" min="0" placeholder="20,700 to 42,000" step="10" type="number"/></div>
-<div><label>Runway Available ft</label><input id="f9LdgRunway" min="0" placeholder="e.g. 6500" step="1" type="number"/></div>
+<div><label>Pressure Altitude ft</label><input inputmode="decimal" data-allow-negative="true" id="f9LdgPA" placeholder="0 to 6000" step="1" type="number"/></div>
+<div><label>OAT °C</label><input inputmode="decimal" data-allow-negative="true" id="f9LdgTemp" placeholder="published range" step="0.1" type="number"/></div>
+<div><label>Landing Weight lb</label><input inputmode="numeric" id="f9LdgWeight" min="0" placeholder="20,700 to 42,000" step="10" type="number"/></div>
+<div><label>Runway Available ft</label><input inputmode="numeric" id="f9LdgRunway" min="0" placeholder="e.g. 6500" step="1" type="number"/></div>
 <div><label>Runway Comparison</label><select id="f9LdgFactor"><option value="1.67">LD × 1.67</option><option value="1.92">LD × 1.92</option><option value="1">Actual LD</option></select></div>
 
 </div></details>
@@ -4692,10 +4767,101 @@ function installF50PilotReviewPanel(){
 function missionViewForAircraft(code){
  return code==="F900B"?"f900bmission":"ops";
 }
-const REFRESH_VIEW_KEY="kusaFlightOpsActiveView:v5.26.15";
+/* Continuity schema is independent of release number; v5.26.12–15 records migrate once. */
+function migrateContinuityStorage(){
+ try{
+   // Tab state is session-scoped; migrate it separately on every tab, even after local data migrated.
+   if(!sessionStorage.getItem("kusaFlightOpsActiveView:v1")){
+     const old=sessionStorage.getItem("kusaFlightOpsActiveView:v5.26.15");
+     if(old)sessionStorage.setItem("kusaFlightOpsActiveView:v1",old);
+   }
+   if(localStorage.getItem("kusaFlightOpsContinuityMigration:v1")==="done")return;
+   for(const name of ["MissionSyncQueue","MissionPackages","LastActiveMission"]){
+     const key="kusaFlightOps"+name+":v1";
+     let current=JSON.parse(name==="LastActiveMission"?"null":localStorage.getItem(key)||(name==="MissionSyncQueue"?"[]":"{}"));
+     for(const version of ["5.26.15","5.26.14","5.26.13","5.26.12"]){
+       const old=localStorage.getItem("kusaFlightOps"+name+":v"+version);if(!old)continue;
+       if(name==="LastActiveMission"){if(!localStorage.getItem(key))localStorage.setItem(key,old);continue;}
+       const prior=JSON.parse(old);
+       if(name==="MissionSyncQueue"){
+         for(const item of prior)if(item?.local_id&&!current.some(x=>x.local_id===item.local_id&&x.action===item.action))current.push(item);
+       }else{for(const [route,pkg] of Object.entries(prior))if(!current[route]||String(pkg.saved_at)>String(current[route].saved_at))current[route]=pkg;}
+     }
+     if(name!=="LastActiveMission")localStorage.setItem(key,JSON.stringify(current));
+   }
+   localStorage.setItem("kusaFlightOpsContinuityMigration:v1","done");
+ }catch(e){console.warn("Continuity migration unavailable",e)}
+}
+migrateContinuityStorage();
+const REFRESH_CONTEXT_KEY="kusaFlightOpsRefreshContext:v1";
+let restoringRefreshContext=true;
+let activePlatformView="home";
+function readRefreshContext(){try{return JSON.parse(sessionStorage.getItem(REFRESH_CONTEXT_KEY)||"null")}catch{return null}}
+const INITIAL_REFRESH_CONTEXT=readRefreshContext();
+const INITIAL_REFRESH_VIEW=(()=>{try{return sessionStorage.getItem("kusaFlightOpsActiveView:v1")||"home"}catch{return"home"}})();
+const REFRESH_CONTROL_SCOPE='#homeView,#newtripView,#opsView,#toldView,#f900bmissionView,#f900bView';
+function refreshControls(){return [...document.querySelectorAll(REFRESH_CONTROL_SCOPE)].flatMap(root=>[...root.querySelectorAll('input[id],select[id],textarea[id]')]).filter(el=>!['password','file','button','submit'].includes(el.type)&&!el.readOnly)}
+function persistRefreshContext({saveDraft=false}={}){
+ if(restoringRefreshContext)return;
+ try{
+   if(saveDraft){clearTimeout(draftSaveTimer);saveCurrentDraft();}
+   const controls=Object.fromEntries(refreshControls().map(el=>[el.id,{value:el.value,checked:el.checked,
+     options:el.tagName==="SELECT"&&/runway/i.test(el.id)?[...el.options].map(o=>({value:o.value,text:o.textContent})):undefined}]));
+   const details=[...document.querySelectorAll('details')].map((el,index)=>[el.id||'@'+index,el.open]);
+   sessionStorage.setItem(REFRESH_CONTEXT_KEY,JSON.stringify({schema:1,view:activePlatformView,scrollY:window.scrollY,controls,details,
+     meta:window.currentMissionMeta||null,missionData,manualWeather,currentNotams,departureNotams,departureObstacleReview,
+     passengers,seatAssignments,whatIfDirty,movingPax:F9_MOVING_PAX}));
+ }catch(e){console.warn("Refresh context could not be saved",e)}
+}
+function applyRefreshControls(context){
+ for(const [id,state] of Object.entries(context.controls||{})){
+   const el=$(id);if(!el||el.readOnly)continue;
+   if(el.tagName==="SELECT"&&Array.isArray(state.options))el.replaceChildren(...state.options.map(o=>new Option(o.text,o.value)));
+   el.value=state.value;if(typeof state.checked==="boolean")el.checked=state.checked;
+ }
+ restoreRefreshDetails(context);
+}
+function restoreRefreshDetails(context){
+ const all=[...document.querySelectorAll('details')];
+ for(const [id,open] of context.details||[]){const el=id.startsWith('@')?all[Number(id.slice(1))]:$(id);if(el)el.open=open;}
+}
+
+function renderRefreshMissionData(){
+ if(!missionData?.departure||!missionData?.destination)return;
+ const dep=cleanICAO($("dep")?.value),dest=cleanICAO($("dest")?.value),alt=cleanICAO($("alt")?.value);
+ for(const [prefix,code,point] of [["dep",dep,missionData.departure],["dest",dest,missionData.destination]]){
+   for(const id of [prefix+"Title",prefix+"WxIdent",prefix+"WxIdent2","sum"+(prefix==="dep"?"Dep":"Dest")])if($(id))$(id).textContent=code;
+   populatePoint(prefix,point);
+ }
+ const alternate=missionData.alternate;
+ for(const id of ["altMetarPanel","altTafPanel"])if($(id))$(id).style.display=alt&&alternate?"block":"none";
+ if(alt&&alternate){
+   $("altTitle").textContent=alt;$("altTitle2").textContent=alt;
+   $("altMetar").innerHTML=formatMetarDecoded(alternate.metar,alternate.altimeter_inhg);
+   $("altTaf").innerHTML=formatTafDecoded(alternate.taf);
+   $("altMetarRaw").textContent=firstVal(alternate.metar||{},["raw","rawOb","raw_text"])||"—";
+   $("altTafRaw").textContent=firstVal(alternate.taf||{},["raw","rawTAF","raw_text"])||"—";
+ }
+ const table=$("runways");table.replaceChildren();
+ for(const [code,point] of [[dep,missionData.departure],[dest,missionData.destination]]){
+   for(const item of directionalRunwayOptions(point.runways||[],point)){
+     const rw=item.runway,w=rw.wind_components||{},tr=document.createElement("tr");
+     for(const value of [code,rw.runway_id,rw.heading,rw.length_ft,rw.width_ft,rw.surface,w.headwind_kt,w.tailwind_kt,w.crosswind_kt]){
+       const td=document.createElement("td");td.textContent=value??"—";tr.append(td);
+     }
+     table.append(tr);
+   }
+ }
+ const route=dep+" → "+dest+(alt?" • Alternate "+alt:"");f9Put("f9Route",route);f9Put("f9mRoute",route);
+ populateFallbackRunwayOptions();
+ const status=$(activeAircraftCode()==="F900B"?"f9mMissionStatus":"missionStatus");
+ if(status)status.textContent="MISSION RESTORED IN PLACE — retained inputs and cached reports. Use Load / Refresh Mission for live updates.";
+}
+const REFRESH_VIEW_KEY="kusaFlightOpsActiveView:v1";
 function showPlatformView(view){
  const requestedView=view;
- try{sessionStorage.setItem(REFRESH_VIEW_KEY,requestedView)}catch(e){}
+ activePlatformView=requestedView;
+ if(!restoringRefreshContext)try{sessionStorage.setItem(REFRESH_VIEW_KEY,requestedView)}catch(e){}
  const actualView=activeAircraftCode()==="F900B"?(view==="ops"?"f900bmission":view==="told"?"f900b":view):view;
  const ids=["home","newtrip","ops","told","f900bmission","f900b","archive","shared"];
  ids.forEach(v=>{
@@ -4708,9 +4874,9 @@ function showPlatformView(view){
  if(actualView==="ops"){installF50PilotReviewPanel();requestAnimationFrame(()=>requestAnimationFrame(redrawCgEnvelope));}
  if(actualView==="f900bmission"){syncF900BTOLDToMission();refreshF900BMission();setTimeout(()=>{f9DrawCGTrace(window.f900bWBLatest);f9RenderMissionParity();f9RenderCanonicalParityFields();},50);}
  if(actualView==="f900b"){syncF900BMissionToTOLD();refreshF900B();if(requestedView==="told")setTimeout(()=>$("f9TakeoffHeading")?.scrollIntoView({block:"start"}),0);}
- if(actualView==="archive"){renderArchive();if(navigator.onLine)reconcileCloudDrafts({render:true});}
+ if(actualView==="archive"){renderArchive();if(navigator.onLine&&!restoringRefreshContext)reconcileCloudDrafts({render:true});}
  if(actualView==="home"){refreshMenuCounts();}
- window.scrollTo({top:0,behavior:"smooth"});
+ if(!restoringRefreshContext){window.scrollTo({top:0,behavior:"smooth"});persistRefreshContext();}
 }
 function showAppTab(tab){ showPlatformView(tab); } // backward compatibility
 
@@ -4777,7 +4943,7 @@ function saveMissionDrafts(arr){localStorage.setItem("kusaFlightOpsDrafts",JSON.
 function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=getMissionDrafts().length}
 
 
-const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v5.26.15";
+const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v1";
 let missionSyncTimer=null;
 let aircraftDirectoryCache=null;
 
@@ -4785,13 +4951,13 @@ function getMissionSyncQueue(){
   try{return JSON.parse(localStorage.getItem(MISSION_SYNC_QUEUE_KEY)||"[]")}catch{return[]}
 }
 function saveMissionSyncQueue(q){
-  try{localStorage.setItem(MISSION_SYNC_QUEUE_KEY,JSON.stringify(q.slice(-100)))}catch{}
+  try{localStorage.setItem(MISSION_SYNC_QUEUE_KEY,JSON.stringify(q))}catch{}
   updateCloudSyncStatus();
 }
 function enqueueMissionSync(localId,action="upsert"){
   if(!localId)return;
   const q=getMissionSyncQueue().filter(x=>!(x.local_id===localId&&x.action===action));
-  q.push({local_id:localId,action,queued_at:new Date().toISOString()});
+  q.push({local_id:localId,action,queued_at:new Date().toISOString(),change_id:crypto.randomUUID()});
   saveMissionSyncQueue(q);
   if(navigator.onLine){
     clearTimeout(missionSyncTimer);
@@ -4886,12 +5052,20 @@ async function syncOneMissionQueueItem(item){
     return {done:false};
   }
 }
+let missionSyncInFlight=null;
 async function flushMissionSyncQueue(){
   if(!navigator.onLine){updateCloudSyncStatus();return}
-  const q=getMissionSyncQueue();if(!q.length){updateCloudSyncStatus();return}
-  const remaining=[];
-  for(const item of q){const result=await syncOneMissionQueueItem(item);if(!result.done)remaining.push(item)}
-  saveMissionSyncQueue(remaining);updateCloudSyncStatus();
+  if(missionSyncInFlight)return missionSyncInFlight;
+  missionSyncInFlight=(async()=>{
+    const pending=getMissionSyncQueue();
+    for(const item of pending){
+      const result=await syncOneMissionQueueItem(item);
+      // Remove only the exact revision sent. An edit queued during the request survives.
+      if(result.done)saveMissionSyncQueue(getMissionSyncQueue().filter(x=>JSON.stringify(x)!==JSON.stringify(item)));
+    }
+    updateCloudSyncStatus();
+  })();
+  try{await missionSyncInFlight}finally{missionSyncInFlight=null}
 }
 
 function cloudMissionToLocalDraft(m){
@@ -4940,20 +5114,7 @@ async function hydrateCloudDrafts({render=false}={}){
     return true;
   }catch(e){console.warn("Cloud draft hydration failed",e);return false}
 }
-function migrateMissionSyncQueues(){
- const current=getMissionSyncQueue();
- const merged=[...current];
- ["kusaFlightOpsMissionSyncQueue:v5.26.12","kusaFlightOpsMissionSyncQueue:v5.26.13"].forEach(key=>{
-   try{
-     const prior=JSON.parse(localStorage.getItem(key)||"[]");
-     if(Array.isArray(prior))for(const item of prior){
-       if(item?.local_id&&!merged.some(x=>x.local_id===item.local_id&&x.action===item.action))merged.push(item);
-     }
-     localStorage.removeItem(key);
-   }catch(e){}
- });
- saveMissionSyncQueue(merged);
-}
+function migrateMissionSyncQueues(){migrateContinuityStorage();}
 function queueUnsyncedLocalDrafts(){
  const queued=new Set(getMissionSyncQueue().map(x=>x.local_id));
  for(const rec of getMissionDrafts()){
@@ -4979,8 +5140,8 @@ async function reconcileCloudDrafts({render=false}={}){
 window.addEventListener("online",()=>{aircraftDirectoryCache=null;updateCloudSyncStatus("NETWORK RESTORED • SYNCING…","warn");setTimeout(async()=>{await reconcileCloudDrafts({render:$("archiveView")?.style.display!=="none"})},500)});
 window.addEventListener("offline",()=>updateCloudSyncStatus());
 
-const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v5.26.15";
-const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v5.26.15";
+const OFFLINE_MISSION_PACKAGE_KEY="kusaFlightOpsMissionPackages:v1";
+const OFFLINE_LAST_ACTIVE_KEY="kusaFlightOpsLastActiveMission:v1";
 function offlineMissionRouteKey(dep,dest,alt=""){
   return [cleanICAO(dep),cleanICAO(dest),cleanICAO(alt)].join("|");
 }
@@ -5030,7 +5191,8 @@ function updateOfflineReadiness(){
 let draftSaveTimer=null;
 
 function captureF900BPlanState(){
- syncF900BMissionToTOLD();
+ if(activePlatformView==="told"||activePlatformView==="f900b")syncF900BTOLDToMission();
+ else syncF900BMissionToTOLD();
  const val=id=>$(id)?.value??"";
  const dep=cleanICAO(val("f9mDep")||$("dep")?.value||"");
  const dest=cleanICAO(val("f9mDest")||$("dest")?.value||"");
@@ -5115,7 +5277,7 @@ function saveCurrentDraft(){
  updateOfflineReadiness();enqueueMissionSync(rec.id,"upsert");
  const txt=`Draft saved ${new Date(rec.updated_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}`;
  const e=$("draftSaveStatus");if(e)e.textContent=txt;const eb=$("draftSaveStatusBottom");if(eb)eb.textContent=txt;const f9=$("f9mDraftStatus");if(f9&&(window.currentMissionMeta?.aircraft==="F900B"))f9.textContent=txt;
- updateCloudSyncStatus();
+ updateCloudSyncStatus();persistRefreshContext();
 }
 function scheduleDraftSave(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
@@ -8290,7 +8452,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.15",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.16",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8365,7 +8527,7 @@ async function startupCheck(manual=false){
    if(btn)btn.disabled=false;
    refreshMenuCounts();
    updateOfflineReadiness();
-   if(!navigator.onLine)setTimeout(()=>{autoResumeOfflineMission()},250);
+   // Refresh context owns startup restoration; avoid a competing offline draft-open reset.
  }
 }
 
@@ -8403,108 +8565,138 @@ $("manualWxDir")?.addEventListener("blur",()=>{const el=$("manualWxDir");if(el&&
 ["captWt","foWt","taxiFuel","fuel","missionFuel","perfV1","perfVR","landVref","perfClimbWt","perfFieldWt","perfGrad","landClimbWt"].forEach(id=>$(id)?.addEventListener("input",recalculate));
 $("perfObs")?.addEventListener("change",()=>{renderDepartureObstacleReview();recalculate();updateToldCard();});
 
+function numericEntryRules(el){
+ const step=String(el.getAttribute("step")||"1").toLowerCase();
+ const min=el.getAttribute("min");
+ const signed=el.dataset.allowNegative==="true"||(min!==null?Number(min)<0:/(?:PA|Temp|OAT|Wind|Slope|Elevation)$/i.test(el.id));
+ return {decimal:step==="any"||step.includes("."),signed};
+}
+function sanitizeNumericEntry(value,{decimal,signed}){
+ let v=String(value||"").replace(/,/g,".");
+ const negative=signed&&v.trim().startsWith("-");
+ v=v.replace(/[^0-9.]/g,"");
+ const parts=v.split(".");
+ v=parts.shift()+(decimal&&parts.length?"."+parts.join(""):"");
+ return (negative?"-":"")+v;
+}
 function configureNumericKeypads(){
- const ua=String(navigator.userAgent||"");
- const appleTouch=/iPad|iPhone|iPod/i.test(ua)||(navigator.platform==="MacIntel"&&Number(navigator.maxTouchPoints||0)>1);
- const fields=[...document.querySelectorAll('input[type="number"],input[data-flightops-number="true"],input[data-native-number-type="number"]')];
- fields.forEach(el=>{
-   if(el.readOnly||el.disabled)return;
-   const stepRaw=String(el.getAttribute("step")||"1").toLowerCase();
-   const minRaw=el.getAttribute("min");
-   const min=minRaw==null?NaN:Number(minRaw);
-   const allowsDecimal=stepRaw==="any"||stepRaw.includes(".");
-   const allowsNegative=Number.isFinite(min)&&min<0;
-   const whole=!allowsDecimal&&!allowsNegative;
-
+ const appleTouch=/iPad|iPhone|iPod/i.test(navigator.userAgent||"")||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1);
+ document.querySelectorAll('input[type="number"],input[data-flightops-number="true"],input[data-native-number-type="number"],input[data-numeric-only="true"],input[pattern*="0-9"]').forEach(el=>{
+   if(el.readOnly)return;
+   const rules=numericEntryRules(el),whole=!rules.decimal&&!rules.signed;
    el.dataset.flightopsNumber="true";
    el.dataset.nativeNumberType="number";
-   el.setAttribute("enterkeyhint","done");
-   el.setAttribute("autocomplete","off");
-
-   if(appleTouch){
-     // iPadOS Safari is most reliable with TEL for positive whole-number fields.
-     // Decimal/negative fields stay text+decimal so decimal point/minus remain available.
-     if(whole){
-       el.setAttribute("type","tel");
-       el.setAttribute("inputmode","numeric");
-       el.setAttribute("pattern","[0-9]*");
-       el.dataset.keypadMode="whole";
-     }else{
-       el.setAttribute("type","text");
-       el.setAttribute("inputmode","decimal");
-       el.removeAttribute("pattern");
-       el.dataset.keypadMode="decimal";
-     }
-   }else{
-     // Preserve native number semantics on desktop/Android while still hinting the best keypad.
-     if(el.getAttribute("type")!=="number")el.setAttribute("type","number");
-     el.setAttribute("inputmode",whole?"numeric":"decimal");
-     if(whole)el.setAttribute("pattern","[0-9]*"); else el.removeAttribute("pattern");
-   }
-
-   if(!el.dataset.keypadSanitizer){
-     el.addEventListener("input",()=>{
-       if(!appleTouch)return;
-       if(el.dataset.keypadMode==="whole"){
-         const clean=String(el.value||"").replace(/\D+/g,"");
-         if(clean!==el.value)el.value=clean;
-       }else{
-         let v=String(el.value||"").replace(/,/g,".").replace(/[^0-9.\-]/g,"");
-         const neg=v.startsWith("-");
-         v=v.replace(/-/g,"");
-         const parts=v.split(".");
-         v=parts.shift()+(parts.length?"."+parts.join(""):"");
-         if(neg)v="-"+v;
-         if(v!==el.value)el.value=v;
-       }
-     });
-     el.dataset.keypadSanitizer="1";
+   el.dataset.keypadMode=whole?"whole":"decimal";
+   el.setAttribute("enterkeyhint","done");el.setAttribute("autocomplete","off");
+   if(appleTouch)el.type=whole?"tel":"text";
+   el.setAttribute("inputmode",whole?"numeric":"decimal");
+   if(whole)el.setAttribute("pattern","[0-9]*");else el.removeAttribute("pattern");
+   if(appleTouch&&rules.signed&&!el.parentElement.querySelector('[data-sign-for="'+el.id+'"]')){
+     const button=document.createElement("button");button.type="button";button.className="numeric-sign-toggle";
+     button.dataset.signFor=el.id;button.textContent="±";
+     button.setAttribute("aria-label","Change sign for "+(el.labels?.[0]?.textContent||el.id));
+     button.addEventListener("click",()=>{
+       if(el.disabled)return;
+       el.value=el.value.startsWith("-")?el.value.slice(1):"-"+el.value;
+       el.focus({preventScroll:true});el.dispatchEvent(new Event("input",{bubbles:true}));
+     });el.insertAdjacentElement("afterend",button);
    }
  });
+}
+/* Capture runs before inline handlers / calculations and covers dynamically rendered controls. */
+document.addEventListener("input",event=>{
+ const el=event.target;
+ if(!el.matches?.('input[data-flightops-number="true"]')||event.isComposing)return;
+ const clean=sanitizeNumericEntry(el.value,numericEntryRules(el));
+ if(clean!==el.value)el.value=clean;
+},true);
 
- // Text controls intentionally used for numeric-only data (e.g. wind direction).
- document.querySelectorAll('input[pattern*="0-9"],input[data-numeric-only="true"]').forEach(el=>{
-   if(el.readOnly||el.disabled)return;
-   if(appleTouch&&el.getAttribute("type")==="text")el.setAttribute("type","tel");
-   el.setAttribute("inputmode","numeric");
-   el.setAttribute("pattern","[0-9]*");
-   if(!el.getAttribute("enterkeyhint"))el.setAttribute("enterkeyhint","done");
- });
+function operationalGateState(box){
+ const primary=[...box.querySelectorAll('b')].map(el=>el.textContent).join(' ')||[...box.childNodes].filter(n=>!n.classList?.contains('gate-state-label')).map(n=>n.textContent).join(' ');
+ const text=primary.toUpperCase();
+ if(box.matches('.bad')||box.querySelector('.bad')||/NO[- ]GO|NOT READY|BLOCK(?:ED|ING)?|CLOSED|FAIL|INVALID|UNAVAILABLE|SOURCE LOCKED|NOT (?:FULLY )?EVALUATED/.test(text))return 'stop';
+ if(box.matches('.warn')||box.querySelector('.warn')||/CHECK|REVIEW|CAUTION|LIMITED|PENDING|INCOMPLETE|REQUIRED/.test(text))return 'caution';
+ if(box.matches('.ok')||box.querySelector('.ok')||/(?:VERIFIED|PASS|READY|CLEARED|SOURCE-CONTROLLED|SOURCE-GATED|LOADED|GO)/.test(text))return 'clear';
+ return 'caution';
 }
 function classifyOperationalGates(root=document){
  root.querySelectorAll?.('.source-gate,.runway-gate,.whatif-gate,.f9-gate,.f9-gate-summary').forEach(box=>{
-   box.classList.remove("gate-clear","gate-caution","gate-stop");
-   const text=String(box.textContent||"").toUpperCase();
-   const bad=!!box.querySelector('.bad')||/NO-GO|NOT READY|BLOCK|CLOSED|FAIL|INVALID|UNAVAILABLE|REQUIRED|SOURCE LOCKED|NOT EVALUATED/.test(text);
-   const warn=!!box.querySelector('.warn')||/CHECK|REVIEW|CAUTION|LIMITED|PENDING|INCOMPLETE|PROCESS REQUIRED/.test(text);
-   const ok=!!box.querySelector('.ok')||/VERIFIED|PASS|READY|CLEARED|SOURCE-CONTROLLED|SOURCE-GATED|LOADED|GO/.test(text);
-   box.classList.add(bad?"gate-stop":warn?"gate-caution":ok?"gate-clear":"gate-caution");
+   const state=operationalGateState(box);
+   for(const name of ['clear','caution','stop'])box.classList.toggle('gate-'+name,name===state);
+   let label=box.querySelector(':scope > .gate-state-label');
+   if(!label){label=document.createElement('span');label.className='gate-state-label';box.prepend(label);}
+   const text={stop:'✕ BLOCKING',caution:'⚠ REVIEW / CAUTION',clear:'✓ CLEARED'}[state];
+   if(label.textContent!==text)label.textContent=text;
  });
 }
 let gateVisualRefreshTimer=null;
-function scheduleGateVisualRefresh(){clearTimeout(gateVisualRefreshTimer);gateVisualRefreshTimer=setTimeout(()=>classifyOperationalGates(document),40)}
+const gateObserverOptions={subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:['class']};
+function scheduleGateVisualRefresh(){
+ clearTimeout(gateVisualRefreshTimer);
+ gateVisualRefreshTimer=setTimeout(()=>{
+   gateObserver.disconnect();
+   try{configureNumericKeypads();classifyOperationalGates(document)}finally{gateObserver.observe(document.documentElement,gateObserverOptions)}
+ },40);
+}
 const gateObserver=new MutationObserver(scheduleGateVisualRefresh);
-gateObserver.observe(document.documentElement,{subtree:true,childList:true,characterData:true,attributes:true,attributeFilter:["class"]});
+gateObserver.observe(document.documentElement,gateObserverOptions);
 
 function isBrowserReload(){
  try{return performance.getEntriesByType("navigation")?.[0]?.type==="reload"}catch(e){return false}
 }
 async function restoreRefreshContext(){
- configureNumericKeypads();classifyOperationalGates(document);
- if(navigator.onLine)await reconcileCloudDrafts();
- if(!isBrowserReload()){refreshMenuCounts();showPlatformView("home");return}
- let wantedView="home",wantedMission="";
- try{wantedView=sessionStorage.getItem(REFRESH_VIEW_KEY)||"home";wantedMission=localStorage.getItem(OFFLINE_LAST_ACTIVE_KEY)||""}catch(e){}
- if(wantedMission){
-   const drafts=getMissionDrafts();
-   const ix=drafts.findIndex(x=>String(x.id)===String(wantedMission));
-   if(ix>=0){try{await openDraftFlightPlan(ix)}catch(e){console.warn("Refresh draft restore failed",e)}}
+ configureNumericKeypads();
+ const context=INITIAL_REFRESH_CONTEXT;
+ const resume=isBrowserReload()||performance.getEntriesByType('navigation')?.[0]?.type==='back_forward'||!!context?.meta;
+ try{
+   if(resume&&context?.schema===1){
+     // Hydrate the existing local mission before any network reconciliation or draft-open reset.
+     window.currentMissionMeta=context.meta;
+     missionData=context.missionData;manualWeather=context.manualWeather||manualWeather;
+     currentNotams=context.currentNotams||currentNotams;departureNotams=context.departureNotams||departureNotams;
+     departureObstacleReview=context.departureObstacleReview||departureObstacleReview;
+     passengers=context.passengers||[];seatAssignments=context.seatAssignments||Array(9).fill(null);
+     F9_MOVING_PAX=context.movingPax||null;
+     renderSeating();applyRefreshControls(context);renderRefreshMissionData();applyRefreshControls(context);
+     setPerformanceInputMode();whatIfDirty=context.whatIfDirty!==false;
+     if(perfIsManual()&&!whatIfDirty)updateWhatIfPlanner(true);
+     selectedRunwayChanged();recalculate();updateFOBVerifyLabel();updateWeatherSourceBadges();
+     if(activeAircraftCode()==='F900B'){
+       f9MirrorRunways();applyRefreshControls(context);
+       if(context.view==='told'||context.view==='f900b')syncF900BTOLDToMission();
+       await refreshF900BMission();f9UpdateFOBVerificationUI();
+     }
+     updateToldCard();
+     showPlatformView(context.view||missionViewForAircraft(activeAircraftCode()));
+     restoreRefreshDetails(context);
+     requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:context.scrollY||0,behavior:'auto'})));
+   }else if(resume){
+     // First reload after upgrading from v5.26.15 has a draft but no new session snapshot.
+     let id='';try{id=localStorage.getItem(OFFLINE_LAST_ACTIVE_KEY)||''}catch{}
+     const ix=getMissionDrafts().findIndex(x=>String(x.id)===id);
+     if(ix>=0)await openDraftFlightPlan(ix);
+     showPlatformView(INITIAL_REFRESH_VIEW);
+   }else{showPlatformView('home');}
+ }catch(e){
+   console.warn('Refresh restore requires review',e);
+   // Keep the requested operational view visible; never redirect an active reload to Menu.
+   showPlatformView(context?.view||INITIAL_REFRESH_VIEW);
+   const status=$(activeAircraftCode()==='F900B'?'f9mMissionStatus':'missionStatus');
+   if(status){status.textContent='REFRESH RESTORE NEEDS REVIEW — local draft and queued edits are retained. '+(e.message||e);status.classList.add('warn');}
+ }finally{
+   restoringRefreshContext=false;configureNumericKeypads();classifyOperationalGates(document);
+   updateCloudSyncStatus();updateOfflineReadiness();
+   if(navigator.onLine)reconcileCloudDrafts().catch(e=>console.warn('Cloud sync deferred',e));
  }
- if(wantedView&&wantedView!=="newtrip")showPlatformView(wantedView);
- else if(window.currentMissionMeta)showPlatformView(missionViewForAircraft(activeAircraftCode()));
- else showPlatformView("home");
- updateCloudSyncStatus();updateOfflineReadiness();
 }
+document.addEventListener('input',()=>persistRefreshContext());
+document.addEventListener('change',()=>persistRefreshContext());
+document.addEventListener('toggle',()=>persistRefreshContext(),true);
+let refreshScrollTimer;
+window.addEventListener('scroll',()=>{clearTimeout(refreshScrollTimer);refreshScrollTimer=setTimeout(()=>persistRefreshContext(),150)},{passive:true});
+window.addEventListener('pagehide',()=>persistRefreshContext({saveDraft:true}));
+document.addEventListener('visibilitychange',()=>{if(document.hidden)persistRefreshContext({saveDraft:true})});
+window.addEventListener('pageshow',event=>{if(event.persisted){configureNumericKeypads();classifyOperationalGates(document);}});
 
 setBaggageFromTotal(num("totalBag"));
 setPassengerCount();
@@ -8514,12 +8706,15 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.15: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
-window.addEventListener("load",()=>{if(!openSharedContentFromHash())restoreRefreshContext()});
+// v5.26.16: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+window.addEventListener("load",()=>{
+ if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
+ restoreRefreshContext();
+});
 // Debounced local draft persistence for active, incomplete missions.
 document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
-window.addEventListener("beforeunload",()=>{try{saveCurrentDraft()}catch(e){}});
+window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true}));
 startupCheck();
 updateHomeArchiveCount();
 updateHomeDraftCount();
@@ -8530,7 +8725,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.15",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.16",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8616,7 +8811,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.15'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.16'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
-</body></html>/* v5.25.86 — draft-resume FOB re-verification + amber deep-link TOLD review gates */
+</body></html>
 

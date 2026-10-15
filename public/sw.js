@@ -1,4 +1,4 @@
-const BUILD="5.26.15";
+const BUILD="5.26.16";
 const PUBLIC_CACHE=`kusa-flightops-public-v${BUILD}`;
 const PROTECTED_CACHE=`kusa-flightops-protected-v${BUILD}`;
 const DB_NAME="kusa-flightops-offline", DB_VERSION=1, STORE="meta";
@@ -19,7 +19,26 @@ async function cacheProtectedFoundation(){const g=await currentGrant();if(!g.ok)
 function offlineJson(error){return new Response(JSON.stringify({ok:false,offline:true,error}),{status:503,headers:{'Content-Type':'application/json','Cache-Control':'no-store'}})}
 function deniedHtml(msg){return new Response(`<!doctype html><html><body style="font-family:Arial;background:#071b33;color:#e8f1fb;padding:32px"><h1>KUSA FlightOps</h1><h2>Secure offline access unavailable</h2><p>${msg}</p><p>Reconnect and sign in to refresh this device authorization.</p></body></html>`,{status:503,headers:{'Content-Type':'text/html; charset=utf-8','Cache-Control':'no-store'}})}
 self.addEventListener('install',e=>{e.waitUntil((async()=>{const c=await caches.open(PUBLIC_CACHE);for(const u of PUBLIC_ASSETS){try{await c.add(u)}catch{}}})());self.skipWaiting()});
-self.addEventListener('activate',e=>e.waitUntil((async()=>{for(const k of await caches.keys())if(k!==PUBLIC_CACHE&&k!==PROTECTED_CACHE)await caches.delete(k);await self.clients.claim()})()));
+self.addEventListener('activate',e=>e.waitUntil((async()=>{
+ // Retain authorized cached data across a UI-only release, including offline updates.
+ const authorized=(await currentGrant()).ok;
+ const keys=await caches.keys();
+ for(const kind of ['public','protected']){
+   const target=kind==='public'?PUBLIC_CACHE:PROTECTED_CACHE;
+   const destination=await caches.open(target);
+   for(const key of keys.filter(k=>k.startsWith('kusa-flightops-'+kind+'-v')&&k!==target)){
+     if(kind==='public'||authorized){
+       const source=await caches.open(key);
+       for(const request of await source.keys())if(!await destination.match(request)){
+         const response=await source.match(request);if(response)await destination.put(request,response);
+       }
+     }
+     await caches.delete(key);
+   }
+ }
+ if(authorized)await cacheProtectedFoundation();
+ await self.clients.claim();
+})()));
 self.addEventListener('message',e=>{const m=e.data||{};if(m.type==='KUSA_OFFLINE_GRANT')e.waitUntil((async()=>{const r=m.grant||{},v=await verifyGrantRecord(r);if(!v.ok){await purgeProtected();return}await dbPut('grant',r);await caches.delete(PROTECTED_CACHE);await cacheProtectedFoundation()})());else if(m.type==='KUSA_OFFLINE_REVOKE')e.waitUntil(purgeProtected());else if(m.type==='KUSA_OFFLINE_REFRESH')e.waitUntil(cacheProtectedFoundation())});
 self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;const u=new URL(req.url);if(u.origin!==self.location.origin)return;
  if(PUBLIC_ASSETS.includes(u.pathname)||u.pathname.startsWith('/icons/')){e.respondWith((async()=>{const c=await caches.open(PUBLIC_CACHE);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch{return(await c.match(req))||new Response('Offline',{status:503})}})());return}
