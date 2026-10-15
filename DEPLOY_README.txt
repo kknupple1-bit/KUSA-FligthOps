@@ -1,26 +1,36 @@
-KUSA FlightOps v5.26.16 FULL PATCH
-Mobile / Responsive Stabilization
-Built October 15, 2026, from the supplied v5.26.15 FULL_PATCH ZIP.
+KUSA FlightOps v5.26.17 FULL PATCH — Version Label / Mobile Navigation
+Base: deployed v5.26.16, using the complete local v5.26.16 patch source.
 
-Deployment
-1. Back up current application files and retain the existing platform database.
-2. Save active missions as Drafts before upgrading. The complete session snapshot
-   starts with v5.26.16; the first upgrade reload can recover only what v5.26.15 saved.
-3. Overwrite /app/server.js and /app/platform.js with the supplied replacements.
-4. Overwrite the six matching files under /app/public with this public/ folder.
-   Retain existing data/, icons/, manifest, dependencies and platform database.
-   This is a replacement patch for the supplied files, not a fresh-site installer.
-5. Restart the Published App using its existing Node 22+ runtime/configuration.
-6. Reconnect Safari/PWA installations online and reload. Confirm browser badge and
-   /api/health both report 5.26.16; check account/admin/invite/reset pages as well.
-7. Load/refresh a mission online and confirm offline readiness before installed-PWA
-   offline testing. Do not clear site data: it holds drafts, cached missions,
-   device authorization and queued edits.
-8. Run ACCEPTANCE_TESTS.txt on both airframes before accepting the release.
+Changes:
+- Version label now sits in normal document flow beneath the app heading.
+  It is no longer a fixed overlay and cannot cover navigation or result content.
+- Mobile navigation has six columns for its six buttons, keeping Account in
+  the same row and preventing an unexpected second row beneath the old badge.
+- All active browser/server/platform/worker/account/admin build references are
+  5.26.17. Aircraft logic, data and mission continuity are unchanged.
 
-No live deployment was performed. Database schema, credentials, aircraft datasets
-and calculation algorithms were not changed. Assets absent from the supplied
-baseline ZIP remain prerequisites on the existing production installation.
+Deploy:
+1. Overwrite /app/server.js and /app/platform.js.
+2. Overwrite the six corresponding files in /app/public with public/ contents.
+3. Retain the database, data files, icons, manifest and existing configuration.
+4. Restart Published App; reconnect Safari/PWA online and reload.
+5. Confirm browser header and server health both show 5.26.17.
+   Do not clear site data or stored drafts.
 
-See RELEASE_NOTES.txt for exact changes and VALIDATION_REPORT.txt for completed
-checks and the distinction between local verification and device acceptance.
+Acceptance:
+- On iPhone Safari and installed PWA, all six bottom buttons are visible and
+  tappable; inspect at the top of the page and after scrolling to the bottom.
+- The version appears below the app heading and scrolls with the header. It
+  never floats over the bottom menu, regardless of safe-area inset.
+- Test small/large iPhones, landscape and iPad split view on both airframes.
+- Confirm the v5.26.16 TOLD layout and refresh continuity remain intact.
+
+Local verification:
+- Backend/worker syntax and all nine inline scripts passed compilation checks.
+- Headless Edge layout checks passed at 320/375/390/430/600/700/768/1024px:
+  badge is in the header, is static, and does not intersect navigation.
+- At phone widths all six buttons share one row, have at least 44px width/height,
+  and their centers receive pointer events without an overlay intercepting them.
+- All files except index.html differ from v5.26.16 only in the build number.
+
+Packaged only; no production deployment was performed.
