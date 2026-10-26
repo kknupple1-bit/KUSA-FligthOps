@@ -55,7 +55,7 @@ included at those paths. For each server-served dataset, the new packaged copy
 matches the server's existing embedded API fallback exactly as parsed JSON,
 including both numeric solver route versions and operational overlays. Original
 root-level source files, server code, platform code, and aircraft calculations are
-unchanged. The existing `FILE_MANIFEST.json` is the historical 5.26.17 UI patch
+unchanged in the packaging repair. The existing `FILE_MANIFEST.json` is the historical 5.26.17 UI patch
 manifest; `RELEASE_MANIFEST.json` controls the complete deployment package.
 
 Mutable SQLite files, shared trips, secrets, and durable `public/assets/` files are
@@ -63,3 +63,19 @@ excluded from the release fingerprint and must not be committed or overwritten.
 GitHub branch protection controls merges; GoDaddy's manual Publish button is a
 separate control. Required CI does not remove that button or provide automatic
 live-service acceptance.
+
+## iPad date-field fix in 5.26.18-deployment.1
+
+Trip Date uses explicit inline sizing and neutralized native WebKit appearance,
+so its date editor remains inside its grid cell. New Trip has two-column field
+rows on tablets and a full-width form panel through 1100 CSS pixels. Narrow
+layouts retain the phone stack. The same date sizing applies to both aircraft's
+Mission date controls. Date types, values, validation, and trip-number behavior
+are unchanged. Active browser/server/worker identifiers advance to 5.26.18 so
+the new layout can be distinguished from the previous release.
+
+`npm run release:layout` renders the actual form markup/CSS in isolated WebKit
+with touch/mobile emulation, 19 viewport widths, two locales, and all three date
+forms. GitHub CI installs WebKit and runs this check in addition to the existing
+release gate. This checks field containment, overlap, touch size, and independent
+entry; it does not replace physical iPad Safari/PWA acceptance.

@@ -24,3 +24,7 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Check packaging and isolated application workflows
         run: npm run release:check
+      - name: Install WebKit for isolated tablet layout checks
+        run: npx playwright install --with-deps webkit
+      - name: Check Trip Date and Alternate field layout
+        run: npm run release:layout
