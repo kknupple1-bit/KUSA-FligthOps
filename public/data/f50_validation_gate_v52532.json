@@ -1,0 +1,22 @@
+{
+  "schema": "kusa.f50.validation_gate.v52532",
+  "build": "5.25.32",
+  "aircraft": "Falcon 50 / N33AP",
+  "status": "SOURCE_RASTER_ENGINEERING_TRACE_STAGE_CLOSED_OPERATOR_SECOND_READ_REMAINS",
+  "completed": [
+    "S+20 dry BFL/V1 12-point software regression gate",
+    "Falcon 50-4 takeoff N1 12-point AFMS regression",
+    "Slats source pages, panel geometry and panel flow registration",
+    "Eight-point Slats source-raster engineering trace bands",
+    "S+48/S+20 landing-distance source geometry/panel flow registration",
+    "Landing source-raster engineering trace program and exact S+48 published anchor",
+    "Wet-runway UK-only applicability guard"
+  ],
+  "not_yet_operationally_released": [
+    "Slats BFL/V1/VMBE direct continuous solver promotion",
+    "S+48/S+20 landing-distance direct continuous solver promotion",
+    "Pilot/operator second-read trace signoff",
+    "Final controlled-build signoff"
+  ],
+  "rule": "No source-raster engineering band is treated as an operational value. Operational promotion requires pilot/operator second read and controlled regression against the final direct solver."
+}

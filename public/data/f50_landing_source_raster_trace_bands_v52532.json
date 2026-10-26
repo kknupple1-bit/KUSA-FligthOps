@@ -1,0 +1,140 @@
+{
+  "schema": "kusa.f50.landing.source_raster_trace_bands.v1",
+  "build": "5.25.32",
+  "aircraft": "Falcon 50 / N33AP",
+  "status": "LANDING_DISTANCE_SOURCE_RASTER_TRACE_PROGRAM_REGISTERED_PENDING_PILOT_SECOND_READ",
+  "source": {
+    "s48": "DTM813 \u00a75.60.4",
+    "s20": "DTM813 \u00a75.65.4"
+  },
+  "definitions": {
+    "raw_landing_distance": "Distance from 50 ft to full stop at AFM stabilized threshold speed.",
+    "field_length": "Raw landing distance times applicable operating factor; kept as a separate layer."
+  },
+  "published_exact_anchors": [
+    {
+      "id": "LD-PUB-S48-01",
+      "configuration": "S48",
+      "inputs": {
+        "pa_ft": 8000,
+        "sat_c": 10,
+        "landing_weight_lb": 28500,
+        "wind_kt": 0
+      },
+      "outputs": {
+        "landing_distance_ft": 2900,
+        "landing_field_length_ft": 4850,
+        "vref_kt": 112.5
+      },
+      "source": "DTM813 Annex 3 example referencing \u00a75.60.4/.5"
+    }
+  ],
+  "engineering_trace_cases": [
+    {
+      "id": "LD-S48-02",
+      "configuration": "S48",
+      "inputs": {
+        "pa_ft": 0,
+        "landing_weight_lb": 25000,
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "landing_distance_ft": [
+          2050,
+          2250
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "LD-S48-03",
+      "configuration": "S48",
+      "inputs": {
+        "pa_ft": 4000,
+        "landing_weight_lb": 31000,
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "landing_distance_ft": [
+          2675,
+          2900
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "LD-S48-04",
+      "configuration": "S48",
+      "inputs": {
+        "pa_ft": 8000,
+        "landing_weight_lb": 35000,
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "landing_distance_ft": [
+          3400,
+          3650
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "LD-S20-01",
+      "configuration": "S20",
+      "inputs": {
+        "pa_ft": 0,
+        "landing_weight_lb": 25000,
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "landing_distance_ft": [
+          2450,
+          2650
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "LD-S20-02",
+      "configuration": "S20",
+      "inputs": {
+        "pa_ft": 4000,
+        "landing_weight_lb": 31000,
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "landing_distance_ft": [
+          3050,
+          3300
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    },
+    {
+      "id": "LD-S20-03",
+      "configuration": "S20",
+      "inputs": {
+        "pa_ft": 8000,
+        "landing_weight_lb": 35000,
+        "wind_kt": 0
+      },
+      "source_read_band": {
+        "landing_distance_ft": [
+          3850,
+          4100
+        ]
+      },
+      "status": "ENGINEERING_SOURCE_RASTER_READ"
+    }
+  ],
+  "factor_layer": {
+    "1.67": "operating-factor layer only; not part of raw AFM stopping-distance solver",
+    "1.92": "operating-factor layer only; not part of raw AFM stopping-distance solver"
+  },
+  "gate": {
+    "published_exact_anchor_passed": true,
+    "engineering_trace_cases": 6,
+    "pilot_second_read_required": true,
+    "operational_engine_active": false
+  }
+}

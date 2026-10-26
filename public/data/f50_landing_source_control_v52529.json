@@ -1,0 +1,48 @@
+{
+  "schema": "kusa.f50.landing.source_control.v1",
+  "build": "5.25.29",
+  "aircraft": "Falcon 50 / N33AP",
+  "status": "DIRECT_SOURCE_REGISTERED_VALIDATION_IN_PROGRESS",
+  "source": {
+    "document": "Dassault DTM813 Airplane Flight Manual",
+    "normal_landing_charts": [
+      {"section":"5.60.4","configuration":"Approach S+Flaps 20 / Landing S+Flaps 48","title":"Landing Distance — S+Flaps 48"},
+      {"section":"5.60.5","configuration":"Landing S+Flaps 48","title":"Landing Speeds — S+Flaps 48","status":"DIRECT VREF DIGITIZATION ALREADY ACTIVE"},
+      {"section":"5.65.4","configuration":"Approach Slats / Landing S+Flaps 20","title":"Landing Distance — S+Flaps 20"},
+      {"section":"5.65.5","configuration":"Landing S+Flaps 20","title":"Landing Speeds — S+Flaps 20","status":"DIRECT VREF+5 DIGITIZATION ALREADY ACTIVE"}
+    ],
+    "definitions": {
+      "landing_distance":"Horizontal distance from 50 ft above landing surface to complete stop.",
+      "stabilized_speed_s48":"VREF",
+      "stabilized_speed_s20":"VREF + 5 kt",
+      "landing_field_length_factor":"Operating-regulation factor applied to demonstrated landing distance; DTM813 definition lists 1.67 or 1.92 as applicable."
+    }
+  },
+  "published_anchor": {
+    "id":"LDG-S48-001",
+    "basis":"DTM813 Annex 3 performance-correction example",
+    "pressure_altitude_ft":8000,
+    "sat_c":10,
+    "actual_weight_lb":28500,
+    "configuration":"S+Flaps 48",
+    "landing_distance_ft":2900,
+    "landing_field_length_ft":4850,
+    "vref_kt":112.5
+  },
+  "abnormal_corrections_registered_for_later_logic": [
+    {"condition":"Antiskid inoperative / No.1 brake system unavailable","S48_landing_distance_multiplier":1.25,"S20_landing_distance_multiplier":1.30,"status":"SOURCE REGISTERED — NOT NEWLY ACTIVATED BY THIS REVISION"},
+    {"condition":"Outboard slats not extended / clean landing","note":"AFM abnormal procedure uses S+20 baseline with fixed/additional increments and VMBE check; requires separate abnormal-performance implementation."}
+  ],
+  "release_gate": {
+    "operational_distance_engine_active": false,
+    "remaining": [
+      "Direct digitization of §5.60.4 landing-distance chart",
+      "Independent regression across weight/altitude envelope for S+48",
+      "Direct digitization of §5.65.4 landing-distance chart",
+      "Independent regression across weight/altitude envelope for S+20",
+      "Verify operating-regulation field-length factor handling is not conflated with raw AFM landing distance",
+      "Human/pilot chart-trace signoff"
+    ],
+    "reason":"Existing production landing-distance grids are not relabeled as direct Dassault data until direct chart digitization and regression are complete."
+  }
+}

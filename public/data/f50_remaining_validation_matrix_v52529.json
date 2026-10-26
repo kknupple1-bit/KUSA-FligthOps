@@ -1,0 +1,18 @@
+{
+  "schema":"kusa.f50.remaining_validation.matrix.v1",
+  "build":"5.25.29",
+  "aircraft":"Falcon 50 / N33AP",
+  "items":[
+    {"area":"S+20 dry BFL/V1","status":"SOFTWARE_GATE_COMPLETE","remaining":"Human/pilot source-trace signoff and final promotion decision"},
+    {"area":"Takeoff N1","status":"VALIDATED_12_OF_12","remaining":"Operator signoff only"},
+    {"area":"Slats dry BFL/V1/VMBE","status":"DIRECT_SOURCE_PHASE1","remaining":"Full geometry digitization, dry regression, anti-ice regression, human signoff"},
+    {"area":"Wet takeoff","status":"SOURCE_LOCKED_APPLICABILITY","remaining":"Locate/confirm N33AP-applicable approved wet source; current §5.46A/§5.51A pages are UK-registered applicability"},
+    {"area":"S+48 landing VREF","status":"DIRECT_SOURCE_ACTIVE","remaining":"Operator signoff"},
+    {"area":"S+48 landing distance","status":"DIRECT_SOURCE_REGISTERED","remaining":"§5.60.4 digitization + regression"},
+    {"area":"S+20 landing speed","status":"DIRECT_SOURCE_ACTIVE","remaining":"Operator signoff"},
+    {"area":"S+20 landing distance","status":"DIRECT_SOURCE_REGISTERED","remaining":"§5.65.4 digitization + regression"},
+    {"area":"Clean 1.5Vs","status":"SOURCE_APPLICABILITY_HOLD","remaining":"Confirm N33AP pitot-probe/SB applicability before activation"},
+    {"area":"Custom-V1 accelerate-stop","status":"SOURCE_LOCKED","remaining":"Direct approved-source implementation for S+20 and Slats"},
+    {"area":"Final operator validation","status":"PENDING","remaining":"Frozen-build trace checks, device consistency, save/share/reopen integrity, discrepancy closure, exact source/build signoff"}
+  ]
+}

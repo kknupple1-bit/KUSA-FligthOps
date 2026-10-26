@@ -1,0 +1,58 @@
+{
+  "schema": "kusa.f50.landing.panel_assignment.v1",
+  "build": "5.25.31",
+  "aircraft": "Falcon 50 / N33AP",
+  "status": "DIRECT_SOURCE_PANEL_ASSIGNMENT_AND_FACTOR_LAYER_VALIDATION",
+  "source": {
+    "document":"Dassault DTM813 Airplane Flight Manual",
+    "s48":{"section":"5.60.4","pdf_page":474,"page_revision":32,"configuration":"S+Flaps 48"},
+    "s20":{"section":"5.65.4","pdf_page":480,"page_revision":23,"configuration":"S+Flaps 20"}
+  },
+  "panel_flow": [
+    "landing weight horizontal entry to pressure-altitude family",
+    "vertical transfer to reported-wind-at-20-ft-height family",
+    "horizontal/vertical transfer to raw landing-distance scale",
+    "separate operating-factor conversion to landing field length"
+  ],
+  "source_definitions": {
+    "landing_distance":"Distance from 50 ft above landing surface to complete stop.",
+    "s48_stabilized_speed":"VREF",
+    "s20_stabilized_speed":"VREF + 5 kt",
+    "field_length_factors":[1.67,1.92]
+  },
+  "published_anchor_s48": {
+    "basis":"DTM813 Annex 3 Example 3",
+    "inputs":{"pa_ft":8000,"sat_c":10,"landing_weight_lb":28500,"runway_slope_pct":0,"wind_type":"CALM","wind_kt":0},
+    "landing_distance_ft":2900,
+    "landing_field_length_ft":4850,
+    "vref_kt":112.5,
+    "factor_check":{"2900_x_1_67_ft":4843,"published_rounded_field_length_ft":4850,"status":"CONSISTENT_WITH_1_67_LAYER"}
+  },
+  "independent_trace_cases": [
+    {"id":"LD48-R-01","configuration":"S48","pa_ft":0,"landing_weight_lb":25000,"wind_type":"CALM","wind_kt":0,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"},
+    {"id":"LD48-R-02","configuration":"S48","pa_ft":4000,"landing_weight_lb":30000,"wind_type":"HEADWIND","wind_kt":10,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"},
+    {"id":"LD48-R-03","configuration":"S48","pa_ft":8000,"landing_weight_lb":28500,"wind_type":"CALM","wind_kt":0,"expected_landing_distance_ft":2900,"status":"PUBLISHED_ANCHOR"},
+    {"id":"LD48-R-04","configuration":"S48","pa_ft":10000,"landing_weight_lb":34000,"wind_type":"TAILWIND","wind_kt":5,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"},
+    {"id":"LD20-R-01","configuration":"S20","pa_ft":0,"landing_weight_lb":25000,"wind_type":"CALM","wind_kt":0,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"},
+    {"id":"LD20-R-02","configuration":"S20","pa_ft":4000,"landing_weight_lb":30000,"wind_type":"HEADWIND","wind_kt":10,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"},
+    {"id":"LD20-R-03","configuration":"S20","pa_ft":8000,"landing_weight_lb":33000,"wind_type":"CALM","wind_kt":0,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"},
+    {"id":"LD20-R-04","configuration":"S20","pa_ft":10000,"landing_weight_lb":35000,"wind_type":"TAILWIND","wind_kt":5,"expected_landing_distance_ft":null,"status":"PENDING_SOURCE_TRACE"}
+  ],
+  "release_gate": {
+    "operational_distance_engine_active":false,
+    "completed":[
+      "S48/S20 source pages registered",
+      "Nomograph panel traversal assigned",
+      "Raw-distance versus field-length factor layers separated",
+      "Published S48 anchor verified against 1.67 factor layer",
+      "Independent landing trace matrix fixed"
+    ],
+    "remaining":[
+      "Source-pixel family coordinate registration",
+      "Continuous S48 raw-distance shadow traversal",
+      "Continuous S20 raw-distance shadow traversal",
+      "Independent raster trace completion",
+      "Human/pilot source-trace signoff"
+    ]
+  }
+}

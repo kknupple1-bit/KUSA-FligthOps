@@ -1,6 +1,6 @@
 {
   "name": "kusa-flightops",
-  "version": "5.26.0",
+  "version": "5.26.17",
   "private": true,
   "main": "server.js",
   "engines": {
@@ -8,7 +8,14 @@
   },
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "prestart": "node scripts/verify-release.cjs",
+    "build": "npm run release:check",
+    "release:manifest": "node scripts/release-manifest.cjs",
+    "release:verify": "node scripts/verify-release.cjs",
+    "release:smoke": "node scripts/smoke-release.cjs",
+    "release:test-gates": "node --test tests/release-gates.test.cjs",
+    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:smoke"
   },
   "dependencies": {
     "express": "4.21.2"

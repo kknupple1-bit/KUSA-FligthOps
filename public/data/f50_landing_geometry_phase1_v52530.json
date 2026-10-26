@@ -1,0 +1,52 @@
+{
+  "schema": "kusa.f50.landing.geometry.phase1.v1",
+  "build": "5.25.30",
+  "aircraft": "Falcon 50 / N33AP",
+  "status": "DIRECT_SOURCE_GEOMETRY_EXTRACTED_SHADOW_ONLY",
+  "source_pages": [
+    {
+      "section": "5.60.4",
+      "pdf_page": 474,
+      "configuration": "S+Flaps 48 landing",
+      "page_revision": 32,
+      "raster": "direct source registration complete"
+    },
+    {
+      "section": "5.65.4",
+      "pdf_page": 480,
+      "configuration": "S+Flaps 20 landing",
+      "page_revision": 23,
+      "raster": "direct source registration complete"
+    }
+  ],
+  "published_validation_anchor": {
+    "pa_ft": 8000,
+    "sat_c": 10,
+    "weight_lb": 28500,
+    "configuration": "S+Flaps 48",
+    "landing_distance_ft": 2900,
+    "landing_field_length_ft": 4850,
+    "factor_check": 1.67,
+    "status": "REGISTERED_NOT_YET_CONTINUOUS_SOLVER_PASS"
+  },
+  "source_definitions": {
+    "landing_distance": "50 ft screen height to complete stop",
+    "s48_approach_speed": "VREF",
+    "s20_approach_speed": "VREF + 5 kt",
+    "field_length_factors": [
+      1.67,
+      1.92
+    ]
+  },
+  "release_gate": {
+    "operational_distance_engine_active": false,
+    "remaining": [
+      "Assign altitude/weight family curves",
+      "Assign wind correction families",
+      "Calibrate raw landing-distance axis",
+      "Implement scale-factor conversion separately from AFM raw distance",
+      "Run independent source traces for S+48 and S+20",
+      "Human/pilot chart-trace signoff"
+    ]
+  }
+}
