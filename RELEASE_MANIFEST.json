@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.27",
-  "release": "5.26.27-deployment.1",
+  "build": "5.26.28",
+  "release": "5.26.28-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -13,27 +13,27 @@
     {
       "path": "package-lock.json",
       "size_bytes": 31244,
-      "sha256": "c4fe0179ccd7b8da134bb9c14679d9492a14f287d52e2070247f0a6e63eaa642"
+      "sha256": "f9aacb855753173a818d670fde88b04d4973efb56358efb505d3ed91bc5262f2"
     },
     {
       "path": "package.json",
-      "size_bytes": 1628,
-      "sha256": "dc0763388a20040d62bb7009187f04af24b68f59cabe39d815b8298a5dc7f31f"
+      "size_bytes": 1731,
+      "sha256": "de08edbf16863eee5c675396661af0af7c963bc8d6089a0ad6aba5b635a573a2"
     },
     {
       "path": "platform.js",
       "size_bytes": 55851,
-      "sha256": "8151611ed563d7d3d8c50710dddce8219d478adcb642fa9f0a6eab1d70ed5490"
+      "sha256": "e942ae5002eb5fb0830df7b8003ba7f9bd16b37ad2212d42d689baaf4bd8edfd"
     },
     {
       "path": "public/account.html",
       "size_bytes": 9677,
-      "sha256": "9b5f90d08b026178f57318da8f6f22a39f1aafa7f071ecbb0de39dad05abcda8"
+      "sha256": "e9ca50b8e2dbfa2a44413a5fb43cac5de74e7b3d68c4760e5ec1647af55a850f"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 12690,
-      "sha256": "4169b5ef2ca7e7bfb6a52afcf49706d4b8d5520cf354ef79b805b3bff4e3b1c2"
+      "sha256": "5d2077654d0e2a027ac2198e80e01285a1bf91ca01f10cd8be9abe2b7348e9ba"
     },
     {
       "path": "public/config.js",
@@ -312,13 +312,13 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 700595,
-      "sha256": "4df872f7457765ab17e29911941114577126e520b33efe334ff9aa1f2f953366"
+      "size_bytes": 700895,
+      "sha256": "78faa6bb84a6b457e6b1c68dfe71010455cd29735acf64e127055fcfbc2d8a2f"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 6957,
-      "sha256": "218064fcb1bd1552cb3c597d699aec33a35fb5aeade3fe2d46b2fa7e8dd4da3e"
+      "sha256": "6258c8b3fe8e5308dfc90125f18581091d62242deba7e1e3b48c472866608760"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -348,12 +348,17 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4279,
-      "sha256": "3fb0143907156b6fc05f9ee2c93cb3ed0c5fba8d37bb487993e16bfa78cc97e9"
+      "sha256": "42c6aaaefab82e2f1b3fe329531012002e174e3126e5203fe5a9c2277b8af980"
     },
     {
       "path": "public/sw.js",
-      "size_bytes": 8314,
-      "sha256": "e6fa7cc2a39a0f8ad952e196f0c580bc88a796f656081adfc05af09d6343efa5"
+      "size_bytes": 8333,
+      "sha256": "7315f388d3814a468d688b5b3baf295da0324537a5f462fc4cc76dad73a6687b"
+    },
+    {
+      "path": "public/weather-math.js",
+      "size_bytes": 939,
+      "sha256": "640de822a8a3a41903a7d2bd50929b8428de8951a13a5f5792505b85d89bcd5d"
     },
     {
       "path": "scripts/database-storage.cjs",
@@ -367,18 +372,18 @@
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 1917,
-      "sha256": "ba844434484972975984275896a4898810090d22558f57cde5fe27931475fd7e"
+      "size_bytes": 1943,
+      "sha256": "4cc51e8419222047a4b489445301a43a2420fd82f4147b7def1d24bc0209ceee"
     },
     {
       "path": "scripts/verify-release.cjs",
-      "size_bytes": 5261,
-      "sha256": "3d61d89690b9383828d7db37e813a4089424422a1fcd1a5dbae9481c9cd2d5ae"
+      "size_bytes": 5287,
+      "sha256": "ef91723abae05100727e7788e5de43ca719543a4a41d57df4591673640047b15"
     },
     {
       "path": "server.js",
-      "size_bytes": 840753,
-      "sha256": "8daaf963243c6f3143a628966932a039cb4d4c0954cf268af5b6849a8616fe4d"
+      "size_bytes": 842439,
+      "sha256": "88bcb6b8546b555fbf28202d939eeb0509cc9cc03b2e56fe07f78fcb603c89ec"
     }
   ]
 }

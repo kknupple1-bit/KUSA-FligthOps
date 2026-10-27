@@ -1246,13 +1246,15 @@ details summary{cursor:pointer;margin-top:8px}
 </style>
 <link rel="stylesheet" href="/numeric-entry.css"/>
 <link rel="stylesheet" href="/mission-review.css"/>
+<script src="/weather-math.js"></script>
+<script>function weatherNumber(value){return KUSAWeatherMath.number(value);}</script>
 </head>
 <body>
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 <div id="pullRefreshIndicator" aria-live="polite" style="position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-72px);z-index:100000;min-width:170px;max-width:calc(100vw - 24px);padding:9px 14px;border:1px solid #31506f;border-radius:999px;background:#06182c;color:#d7e6f7;text-align:center;font-size:12px;font-weight:800;box-shadow:0 5px 18px rgba(0,0,0,.32);opacity:0;pointer-events:none;transition:transform .14s ease,opacity .14s ease">Pull to refresh</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.27 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.28 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1275,7 +1277,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.27 — build identification stays in the header, clear of navigation. */
+/* v5.26.28 — build identification stays in the header, clear of navigation. */
 #buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
   background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
   line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
@@ -1284,7 +1286,7 @@ details summary{cursor:pointer;margin-top:8px}
   .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
-/* v5.26.27 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.28 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1360,7 +1362,7 @@ canvas,svg,img{max-width:100%}
 </style>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.27</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.28</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -3971,11 +3973,11 @@ function f9RenderMissionParity(){
  const dm=$("f9mDepMetarDecoded"),dt=$("f9mDepTafDecoded"),lm=$("f9mDestMetarDecoded"),lt=$("f9mDestTafDecoded");
  if(dm)dm.innerHTML=formatMetarDecoded(dep.metar,depAlt);if(dt)dt.innerHTML=formatTafDecoded(dep.taf);if(lm)lm.innerHTML=formatMetarDecoded(dest.metar,destAlt);if(lt)lt.innerHTML=formatTafDecoded(dest.taf);
  f9Put("f9mDepMetarRaw",f9RawText(dep.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mDepTafRaw",f9RawText(dep.taf,["raw","rawTAF","raw_text","rawText"]));f9Put("f9mDestMetarRaw",f9RawText(dest.metar,["raw","rawOb","raw_text","rawText"]));f9Put("f9mDestTafRaw",f9RawText(dest.taf,["raw","rawTAF","raw_text","rawText"]));
- const airportLine=x=>{const e=Number((x.airport||{}).elevation_ft??(x.airport||{}).elev??(x.airport||{}).elevation);return `${airportName(x)} • ${Number.isFinite(e)?Math.round(e).toLocaleString():"—"} ft`};
+ const airportLine=x=>{const e=weatherNumber((x.airport||{}).elevation_ft??(x.airport||{}).elev??(x.airport||{}).elevation);return `${airportName(x)} • ${Number.isFinite(e)?Math.round(e).toLocaleString():"—"} ft`};
  const depId=dep.icao||dep.airport?.ident||"—",destId=dest.icao||dest.airport?.ident||"—";
  f9Put("f9mDepTitle",depId);f9Put("f9mDestTitle",destId);f9Put("f9mDepWxIdent",depId);f9Put("f9mDepWxIdent2",depId);f9Put("f9mDestWxIdent",destId);f9Put("f9mDestWxIdent2",destId);
  f9Put("f9mDepAirportSummary",depId);f9Put("f9mDepAirportNote",airportLine(dep));f9Put("f9mDestAirportSummary",destId);f9Put("f9mDestAirportNote",airportLine(dest));
- const fmtAlt=v=>Number.isFinite(Number(v))?`${Math.round(Number(v)).toLocaleString()} ft`:"—";
+ const fmtAlt=v=>Number.isFinite(weatherNumber(v))?`${Math.round(Number(v)).toLocaleString()} ft`:"—";
  f9Put("f9mDepPA",fmtAlt(dep.pressure_altitude_ft));f9Put("f9mDepDA",fmtAlt(dep.density_altitude_ft));f9Put("f9mDestPA",fmtAlt(dest.pressure_altitude_ft));f9Put("f9mDestDA",fmtAlt(dest.density_altitude_ft));
  const rwLine=r=>r?`RWY ${r.runway_id} • ${Math.round(Number(r.length_ft)||0)} ft`:"—",windLine=r=>{if(!r)return"—";const w=r.wind_components||{};return`HW ${f9Fmt(w.headwind_kt,1)} • TW ${f9Fmt(w.tailwind_kt,1)} • XW ${f9Fmt(w.crosswind_kt,1)} kt`};
  f9Put("f9mDepRunwaySummary",rwLine(dr));f9Put("f9mDepWindSummary",windLine(dr));f9Put("f9mDestRunwaySummary",rwLine(lr));f9Put("f9mDestWindSummary",windLine(lr));
@@ -4065,7 +4067,7 @@ async function loadF900BData(){
  })().catch(e=>{F900B_LOAD_PROMISE=null;throw e});
  return F900B_LOAD_PROMISE;
 }
-function f9Num(id){const v=$(id)?.value;return v===""||v==null?null:Number(v)}
+function f9Num(id){return weatherNumber($(id)?.value)}
 function f9Fmt(value,digits=0,suffix=""){return Number.isFinite(value)?`${value.toLocaleString(undefined,{minimumFractionDigits:digits,maximumFractionDigits:digits})}${suffix}`:"—"}
 function formatVspeed(value,suffix=" kt"){const n=Number(value);return Number.isFinite(n)&&n>0?`${Math.round(n)}${suffix}`:"—"}
 function formatWindDirection(value,degree=true){if(value==null||value==="")return"—";const raw=String(value).trim().toUpperCase();if(raw==="VRB")return"VRB";const n=Number(raw);if(!Number.isFinite(n))return raw;let d=Math.round(n);if(d<0||d>360)return raw;const txt=String(d).padStart(3,"0");return degree?`${txt}°`:txt}
@@ -4291,7 +4293,7 @@ function renderF900BLanding(prefix,out,factor,structuralGate=true){
 function f9SetTone(id,text,tone="warn"){const e=$(id);if(!e)return;e.textContent=text;e.className=tone;}
 function f9MetarSummary(point){
  const m=point?.metar||null;if(!m)return"METAR unavailable — manual weather entry remains available in performance fields.";
- const raw=firstVal(m,["raw","rawOb","raw_text"]);const t=Number(firstVal(m,["temp_c","temp","temperature"]));const pa=Number(point?.pressure_altitude_ft);
+ const raw=firstVal(m,["raw","rawOb","raw_text"]);const t=weatherNumber(firstVal(m,["temp_c","temp","temperature"]));const pa=weatherNumber(point?.pressure_altitude_ft);
  const obs=firstVal(m,["obs_time","reportTime","obsTime","time"]);let ageTxt="";if(obs){const age=(Date.now()-new Date(obs).getTime())/60000;if(Number.isFinite(age)&&age>=0)ageTxt=` • WX age ${Math.round(age)} min${age>90?" STALE":""}`;}
  const wind=windTextObj(m);return`${raw?String(raw):"METAR loaded"}${Number.isFinite(t)?` • OAT ${t.toFixed(0)}°C`:""}${Number.isFinite(pa)?` • PA ${Math.round(pa).toLocaleString()} ft`:""} • ${wind}${ageTxt}`;
 }
@@ -4307,8 +4309,8 @@ function f9ApplyMissionEnvironment(){
  const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest");
  if(dep){const w=dep.wind_components||{};f9Put("f9mDepRunwayInfo",`RWY ${dep.runway_id} • ${Number(dep.length_ft||0).toLocaleString()} ft • heading ${formatWindDirection(dep.heading)} • HW ${esc(w.headwind_kt)} / TW ${esc(w.tailwind_kt)} / XW ${esc(w.crosswind_kt)} kt${dep.slope_pct!=null?` • slope ${dep.slope_pct}%`:""}`);if($("f9mToRunway"))$("f9mToRunway").value=departureNotams?.usable_length_ft||dep.length_ft||"";const signed=(Number(w.headwind_kt)||0)-(Number(w.tailwind_kt)||0);if($("f9mToWind"))$("f9mToWind").value=signed.toFixed(1);if($("f9mToSlope"))$("f9mToSlope").value=Number(dep.slope_pct||0).toFixed(2);}
  if(dest){const w=dest.wind_components||{};f9Put("f9mDestRunwayInfo",`RWY ${dest.runway_id} • ${Number(dest.length_ft||0).toLocaleString()} ft • heading ${formatWindDirection(dest.heading)} • HW ${esc(w.headwind_kt)} / TW ${esc(w.tailwind_kt)} / XW ${esc(w.crosswind_kt)} kt${dest.slope_pct!=null?` • slope ${dest.slope_pct}%`:""}`);if($("f9mLdgRunway"))$("f9mLdgRunway").value=currentNotams?.usable_length_ft||dest.length_ft||"";}
- const dp=Number(missionData.departure?.pressure_altitude_ft),dt=Number(firstVal(missionData.departure?.metar||{},["temp_c","temp","temperature"]));if(Number.isFinite(dp)&&$("f9mToPA"))$("f9mToPA").value=Math.round(dp);if(Number.isFinite(dt)&&$("f9mToTemp"))$("f9mToTemp").value=dt;
- const lp=Number(missionData.destination?.pressure_altitude_ft),lt=Number(firstVal(missionData.destination?.metar||{},["temp_c","temp","temperature"]));if(Number.isFinite(lp)&&$("f9mLdgPA"))$("f9mLdgPA").value=Math.round(lp);if(Number.isFinite(lt)&&$("f9mLdgTemp"))$("f9mLdgTemp").value=lt;
+ for(const [ids,value] of [[["f9mToPA","f9ToPA"],missionData.departure?.pressure_altitude_ft],[["f9mToTemp","f9ToTemp"],firstVal(missionData.departure?.metar||{},["temp_c","temp","temperature"])]] ){const n=weatherNumber(value);ids.forEach(id=>{if($(id))$(id).value=n===null?"":n;});}
+ for(const [ids,value] of [[["f9mLdgPA","f9LdgPA"],missionData.destination?.pressure_altitude_ft],[["f9mLdgTemp","f9LdgTemp"],firstVal(missionData.destination?.metar||{},["temp_c","temp","temperature"])]] ){const n=weatherNumber(value);ids.forEach(id=>{if($(id))$(id).value=n===null?"":n;});}
  f9Put("f9mDepNotamInfo",`NOTAM: ${departureNotams?.status||"NOT_CHECKED"}${departureNotams?.usable_length_ft?` • usable ${Math.round(departureNotams.usable_length_ft).toLocaleString()} ft`:""}`);
  f9Put("f9mDestNotamInfo",`NOTAM: ${currentNotams?.status||"NOT_CHECKED"}${currentNotams?.usable_length_ft?` • usable ${Math.round(currentNotams.usable_length_ft).toLocaleString()} ft`:""}`);
 }
@@ -4469,7 +4471,7 @@ async function f9ApplyManualWeather(){
  if(!missionData){const dep=cleanICAO($("f9mDep")?.value||""),dest=cleanICAO($("f9mDest")?.value||"");if(!dep||!dest){alert("Enter departure and destination identifiers first.");return}missionData={departure:{icao:dep,airport:{ident:dep},runways:[],metar:null,taf:null},destination:{icao:dest,airport:{ident:dest},runways:[],metar:null,taf:null},alternate:null};}
  const p=wxPoint(which),st=manualWeather[which];if(!p)return;if(!st.live)st.live={metar:p.metar?JSON.parse(JSON.stringify(p.metar)):null,pressure_altitude_ft:p.pressure_altitude_ft??null,density_altitude_ft:p.density_altitude_ft??null,altimeter_inhg:p.altimeter_inhg??null};
  if(mode==="LIVE"){const L=st.live||{};p.metar=L.metar||null;p.pressure_altitude_ft=L.pressure_altitude_ft??null;p.density_altitude_ft=L.density_altitude_ft??null;p.altimeter_inhg=L.altimeter_inhg??null;st.mode="LIVE";st.applied=false;if($(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified"))$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified").checked=false;try{await f9LoadOperationalData(true);f9LoadManualWeatherForm();return}catch(e){}}
- else{const num=id=>{const e=$(id),n=Number(e?.value);return e&&String(e.value).trim()!==""&&Number.isFinite(n)?n:null};const oat=num("f9ManualWxOAT"),alt=num("f9ManualWxAlt"),dir=num("f9ManualWxDir"),spd=num("f9ManualWxSpeed"),gust=num("f9ManualWxGust");let pa=num("f9ManualWxPA");const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}const now=new Date().toISOString();st.manual_values={oat,pa:Math.round(pa),alt:Number.isFinite(alt)?alt:null,dir:Number.isFinite(dir)?dir:null,spd:Number.isFinite(spd)?spd:null,gust:Number.isFinite(gust)?gust:null};p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:st.manual_values.dir,wind_kt:st.manual_values.spd,wind_gust_kt:st.manual_values.gust,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=st.manual_values.alt;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("f9ManualWxNote")?.value||"").trim();const cb=$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified");if(cb)cb.checked=true;}
+ else{const num=id=>{const e=$(id),n=Number(e?.value);return e&&String(e.value).trim()!==""&&Number.isFinite(n)?n:null};const oat=num("f9ManualWxOAT"),alt=num("f9ManualWxAlt"),dir=num("f9ManualWxDir"),spd=num("f9ManualWxSpeed"),gust=num("f9ManualWxGust");let pa=num("f9ManualWxPA");const elev=weatherNumber(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}const now=new Date().toISOString();st.manual_values={oat,pa:Math.round(pa),alt:Number.isFinite(alt)?alt:null,dir:Number.isFinite(dir)?dir:null,spd:Number.isFinite(spd)?spd:null,gust:Number.isFinite(gust)?gust:null};p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:st.manual_values.dir,wind_kt:st.manual_values.spd,wind_gust_kt:st.manual_values.gust,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=st.manual_values.alt;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("f9ManualWxNote")?.value||"").trim();const cb=$(which==="dep"?"f9mDepManualWxVerified":"f9mDestManualWxVerified");if(cb)cb.checked=true;}
  f9ApplyMissionEnvironment();await refreshF900BMission();f9UpdateWeatherSourceBadges();f9UpdateOperationalGate();f9RenderMissionParity();f9RenderCanonicalParityFields();scheduleDraftSave();const ms=$("f9ManualWxStatus");if(ms)ms.textContent=weatherSourceState(which).mode==="MANUAL"?`MANUAL WEATHER UPDATED ${new Date(manualWeather[which].entered_at).toLocaleString()}`:"LIVE weather restored.";f9UpdateManualWeatherActionButton();
 }
 
@@ -4477,7 +4479,7 @@ function f9UpdateOperationalGate(){
  const wb=window.f900bWBLatest;const verified=f9UpdateFOBVerificationUI();
  const pax=f9SyncPassengerStatus();const wbOK=!!wb?.ok&&pax.ok;f9SetTone("f9GateWB",wbOK?"PASS":"CHECK",wbOK?"ok":"bad");f9Put("f9GateWBNote",wbOK?`TOW ${Math.round(wb.tow).toLocaleString()} lb • CG ${wb.tcg?.pct?.toFixed(2)}% MAC • LDG ${Math.round(wb.ldw).toLocaleString()} lb / ${wb.lcg?.pct?.toFixed(2)}% MAC • PAX ${pax.loaded}/${pax.requested}`:(!pax.ok?`Passenger loading mismatch — ${pax.requested} entered / ${pax.loaded} seated`:"Structural/load/CG check incomplete"));
  const fob=Number($("f9mFOB")?.value),wbFob=Number($("f9wbFuel")?.value),missionFuel=Number($("f9mMissionFuel")?.value),wbTrip=Number($("f9wbTripBurn")?.value);const fuelMatch=Number.isFinite(fob)&&Number.isFinite(wbFob)&&Math.abs(fob-wbFob)<1&&Number.isFinite(missionFuel)&&Number.isFinite(wbTrip)&&Math.abs(missionFuel-wbTrip)<1;const fuelOK=fuelMatch&&fob>0&&missionFuel>=0&&missionFuel<=fob&&verified&&!!wb?.loadOK;f9SetTone("f9GateFOB",fuelOK?"PASS":"CHECK",fuelOK?"ok":"bad");f9Put("f9GateFOBNote",fuelOK?`${Math.round(fob).toLocaleString()} lb verified • taxi ${Math.round(Number($("f9wbTaxi")?.value)||0).toLocaleString()} • trip ${Math.round(missionFuel).toLocaleString()} • landing FOB ${Math.round(wb?.ldgFuel||0).toLocaleString()} lb`:(fuelMatch?"FOB/mission fuel require pilot verification and valid fuel plan":"Mission and W&B fuel values are not reconciled"));
- const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest"),depAge=f9MetarAgeMinutes(missionData?.departure),destAge=f9MetarAgeMinutes(missionData?.destination),depManual=!!$("f9mDepManualWxVerified")?.checked,destManual=!!$("f9mDestManualWxVerified")?.checked;const depWx=(Number.isFinite(depAge)&&depAge<=90)||depManual,destWx=(Number.isFinite(destAge)&&destAge<=90)||destManual;const wxFields=Number.isFinite(Number($("f9mToPA")?.value))&&Number.isFinite(Number($("f9mToTemp")?.value))&&Number.isFinite(Number($("f9mLdgPA")?.value))&&Number.isFinite(Number($("f9mLdgTemp")?.value));const wxOK=!!dep&&!!dest&&wxFields&&depWx&&destWx;f9SetTone("f9GateWx",wxOK?"PASS":"CHECK",wxOK?"ok":"bad");f9Put("f9GateWxNote",wxOK?`DEP ${depManual?"MANUAL VERIFIED":`METAR ${Math.round(depAge)} min`} • DEST ${destManual?"MANUAL VERIFIED":`METAR ${Math.round(destAge)} min`}`:`Current METAR ≤90 min or explicit manual verification required at both airports`);
+ const dep=selectedRunwayObj("dep"),dest=selectedRunwayObj("dest"),depAge=f9MetarAgeMinutes(missionData?.departure),destAge=f9MetarAgeMinutes(missionData?.destination),depManual=!!$("f9mDepManualWxVerified")?.checked,destManual=!!$("f9mDestManualWxVerified")?.checked;const depWx=(Number.isFinite(depAge)&&depAge<=90)||depManual,destWx=(Number.isFinite(destAge)&&destAge<=90)||destManual;const wxFields=Number.isFinite(f9Num("f9mToPA"))&&Number.isFinite(f9Num("f9mToTemp"))&&Number.isFinite(f9Num("f9mLdgPA"))&&Number.isFinite(f9Num("f9mLdgTemp"));const wxOK=!!dep&&!!dest&&wxFields&&depWx&&destWx;f9SetTone("f9GateWx",wxOK?"PASS":"CHECK",wxOK?"ok":"bad");f9Put("f9GateWxNote",wxOK?`DEP ${depManual?"MANUAL VERIFIED":`METAR ${Math.round(depAge)} min`} • DEST ${destManual?"MANUAL VERIFIED":`METAR ${Math.round(destAge)} min`}`:`Current METAR ≤90 min or explicit manual verification required at both airports`);
  const depNotamOK=departureNotams?.status==="CHECKED"&&departureNotams?.runway_state!=="CLOSED",destNotamOK=currentNotams?.status==="CHECKED"&&currentNotams?.runway_state!=="CLOSED",notamOK=depNotamOK&&destNotamOK;f9SetTone("f9GateNotam",notamOK?"PASS":"CHECK",notamOK?"ok":"bad");f9Put("f9GateNotamNote",notamOK?`DEP ${departureNotams.runway_state||"OPEN"} • DEST ${currentNotams.runway_state||"OPEN"}`:(departureNotams?.runway_state==="CLOSED"||currentNotams?.runway_state==="CLOSED"?"Selected runway CLOSED by current NOTAM assessment":"Departure and destination FAA NMS review required"));
  const rp=f9RunwayPerformanceGate();f9SetTone("f9GateRunwayPerf",rp.ok?"PASS":"CHECK",rp.ok?"ok":"bad");let rpWhy="";if(!rp.ok){const why=[];if(!Number.isFinite(rp.bfl))why.push("NO TAKEOFF BFL SOLUTION");else if(!rp.toOK)why.push(`TAKEOFF MARGIN ${Number.isFinite(rp.depAvail)?Math.round(rp.depAvail-rp.bfl).toLocaleString()+" ft":"UNAVAILABLE"}`);if(!Number.isFinite(rp.retReq))why.push("NO RETURN LANDING SOLUTION");else if(!rp.retOK)why.push(`RETURN MARGIN ${Number.isFinite(rp.depAvail)?Math.round(rp.depAvail-rp.retReq).toLocaleString()+" ft":"UNAVAILABLE"}`);if(!Number.isFinite(rp.ldgReq))why.push("NO DEST LANDING SOLUTION");else if(!rp.ldgOK)why.push(`DEST MARGIN ${Number.isFinite(rp.destAvail)?Math.round(rp.destAvail-rp.ldgReq).toLocaleString()+" ft":"UNAVAILABLE"}`);rpWhy=why.join(" • ")||"Positive source-bounded runway margins required";}f9Put("f9GateRunwayPerfNote",rp.ok?`TO +${Math.round(rp.depAvail-rp.bfl).toLocaleString()} ft • RETURN +${Math.round(rp.depAvail-rp.retReq).toLocaleString()} ft • LDG +${Math.round(rp.destAvail-rp.ldgReq).toLocaleString()} ft`:rpWhy);
  const retWeight=f9DistanceFromText("f9EmerWeight"),retStatus=$("f9EmerStatus")?.textContent||"",returnOK=Number.isFinite(retWeight)&&retWeight<=42000&&rp.retOK&&!/NO-GO|UNAVAILABLE|REQUIRED|SOURCE LOCKED/i.test(retStatus);f9SetTone("f9GateReturn",returnOK?"PASS":"CHECK",returnOK?"ok":"bad");f9Put("f9GateReturnNote",returnOK?`${Math.round(retWeight).toLocaleString()} lb • required ${Math.round(rp.retReq).toLocaleString()} / usable ${Math.round(rp.depAvail).toLocaleString()} ft`:"Valid emergency-return weight, landing solution and runway margin required");
@@ -4509,7 +4511,7 @@ function syncF900BTOLDToMission(){
   ["f9ReturnBurn","f9mReturnBurn"],["f9LdgAI","f9mLdgAI"],["f9LdgPA","f9mLdgPA"],["f9LdgTemp","f9mLdgTemp"],
   ["f9LdgWeight","f9mLdgWeight"],["f9LdgRunway","f9mLdgRunway"],["f9LdgFactor","f9mLdgFactor"],["f9LdgMode","f9mLdgMode"],["f9Hyd2Flaps","f9mHyd2Flaps"],["f9Hyd2Airbrake","f9mHyd2Airbrake"],["f9BothHydConfig","f9mBothHydConfig"]
  ];
- pairs.forEach(([a,b])=>{if($(a)&&$(b)&&String($(a).value)!=="")$(b).value=$(a).value});
+ pairs.forEach(([a,b])=>{if($(a)&&$(b)&&(String($(a).value)!==""||/^(f9m?|f9)(To|Ldg)(PA|Temp)$/.test(a)))$(b).value=$(a).value});
  f9UpdateAbnormalLandingUI();
 }
 function f9MissionCopy(id,val){const e=$(id);if(e)e.textContent=val??"—"}
@@ -4760,7 +4762,7 @@ async function applyManualWeather(){
    try{if(cleanICAO($("dep").value)&&cleanICAO($("dest").value)){await loadMission({preserveManualWeather:true,quiet:true});return;}}catch(e){}
  }else{
    const oat=valueOrNull("manualWxOAT"),alt=valueOrNull("manualWxAlt"),dir=valueOrNull("manualWxDir"),spd=valueOrNull("manualWxSpeed"),gust=valueOrNull("manualWxGust");let pa=valueOrNull("manualWxPA");
-   const elev=Number(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;
+   const elev=weatherNumber(p?.airport?.elevation_ft??p?.airport?.elev??p?.airport?.elevation);if(!Number.isFinite(pa)&&Number.isFinite(alt)&&Number.isFinite(elev))pa=elev+(29.92-alt)*1000;
    if(!Number.isFinite(oat)||!Number.isFinite(pa)){alert("Manual weather requires OAT and pressure altitude, or an altimeter setting with a known airport elevation.");return}
    const now=new Date().toISOString();st.manual_values={oat,pa:Math.round(pa),alt:Number.isFinite(alt)?alt:null,dir:Number.isFinite(dir)?dir:null,spd:Number.isFinite(spd)?spd:null,gust:Number.isFinite(gust)?gust:null};
    p.metar={icao:p.icao||p.airport?.ident||"",raw:"MANUAL WEATHER ENTRY",obs_time:now,temp_c:oat,wind_dir:st.manual_values.dir,wind_kt:st.manual_values.spd,wind_gust_kt:st.manual_values.gust,manual:true};p.pressure_altitude_ft=Math.round(pa);p.altimeter_inhg=st.manual_values.alt;const isa=15-0.0019812*pa;p.density_altitude_ft=Math.round(pa+120*(oat-isa));st.mode="MANUAL";st.applied=true;st.entered_at=now;st.note=String($("manualWxNote")?.value||"").trim();
@@ -5668,8 +5670,8 @@ function currentMissionSummaryText(){
  });
  const fob=Math.max(0,num("fuel")),taxi=Math.max(0,num("taxiFuel")),missionFuel=Math.max(0,num("missionFuel"));
  const depPA=perfTakeoffPA(), depTemp=perfTakeoffTemp();
- const destPA=missionData&&Number.isFinite(Number(missionData.destination.pressure_altitude_ft))
-   ?Math.round(Number(missionData.destination.pressure_altitude_ft)):null;
+ const destPA=missionData&&Number.isFinite(weatherNumber(missionData.destination.pressure_altitude_ft))
+   ?Math.round(weatherNumber(missionData.destination.pressure_altitude_ft)):null;
  const toConfig=FS_PERF.takeoff[$("toConfig").value]?.label||"—";
  const landConfig=FS_PERF.landing[$("landConfig").value]?.label||"—";
  const lines=[
@@ -6589,7 +6591,7 @@ function updateToldCard(){
  $("toldDestRwy").textContent=`${destCode} / ${lr?lr.runway_id:"—"}`;
  $("toldDestSurface").textContent=`${lr&&lr.length_ft?Number(lr.length_ft).toLocaleString()+" ft":"—"} / ${$("landRunwayCondition")?$("landRunwayCondition").value:"DRY"}`;
  $("toldDestWind").textContent=lr?`HW ${esc(lw.headwind_kt)} • TW ${esc(lw.tailwind_kt)} • XW ${esc(lw.crosswind_kt)} kt`:"—";
- $("toldDestPA").textContent=missionData&&Number.isFinite(Number(missionData.destination.pressure_altitude_ft))?Math.round(Number(missionData.destination.pressure_altitude_ft)).toLocaleString()+" ft":"—";
+ $("toldDestPA").textContent=missionData&&Number.isFinite(weatherNumber(missionData.destination.pressure_altitude_ft))?Math.round(weatherNumber(missionData.destination.pressure_altitude_ft)).toLocaleString()+" ft":"—";
  if($("toldDestWxSource"))$("toldDestWxSource").textContent=formatWeatherSource("dest");
  $("toldLDW").textContent=Number.isFinite(c.landing)?Math.round(c.landing).toLocaleString()+" lb":"—";
  $("toldLandingFuel").textContent=Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—";
@@ -7382,7 +7384,8 @@ function formatTafDecoded(t){if(!t)return'<span class="warn">TAF unavailable</sp
 
 
 function populatePoint(prefix,x){
- $(prefix+"Airport").textContent=`${airportName(x)} • ${esc((x.airport||{}).elevation_ft||(x.airport||{}).elev||(x.airport||{}).elevation)} ft`;
+ const elevation=weatherNumber((x.airport||{}).elevation_ft??(x.airport||{}).elev??(x.airport||{}).elevation);
+ $(prefix+"Airport").textContent=`${airportName(x)} • ${elevation===null?"—":Math.round(elevation).toLocaleString()} ft`;
  $(prefix+"PA").textContent=esc(x.pressure_altitude_ft)+" ft";
  $(prefix+"DA").textContent=esc(x.density_altitude_ft)+" ft";
  $(prefix+"Metar").innerHTML=formatMetarDecoded(x.metar,x.altimeter_inhg);
@@ -7648,7 +7651,7 @@ function processWhatIf(){
 
 function perfTakeoffPA(){
  if(perfIsManual())return valueOrNull("manualTOPA");
- return missionData?Number(missionData.departure.pressure_altitude_ft):null;
+ return missionData?weatherNumber(missionData.departure.pressure_altitude_ft):null;
 }
 function perfTakeoffTemp(){
  if(perfIsManual())return valueOrNull("manualTOTemp");
@@ -7661,7 +7664,7 @@ function perfTakeoffRunwayLen(){
  return perfIsManual()?valueOrNull("manualTORwyLen"):valueOrNull("perfRwyLen");
 }
 function perfLandingPA(){
- return missionData?Number(missionData.destination.pressure_altitude_ft):null;
+ return missionData?weatherNumber(missionData.destination.pressure_altitude_ft):null;
 }
 function setPerformanceInputMode(){
  const manual=perfIsManual();
@@ -7948,7 +7951,7 @@ function processFallbackRunway(){
 
  const metar=point.metar||{};
  const oat=Number(firstVal(metar,["temp_c","temperature_c","temp","temperature"]));
- const pa=Number(point.pressure_altitude_ft);
+ const pa=weatherNumber(point.pressure_altitude_ft);
  $("fallbackWeather").textContent=
    `${Number.isFinite(oat)?oat.toFixed(1)+"°C":"OAT —"} • ${Number.isFinite(pa)?Math.round(pa).toLocaleString()+" ft PA":"PA —"}`;
 
@@ -8471,7 +8474,7 @@ function autoLDG(){
  const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],wk=(valueOrNull("landWt")||0)/1000;
  const published=d?interpScalarN(d.speed,wk):null;const vref=published==null?null:(cfg==="S20"?published-5:published);
  if(vref!=null)$("landVref").value=Math.round(vref);else $("landVref").value="";
- let pa=Number(missionData.destination.pressure_altitude_ft),r=null,reason="";
+ let pa=weatherNumber(missionData.destination.pressure_altitude_ft),r=null,reason="";
  if(!Number.isFinite(pa))reason="Destination pressure altitude unavailable";else if(d){
    let lookupPA=pa,paBasis="actual";const minPA=Math.min(...kN(d.tables));if(pa<minPA&&minPA===0&&pa>=-1000){lookupPA=0;paBasis="SEA LEVEL row"}
    r=fsLanding(cfg,lookupPA,wk);if(!r)reason="Landing distance outside legacy digitized table range";else r.paBasis=paBasis
@@ -8485,7 +8488,7 @@ function syncLandingSection(){
  const surface=$("landRunwayCondition").value;
  const cfg=$("landConfig").value,d=FS_PERF.landing[cfg],a=autoLDG();
  const ai=$("landAntiIce")?.value||"OFF";
- const pa=missionData?Number(missionData.destination.pressure_altitude_ft):null;
+ const pa=missionData?weatherNumber(missionData.destination.pressure_altitude_ft):null;
  const oat=destTempC();
  const afms=afmsRevCLandingClimbLimit(cfg,ai,pa,oat);
  if(Number.isFinite(afms.limit))$("landClimbWt").value=Math.round(afms.limit);else $("landClimbWt").value="";
@@ -8683,7 +8686,7 @@ function refreshMenuCounts(){
  requestAnimationFrame(()=>{updateHomeDraftCount();updateHomeArchiveCount()});
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
-const APP_UPDATE_BUILD="5.26.27";
+const APP_UPDATE_BUILD="5.26.28";
 function setAppUpdateNotice(serverBuild,browserBuild=APP_UPDATE_BUILD){
  const notice=$("appUpdateNotice"),message=$("appUpdateMessage"),title=$("appUpdateTitle");
  if(!notice||!/^\d+\.\d+\.\d+$/.test(String(serverBuild||"")))return;
@@ -8714,7 +8717,7 @@ async function updateFlightOpsApp(){
 }
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkAppVersion()});
 async function startupCheck(manual=false){
- const expected="5.26.27",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.28",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8977,7 +8980,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.27: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.28: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8987,7 +8990,7 @@ document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.curr
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
 window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true}));
 
-/* v5.26.27 — in-app pull-to-refresh for iPhone/iPad/PWA.
+/* v5.26.28 — in-app pull-to-refresh for iPhone/iPad/PWA.
    Refreshes the active mission's live operational data instead of relying on
    browser chrome pull-to-reload, which is unavailable in some standalone/PWA contexts. */
 (function installPullToRefresh(){
@@ -9066,7 +9069,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.27",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.28",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -9154,7 +9157,7 @@ try{installF50PilotReviewPanel();}catch(e){}
 </script>
 <script src="/numeric-entry.js"></script>
 <script src="/mission-review.js"></script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.27'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.28'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 

@@ -1,9 +1,9 @@
-const BUILD="5.26.27";
+const BUILD="5.26.28";
 const PUBLIC_CACHE=`kusa-flightops-public-v${BUILD}`;
 const PROTECTED_CACHE=`kusa-flightops-protected-v${BUILD}`;
 const DB_NAME="kusa-flightops-offline", DB_VERSION=1, STORE="meta";
 const PUBLIC_ASSETS=["/account.html","/invite.html","/reset-password.html","/manifest.webmanifest","/icons/icon-192.png","/icons/icon-512.png"];
-const PROTECTED_SHELL=["/index.html","/numeric-entry.js","/numeric-entry.css","/mission-review.js","/mission-review.css","/manifest.webmanifest","/icons/icon-192.png","/icons/icon-512.png"];
+const PROTECTED_SHELL=["/index.html","/numeric-entry.js","/numeric-entry.css","/weather-math.js","/mission-review.js","/mission-review.css","/manifest.webmanifest","/icons/icon-192.png","/icons/icon-512.png"];
 function openDb(){return new Promise((resolve,reject)=>{const req=indexedDB.open(DB_NAME,DB_VERSION);req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(STORE))db.createObjectStore(STORE)};req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)})}
 async function dbGet(k){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readonly"),r=tx.objectStore(STORE).get(k);r.onsuccess=()=>resolve(r.result??null);r.onerror=()=>reject(r.error)})}
 async function dbPut(k,v){const db=await openDb();return new Promise((resolve,reject)=>{const tx=db.transaction(STORE,"readwrite");tx.objectStore(STORE).put(v,k);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error)})}
