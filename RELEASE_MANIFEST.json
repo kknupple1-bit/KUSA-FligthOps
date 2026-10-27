@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.20",
-  "release": "5.26.20-deployment.1",
+  "build": "5.26.21",
+  "release": "5.26.21-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -13,27 +13,27 @@
     {
       "path": "package-lock.json",
       "size_bytes": 31244,
-      "sha256": "34d32d7a14999192df7038cef6f3e3c7d8f0477a0785e627e5494cd28df69d63"
+      "sha256": "f426e5be787216252046489ca57e52d41c4df01a416c1fabebe8272b6a5d8013"
     },
     {
       "path": "package.json",
-      "size_bytes": 913,
-      "sha256": "056085fcf53e45b922c78eb97622cf35cc5bd1628d178ced3c3e61e6866a97ee"
+      "size_bytes": 1013,
+      "sha256": "2557b2add1c6119a3207f8f760e9611fab4db065cb453b26805633ef525349fe"
     },
     {
       "path": "platform.js",
       "size_bytes": 54643,
-      "sha256": "d24c7928ed254198267eb61e607ad350aa54c5904a6d3c9625c2b3bbae8f6857"
+      "sha256": "9b405a0a70836eab327794c950b3c33e947c51dd3c0a7e250efd7394fea6f6fa"
     },
     {
       "path": "public/account.html",
       "size_bytes": 9677,
-      "sha256": "0d00dc12a4c7992e1b68361daa3b149eca5f9d7188e1595439e838d6b0130dd9"
+      "sha256": "dffed25c32c823eb40082bbadb6092d319bb43aad7e4bd58326919c2304c7aae"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 12690,
-      "sha256": "e437e659ba3fc1fec5f68d8385f2db14f05804f57787163bd3d6d5e4d839b327"
+      "sha256": "71cac703ee78f863b2beaa4832655929505043753eeb5548ab7fb9bb08a23116"
     },
     {
       "path": "public/config.js",
@@ -312,13 +312,13 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 685075,
-      "sha256": "2e6656dc79003adb5a53eccd3b9e89cfcf2f434aa62b3f9b413fef6185f5d2b0"
+      "size_bytes": 685631,
+      "sha256": "2804eb46d08ade3ad88a528373b76269b65f5b7483972c2bfa19aabe0eceb6ee"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 6957,
-      "sha256": "f8d880af013972ed98d72dbb1abc2c248e0ea66dd2080073520b5da293ab7874"
+      "sha256": "6f73a9cf598a4f38458cd9d6dfd84ed69e4b3ca099bfe933c7e49fa0c0280520"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -328,12 +328,12 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4279,
-      "sha256": "f674a2553267077a4105735ff5dad2a386cc711dcf9686aeadb0e59687165802"
+      "sha256": "76d9b1f87632fffb55f98585c480b87068aafee2cd980daf3a07427f8a7a431e"
     },
     {
       "path": "public/sw.js",
       "size_bytes": 8230,
-      "sha256": "d9752906dd2fc3ccb1ce67ccedb0b458a20d07d455c76bdcdde5f951ec0f5491"
+      "sha256": "0a1e34605c0e44c70d27f125e265d665268e3b7a2512235414dfe051e52bd82e"
     },
     {
       "path": "scripts/release-files.cjs",
@@ -348,7 +348,7 @@
     {
       "path": "server.js",
       "size_bytes": 840753,
-      "sha256": "9afb8ae032177b1be64911085ef95a16f5c1075482f21ee39ca5ffec241e56d9"
+      "sha256": "2efe530d7efda38c6ceff4b6c6f5ac26b29b1d5923dd07d46e4361eef0399831"
     }
   ]
 }
