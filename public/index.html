@@ -1250,7 +1250,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="pullRefreshIndicator" aria-live="polite" style="position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-72px);z-index:100000;min-width:170px;max-width:calc(100vw - 24px);padding:9px 14px;border:1px solid #31506f;border-radius:999px;background:#06182c;color:#d7e6f7;text-align:center;font-size:12px;font-weight:800;box-shadow:0 5px 18px rgba(0,0,0,.32);opacity:0;pointer-events:none;transition:transform .14s ease,opacity .14s ease">Pull to refresh</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.24 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.25 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1273,7 +1273,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.24 — build identification stays in the header, clear of navigation. */
+/* v5.26.25 — build identification stays in the header, clear of navigation. */
 #buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
   background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
   line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
@@ -1282,7 +1282,7 @@ details summary{cursor:pointer;margin-top:8px}
   .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
-/* v5.26.24 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.25 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1358,7 +1358,7 @@ canvas,svg,img{max-width:100%}
 </style>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.24</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.25</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -1371,6 +1371,11 @@ canvas,svg,img{max-width:100%}
 </header>
 <div class="beta-banner">INTERNAL BETA — DEVELOPMENT / VALIDATION ONLY — NOT APPROVED FOR FLIGHT USE</div>
 <main>
+<section class="callout warn" id="appUpdateNotice" role="status" aria-live="polite" hidden style="margin:12px 0">
+<b id="appUpdateTitle">A new FlightOps version is available</b>
+<p id="appUpdateMessage">Tap Update Now to save this draft on this device and reload. Sign in again if prompted.</p>
+<button id="appUpdateNowBtn" type="button" onclick="updateFlightOpsApp()" style="min-height:44px">Update Now</button>
+</section>
 <div id="homeView" style="display:block">
 <div class="home-shell">
 <div class="newtrip-card">
@@ -5030,6 +5035,7 @@ function updateHomeDraftCount(){const e=$("homeDraftCount");if(e)e.textContent=g
 
 
 const MISSION_SYNC_QUEUE_KEY="kusaFlightOpsMissionSyncQueue:v1";
+const MISSION_DELETIONS_KEY="kusaFlightOpsMissionDeletions:v1";
 let missionSyncTimer=null;
 let aircraftDirectoryCache=null;
 let cloudSyncUser=null;
@@ -5045,7 +5051,9 @@ function saveMissionSyncQueue(q){
 }
 function enqueueMissionSync(localId,action="upsert"){
   if(!localId)return;
-  const q=getMissionSyncQueue().filter(x=>!(x.local_id===localId&&x.action===action));
+  const record=findLocalMissionRecord(localId);
+  if(action!=="delete"&&(record?.server_delete_pending||isMissionDeleted(record||{id:localId})))return;
+  const q=getMissionSyncQueue().filter(x=>!(x.local_id===localId&&(action==="delete"||x.action===action)));
   q.push({local_id:localId,action,queued_at:new Date().toISOString(),change_id:crypto.randomUUID()});
   saveMissionSyncQueue(q);
   if(navigator.onLine){
@@ -5056,6 +5064,46 @@ function enqueueMissionSync(localId,action="upsert"){
 function findLocalMissionRecord(id){
   if(!id)return null;
   return getMissionDrafts().find(x=>x.id===id)||getMissionArchive().find(x=>x.id===id)||null;
+}
+function getMissionDeletions(){
+  try{return JSON.parse(localStorage.getItem(MISSION_DELETIONS_KEY)||"[]")}catch{return[]}
+}
+function isMissionDeleted(record){
+  return !!record&&getMissionDeletions().some(d=>(d.local_id===record.id||(d.server_id&&d.server_id===record.server_mission_id))&&(!d.owner||!record.server_owner_user_id||d.owner===record.server_owner_user_id));
+}
+function detachDeletedMission(id){
+  if(window.currentMissionMeta?.id!==id)return;
+  if(typeof draftSaveTimer!=="undefined")clearTimeout(draftSaveTimer);
+  window.currentMissionMeta=null;
+  if(localStorage.getItem("kusaFlightOpsLastActiveMission:v1")===id)localStorage.removeItem("kusaFlightOpsLastActiveMission:v1");
+  if(typeof sessionStorage!=="undefined"){
+    const key="kusaFlightOpsRefreshContext:v1";
+    try{const context=JSON.parse(sessionStorage.getItem(key)||"null");if(context?.meta?.id===id)sessionStorage.removeItem(key)}catch(_){}
+  }
+}
+function removeDeletedLocalMission(record){
+  const tombstones=getMissionDeletions();
+  if(!isMissionDeleted(record)){
+    tombstones.push({local_id:record.id,server_id:record.server_mission_id||null,owner:record.server_owner_user_id||cloudSyncUser?.id||null});
+    localStorage.setItem(MISSION_DELETIONS_KEY,JSON.stringify(tombstones));
+  }
+  saveHydratedMissionLists(getMissionDrafts().filter(r=>r.id!==record.id),getMissionArchive().filter(r=>r.id!==record.id));
+  saveMissionSyncQueue(getMissionSyncQueue().filter(item=>item.local_id!==record.id));
+  detachDeletedMission(record.id);
+}
+function requestMissionDeletion(localId){
+  const record=findLocalMissionRecord(localId);if(!record)return;
+  // Retain the record until the cloud acknowledgement so failed/offline deletes retry.
+  try{
+    updateLocalMissionRecord(localId,{server_delete_pending:true,server_delete_error:null});
+    detachDeletedMission(localId);
+    enqueueMissionSync(localId,"delete");
+    if(typeof renderArchive==="function")renderArchive();
+    return true;
+  }catch(error){
+    if(typeof alert==="function")alert("Deletion could not be queued on this device. The plan is retained. Resolve the device storage problem, then Refresh and try again.");
+    return false;
+  }
 }
 function updateLocalMissionRecord(id,patch){
   const drafts=getMissionDrafts(),di=drafts.findIndex(x=>x.id===id);
@@ -5087,7 +5135,8 @@ function renderFlightPlanCloudStatus(){
 function setFlightPlanCloudStatus(kind,text){flightPlanCloudStatus={kind,text};renderFlightPlanCloudStatus();}
 function planSyncStatusMarkup(record){
   let kind="warn",text="Saved on this device — not yet cloud synced";
-  if(record.server_owner_user_id&&cloudSyncUser?.id&&record.server_owner_user_id!==cloudSyncUser.id)text="Saved under another account — sign in to that account to sync";
+  if(record.server_delete_pending)text=record.server_delete_error?"Deletion not yet confirmed — local copy retained; Refresh to retry":"Deletion pending — reconnect and Refresh to finish removing this plan";
+  else if(record.server_owner_user_id&&cloudSyncUser?.id&&record.server_owner_user_id!==cloudSyncUser.id)text="Saved under another account — sign in to that account to sync";
   else if(record.server_sync_state==="conflict"){kind="bad";text="Sync conflict — local copy preserved for review";}
   else if(record.server_sync_state==="auth_required")text="Sign in, then Refresh to upload this plan";
   else if(record.server_sync_state==="wrong_account")text="Saved under another account — sign in to that account to sync";
@@ -5145,13 +5194,25 @@ async function updateServerMissionForRecord(rec){
 }
 async function syncOneMissionQueueItem(item){
   const rec=findLocalMissionRecord(item.local_id);
-  if(!rec||rec.server_sync_state==="conflict")return {done:true};
+  if(!rec)return {done:true};
+  if(isMissionDeleted(rec)){removeDeletedLocalMission(rec);return {done:true};}
+  if(item.action!=="delete"&&(rec.server_delete_pending||rec.server_sync_state==="conflict"))return {done:true};
   if(!navigator.onLine)return {done:false};
   updateCloudSyncStatus("SYNCING TO CLOUD…","warn");
   try{
     const user=await ensureCloudSyncUser();
     if(rec.server_owner_user_id&&rec.server_owner_user_id!==user.id){
+      if(item.action==="delete"){removeDeletedLocalMission(rec);return {done:true};}
       updateLocalMissionRecord(rec.id,{server_sync_state:"wrong_account",server_sync_error:"WRONG_ACCOUNT"});return {done:false};
+    }
+    if(item.action==="delete"){
+      // Idempotent create also resolves a prior upload whose acknowledgement was lost.
+      const mission=rec.server_mission_id?{id:rec.server_mission_id}:await createServerMissionForRecord(rec);
+      const response=await fetch(`/api/missions/${encodeURIComponent(mission.id)}`,{method:"DELETE",credentials:"same-origin"});
+      const body=await response.json().catch(()=>({}));
+      if(!response.ok&&!(response.status===404&&body.error==="MISSION_NOT_FOUND"))throw Object.assign(new Error(body.error||`MISSION_DELETE_HTTP_${response.status}`),{code:body.error,status:response.status});
+      removeDeletedLocalMission({...rec,server_mission_id:mission.id,server_owner_user_id:user.id});
+      return {done:true};
     }
     const sentPayload=JSON.stringify(serverPayloadForRecord(rec));
     let serverMission=rec.server_mission_id?await updateServerMissionForRecord(rec):await createServerMissionForRecord(rec);
@@ -5171,6 +5232,12 @@ async function syncOneMissionQueueItem(item){
       ...(item.action==="archive"?{server_archived_at:serverMission.archived_at||new Date().toISOString()}:{} )});
     return {done:true};
   }catch(e){
+    if(e?.code==="MISSION_DELETED"){removeDeletedLocalMission(rec);return {done:true};}
+    if(item.action==="delete"){
+      updateLocalMissionRecord(rec.id,{server_delete_pending:true,server_delete_error:String(e?.code||e?.message||e)});
+      if(e?.status===401){cloudSyncUser=null;aircraftDirectoryCache=null;}
+      return {done:false};
+    }
     if(item.action==="archive"&&e?.code==="MISSION_NOT_DRAFT"&&rec.server_mission_id){
       try{
         const response=await fetch(`/api/missions/${encodeURIComponent(rec.server_mission_id)}`,{credentials:"same-origin",cache:"no-store"});
@@ -5241,15 +5308,20 @@ function saveHydratedMissionLists(drafts,archive){
 }
 async function hydrateCloudDrafts({render=false}={}){
   if(!navigator.onLine)return false;
-  const lists=await Promise.all(["draft","archived"].map(async status=>{
+  const lists=await Promise.all(["draft","archived","deleted"].map(async status=>{
     const response=await fetch(`/api/missions?status=${status}`,{credentials:"same-origin",cache:"no-store"});
     const body=await response.json().catch(()=>({}));
     if(!response.ok||!Array.isArray(body.missions))throw Object.assign(new Error(body.error||`CLOUD_DOWNLOAD_HTTP_${response.status}`),{status:response.status,code:body.error});
     return body.missions;
   }));
+  for(const deleted of lists[2]){
+    const records=[...getMissionDrafts(),...getMissionArchive()];
+    for(const record of records)if((record.server_mission_id===deleted.id||record.id===deleted.local_mission_id)&&(!record.server_owner_user_id||record.server_owner_user_id===deleted.owner_user_id))removeDeletedLocalMission(record);
+  }
   const drafts=getMissionDrafts(),archive=getMissionArchive(),queuedIds=new Set(getMissionSyncQueue().map(x=>x.local_id));
   for(const sm of [...lists[0],...lists[1]]){
     const cloud=cloudMissionToLocalDraft(sm),target=sm.status==="archived"?archive:drafts,other=sm.status==="archived"?drafts:archive;
+    if(isMissionDeleted(cloud))continue;
     const matches=entry=>(entry.server_mission_id===sm.id||entry.id===cloud.id)&&(!entry.server_owner_user_id||entry.server_owner_user_id===cloud.server_owner_user_id);
     let i=target.findIndex(matches),oi=other.findIndex(matches),existing=i>=0?target[i]:oi>=0?other[oi]:null;
     const active=existing&&window.currentMissionMeta?.id===existing.id&&!window.currentMissionMeta.completed;
@@ -5257,7 +5329,7 @@ async function hydrateCloudDrafts({render=false}={}){
       existing.server_sync_state="conflict";existing.server_sync_error="REMOTE_CHANGED_WHILE_OPEN";existing.server_current_revision=Number(sm.revision||1);
       continue; // The visible form still contains the prior values; never autosave it over a newer remote plan.
     }
-    const pending=existing&&(queuedIds.has(existing.id)||["conflict","queued","queued_offline","auth_required","wrong_account"].includes(existing.server_sync_state));
+    const pending=existing&&(existing.server_delete_pending||queuedIds.has(existing.id)||["conflict","queued","queued_offline","auth_required","wrong_account"].includes(existing.server_sync_state));
     if(pending){
       if(Number(sm.revision)>Number(existing.server_revision||0))existing.server_current_revision=Number(sm.revision);
       continue; // Never replace a local edit or conflict with an automatic download.
@@ -5276,6 +5348,7 @@ function migrateMissionSyncQueues(){migrateContinuityStorage();}
 function queueUnsyncedLocalDrafts(){
   const queued=new Set(getMissionSyncQueue().map(x=>x.local_id));
   for(const [records,action] of [[getMissionDrafts(),"upsert"],[getMissionArchive(),"archive"]])for(const rec of records){
+    if(rec?.server_delete_pending){if(!queued.has(rec.id)){enqueueMissionSync(rec.id,"delete");queued.add(rec.id)}continue;}
     if(!rec?.id||rec.server_sync_state==="conflict")continue;
     if(rec.server_owner_user_id&&cloudSyncUser?.id&&rec.server_owner_user_id!==cloudSyncUser.id)continue;
     const neverSynced=!rec.server_mission_id;
@@ -5448,6 +5521,10 @@ function draftRecord(){
  return {id:window.currentMissionMeta.id,trip_number:currentTripNumber(),trip_date:currentTripDate(),leg_number:window.currentMissionMeta.leg_number||1,aircraft:window.currentMissionMeta.aircraft||"N33AP",note:window.currentMissionMeta.note||state.note||"",started_at:window.currentMissionMeta.started_at||new Date().toISOString(),updated_at:new Date().toISOString(),dep:state.dep,dest:state.dest,alt:state.alt,state};
 }
 function saveCurrentDraft(){
+ if(window.currentMissionMeta){
+   const existing=findLocalMissionRecord(window.currentMissionMeta.id);
+   if(existing?.server_delete_pending||isMissionDeleted(existing||window.currentMissionMeta)){detachDeletedMission(window.currentMissionMeta.id);return;}
+ }
  let rec=draftRecord();if(!rec)return;
  const arr=getMissionDrafts(),ix=arr.findIndex(x=>x.id===rec.id),prior=ix>=0?arr[ix]:null;
  if(prior)["server_mission_id","server_revision","server_owner_user_id","server_synced_at","server_sync_state","server_sync_error","server_current_revision"].forEach(k=>{if(prior[k]!=null&&rec[k]==null)rec[k]=prior[k]});
@@ -5464,6 +5541,7 @@ function saveCurrentDraft(){
 }
 function scheduleDraftSave(){
  if(!window.currentMissionMeta||window.currentMissionMeta.completed)return;
+  if(findLocalMissionRecord(window.currentMissionMeta.id)?.server_delete_pending||isMissionDeleted(window.currentMissionMeta))return;
  const e=$("draftSaveStatus");if(e)e.textContent="Saving draft…";const eb=$("draftSaveStatusBottom");if(eb)eb.textContent="Saving draft…";
  clearTimeout(draftSaveTimer);draftSaveTimer=setTimeout(saveCurrentDraft,450);
 }
@@ -6112,10 +6190,9 @@ function deleteArchiveFlightPlan(i){
  const arr=getMissionArchive(),m=arr[i];
  if(!m)return;
  const route=`${m.dep||"—"} → ${m.dest||"—"}`;
- if(!confirm(`Delete saved flight plan ${route}? This cannot be undone.`))return;
+ if(!confirm(`Delete saved flight plan ${route} from your account and synced devices? Copies belonging to an older account are removed from this device only.`))return;
  selectedArchiveFlightPlanIds.delete(m.id);
- arr.splice(i,1);
- saveMissionArchive(arr);
+ requestMissionDeletion(m.id);
  renderArchive();
  updateArchiveSelectionCount();
 }
@@ -6126,9 +6203,8 @@ function deleteSelectedFlightPlans(){
    return;
  }
  const count=selectedArchiveFlightPlanIds.size;
- if(!confirm(`Delete ${count} selected flight plan${count===1?"":"s"}? This cannot be undone.`))return;
- const remaining=getMissionArchive().filter(m=>!selectedArchiveFlightPlanIds.has(m.id));
- saveMissionArchive(remaining);
+ if(!confirm(`Delete ${count} selected flight plan${count===1?"":"s"} from your account and synced devices? Copies belonging to an older account are removed from this device only.`))return;
+ for(const m of getMissionArchive())if(selectedArchiveFlightPlanIds.has(m.id))requestMissionDeletion(m.id);
  selectedArchiveFlightPlanIds.clear();
  renderArchive();
  updateArchiveSelectionCount();
@@ -6143,6 +6219,7 @@ function renderDrafts(){
 }
 async function openDraftFlightPlan(i){
  const arr=getMissionDrafts(),m=arr[i];if(!m)return;
+ if(m.server_delete_pending){alert("Deletion is pending. Reconnect and Refresh to finish removing this plan.");return;}
  if((m.aircraft||m.state?.aircraft)==="F900B"){await restoreF900BFlightPlan(m,{fromDraft:true});return}
  await restoreArchivedFlightPlan(m,i,{fromDraft:true});
  const s=m.state||{};
@@ -6155,7 +6232,7 @@ async function openDraftFlightPlan(i){
  window.currentMissionMeta={id:m.id||newMissionId(),trip_number:m.trip_number||allocateTripNumber(m.trip_date||m.state?.trip_date||m.started_at||new Date()),trip_date:m.trip_date||m.state?.trip_date||localISODate(new Date()),leg_number:m.leg_number||1,aircraft:m.aircraft||"N33AP",note:m.note||"",started_at:m.started_at||new Date().toISOString(),completed:false,reopened_from_draft:true,server_mission_id:m.server_mission_id||null,server_revision:m.server_revision||null,server_sync_state:m.server_sync_state||null};syncActiveTripDateInputs();
  updateWeatherSourceBadges();recalculate();updateToldCard();saveCurrentDraft();showPlatformView("ops");
 }
-function deleteDraftFlightPlan(i){const arr=getMissionDrafts(),m=arr[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"}?`))return;arr.splice(i,1);saveMissionDrafts(arr);renderDrafts()}
+function deleteDraftFlightPlan(i){const m=getMissionDrafts()[i];if(!m)return;if(!confirm(`Delete draft ${m.dep||"—"} → ${m.dest||"—"} from your account and synced devices? Copies belonging to an older account are removed from this device only.`))return;requestMissionDeletion(m.id)}
 
 function renderArchive(){
  renderFlightPlanCloudStatus();
@@ -7514,79 +7591,10 @@ async function loadMission(options={}){
  }catch(e){if(!quiet)$("missionStatus").innerHTML='<span class="bad">'+e+'</span>';throw e}
 }
 
-function enableFastNumericEntry(){
- const numericInputs=[...document.querySelectorAll('input[type="number"]')];
- numericInputs.forEach(el=>{
-   if(el.readOnly||el.disabled)return;
-   // iOS/iPadOS/Android: request the numeric keypad while preserving decimal support.
-   el.setAttribute("inputmode","decimal");
-   el.setAttribute("enterkeyhint","done");
-
-   // A single tap/click/focus selects the current value so the next keystroke
-   // replaces it rather than appending or requiring manual deletion.
-   const selectAll=()=>{
-     requestAnimationFrame(()=>{
-       try{el.select()}catch(e){}
-       try{
-         if(typeof el.setSelectionRange==="function"){
-           el.setSelectionRange(0,String(el.value||"").length);
-         }
-       }catch(e){}
-     });
-   };
-
-   if(!el.dataset.fastNumericEntry){
-     el.addEventListener("focus",selectAll);
-     el.addEventListener("click",selectAll);
-     el.addEventListener("touchend",selectAll,{passive:true});
-     el.dataset.fastNumericEntry="1";
-   }
- });
-
- // Some operational numeric fields were historically rendered without type=number.
- // Explicitly convert known editable weight/fuel/distance fields to numeric entry.
- const knownNumericIds=[
-   "paxRequested","captWeight","foWeight","homeFOB","homeMissionFuel","taxiFuel","emerReturnBurn",
-   "bagComp0","bagComp1","bagComp2","manualUsableLda",
-   "perfManualPA","perfManualTemp","perfManualWt","perfManualRwyLen"
- ];
- knownNumericIds.forEach(id=>{
-   const el=$(id);
-   if(!el||el.readOnly||el.disabled)return;
-   el.setAttribute("type","number");
-   el.setAttribute("inputmode","decimal");
-   el.setAttribute("enterkeyhint","done");
-   if(!el.dataset.fastNumericEntry){
-     const selectAll=()=>requestAnimationFrame(()=>{try{el.select()}catch(e){}});
-     el.addEventListener("focus",selectAll);
-     el.addEventListener("click",selectAll);
-     el.addEventListener("touchend",selectAll,{passive:true});
-     el.dataset.fastNumericEntry="1";
-   }
- });
-}
+function enableFastNumericEntry(){configureNumericKeypads();}
 
 document.addEventListener("DOMContentLoaded",enableFastNumericEntry);
 document.addEventListener("DOMContentLoaded",()=>{checkNotamConnection().catch(()=>{});});
-
-document.addEventListener("DOMContentLoaded",()=>{
- const pax=$("paxRequested");
- if(pax){
-   pax.setAttribute("inputmode","numeric");
-   pax.setAttribute("enterkeyhint","done");
-   pax.setAttribute("step","1");
-   const replaceReady=()=>{
-     requestAnimationFrame(()=>{
-       try{pax.focus({preventScroll:true})}catch(e){}
-       try{pax.select()}catch(e){}
-     });
-   };
-   pax.addEventListener("focus",replaceReady);
-   pax.addEventListener("click",replaceReady);
-   pax.addEventListener("touchend",replaceReady,{passive:true});
- }
-});
-
 
 function valueOrNull(id){const v=$(id).value;return v===""?null:+v}
 
@@ -8655,8 +8663,38 @@ function refreshMenuCounts(){
  requestAnimationFrame(()=>{updateHomeDraftCount();updateHomeArchiveCount()});
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
+const APP_UPDATE_BUILD="5.26.25";
+function setAppUpdateNotice(serverBuild,browserBuild=APP_UPDATE_BUILD){
+ const notice=$("appUpdateNotice"),message=$("appUpdateMessage"),title=$("appUpdateTitle");
+ if(!notice||!/^\d+\.\d+\.\d+$/.test(String(serverBuild||"")))return;
+ notice.hidden=String(serverBuild)===browserBuild;
+ if(notice.hidden)return;
+ title.textContent=String(serverBuild).localeCompare(browserBuild,undefined,{numeric:true})>0?"A newer FlightOps version is available":"FlightOps versions do not match";
+ message.textContent=`Server version ${serverBuild} • this app ${browserBuild}. Tap Update Now to save this draft on this device and reload. Sign in again if prompted. If the versions still differ, contact your administrator.`;
+}
+async function checkAppVersion(){
+ if(!navigator.onLine)return;
+ try{const health=await fetchJsonWithTimeout(apiUrl("/api/health?_="+Date.now()),5000);setAppUpdateNotice(health.build)}catch(_){}
+}
+async function updateFlightOpsApp(){
+ const message=$("appUpdateMessage"),button=$("appUpdateNowBtn");
+ if(!navigator.onLine){if(message)message.textContent="Connect to the internet, then tap Update Now. Your saved drafts remain on this device.";return false;}
+ if(button)button.disabled=true;
+ try{
+   if(window.currentMissionMeta&&!window.currentMissionMeta.completed){
+     saveCurrentDraft();
+     if(!findLocalMissionRecord(window.currentMissionMeta.id))throw new Error("Draft save was not confirmed");
+   }
+   persistRefreshContext();
+   window.location.reload();return true;
+ }catch(error){
+   if(message)message.textContent="Update paused because the draft could not be saved. Keep this page open and resolve the save problem before retrying.";
+   if(button)button.disabled=false;return false;
+ }
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkAppVersion()});
 async function startupCheck(manual=false){
- const expected="5.26.24",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.25",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8665,7 +8703,8 @@ async function startupCheck(manual=false){
  try{
    const h=await fetchJsonWithTimeout(apiUrl("/api/health?_="+Date.now()),5000);
    const buildOk=String(h.build||"")===expected;
-   if(bs){bs.textContent=buildOk?"CURRENT":"UPDATE / REDEPLOY REQUIRED";bs.className=buildOk?"ok":"bad"}
+   setAppUpdateNotice(h.build,expected);
+   if(bs){bs.textContent=buildOk?"CURRENT":"VERSION CHANGE — TAP UPDATE NOW";bs.className=buildOk?"ok":"warn"}
    if(bn)bn.textContent=`Browser ${expected} • Server ${h.build||"unknown"}`;
    try{
      const [f9,f9wb]=await Promise.all([loadF900BData(),loadF900BWB()]);
@@ -8700,7 +8739,7 @@ async function startupCheck(manual=false){
      if(ls){ls.textContent=(wx&&nms)?"ONLINE":(wx||nms)?"PARTIAL":"UNAVAILABLE";ls.className=(wx&&nms)?"ok":(wx||nms)?"warn":"bad"}
      if(ln)ln.textContent=`Weather ${wx?"online":"unavailable"} • FAA NMS ${nms?"authenticated":"unavailable"}${j.nms?.environment?" • "+j.nms.environment:""}`;
      if(notice){
-       if(!buildOk||runwayCount<1)notice.innerHTML='<span class="bad"><b>DATA ACTION REQUIRED.</b> Required packaged data or app/server version is not ready. Redeploy/update before relying on mission calculations.</span>';
+       if(!buildOk||runwayCount<1)notice.innerHTML='<span class="bad"><b>DATA ACTION REQUIRED.</b> If an update is available, tap Update Now above. Missing packaged data or a version mismatch that remains after reloading requires administrator review.</span>';
        else if(!wx||!nms)notice.innerHTML='<span class="warn"><b>LOCAL DATA READY.</b> One or more live services are unavailable. Manual weather / manual review may be required.</span>';
        else notice.innerHTML='<span class="ok"><b>DATA CURRENT • LIVE SERVICES ONLINE.</b></span> No manual data download is required.';
      }
@@ -8792,9 +8831,15 @@ function configureNumericKeypads(){
    el.dataset.nativeNumberType="number";
    el.dataset.keypadMode=whole?"whole":"decimal";
    el.setAttribute("enterkeyhint","done");el.setAttribute("autocomplete","off");
-   if(appleTouch)el.type=whole?"tel":"text";
+   // Text + an explicit input mode/pattern requests digits on iPadOS without
+   // the telephone keypad contract. Do not change type again on later focus.
+   if(appleTouch)el.type="text";
    el.setAttribute("inputmode",whole?"numeric":"decimal");
    if(whole)el.setAttribute("pattern","[0-9]*");else el.removeAttribute("pattern");
+   if(!el.dataset.fastNumericEntry){
+     el.addEventListener("focus",()=>{try{el.select()}catch(_){}});
+     el.dataset.fastNumericEntry="1";
+   }
    if(appleTouch&&rules.signed&&!el.parentElement.querySelector('[data-sign-for="'+el.id+'"]')){
      const button=document.createElement("button");button.type="button";button.className="numeric-sign-toggle";
      button.dataset.signFor=el.id;button.textContent="±";
@@ -8910,7 +8955,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.24: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.25: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8920,7 +8965,7 @@ document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.curr
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
 window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true}));
 
-/* v5.26.24 — in-app pull-to-refresh for iPhone/iPad/PWA.
+/* v5.26.25 — in-app pull-to-refresh for iPhone/iPad/PWA.
    Refreshes the active mission's live operational data instead of relying on
    browser chrome pull-to-reload, which is unavailable in some standalone/PWA contexts. */
 (function installPullToRefresh(){
@@ -8954,6 +8999,7 @@ window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true
        window.location.reload();
        return;
      }
+     if(typeof checkAppVersion==="function")await checkAppVersion();
      setIndicator("Refresh finished — check weather / NOTAM status",true,90);
      await new Promise(resolve=>setTimeout(resolve,550));
    }catch(e){
@@ -8998,7 +9044,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.24",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.25",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -9084,7 +9130,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.24'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.25'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 
