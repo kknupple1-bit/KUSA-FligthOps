@@ -7,7 +7,7 @@ const {webkit} = require('playwright');
 const root = path.resolve(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'public/index.html'), 'utf8');
 const html = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
-const widths = [320, 390, 600, 700, 701, 744, 768, 810, 820, 834, 850, 851, 1000, 1024, 1100, 1180, 1194, 1366, 1440];
+const widths = [320, 375, 390, 393, 430, 600, 700, 701, 744, 768, 810, 820, 834, 850, 851, 1000, 1024, 1100, 1180, 1194, 1366, 1440];
 
 (async () => {
   const browser = await webkit.launch({headless: true});
@@ -26,7 +26,7 @@ const widths = [320, 390, 600, 700, 701, 744, 768, 810, 820, 834, 850, 851, 1000
           {id: 'f900bmissionView', date: 'f9mTripDate', alternate: 'f9mAlt'}
         ]) {
           await page.evaluate(({view}) => {
-            for (const id of ['homeView', 'newtripView', 'opsView', 'f900bmissionView', 'toldView', 'f900bView']) {
+            for (const id of ['homeView', 'newtripView', 'opsView', 'f900bmissionView', 'toldView', 'f900bView', 'archiveView']) {
               const el = document.getElementById(id); if (el) el.style.display = id === view.id ? 'block' : 'none';
             }
             document.getElementById(view.date).value = '2026-10-26';
@@ -59,10 +59,28 @@ const widths = [320, 390, 600, 700, 701, 744, 768, 810, 820, 834, 850, 851, 1000
           assert.equal(await page.locator('#' + view.date).inputValue(), '2026-10-26', `${label}: date changed`);
           cases++;
         }
+        await page.evaluate(() => {
+          for (const id of ['homeView', 'newtripView', 'opsView', 'f900bmissionView', 'toldView', 'f900bView', 'archiveView']) {
+            const el = document.getElementById(id); if (el) el.style.display = id === 'archiveView' ? 'block' : 'none';
+          }
+          window.refreshTapCount = 0;
+          window.refreshFlightPlans = () => { window.refreshTapCount++; };
+        });
+        const refresh = page.locator('#refreshFlightPlansBtn');
+        const size = await refresh.evaluate(el => {
+          const r = el.getBoundingClientRect(), style = getComputedStyle(el);
+          return {width:r.width,height:r.height,left:r.left,right:r.right,whiteSpace:style.whiteSpace,overflow:el.scrollWidth-el.clientWidth};
+        });
+        assert(size.width >= 108 && size.height >= 44 && size.height <= 64, `${locale} ${width}px: Refresh wrapping or touch size`);
+        assert(size.left >= 0 && size.right <= width && size.overflow <= 1, `${locale} ${width}px: Refresh exceeds its available space`);
+        assert.equal(size.whiteSpace, 'nowrap');
+        await refresh.tap();
+        assert.equal(await page.evaluate(() => window.refreshTapCount), 1);
+        cases++;
       }
       await context.close();
     }
-    console.log(`PASS WebKit tablet/mobile form layout: ${cases} cases, ${widths.length} widths, 2 locales, New Trip and both aircraft Mission forms.`);
+    console.log(`PASS WebKit tablet/mobile form layout: ${cases} cases, ${widths.length} widths, 2 locales, New Trip, both aircraft Mission forms and Flight Plans Refresh.`);
     console.log('Emulated WebKit coverage; physical iPad Safari/PWA acceptance remains separate.');
   } finally { await browser.close(); }
 })().catch(error => {console.error(error); process.exitCode = 1;});

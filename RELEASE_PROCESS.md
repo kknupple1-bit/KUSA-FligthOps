@@ -82,3 +82,34 @@ with touch/mobile emulation, 19 viewport widths, two locales, and all three date
 forms. GitHub CI installs WebKit and runs this check in addition to the existing
 release gate. This checks field containment, overlap, touch size, and independent
 entry; it does not replace physical iPad Safari/PWA acceptance.
+
+## Flight Plans refresh and continuity in 5.26.19-deployment.1
+
+The Flight Plans Refresh action now reconciles the account with the server,
+instead of only redrawing local storage. Both draft and archived plans download.
+Completed-plan reports and saved display metadata travel with new uploads;
+older server records still retain their available state and summary without
+inventing missing result values. Returning to the app or reconnecting refreshes
+the list, and a visible Flight Plans screen checks again every 30 seconds.
+
+The header uses a nonshrinking Refresh button, with a full-width button on
+small phones. The list reports its account, last successful cloud check,
+pending uploads and conflicts. Each plan distinguishes local-only/pending
+data from an acknowledged cloud save. A local edit made during an upload keeps
+its own queue entry and receives another upload pass. Download, authentication,
+and storage failures retain local copies. Known ownership mismatches do not
+upload a plan into a different account.
+
+Create retries reuse the same owner's client mission identity after an
+interrupted acknowledgement. A differing reused cloud record creates a local
+conflict rather than silently replacing it. An already-completed archive
+acknowledgement can be retried without producing a false draft-update conflict.
+No aircraft performance algorithms or source datasets change in this release.
+
+The required CI suite now includes the actual client sync functions running in
+two independent device stores against a temporary server/SQLite database. It
+tests draft transfer, archive transfer, offline recovery, conflicts, interrupted
+uploads, sign-in failures, ownership protection and storage rollback. The
+WebKit layout suite covers 22 widths and includes the Flight Plans Refresh
+button (176 cases across two locales). These tests do not establish whether a
+specific user plan has uploaded from a physical device.

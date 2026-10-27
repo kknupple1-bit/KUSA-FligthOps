@@ -35,7 +35,7 @@ function clearSessionCookie(req,res){
 }
 
 function initDb(){
-  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.18 platform services'};
+  if(!DatabaseSync) return {ok:false,error:'node:sqlite unavailable; Node 22+ is required for v5.26.19 platform services'};
   fs.mkdirSync(path.dirname(DB_PATH),{recursive:true});
   const db=new DatabaseSync(DB_PATH);
   db.exec('PRAGMA journal_mode=WAL; PRAGMA foreign_keys=ON;');
@@ -296,7 +296,7 @@ function allowedAircraft(userId){
 function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
 function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
-function installPlatform(app,{build='5.26.18'}={}){
+function installPlatform(app,{build='5.26.19'}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -906,6 +906,14 @@ function installPlatform(app,{build='5.26.18'}={}){
     if(!canUseAircraft(req.flightopsSession.user_id,aircraftId)) return res.status(403).json({ok:false,error:'AIRCRAFT_ACCESS_DENIED'});
     const orgs=membershipsFor(req.flightopsSession.user_id); const orgId=orgs[0]?.organization_id; if(!orgId)return res.status(403).json({ok:false,error:'NO_ORGANIZATION'});
     const mid=id('mis'),now=isoNow(),payload=body.payload&&typeof body.payload==='object'?body.payload:{};
+    // A mobile connection can drop after commit but before the response arrives.
+    // Reuse this owner's existing client mission rather than create a duplicate.
+    const localMissionId=typeof payload.local_mission_id==='string'?payload.local_mission_id.trim():'';
+    if(localMissionId && localMissionId.length<=200){
+      const existing=state.db.prepare("SELECT * FROM missions WHERE owner_user_id=? AND aircraft_id=? AND json_extract(payload_json,'$.local_mission_id')=? ORDER BY created_at DESC LIMIT 1")
+        .get(req.flightopsSession.user_id,aircraftId,localMissionId);
+      if(existing)return res.json({ok:true,mission:safeMission(existing),reused:true});
+    }
     state.db.prepare(`INSERT INTO missions(id,organization_id,aircraft_id,owner_user_id,trip_number,status,revision,mission_date,departure,destination,alternate,payload_json,created_at,updated_at) VALUES(?,?,?,?,?,'draft',1,?,?,?,?,?,?,?)`).run(mid,orgId,aircraftId,req.flightopsSession.user_id,body.trip_number||null,body.mission_date||null,body.departure||null,body.destination||null,body.alternate||null,JSON.stringify(payload),now,now);
     state.db.prepare('INSERT INTO mission_revisions(id,mission_id,revision,user_id,payload_json,created_at) VALUES(?,?,?,?,?,?)').run(id('rev'),mid,1,req.flightopsSession.user_id,JSON.stringify(payload),now);
     res.status(201).json({ok:true,mission:safeMission(state.db.prepare('SELECT * FROM missions WHERE id=?').get(mid))});
