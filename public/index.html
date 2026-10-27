@@ -1244,13 +1244,14 @@ details summary{cursor:pointer;margin-top:8px}
   border-color:#456b8e!important;
 }
 </style>
+<link rel="stylesheet" href="/numeric-entry.css"/>
 </head>
 <body>
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 <div id="pullRefreshIndicator" aria-live="polite" style="position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-72px);z-index:100000;min-width:170px;max-width:calc(100vw - 24px);padding:9px 14px;border:1px solid #31506f;border-radius:999px;background:#06182c;color:#d7e6f7;text-align:center;font-size:12px;font-weight:800;box-shadow:0 5px 18px rgba(0,0,0,.32);opacity:0;pointer-events:none;transition:transform .14s ease,opacity .14s ease">Pull to refresh</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.25 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.26 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1273,7 +1274,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.25 — build identification stays in the header, clear of navigation. */
+/* v5.26.26 — build identification stays in the header, clear of navigation. */
 #buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
   background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
   line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
@@ -1282,7 +1283,7 @@ details summary{cursor:pointer;margin-top:8px}
   .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
-/* v5.26.25 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.26 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1358,7 +1359,7 @@ canvas,svg,img{max-width:100%}
 </style>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.25</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.26</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -1454,11 +1455,11 @@ canvas,svg,img{max-width:100%}
 <div class="row">
 <div class="fuel-big">
 <label>FOB lb</label>
-<input inputmode="numeric" enterkeyhint="done" id="homeFOB" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
+<input inputmode="numeric" enterkeyhint="done" id="homeFOB" max="15514" min="0" step="50" type="number" value="0000"/>
 </div>
 <div class="fuel-big">
 <label>Trip Fuel Burn lb (excludes taxi)</label>
-<input inputmode="numeric" enterkeyhint="done" id="homeMissionFuel" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
+<input inputmode="numeric" enterkeyhint="done" id="homeMissionFuel" max="15514" min="0" step="50" type="number" value="0000"/>
 </div>
 </div>
 <div class="newtrip-fuel-note">Enter FOB and takeoff-to-landing trip burn in pounds. Taxi burn is deducted separately; fuel remaining on landing is not part of trip burn. Tap a 0000 field to replace the value.</div>
@@ -1489,7 +1490,7 @@ canvas,svg,img{max-width:100%}
 <div class="trip-date-field"><label for="activeTripDate">Trip Date</label><input id="activeTripDate" onchange="activeTripDateChanged('activeTripDate')" type="date"/><div class="small" id="activeTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input inputmode="numeric" enterkeyhint="done" id="fuel" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote"></div></div>
+<div><label>Fuel on Board (FOB) lb</label><input inputmode="numeric" enterkeyhint="done" id="fuel" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote"></div></div>
 <div><label>Trip Fuel Burn lb (excludes taxi)</label><input inputmode="numeric" enterkeyhint="done" id="missionFuel" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input inputmode="numeric" enterkeyhint="done" id="taxiFuel" min="0" oninput="recalculate()" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input inputmode="numeric" enterkeyhint="done" id="emerReturnBurn" min="0" oninput="recalculate()" type="number" value="500"/></div>
@@ -2535,7 +2536,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div class="trip-date-field"><label for="f9mTripDate">Trip Date</label><input id="f9mTripDate" onchange="activeTripDateChanged('f9mTripDate')" type="date"/><div class="small" id="f9mTripDateNote">Changing the date will renumber the active trip.</div></div>
 </div>
 <div class="row" style="margin-top:10px">
-<div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input inputmode="numeric" id="f9mFOB" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote"></div></div>
+<div><label>Fuel on Board (FOB) lb</label><input inputmode="numeric" id="f9mFOB" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote"></div></div>
 <div><label>Trip Fuel Burn lb (excludes taxi)</label><input inputmode="numeric" id="f9mMissionFuel" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input inputmode="numeric" id="f9mTaxiFuel" min="0" oninput="f9Section1FuelChanged('taxi')" step="10" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input inputmode="numeric" id="f9mReturnBurn" min="0" oninput="f9Section1ReturnBurnChanged()" step="10" type="number" value="500"/></div>
@@ -8663,7 +8664,7 @@ function refreshMenuCounts(){
  requestAnimationFrame(()=>{updateHomeDraftCount();updateHomeArchiveCount()});
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
-const APP_UPDATE_BUILD="5.26.25";
+const APP_UPDATE_BUILD="5.26.26";
 function setAppUpdateNotice(serverBuild,browserBuild=APP_UPDATE_BUILD){
  const notice=$("appUpdateNotice"),message=$("appUpdateMessage"),title=$("appUpdateTitle");
  if(!notice||!/^\d+\.\d+\.\d+$/.test(String(serverBuild||"")))return;
@@ -8694,7 +8695,7 @@ async function updateFlightOpsApp(){
 }
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkAppVersion()});
 async function startupCheck(manual=false){
- const expected="5.26.25",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.26",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8834,13 +8835,15 @@ function configureNumericKeypads(){
    // Text + an explicit input mode/pattern requests digits on iPadOS without
    // the telephone keypad contract. Do not change type again on later focus.
    if(appleTouch)el.type="text";
-   el.setAttribute("inputmode",whole?"numeric":"decimal");
+   const customPad=appleTouch&&window.KUSANumberPad?.configure(el);
+   if(!customPad)el.setAttribute("inputmode",whole?"numeric":"decimal");
    if(whole)el.setAttribute("pattern","[0-9]*");else el.removeAttribute("pattern");
-   if(!el.dataset.fastNumericEntry){
+   if(customPad)el.parentElement.querySelector('[data-sign-for="'+el.id+'"]')?.remove();
+   if(!customPad&&!el.dataset.fastNumericEntry){
      el.addEventListener("focus",()=>{try{el.select()}catch(_){}});
      el.dataset.fastNumericEntry="1";
    }
-   if(appleTouch&&rules.signed&&!el.parentElement.querySelector('[data-sign-for="'+el.id+'"]')){
+   if(appleTouch&&!customPad&&rules.signed&&!el.parentElement.querySelector('[data-sign-for="'+el.id+'"]')){
      const button=document.createElement("button");button.type="button";button.className="numeric-sign-toggle";
      button.dataset.signFor=el.id;button.textContent="±";
      button.setAttribute("aria-label","Change sign for "+(el.labels?.[0]?.textContent||el.id));
@@ -8955,7 +8958,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.25: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.26: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8965,7 +8968,7 @@ document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.curr
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
 window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true}));
 
-/* v5.26.25 — in-app pull-to-refresh for iPhone/iPad/PWA.
+/* v5.26.26 — in-app pull-to-refresh for iPhone/iPad/PWA.
    Refreshes the active mission's live operational data instead of relying on
    browser chrome pull-to-reload, which is unavailable in some standalone/PWA contexts. */
 (function installPullToRefresh(){
@@ -9044,7 +9047,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.25",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.26",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -9130,7 +9133,8 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.25'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script src="/numeric-entry.js"></script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.26'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 

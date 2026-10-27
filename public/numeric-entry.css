@@ -1,0 +1,19 @@
+#flightopsNumberPad{box-sizing:border-box;width:min(420px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;margin:auto;padding:20px;border:1px solid #50769b;border-radius:16px;background:#0c2743;color:#edf5ff;font-family:Arial,sans-serif;box-shadow:0 16px 60px #0009}
+#flightopsNumberPad::backdrop{background:#03101ecc}
+#flightopsNumberPad h2{font-size:20px;line-height:1.25;margin:0 0 8px}
+#flightopsNumberPad .pad-help{font-size:13px;line-height:1.4;color:#b9cde0;margin:0 0 12px}
+#flightopsNumberPad output{display:block;box-sizing:border-box;min-height:62px;padding:12px;border:1px solid #50769b;border-radius:9px;background:#061a2d;color:#fff;text-align:right;font-size:30px;overflow-wrap:anywhere}
+#flightopsNumberPad .pad-error{min-height:20px;margin:8px 0;color:#ffd166;font-size:13px}
+#flightopsNumberPad .pad-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#flightopsNumberPad button{box-sizing:border-box;min-width:0;min-height:54px;width:100%;margin:0;padding:10px 6px;border:1px solid #50769b;border-radius:9px;background:#173f63;color:#fff;font:700 22px Arial,sans-serif;touch-action:manipulation}
+#flightopsNumberPad button:focus-visible{outline:3px solid #ffcf64;outline-offset:2px}
+#flightopsNumberPad button:disabled{opacity:.35}
+#flightopsNumberPad .pad-tools,#flightopsNumberPad .pad-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+#flightopsNumberPad .pad-tools button{font-size:15px;min-height:44px}
+#flightopsNumberPad .pad-actions button{font-size:17px}
+#flightopsNumberPad [data-key="done"]{background:#2870ac}
+#flightopsNumberPad [data-key="keyboard"]{margin-top:10px;font-size:13px;min-height:44px;background:transparent}
+@media(max-height:540px){#flightopsNumberPad{padding:12px}#flightopsNumberPad button{min-height:44px;padding:6px}#flightopsNumberPad output{min-height:44px;padding:6px;font-size:25px}#flightopsNumberPad .pad-help{margin-bottom:6px}#flightopsNumberPad .pad-error{margin:4px 0}}
+@media(min-width:600px) and (max-width:1100px){
+ #newtripView .row:has(#homeFOB)>div>label,#missionSetupSection .row:has(#fuel)>div>label,#f9MissionSetupSection .row:has(#f9mFOB)>div>label{min-height:3em;line-height:1.25}
+}

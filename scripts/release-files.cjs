@@ -24,6 +24,7 @@ function releaseFiles(root) {
 const requiredFiles = [
   'server.js', 'platform.js', 'package.json', 'package-lock.json', 'data/runways.json',
   'scripts/database-storage.cjs', 'scripts/migrate-database.cjs',
+  'public/numeric-entry.js', 'public/numeric-entry.css',
   'public/index.html', 'public/account.html', 'public/admin-users.html',
   'public/invite.html', 'public/reset-password.html', 'public/sw.js',
   'public/manifest.webmanifest', 'public/icons/icon-192.png', 'public/icons/icon-512.png',

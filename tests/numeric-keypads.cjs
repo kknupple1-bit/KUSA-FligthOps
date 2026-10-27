@@ -4,6 +4,7 @@ const {webkit}=require('playwright');
 const root=path.resolve(__dirname,'..'),source=fs.readFileSync(path.join(root,'public/index.html'),'utf8');
 const markup=source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,'').replace(/\s+on(?:focus|click|input|change|blur)="[^"]*"/gi,'');
 const code=source.slice(source.indexOf('function numericEntryRules('),source.indexOf('function operationalGateState('));
+const futureBuild=JSON.parse(fs.readFileSync(path.join(root,'package.json'))).version.split('.').map(Number);futureBuild[2]++;
 const fastCode=source.slice(source.indexOf('function enableFastNumericEntry(){'),source.indexOf('document.addEventListener("DOMContentLoaded",enableFastNumericEntry);'));
 (async()=>{
  const browser=await webkit.launch({headless:true});let cases=0;
@@ -40,7 +41,7 @@ const fastCode=source.slice(source.indexOf('function enableFastNumericEntry(){')
     await page.screenshot({path:path.join(output,'ipad-numeric-fields-v52625.png')});
     await page.evaluate(()=>{window.$=id=>document.getElementById(id);for(const id of ['homeView','newtripView','opsView','toldView','f900bmissionView','f900bView','archiveView'])document.getElementById(id).style.display=id==='homeView'?'block':'none';window.scrollTo(0,0)});
     await page.addScriptTag({content:source.slice(source.indexOf('const APP_UPDATE_BUILD='),source.indexOf('async function startupCheck('))});
-    await page.evaluate(()=>setAppUpdateNotice('5.26.26'));
+    await page.evaluate(build=>setAppUpdateNotice(build),futureBuild.join('.'));
     const update=page.getByRole('button',{name:'Update Now',exact:true});assert(await update.isVisible());
     const box=await update.boundingBox();assert(box.height>=44&&box.x>=0&&box.x+box.width<=834);cases++;
     await page.screenshot({path:path.join(output,'update-notice-preview-v52625.png')});
