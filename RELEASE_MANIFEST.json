@@ -1,0 +1,354 @@
+{
+  "schema": "kusa.flightops.release.v1",
+  "build": "5.26.18",
+  "release": "5.26.18-deployment.1",
+  "status": "READY FOR REVIEW",
+  "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
+  "files": [
+    {
+      "path": "data/runways.json",
+      "size_bytes": 1965,
+      "sha256": "47e19e0bdd450a779e1457ac12f289ab2f9cf58c8a521b9a67bb52742e3bad0c"
+    },
+    {
+      "path": "package-lock.json",
+      "size_bytes": 31244,
+      "sha256": "287a3a598771823c5d4e272f7298b03fb83e8032c9935c6464742dfb4d858f8b"
+    },
+    {
+      "path": "package.json",
+      "size_bytes": 810,
+      "sha256": "6561f5b0b96e2a09e3997e2499e5567ea0836cdf33a8f7d16350262e4d522b42"
+    },
+    {
+      "path": "platform.js",
+      "size_bytes": 53966,
+      "sha256": "01083cb6184c8eb45a610ffae597993518bc175546344ae45307dedd4f7dca6c"
+    },
+    {
+      "path": "public/account.html",
+      "size_bytes": 9677,
+      "sha256": "3bc048e7d2c96660be2062dec68260788107581e6fe5b98d6fa670918c039cc8"
+    },
+    {
+      "path": "public/admin-users.html",
+      "size_bytes": 12690,
+      "sha256": "4f466a98547cf4684d23c7e88f322927ea1ded630f4b4c167dc0959d6ff3afd4"
+    },
+    {
+      "path": "public/config.js",
+      "size_bytes": 32,
+      "sha256": "875596ce349aa9999ca8f748c8f928e3209fd54fd6bd3b5874a37d8f17f79f0d"
+    },
+    {
+      "path": "public/data/f50_dash4_n1_validation_v52527.json",
+      "size_bytes": 5709,
+      "sha256": "d1960404a168f94674586c8c447eafe8a3ea1ab500e7ae65e19bca04c685cf41"
+    },
+    {
+      "path": "public/data/f50_landing_geometry_phase1_v52530.json",
+      "size_bytes": 1494,
+      "sha256": "2d1daf1a1c2ea225b188dfaa9c3009310dbba9eec95ae748bfaddc73cb1e2d59"
+    },
+    {
+      "path": "public/data/f50_landing_panel_assignment_v52531.json",
+      "size_bytes": 3523,
+      "sha256": "4bd09e3a67d88c958fb33c0469cde91725c07b6bba7af547fb07fe4745515ed9"
+    },
+    {
+      "path": "public/data/f50_landing_source_control_v52529.json",
+      "size_bytes": 2725,
+      "sha256": "3bad6106a1573f69406b277bd202712c3dbbb0b46aeb681dae84ccdbd385ff67"
+    },
+    {
+      "path": "public/data/f50_landing_source_raster_trace_bands_v52532.json",
+      "size_bytes": 3380,
+      "sha256": "512cd71068397ade39426d1df79aff7b39ed37d4330bcfb03571d246a582d92b"
+    },
+    {
+      "path": "public/data/f50_remaining_validation_matrix_v52529.json",
+      "size_bytes": 1640,
+      "sha256": "a5347aed91bb6704f471f91451eb4067dab0f262ba34ed95875049e09115e56a"
+    },
+    {
+      "path": "public/data/f50_s20_12pt_regression_results_v52526.json",
+      "size_bytes": 3545,
+      "sha256": "9f6c677244513b5a680f4e1c0291fe630625158790a61f83914844609220a3b2"
+    },
+    {
+      "path": "public/data/f50_s20_dry_validation_12pt_rev31.json",
+      "size_bytes": 7824,
+      "sha256": "d168aa4101827bd0b00a29231e497b38ed9951607a01a1814e672387fefe00bb"
+    },
+    {
+      "path": "public/data/f50_s20_nomograph_rev31.json",
+      "size_bytes": 9148,
+      "sha256": "67329993ad3e8c2d12ccb38bb1b3244f0cf72d5b062d43428ca46c641b0b8f3d"
+    },
+    {
+      "path": "public/data/f50_s20_v1_nomograph_rev31.json",
+      "size_bytes": 13599,
+      "sha256": "e058ad11b91c48579c268eaba3277ee7f703d11e66b3943dc09391d3d45a2f27"
+    },
+    {
+      "path": "public/data/f50_slats_dry_regression_start_v52530.json",
+      "size_bytes": 2860,
+      "sha256": "560f3f38c06a7a2622281a80e2a0b4b586121645853f9c6e737939838cf4e178"
+    },
+    {
+      "path": "public/data/f50_slats_independent_trace_matrix_v52531.json",
+      "size_bytes": 2669,
+      "sha256": "0e1b711f62ec7903c3cee65a52878e8d02d7764d87fa31c360ea85dd9b319814"
+    },
+    {
+      "path": "public/data/f50_slats_landing_geometry_phase2_v52530.json",
+      "size_bytes": 472107,
+      "sha256": "5b9fab66661f723980d2134dbbbcb021d431edf3e4b1edbeb6ffd0f333c3095b"
+    },
+    {
+      "path": "public/data/f50_slats_panel_assignment_v52531.json",
+      "size_bytes": 3833,
+      "sha256": "bb98a32ad549e1402be8cfc8d61a2ae122bd2ab3c6f92faa49c0986badfd1530"
+    },
+    {
+      "path": "public/data/f50_slats_source_control_v52528.json",
+      "size_bytes": 3718,
+      "sha256": "2ce815c324ae4636180347e86bf4bc7dfff289ce0863418fddad06dc59d239be"
+    },
+    {
+      "path": "public/data/f50_slats_source_raster_trace_bands_v52532.json",
+      "size_bytes": 5995,
+      "sha256": "9a66fe5e435eaea4bbde8e9ff699f2513da9a3cda7bf833a17dad07ffab17027"
+    },
+    {
+      "path": "public/data/f50_slats_validation_phase1_v52529.json",
+      "size_bytes": 2870,
+      "sha256": "50955bbea84482f2b753107cfc584250f3f76d71fa7cc953e3304b33d2df0ce6"
+    },
+    {
+      "path": "public/data/f50_validation_gate_v52532.json",
+      "size_bytes": 1126,
+      "sha256": "670125d6a2b50bf94e2af990765d087b78be125a3d8e6f856e45888dfbb16174"
+    },
+    {
+      "path": "public/data/f50_wet_source_applicability_v52528.json",
+      "size_bytes": 1612,
+      "sha256": "be7e2beee450e125013d3e2024546e5297b31163145e92192ee740972af672ce"
+    },
+    {
+      "path": "public/data/f900b_dtm9823_digitization_v52551.json",
+      "size_bytes": 6974,
+      "sha256": "99ee4bfd00ce8c65dac1ae2a070ed0a79c0e64f3b7f1c7e13251267823d9e0f0"
+    },
+    {
+      "path": "public/data/f900b_dtm9823_numeric_v52553.json",
+      "size_bytes": 103021,
+      "sha256": "2738b41c34032731ff222d855907465bc49882c0cf8c5e94dbd9f0e3a009ebfd"
+    },
+    {
+      "path": "public/data/f900b_dtm9823_numeric_v52555.json",
+      "size_bytes": 28959,
+      "sha256": "11c3d22e380021bdee1a99ba3161984668fa4361236be2742dccc016153cbe39"
+    },
+    {
+      "path": "public/data/f900b_n699bg_wb_v52543.json",
+      "size_bytes": 6532,
+      "sha256": "417a0ac69bfa547e559a6af245db0342e988631f73043492a796758c27f1ba90"
+    },
+    {
+      "path": "public/data/f900b_operational_overlays_v52541.json",
+      "size_bytes": 2690,
+      "sha256": "27e7073037ea63b0a5ae5360264d4d71280936b1e680404b918ef05db9095a72"
+    },
+    {
+      "path": "public/data/f900b_qrh_rev02.json",
+      "size_bytes": 1228033,
+      "sha256": "7cbdb66b7abdecefba09105d9a3739d72d26d37774e4614724628b0751bfa39d"
+    },
+    {
+      "path": "public/f50_dash4_n1_validation_v52527.json",
+      "size_bytes": 5709,
+      "sha256": "d1960404a168f94674586c8c447eafe8a3ea1ab500e7ae65e19bca04c685cf41"
+    },
+    {
+      "path": "public/f50_landing_geometry_phase1_v52530.json",
+      "size_bytes": 1494,
+      "sha256": "2d1daf1a1c2ea225b188dfaa9c3009310dbba9eec95ae748bfaddc73cb1e2d59"
+    },
+    {
+      "path": "public/f50_landing_panel_assignment_v52531.json",
+      "size_bytes": 3523,
+      "sha256": "4bd09e3a67d88c958fb33c0469cde91725c07b6bba7af547fb07fe4745515ed9"
+    },
+    {
+      "path": "public/f50_landing_source_control_v52529.json",
+      "size_bytes": 2725,
+      "sha256": "3bad6106a1573f69406b277bd202712c3dbbb0b46aeb681dae84ccdbd385ff67"
+    },
+    {
+      "path": "public/f50_landing_source_raster_trace_bands_v52532.json",
+      "size_bytes": 3380,
+      "sha256": "512cd71068397ade39426d1df79aff7b39ed37d4330bcfb03571d246a582d92b"
+    },
+    {
+      "path": "public/f50_remaining_validation_matrix_v52529.json",
+      "size_bytes": 1640,
+      "sha256": "a5347aed91bb6704f471f91451eb4067dab0f262ba34ed95875049e09115e56a"
+    },
+    {
+      "path": "public/f50_s20_12pt_regression_results_v52526.json",
+      "size_bytes": 3545,
+      "sha256": "9f6c677244513b5a680f4e1c0291fe630625158790a61f83914844609220a3b2"
+    },
+    {
+      "path": "public/f50_s20_dry_validation_12pt_rev31.json",
+      "size_bytes": 7824,
+      "sha256": "d168aa4101827bd0b00a29231e497b38ed9951607a01a1814e672387fefe00bb"
+    },
+    {
+      "path": "public/f50_s20_nomograph_rev31.json",
+      "size_bytes": 9148,
+      "sha256": "67329993ad3e8c2d12ccb38bb1b3244f0cf72d5b062d43428ca46c641b0b8f3d"
+    },
+    {
+      "path": "public/f50_s20_v1_nomograph_rev31.json",
+      "size_bytes": 13599,
+      "sha256": "e058ad11b91c48579c268eaba3277ee7f703d11e66b3943dc09391d3d45a2f27"
+    },
+    {
+      "path": "public/f50_slats_dry_regression_start_v52530.json",
+      "size_bytes": 2860,
+      "sha256": "560f3f38c06a7a2622281a80e2a0b4b586121645853f9c6e737939838cf4e178"
+    },
+    {
+      "path": "public/f50_slats_independent_trace_matrix_v52531.json",
+      "size_bytes": 2669,
+      "sha256": "0e1b711f62ec7903c3cee65a52878e8d02d7764d87fa31c360ea85dd9b319814"
+    },
+    {
+      "path": "public/f50_slats_landing_geometry_phase2_v52530.json",
+      "size_bytes": 472107,
+      "sha256": "5b9fab66661f723980d2134dbbbcb021d431edf3e4b1edbeb6ffd0f333c3095b"
+    },
+    {
+      "path": "public/f50_slats_panel_assignment_v52531.json",
+      "size_bytes": 3833,
+      "sha256": "bb98a32ad549e1402be8cfc8d61a2ae122bd2ab3c6f92faa49c0986badfd1530"
+    },
+    {
+      "path": "public/f50_slats_source_control_v52528.json",
+      "size_bytes": 3718,
+      "sha256": "2ce815c324ae4636180347e86bf4bc7dfff289ce0863418fddad06dc59d239be"
+    },
+    {
+      "path": "public/f50_slats_source_raster_trace_bands_v52532.json",
+      "size_bytes": 5995,
+      "sha256": "9a66fe5e435eaea4bbde8e9ff699f2513da9a3cda7bf833a17dad07ffab17027"
+    },
+    {
+      "path": "public/f50_slats_validation_phase1_v52529.json",
+      "size_bytes": 2870,
+      "sha256": "50955bbea84482f2b753107cfc584250f3f76d71fa7cc953e3304b33d2df0ce6"
+    },
+    {
+      "path": "public/f50_validation_gate_v52532.json",
+      "size_bytes": 1126,
+      "sha256": "670125d6a2b50bf94e2af990765d087b78be125a3d8e6f856e45888dfbb16174"
+    },
+    {
+      "path": "public/f50_wet_source_applicability_v52528.json",
+      "size_bytes": 1612,
+      "sha256": "be7e2beee450e125013d3e2024546e5297b31163145e92192ee740972af672ce"
+    },
+    {
+      "path": "public/f900b_dtm9823_digitization_v52551.json",
+      "size_bytes": 6974,
+      "sha256": "99ee4bfd00ce8c65dac1ae2a070ed0a79c0e64f3b7f1c7e13251267823d9e0f0"
+    },
+    {
+      "path": "public/f900b_dtm9823_numeric_v52553.json",
+      "size_bytes": 103021,
+      "sha256": "2738b41c34032731ff222d855907465bc49882c0cf8c5e94dbd9f0e3a009ebfd"
+    },
+    {
+      "path": "public/f900b_dtm9823_numeric_v52555.json",
+      "size_bytes": 28959,
+      "sha256": "11c3d22e380021bdee1a99ba3161984668fa4361236be2742dccc016153cbe39"
+    },
+    {
+      "path": "public/f900b_n699bg_wb_v52543.json",
+      "size_bytes": 6532,
+      "sha256": "417a0ac69bfa547e559a6af245db0342e988631f73043492a796758c27f1ba90"
+    },
+    {
+      "path": "public/f900b_operational_overlays_v52541.json",
+      "size_bytes": 3348,
+      "sha256": "004fe8538cfd267636203921b2c7ec7be7c5a6c8185c11ac0ef9ea3becbf7006"
+    },
+    {
+      "path": "public/f900b_qrh_rev02.json",
+      "size_bytes": 1228033,
+      "sha256": "7cbdb66b7abdecefba09105d9a3739d72d26d37774e4614724628b0751bfa39d"
+    },
+    {
+      "path": "public/icon-192.png",
+      "size_bytes": 1397,
+      "sha256": "6db2a2d732916739571382ca3a6f3938ed82f5c9af7c502c5e357ff9a4fc12af"
+    },
+    {
+      "path": "public/icon-512.png",
+      "size_bytes": 3110,
+      "sha256": "6e9a67af230039c47b096dc2f12baac8d27ac7ab40881c18dc4c16c6a5baafd9"
+    },
+    {
+      "path": "public/icons/icon-192.png",
+      "size_bytes": 1397,
+      "sha256": "6db2a2d732916739571382ca3a6f3938ed82f5c9af7c502c5e357ff9a4fc12af"
+    },
+    {
+      "path": "public/icons/icon-512.png",
+      "size_bytes": 3110,
+      "sha256": "6e9a67af230039c47b096dc2f12baac8d27ac7ab40881c18dc4c16c6a5baafd9"
+    },
+    {
+      "path": "public/index.html",
+      "size_bytes": 673203,
+      "sha256": "9936a5f5b4168cdfaf2752f6208eac66ca2a0bfc5c196d0ebd8ce2d0d8bed2e6"
+    },
+    {
+      "path": "public/invite.html",
+      "size_bytes": 6957,
+      "sha256": "32c78aeb0f012a2ed5ca107d52486d6832ec192510bf11d704e2c21eeb5818f5"
+    },
+    {
+      "path": "public/manifest.webmanifest",
+      "size_bytes": 309,
+      "sha256": "62b8b5eef85815350af978f6e1615b6ac7b797573ec36b4f098d41e891223b39"
+    },
+    {
+      "path": "public/reset-password.html",
+      "size_bytes": 4279,
+      "sha256": "f9305c7ce08ed23b13b359ac96aa6dda531084a60cf40ad907022ccf000214a9"
+    },
+    {
+      "path": "public/sw.js",
+      "size_bytes": 8230,
+      "sha256": "78f417e435422d7d2801e87ea2c81002905d5f5ed8add86da9d568b83dcee7d9"
+    },
+    {
+      "path": "scripts/release-files.cjs",
+      "size_bytes": 1667,
+      "sha256": "83acb0ce31a46becfe6878196f676bc76b9539dd1fb8ff248738901cd85cc5a0"
+    },
+    {
+      "path": "scripts/verify-release.cjs",
+      "size_bytes": 5142,
+      "sha256": "a6083e3f845dc5687325eb113f1cd96285384b88df87187278f53eda8e531588"
+    },
+    {
+      "path": "server.js",
+      "size_bytes": 840753,
+      "sha256": "01576ede201562ca03abdf259516b1cf123dc74d464fe1b87c1ac066300bae05"
+    }
+  ]
+}

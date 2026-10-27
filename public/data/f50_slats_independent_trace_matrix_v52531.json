@@ -1,0 +1,26 @@
+{
+  "schema": "kusa.f50.slats.independent_trace_matrix.v1",
+  "build": "5.25.31",
+  "aircraft": "Falcon 50 / N33AP",
+  "configuration": "SLATS_ONLY",
+  "status": "DRY_INDEPENDENT_TRACE_MATRIX_FIXED_INPUTS_EXPECTED_OUTPUTS_PENDING_SOURCE_READ",
+  "source": "Dassault DTM813 §5.50.6/.7/.8/.9",
+  "acceptance_gates": {"bfl_ft":250,"v1_kt":1.0,"vmbe_kt":1.0},
+  "rules": [
+    "Expected outputs must be read from the source raster independently of the FlightOps solver.",
+    "The model under test must not populate the expected-output fields.",
+    "No extrapolation outside printed source families.",
+    "Dry / anti-ice OFF only for this matrix."
+  ],
+  "cases": [
+    {"id":"SL-R-01","chart":"5.50.6 lower","pa_ft":0,"sat_c":-20,"weight_lb":28000,"slope_pct":1,"wind_type":"HEADWIND","wind_kt":20,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-02","chart":"5.50.6 lower","pa_ft":4000,"sat_c":20,"weight_lb":30000,"slope_pct":0,"wind_type":"CALM","wind_kt":0,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-03","chart":"5.50.6 lower","pa_ft":8000,"sat_c":10,"weight_lb":32000,"slope_pct":-1,"wind_type":"TAILWIND","wind_kt":5,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-04","chart":"5.50.6 lower","pa_ft":10000,"sat_c":20,"weight_lb":33000,"slope_pct":1,"wind_type":"HEADWIND","wind_kt":10,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-05","chart":"5.50.7 higher","pa_ft":4000,"sat_c":0,"weight_lb":35000,"slope_pct":0,"wind_type":"HEADWIND","wind_kt":20,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-06","chart":"5.50.7 higher","pa_ft":6000,"sat_c":10,"weight_lb":36000,"slope_pct":1,"wind_type":"CALM","wind_kt":0,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-07","chart":"5.50.7 higher","pa_ft":8000,"sat_c":20,"weight_lb":37000,"slope_pct":-1,"wind_type":"TAILWIND","wind_kt":5,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"},
+    {"id":"SL-R-08","chart":"5.50.7 higher / VMBE proximity","pa_ft":10000,"sat_c":20,"weight_lb":38000,"slope_pct":1,"wind_type":"TAILWIND","wind_kt":5,"expected":{"bfl_ft":null,"v1_kt":null,"vmbe_kt":null},"status":"PENDING_INDEPENDENT_SOURCE_TRACE"}
+  ],
+  "gate": {"completed_source_traces":0,"required_source_traces":8,"operational_engine_active":false}
+}

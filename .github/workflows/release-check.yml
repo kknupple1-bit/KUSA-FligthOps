@@ -1,0 +1,30 @@
+name: FlightOps Release Check
+on:
+  pull_request:
+  push:
+    branches: [main, 'release/**']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: flightops-release-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  release-check:
+    name: FlightOps release gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install exactly the locked dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Check packaging and isolated application workflows
+        run: npm run release:check
+      - name: Install WebKit for isolated tablet layout checks
+        run: npx playwright install --with-deps webkit
+      - name: Check Trip Date and Alternate field layout
+        run: npm run release:layout

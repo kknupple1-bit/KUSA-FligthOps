@@ -1,0 +1,91 @@
+{
+  "schema": "kusa.f50.slats.panel_assignment.v1",
+  "build": "5.25.31",
+  "aircraft": "Falcon 50 / N33AP",
+  "configuration": "SLATS_ONLY",
+  "status": "DIRECT_SOURCE_PANEL_FAMILIES_ASSIGNED_SHADOW_ONLY",
+  "source": {
+    "document": "Dassault DTM813 Airplane Flight Manual",
+    "charts": [
+      {"section":"5.50.6","pdf_page":448,"title":"Balanced Field Length — Slats — Lower Weights","page_revision":29},
+      {"section":"5.50.7","pdf_page":449,"title":"Balanced Field Length — Slats — Higher Weights","page_revision":23},
+      {"section":"5.50.8","pdf_page":450,"title":"Maximum Brake Energy Speed (VMBE) — Slats","page_revision":23},
+      {"section":"5.50.9","pdf_page":451,"title":"Engine Failure Speed Associated With Balanced Field Length — Slats","page_revision":23}
+    ],
+    "worked_example": {"section":"5.50.5","pdf_page":447,"page_revision":29}
+  },
+  "panel_flow": {
+    "bfl_lower_5_50_6": [
+      "SAT horizontal entry into pressure-altitude family",
+      "vertical transfer to takeoff-weight family",
+      "vertical transfer to runway-slope family",
+      "vertical transfer to wind family",
+      "vertical read to field-length axis"
+    ],
+    "bfl_higher_5_50_7": [
+      "SAT horizontal entry into pressure-altitude family",
+      "vertical transfer to higher-weight family",
+      "vertical transfer to runway-slope family",
+      "vertical transfer to wind family",
+      "vertical read to field-length axis"
+    ],
+    "vmbe_5_50_8": [
+      "SAT horizontal entry into pressure-altitude family",
+      "vertical transfer to takeoff-weight family",
+      "vertical transfer to runway-slope family",
+      "vertical transfer to wind family",
+      "vertical read to IAS axis"
+    ],
+    "v1_5_50_9": [
+      "SAT horizontal entry into pressure-altitude family",
+      "vertical transfer to takeoff-weight family",
+      "vertical transfer to runway-slope family",
+      "vertical transfer to wind family",
+      "vertical read to IAS axis"
+    ]
+  },
+  "physical_family_labels": {
+    "pressure_altitude_ft": [0,2000,4000,6000,8000,10000,12000,14000],
+    "takeoff_weight_lb_chart_span": [22000,40780],
+    "runway_slope_pct": [-2,-1,0,1,2],
+    "wind": {"headwind_kt_max":50,"tailwind_kt_max":10},
+    "bfl_lower_field_length_ft_nominal_axis": [2000,11000],
+    "bfl_higher_field_length_ft_nominal_axis": [6000,15000],
+    "vmbe_ias_kt_nominal_axis": [110,160],
+    "v1_ias_kt_nominal_axis": [90,140]
+  },
+  "anti_ice_source_handling": {
+    "bfl_5_50_6_7": "Use dotted pressure-altitude families with anti-icing ON; never substitute solid-family OFF data.",
+    "v1_5_50_9": {
+      "0_2000_4000_ft_add_kt": 1,
+      "6000_8000_10000_ft_add_kt": 2,
+      "minimum_v1_kt": 91
+    },
+    "operational_status": "LOCKED_PENDING_SEPARATE_A_I_VALIDATION"
+  },
+  "published_anchor_consistency": {
+    "case": "DTM813 §5.50.5 worked example",
+    "inputs": {"pa_ft":4000,"sat_c":20,"weight_lb":34400,"slope_pct":-1,"wind_type":"TAILWIND","wind_kt":5},
+    "outputs": {"bfl_ft":6200,"vmbe_kt":134,"v1_kt":116,"vr_v2_kt":127.5},
+    "status": "SOURCE_LOCKED_NUMERIC_ANCHOR"
+  },
+  "release_gate": {
+    "operational_engine_active": false,
+    "completed": [
+      "Source pages and page revisions registered",
+      "Panel traversal order assigned",
+      "Physical family labels assigned",
+      "Lower/higher-weight BFL split preserved",
+      "VMBE and V1 IAS output axes identified",
+      "Anti-ice source-family separation retained",
+      "Worked-example numeric anchor registered"
+    ],
+    "remaining": [
+      "Register source-pixel coordinates for each physical family",
+      "Build continuous source-raster shadow traversal",
+      "Complete eight independent dry raster traces",
+      "Complete separate anti-ice regression",
+      "Human/pilot source-trace signoff"
+    ]
+  }
+}

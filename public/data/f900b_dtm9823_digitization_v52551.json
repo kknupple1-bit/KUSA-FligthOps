@@ -1,0 +1,122 @@
+{
+  "schema": "kusa.f900b.dtm9823_digitization.v5.25.51",
+  "build": "5.25.51",
+  "aircraft": "Falcon 900B / N699BG",
+  "applicability": "A/C with SB F900-100 (TFE731-5BR)",
+  "source": {
+    "document": "Mystere-Falcon 900 Performance Manual",
+    "document_id": "DTM9823",
+    "section": "3A",
+    "use": "Source-control digitization and validation register. AFM controls in case of discrepancy."
+  },
+  "source_limits": {
+    "runway_slope_pct": [-2, 2],
+    "wind_kt_chart": {"headwind_max": 50, "tailwind_max": 10},
+    "takeoff_configurations": ["20 FLAPS + SLATS", "7 FLAPS + SLATS"],
+    "surfaces": ["DRY", "WET"]
+  },
+  "chart_families": {
+    "20_dry": [
+      {"chart":"3A-5-10","name":"Balanced field length - uncorrected"},
+      {"chart":"3A-5-11","name":"Balanced field length - wind/slope corrections"},
+      {"chart":"3A-5-12","name":"V1 associated with balanced field length - uncorrected"},
+      {"chart":"3A-5-13","name":"V1 associated with balanced field length - wind/slope corrections"},
+      {"chart":"3A-5-14","name":"VR/V2 and recommended takeoff attitude"},
+      {"chart":"3A-5-15","name":"Maximum takeoff weight limited by climb requirements"},
+      {"chart":"3A-5-16","name":"Second-segment takeoff climb"},
+      {"chart":"3A-5-17","name":"Close-in obstacle clearance"},
+      {"chart":"3A-5-18","name":"Distant obstacle clearance"},
+      {"chart":"3A-5-19","name":"Transition segment distance"},
+      {"chart":"3A-5-20/21","name":"Takeoff acceleration time"},
+      {"chart":"3A-5-22/23","name":"Acceleration at brake release"}
+    ],
+    "20_wet": [
+      {"chart":"3A-6-2","name":"Balanced field length on wet runway - uncorrected"},
+      {"chart":"3A-6-3","name":"Balanced field length on wet runway - wind/slope corrections"},
+      {"chart":"3A-6-4","name":"V1 associated with wet balanced field length - uncorrected"},
+      {"chart":"3A-6-5","name":"V1 associated with wet balanced field length - wind/slope corrections"}
+    ],
+    "7_dry": [
+      {"chart":"3A-10-10","name":"Balanced field length - uncorrected"},
+      {"chart":"3A-10-11","name":"Balanced field length - wind/slope corrections"},
+      {"chart":"3A-10-12","name":"V1 associated with balanced field length - uncorrected"},
+      {"chart":"3A-10-13","name":"V1 associated with balanced field length - wind/slope corrections"},
+      {"chart":"3A-10-14","name":"Maximum brake-energy speed VMBE"},
+      {"chart":"3A-10-15","name":"VR/V2 and recommended takeoff attitude"},
+      {"chart":"3A-10-17","name":"Maximum takeoff weight limited by climb requirements"},
+      {"chart":"3A-10-18","name":"Second-segment takeoff climb"},
+      {"chart":"3A-10-19","name":"Close-in obstacle clearance"},
+      {"chart":"3A-10-20","name":"Distant obstacle clearance"},
+      {"chart":"3A-10-21","name":"Transition segment distance"},
+      {"chart":"3A-10-22/23","name":"Takeoff acceleration time"},
+      {"chart":"3A-10-24/25","name":"Acceleration at brake release"}
+    ],
+    "7_wet": [
+      {"chart":"3A-11-2","name":"Balanced field length on wet runway - uncorrected"},
+      {"chart":"3A-11-3","name":"Balanced field length on wet runway - wind/slope corrections"},
+      {"chart":"3A-11-4","name":"V1 associated with wet balanced field length - uncorrected"},
+      {"chart":"3A-11-5","name":"V1 associated with wet balanced field length - wind/slope corrections"},
+      {"chart":"3A-11-6","name":"Maximum brake-energy speed VMBE"}
+    ],
+    "clearway_stopway": [
+      {"chart":"3A-5-2 through 3A-5-8","name":"20 degree accelerate-stop / OEI takeoff / all-engine factored distance / V1-VR solution"},
+      {"chart":"3A-10-2 through 3A-10-8","name":"7 degree accelerate-stop / OEI takeoff / all-engine factored distance / V1-VR solution"}
+    ]
+  },
+  "published_exact_anchors": [
+    {
+      "id":"DTM9823-20-DRY-EX",
+      "configuration":"20 FLAPS + SLATS",
+      "surface":"DRY",
+      "inputs":{"pressure_altitude_ft":2000,"sat_c":40,"runway_length_ft":5930,"runway_slope_pct":1,"headwind_kt":20,"takeoff_weight_lb":41100},
+      "outputs":{"bfl_ft":5930,"v1_kt":117.0,"vr_v2_kt":123.0,"second_segment_gross_gradient_pct":3.9,"recommended_pitch_deg":14.1},
+      "source":"DTM9823 3A-5-9 example"
+    },
+    {
+      "id":"DTM9823-20-WET-EX",
+      "configuration":"20 FLAPS + SLATS",
+      "surface":"WET",
+      "inputs":{"pressure_altitude_ft":2000,"sat_c":40,"runway_length_ft":5930,"runway_slope_pct":1,"headwind_kt":20,"takeoff_weight_lb":41100},
+      "outputs":{"bfl_ft":5930,"v1_kt":107.5,"vr_v2_kt":123.0,"second_segment_gross_gradient_pct":3.9,"recommended_pitch_deg":14.1},
+      "source":"DTM9823 3A-6-1 example"
+    },
+    {
+      "id":"DTM9823-7-DRY-EX",
+      "configuration":"7 FLAPS + SLATS",
+      "surface":"DRY",
+      "inputs":{"pressure_altitude_ft":7000,"sat_c":30,"runway_length_ft":7600,"runway_slope_pct":-1,"headwind_kt":15,"takeoff_weight_lb":41000},
+      "outputs":{"bfl_ft":7600,"v1_kt":117.8,"vr_v2_kt":130.7,"vmbe_kt":154.1,"second_segment_gross_gradient_pct":4.05,"recommended_pitch_deg":15.2},
+      "source":"DTM9823 3A-10-9 example"
+    },
+    {
+      "id":"DTM9823-7-WET-EX",
+      "configuration":"7 FLAPS + SLATS",
+      "surface":"WET",
+      "inputs":{"pressure_altitude_ft":7000,"sat_c":30,"runway_length_ft":5800,"runway_slope_pct":-1,"headwind_kt":15,"takeoff_weight_lb":34850},
+      "outputs":{"bfl_ft":5800,"v1_kt":96.8,"vr_v2_kt":120.0,"second_segment_gross_gradient_pct":6.60,"recommended_pitch_deg":16.8},
+      "source":"DTM9823 3A-11-1 example"
+    },
+    {
+      "id":"DTM9823-20-CW-SW-EX",
+      "configuration":"20 FLAPS + SLATS",
+      "surface":"DRY",
+      "inputs":{"pressure_altitude_ft":2000,"sat_c":40,"tora_ft":5930,"stopway_ft":100,"clearway_ft":500,"runway_slope_pct":1,"headwind_kt":20},
+      "outputs":{"asda_ft":6030,"toda_ft":6430,"distance_limited_weight_v1vr1_lb":40050,"oei_distance_limited_weight_v1vr1_lb":43000,"combined_distance_weight_lb":42000,"combined_v1_vr_ratio":0.961},
+      "source":"DTM9823 3A-5-1 example"
+    },
+    {
+      "id":"DTM9823-7-CW-SW-EX",
+      "configuration":"7 FLAPS + SLATS",
+      "surface":"DRY",
+      "inputs":{"pressure_altitude_ft":7000,"sat_c":30,"tora_ft":7600,"stopway_ft":400,"clearway_ft":500,"runway_slope_pct":-1,"headwind_kt":15},
+      "outputs":{"asda_ft":8000,"toda_ft":8100,"distance_limited_weight_v1vr1_lb":40150,"oei_distance_limited_weight_v1vr1_lb":43850,"combined_distance_weight_lb":42500,"combined_v1_vr_ratio":0.950,"all_engine_factored_distance_weight_lb":42150},
+      "source":"DTM9823 3A-10-1 example"
+    }
+  ],
+  "validation": {
+    "method":"Use published exact examples as hard anchors. Raster-derived correction surfaces must independently reproduce these anchors before operational promotion.",
+    "engineering_read_tolerances":{"bfl_ft":250,"v1_kt":1.5,"vr_v2_kt":1.0,"gradient_pct":0.25,"pitch_deg":0.5},
+    "promotion_gate":"PENDING_INDEPENDENT_SECOND_READ",
+    "solver_status":"VALIDATION_LOCKED"
+  }
+}
