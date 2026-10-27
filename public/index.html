@@ -1249,7 +1249,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.20 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.21 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1272,7 +1272,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.20 — build identification stays in the header, clear of navigation. */
+/* v5.26.21 — build identification stays in the header, clear of navigation. */
 #buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
   background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
   line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
@@ -1281,7 +1281,7 @@ details summary{cursor:pointer;margin-top:8px}
   .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
-/* v5.26.20 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.21 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1357,7 +1357,7 @@ canvas,svg,img{max-width:100%}
 </style>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.20</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.21</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -1451,11 +1451,11 @@ canvas,svg,img{max-width:100%}
 <input inputmode="numeric" enterkeyhint="done" id="homeFOB" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
 </div>
 <div class="fuel-big">
-<label>Mission Fuel lb</label>
+<label>Trip Fuel Burn lb (excludes taxi)</label>
 <input inputmode="numeric" enterkeyhint="done" id="homeMissionFuel" max="15514" min="0" onclick="selectFuelEntry(this)" onfocus="selectFuelEntry(this)" step="50" type="number" value="0000"/>
 </div>
 </div>
-<div class="newtrip-fuel-note">Enter FOB and mission fuel. Tap a 0000 field to replace the value.</div>
+<div class="newtrip-fuel-note">Enter FOB and takeoff-to-landing trip burn in pounds. Taxi burn is deducted separately; fuel remaining on landing is not part of trip burn. Tap a 0000 field to replace the value.</div>
 </div>
 <button onclick="startNewTrip()" style="margin-top:12px" type="button">Start New Trip</button>
 </div>
@@ -1484,7 +1484,7 @@ canvas,svg,img{max-width:100%}
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input inputmode="numeric" enterkeyhint="done" id="fuel" max="15514" min="0" oninput="resetFuelVerification();resetLowFuelConfirmation();recalculate()" type="number" value="0"/><div class="small" id="fobVerifyNote"></div></div>
-<div><label>Mission Fuel Required lb</label><input inputmode="numeric" enterkeyhint="done" id="missionFuel" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
+<div><label>Trip Fuel Burn lb (excludes taxi)</label><input inputmode="numeric" enterkeyhint="done" id="missionFuel" max="15514" min="0" oninput="resetLowFuelConfirmation();recalculate()" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input inputmode="numeric" enterkeyhint="done" id="taxiFuel" min="0" oninput="recalculate()" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input inputmode="numeric" enterkeyhint="done" id="emerReturnBurn" min="0" oninput="recalculate()" type="number" value="500"/></div>
 </div>
@@ -1703,7 +1703,7 @@ PAX entered does not equal PAX seated. Weight &amp; balance is flagged incomplet
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Fuel on Board</div><b id="fuelCalc">0 lb</b></div>
-<div class="wx"><div class="small">Mission Fuel Required</div><b id="missionFuelCalc">0 lb</b></div>
+<div class="wx"><div class="small">Trip Fuel Burn (excludes taxi)</div><b id="missionFuelCalc">0 lb</b></div>
 <div class="wx"><div class="small">Planned Landing Fuel</div><b id="landingFuelCalc">0 lb</b></div>
 <div class="wx"><div class="small">Fuel Reserve</div><b id="fuelReserveCalc">0 lb</b></div>
 </div>
@@ -2174,7 +2174,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <tr><td>Destination Runway</td><td id="sumDestRwy">—</td></tr>
 <tr><td>Passengers</td><td id="sumPax">0</td></tr>
 <tr><td>Fuel on Board</td><td id="sumFuel">0 lb</td></tr>
-<tr><td>Mission Fuel</td><td id="sumMissionFuel">0 lb</td></tr>
+<tr><td>Trip Fuel Burn (excludes taxi)</td><td id="sumMissionFuel">0 lb</td></tr>
 <tr><td>FAA airport data</td><td class="warn" id="sumFAA">NOT LOADED</td></tr>
 <tr><td>Runway Data Source</td><td id="sumRunwaySource">—</td></tr>
 <tr><td>Live METAR/TAF</td><td class="warn" id="sumWX">NOT LOADED</td></tr>
@@ -2408,7 +2408,7 @@ The chart shows the <b>takeoff CG point</b>, the actual modeled <b>CG path as fu
 <div class="told-row"><span>Fuel on Board</span><span id="toldPrepFOB">—</span></div>
 <div class="told-row"><span>FOB Verification</span><span id="toldPrepFOBStatus">—</span></div>
 <div class="told-row"><span>Taxi Fuel</span><span id="toldPrepTaxi">—</span></div>
-<div class="told-row"><span>Mission Fuel</span><span id="toldPrepMissionFuel">—</span></div>
+<div class="told-row"><span>Trip Fuel Burn (excludes taxi)</span><span id="toldPrepMissionFuel">—</span></div>
 <div class="told-row"><span>Planned Landing Fuel</span><span id="toldPrepLandingFuel">—</span></div>
 <div class="told-row"><span>Landing Fuel Gate</span><span id="toldPrepFuelGate">—</span></div>
 </div>
@@ -2530,7 +2530,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="row" style="margin-top:10px">
 <div><label>Fuel on Board (FOB) lb — FROM NEW TRIP</label><input inputmode="numeric" id="f9mFOB" max="19165" min="0" oninput="f9Section1FuelChanged('fob')" step="10" type="number" value="0"/><div class="small" id="f9mFOBNote"></div></div>
-<div><label>Mission Fuel Required lb</label><input inputmode="numeric" id="f9mMissionFuel" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
+<div><label>Trip Fuel Burn lb (excludes taxi)</label><input inputmode="numeric" id="f9mMissionFuel" max="19165" min="0" oninput="f9Section1FuelChanged('mission')" step="10" type="number" value="0"/></div>
 <div><label>Taxi Fuel lb</label><input inputmode="numeric" id="f9mTaxiFuel" min="0" oninput="f9Section1FuelChanged('taxi')" step="10" type="number" value="200"/></div>
 <div><label>Emer. Return Fuel Burn lb</label><input inputmode="numeric" id="f9mReturnBurn" min="0" oninput="f9Section1ReturnBurnChanged()" step="10" type="number" value="500"/></div>
 </div>
@@ -2705,7 +2705,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 <div class="row" style="margin-top:10px">
 <div class="wx"><div class="small">Fuel on Board</div><b id="f9CalcFOB">—</b></div>
-<div class="wx"><div class="small">Mission Fuel Required</div><b id="f9CalcMissionFuel">—</b></div>
+<div class="wx"><div class="small">Trip Fuel Burn (excludes taxi)</div><b id="f9CalcMissionFuel">—</b></div>
 <div class="wx"><div class="small">Planned Landing Fuel</div><b id="f9CalcLandingFuel">—</b></div>
 <div class="wx"><div class="small">Fuel Reserve</div><b id="f9CalcFuelReserve">—</b></div>
 </div>
@@ -2954,7 +2954,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Max Landing</label><input readonly="" value="42,000 lb"/></div><div><label>Minimum Flight Weight</label><input readonly="" value="20,700 lb"/></div><div><label>MAC</label><input readonly="" value="113.69 in"/></div><div><label>Fuel Capacity</label><input readonly="" value="≈19,165 lb"/></div>
 </div>
 </div><div class="card canonical-post-card"><h2>Mission Summary</h2><table>
-<tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Mission Fuel</td><td id="f9sTrip">—</td></tr><tr><td>FAA airport data</td><td class="ok">LOADED / CACHED</td></tr><tr><td>Runway Data Source</td><td>FAA NASR / packaged fallback</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr>
+<tr><td>Origin</td><td id="f9SummaryDep">—</td></tr><tr><td>Destination</td><td id="f9SummaryDest">—</td></tr><tr><td>Departure Runway</td><td id="f9SummaryDepRwy">—</td></tr><tr><td>Destination Runway</td><td id="f9SummaryDestRwy">—</td></tr><tr><td>Passengers</td><td id="f9SummaryPax">—</td></tr><tr><td>Fuel on Board</td><td id="f9sFOB">—</td></tr><tr><td>Trip Fuel Burn (excludes taxi)</td><td id="f9sTrip">—</td></tr><tr><td>FAA airport data</td><td class="ok">LOADED / CACHED</td></tr><tr><td>Runway Data Source</td><td>FAA NASR / packaged fallback</td></tr><tr><td>Live METAR/TAF</td><td id="f9SummaryWx">—</td></tr>
 </table></div><div class="card canonical-post-card"><h2>Weight Limits</h2><table>
 <tr><td>ZFW</td><td id="f9LimZFW">—</td></tr>
 <tr><td>Ramp</td><td id="f9LimRamp">—</td></tr>
@@ -5632,7 +5632,7 @@ function currentMissionSummaryText(){
    "",
    "FUEL PLAN",
    `FOB: ${Math.round(fob).toLocaleString()} lb | Verified: ${$("fobVerified")?.checked?"YES":"NO"}`,
-   `Taxi fuel: ${Math.round(taxi).toLocaleString()} lb | Mission required: ${Math.round(missionFuel).toLocaleString()} lb`,
+   `Taxi fuel: ${Math.round(taxi).toLocaleString()} lb | Trip burn (excludes taxi): ${Math.round(missionFuel).toLocaleString()} lb`,
    `Planned landing fuel: ${Number.isFinite(c.landingFuel)?Math.round(c.landingFuel).toLocaleString()+" lb":"—"}`,
    `Landing fuel gate: ${textOf("landingFuelGuardStatus")}`,
    "",
@@ -6170,7 +6170,7 @@ function renderArchive(){
      ${planSyncStatusMarkup(m)}
      <div class="small" style="margin-top:8px">
        TOW ${m.tow_lb==null?"—":Number(m.tow_lb).toLocaleString()+" lb"} •
-       Mission fuel ${m.mission_fuel_lb==null?"—":Number(m.mission_fuel_lb).toLocaleString()+" lb"} •
+       Trip burn (excludes taxi) ${m.mission_fuel_lb==null?"—":Number(m.mission_fuel_lb).toLocaleString()+" lb"} •
        LDW ${m.ldw_lb==null?"—":Number(m.ldw_lb).toLocaleString()+" lb"} •
        Landing fuel ${m.landing_fuel_lb==null?"—":Number(m.landing_fuel_lb).toLocaleString()+" lb"}
      </div>
@@ -6434,8 +6434,8 @@ function updateToldCard(){
  $("toldPrepLDGCG").textContent=Number.isFinite(c.landingPct)?`${c.landingPct.toFixed(2)}% MAC`:"—";
  $("toldPrepWB").textContent=`W&B ${c.wbOK?"READY":"CHECK"}`;
  $("toldPrepWB").className=`told-pill ${c.wbOK?"ok":"bad"}`;
- const fuelReady=fobVerified && (!c.lowLandingFuel || c.lowLandingFuelConfirmed);
- $("toldPrepFuel").textContent=`FUEL ${fuelReady?"VERIFIED":"CHECK"}`;
+ const fuelReady=fobVerified && c.fuelOK===true && (!c.lowLandingFuel || c.lowLandingFuelConfirmed);
+ $("toldPrepFuel").textContent=c.fuelOK===false?"FUEL CHECK — TAXI + TRIP EXCEEDS FOB":`FUEL ${fuelReady?"VERIFIED":"CHECK"}`;
  $("toldPrepFuel").className=`told-pill ${fuelReady?"ok":"bad"}`;
  $("toldPrepRunways").textContent=`RUNWAYS ${runwayReady?"LOADED":"CHECK"}`;
  $("toldPrepRunways").className=`told-pill ${runwayReady?"ok":"warn"}`;
@@ -6597,6 +6597,7 @@ function updateToldCard(){
  const lowFuel=Number.isFinite(c.landingFuel)&&c.landingFuel<3000;
  const confirmed=$("lowFuelConfirm")?.checked;
  const issues=[];
+ if(c.fuelOK===false)issues.push({label:"TAXI + TRIP BURN EXCEEDS FUEL ON BOARD",severity:"bad",target:"missionSetupSection",focus:"missionFuel"});
  if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push({label:"PASSENGER SEATING CHECK REQUIRED",target:"missionPassengerSection",focus:"paxRequested"});
  if(!dr||!lr)issues.push({label:"RUNWAY SELECTION REQUIRED",target:"missionSetupSection",focus:!dr?"depRunway":"destRunway"});
  if(currentNotams.status!=="CHECKED")issues.push({label:"NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
@@ -7168,7 +7169,8 @@ function recalculate(){
  bd.stations.forEach(s=>{w+=s.load;m+=s.load*s.arm;loadRows.push({name:s.name,desc:"Baggage",arm:s.arm,load:s.load,moment:s.load*s.arm})});
 
  const zfw=w,arm=m/w,pct=pctMacFromArm(arm),fl=interp(fwd,w),al=interp(aft,w);
- const ramp=zfw+fob,tow=ramp-taxi,landingFuel=Math.max(0,fob-missionFuel),landing=zfw+landingFuel,reserve=fob-missionFuel;
+ const reserve=fob-taxi-missionFuel;
+ const ramp=zfw+fob,tow=ramp-taxi,landingFuel=Math.max(0,reserve),landing=zfw+landingFuel;
  const takeoffFuel=Math.max(0,fob-taxi);
  const takeoffMoment=m+fuelMomentLbIn(takeoffFuel);
  const landingMoment=m+fuelMomentLbIn(landingFuel);
@@ -7189,14 +7191,14 @@ function recalculate(){
      burnPath.push({fuel,weight:gross,pct:pctMacFromArm(a)});
    }
  }
- const seatMatch=requested===seatedCount,fuelOK=reserve>=0;
+ const seatMatch=requested===seatedCount,fuelOK=taxi<=fob&&reserve>=0;
  const toFl=interp(fwd,tow),toAl=interp(aft,tow),ldFl=interp(fwd,landing),ldAl=interp(aft,landing);
  const cgPathOK=burnPath.length?burnPath.every(p=>p.pct>=interp(fwd,p.weight)&&p.pct<=interp(aft,p.weight)):false;
- const wbMathOK=seatMatch&&pct>=fl&&pct<=al&&takeoffPct>=toFl&&takeoffPct<=toAl&&landingPct>=ldFl&&landingPct<=ldAl&&cgPathOK&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
+ const wbMathOK=fuelOK&&seatMatch&&pct>=fl&&pct<=al&&takeoffPct>=toFl&&takeoffPct<=toAl&&landingPct>=ldFl&&landingPct<=ldAl&&cgPathOK&&zfw<=maxZFW&&ramp<=maxRamp&&tow<=maxTO&&landing<=maxLand&&bd.overflow<=0;
  const wbOK=wbMathOK&&fobVerified;
  const lowLandingFuel=landingFuel<3000;
  const lowLandingFuelConfirmed=!lowLandingFuel || !!$("lowFuelConfirm")?.checked;
- latestCalc={zfw,ramp,tow,landing,landingFuel,reserve,pct,takeoffPct,landingPct,takeoffArm,landingArm,burnPath,wbOK,lowLandingFuel,lowLandingFuelConfirmed};
+ latestCalc={zfw,ramp,tow,landing,landingFuel,reserve,fuelOK,pct,takeoffPct,landingPct,takeoffArm,landingArm,burnPath,wbOK,lowLandingFuel,lowLandingFuelConfirmed};
 
  $("paxRequestedDisplay").textContent=requested;
  $("paxSeatedDisplay").textContent=seatedCount;
@@ -7228,7 +7230,7 @@ function recalculate(){
  $("cgTraceStatus").textContent="DTM912 FUEL MOMENT";
  $("cgTraceStatus").className="ok";
  $("cgTraceNote").textContent="Rev 13 • Section 2 • interpolated within published fuel points";
- const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!fobVerified?"VERIFY FOB — DELIBERATE CHECK":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS"));env.className=wbOK?"ok":"bad";
+ const env=$("envStatus");env.textContent=wbOK?"WITHIN LIMITS":(!fuelOK?"INSUFFICIENT FUEL — TAXI + TRIP EXCEEDS FOB":(!fobVerified?"VERIFY FOB — DELIBERATE CHECK":(!seatMatch?"PAX SEATING INCOMPLETE":"CHECK LIMITS")));env.className=wbOK?"ok":"bad";
  $("limZFW").textContent=`${Math.round(zfw).toLocaleString()} / ${maxZFW.toLocaleString()} lb`;
  $("limRamp").textContent=`${Math.round(ramp).toLocaleString()} / ${maxRamp.toLocaleString()} lb`;
  $("limTO").textContent=`${Math.round(tow).toLocaleString()} / ${maxTO.toLocaleString()} lb`;
@@ -8615,7 +8617,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.20",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.21",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8869,7 +8871,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.20: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.21: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8888,7 +8890,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.20",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.21",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8974,7 +8976,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.20'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.21'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 

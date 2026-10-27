@@ -117,3 +117,7 @@ specific user plan has uploaded from a physical device.
 ## v5.26.20 — TOLD attention contrast
 
 Override the shared blue button theme for both aircraft TOLD attention links. Review-required controls use amber backgrounds, borders and warning symbols; an explicitly recorded F50 obstacle conflict uses red and STOP text. The cleared summary uses green. This changes presentation only: no aircraft limits, fuel calculations, verification decisions or user records are changed. The separately reported taxi/landing-fuel calculation defect remains unresolved and is outside this visual patch.
+
+## v5.26.21 — Separate taxi and trip-burn accounting
+
+F50 landing fuel now equals FOB minus taxi burn minus takeoff-to-landing trip burn, matching the existing F900B convention. Landing weight, fuel moment/CG path, reserve display, landing performance inputs, summaries and newly calculated archives consume the corrected result. Invalid taxi-plus-trip plans block the F50 W&B/fuel readiness indicators and show an explicit red attention message; clamped zero landing fuel cannot clear the gate. Input labels now state that trip burn excludes taxi. Stored numeric inputs and historical archive summaries are retained; previously saved plans require review under the clarified convention. No aircraft source tables, limits or fuel-moment schedules changed.
