@@ -4,6 +4,7 @@ const fs = require("fs");
 const crypto = require("crypto");
 const app = express();
 const { installPlatform } = require("./platform");
+const {number:weatherNumber,hpaToInhg,pressureAlt,densityAlt}=require('./public/weather-math');
 const PORT = process.env.PORT || 3000;
 
 // FAA NOTAM Management Service (NMS) OAuth2 client-credentials integration.
@@ -28,7 +29,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.26.27",
+    build:"5.26.28",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -54,7 +55,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.26.27"
+      "User-Agent":"KUSA-FlightOps/5.26.28"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -105,6 +106,8 @@ function normalizeNmsGeoJson(data){
 
 const AWC = "https://aviationweather.gov/api/data";
 const NASR_RUNWAYS = "https://services.arcgis.com/xOi1kZaI0eWDREZv/ArcGIS/rest/services/Runways_View/FeatureServer/0/query";
+const NASR_AIRPORTS = "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_Aviation_Facilities/FeatureServer/0/query";
+const airportElevationCache=new Map();
 
 app.use(express.json({limit:"1mb"}));
 app.use((req,res,next)=>{
@@ -113,9 +116,9 @@ app.use((req,res,next)=>{
   res.set("Expires","0");
   next();
 });
-// v5.26.27 application-platform foundation: accounts, persistent sessions, aircraft access, and server-backed missions.
+// v5.26.28 application-platform foundation: accounts, persistent sessions, aircraft access, and server-backed missions.
 // Install platform routes and the mandatory auth gate BEFORE serving the FlightOps static application.
-installPlatform(app,{build:"5.26.27"});
+installPlatform(app,{build:"5.26.28"});
 
 app.use(express.static(path.join(__dirname,"public"),{maxAge:0,etag:false}));
 
@@ -180,9 +183,6 @@ function pruneSharedTrips(obj){
 }
 
 const first=x=>Array.isArray(x)?(x[0]||null):x;
-const hpaToInhg=h=>h==null?null:Number(h)*0.0295299830714;
-const pressureAlt=(e,a)=>e==null||a==null?null:Number(e)+(29.92-Number(a))*1000;
-function densityAlt(pa,t){if(pa==null||t==null)return null;const isa=15-1.98*(Number(pa)/1000);return Number(pa)+120*(Number(t)-isa);}
 function windComponents(h,d,s){if(h==null||d==null||s==null)return null;const a=(Number(d)-Number(h))*Math.PI/180,head=Math.cos(a)*Number(s),cross=Math.sin(a)*Number(s);return{headwind_kt:Math.round(Math.max(head,0)*10)/10,tailwind_kt:Math.round(Math.max(-head,0)*10)/10,crosswind_kt:Math.round(Math.abs(cross)*10)/10};}
 async function awc(name,params){const u=new URL(`${AWC}/${name}`);Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));const r=await fetch(u,{headers:{"Accept":"application/json","User-Agent":"KUSA-FlightOps/2.1"}});if(r.status===204)return null;if(!r.ok)throw new Error(`AWC ${name}: ${r.status}`);return await r.json();}
 
@@ -280,6 +280,23 @@ for(const [icao,data] of Object.entries(runwayFallbackDb)){
  }
 }
 
+async function nasrAirportElevation(icao){
+ const id=String(icao||'').toUpperCase().trim();if(!/^[A-Z0-9]{3,4}$/.test(id))return null;
+ const cached=airportElevationCache.get(id);if(cached&&Date.now()-cached.ts<6*60*60*1000)return cached.value;
+ const u=new URL(NASR_AIRPORTS);
+ const faa=id.length===4&&id.startsWith('K')?id.slice(1):id;
+ u.searchParams.set('where',`ICAO_ID='${id}' OR ARPT_ID='${faa}'`);
+ u.searchParams.set('outFields','ICAO_ID,ARPT_ID,ARPT_NAME,ELEV,EFF_DATE,ARPT_ELEV_SOURCE,ELEVATION_SRC_DATE');
+ u.searchParams.set('returnGeometry','false');u.searchParams.set('f','json');
+ const r=await fetch(u,{headers:{Accept:'application/json','User-Agent':'KUSA-FlightOps'},signal:AbortSignal.timeout(8000)});
+ if(!r.ok)throw new Error(`FAA airport elevation lookup: HTTP ${r.status}`);
+ const j=await r.json();if(j.error)throw new Error('FAA airport elevation lookup unavailable');
+ const rows=(j.features||[]).map(f=>f.attributes||{});
+ const row=rows.find(a=>String(a.ICAO_ID||'').toUpperCase()===id)||rows.find(a=>!a.ICAO_ID&&String(a.ARPT_ID||'').toUpperCase()===faa);
+ const elevation=weatherNumber(row?.ELEV);if(!row||elevation===null)return null;
+ const value={elevation_ft:elevation,elevation_source:'FAA NASR / NTAD Aviation Facilities',elevation_effective_date:row.EFF_DATE||null,elevation_survey_source:row.ARPT_ELEV_SOURCE||null,elevation_survey_date:row.ELEVATION_SRC_DATE||null};
+ airportElevationCache.set(id,{ts:Date.now(),value});return value;
+}
 async function airportBundle(icao){
  const id=String(icao||"").toUpperCase().trim();
  let airport=null,runways=[],runway_source="none";
@@ -293,7 +310,10 @@ async function airportBundle(icao){
  let metar=null,taf=null;
  try{metar=normMetar(first(await awc("metar",{ids:id,format:"json"})));}catch{}
  try{taf=normTaf(first(await awc("taf",{ids:id,format:"json"})));}catch{}
- const elev=airport?.elevation_ft??airport?.elev??airport?.elevation??null;
+ let elev=weatherNumber(airport?.elevation_ft??airport?.elev??airport?.elevation);
+ if(elev===null){
+   try{const found=await nasrAirportElevation(id);if(found){airport={...(airport||{ident:id}),...found};elev=found.elevation_ft;if(runwayDb[id])runwayDb[id].airport=airport;}}catch{}
+ }
  const alt=hpaToInhg(metar?.altimeter_hpa),pa=pressureAlt(elev,alt),da=densityAlt(pa,metar?.temp_c);
  runways=runways.map(r=>({...r,wind_components:windComponents(r.heading,metar?.wind_dir,metar?.wind_kt)}));
  return{icao:id,airport:airport||{ident:id},runways,runway_source,metar,taf,pressure_altitude_ft:pa==null?null:Math.round(pa),density_altitude_ft:da==null?null:Math.round(da),altimeter_inhg:alt==null?null:Math.round(alt*100)/100};
@@ -359,12 +379,12 @@ app.get("/api/shared-trips/:id",(req,res)=>{
   }catch(e){res.status(500).json({error:"Unable to open shared trip."})}
 });
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.26.27",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02","N699BG_WB_V52543","F900B_DTM9823_DIGITIZATION_V52551"]}));
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.26.28",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02","N699BG_WB_V52543","F900B_DTM9823_DIGITIZATION_V52551"]}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.26.27",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.26.28",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -434,7 +454,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.26.27"
+      "User-Agent":"KUSA-FlightOps/5.26.28"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
