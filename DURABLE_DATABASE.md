@@ -47,6 +47,29 @@ An operator may explicitly set `FLIGHTOPS_INIT_DATABASE=true` once to create a
 brand-new database on private storage, then remove that setting. This recreates
 account identities; do not use it to repair an existing installation.
 
+## Explicitly approved fresh cutover
+
+If the operator accepts recreating ALL cloud users, sessions, grants and plans,
+the existing-database migration can be skipped. Keep the old database untouched
+for rollback. Use `/private/flightops-preview/flightops.sqlite` for Preview and
+`/private/flightops/flightops.sqlite` for Published; never share their databases.
+
+On the existing 5.26.23 app, setting `FLIGHTOPS_DB_PATH` and restarting creates
+the new database and seeds the configured administrator. On 5.26.24, an approved
+empty installation additionally requires `FLIGHTOPS_INIT_DATABASE=true` for its
+first start, then removal of that setting. Do not display or change bootstrap
+credentials. The operator signs in directly with the configured bootstrap
+credentials and recreates additional users and device authorizations.
+
+Verify database-file presence, sign-in and a newly uploaded labeled test draft.
+Check its download on a separate device and survival across a Published restart
+and a later controlled publish. Existing device drafts tied to old internal user
+IDs remain separate; retaining them is not proof of new-cloud synchronization.
+
+On 2026-10-27 the operator explicitly selected this fresh-cutover approach and
+accepted recreating user accounts. This supersedes the migration requirement
+for that installation, without authorizing deletion of its old database.
+
 ## Recovery
 
 Keep writes paused. Select the verified private backup under a separate filename
