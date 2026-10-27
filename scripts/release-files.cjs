@@ -5,7 +5,8 @@ const path = require('node:path');
 // Runtime-owned data (SQLite, shared trips, and public/assets) is not a release asset.
 function releaseFiles(root) {
   const files = ['server.js', 'platform.js', 'package.json', 'package-lock.json',
-    'data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs'];
+    'data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs',
+    'scripts/database-storage.cjs', 'scripts/migrate-database.cjs'];
   function visit(relative) {
     for (const entry of fs.readdirSync(path.join(root, relative), {withFileTypes: true})) {
       const name = `${relative}/${entry.name}`;
@@ -22,6 +23,7 @@ function releaseFiles(root) {
 // These paths are part of the application's delivery contract, not optional fallbacks.
 const requiredFiles = [
   'server.js', 'platform.js', 'package.json', 'package-lock.json', 'data/runways.json',
+  'scripts/database-storage.cjs', 'scripts/migrate-database.cjs',
   'public/index.html', 'public/account.html', 'public/admin-users.html',
   'public/invite.html', 'public/reset-password.html', 'public/sw.js',
   'public/manifest.webmanifest', 'public/icons/icon-192.png', 'public/icons/icon-512.png',
