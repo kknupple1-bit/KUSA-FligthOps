@@ -1,6 +1,6 @@
 {
   "name": "kusa-flightops",
-  "version": "5.26.23",
+  "version": "5.26.24",
   "private": true,
   "main": "server.js",
   "engines": {
@@ -15,13 +15,14 @@
     "release:verify": "node scripts/verify-release.cjs",
     "release:smoke": "node scripts/smoke-release.cjs",
     "release:test-gates": "node --test tests/release-gates.test.cjs",
-    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:smoke",
+    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:smoke",
     "release:layout": "node tests/ipad-trip-layout.cjs",
     "release:test-n1": "node --test tests/n1-gates.test.cjs",
     "release:test-fuel": "node --test tests/fuel-accounting.test.cjs",
     "release:test-sync": "node --test tests/cross-device-sync.test.cjs",
     "release:test-obstacle": "node --test tests/obstacle-gates.test.cjs",
-    "release:test-pull-refresh": "node --test tests/pull-refresh.test.cjs"
+    "release:test-pull-refresh": "node --test tests/pull-refresh.test.cjs",
+    "release:test-storage": "node --test tests/database-storage.test.cjs"
   },
   "dependencies": {
     "express": "4.21.2"
