@@ -1,0 +1,11 @@
+.mission-told-float{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom));z-index:9997;width:auto!important;min-height:48px;padding:12px 20px;border:2px solid #89caff;background:#145084;color:white;border-radius:28px;box-shadow:0 4px 18px #0009;font-weight:800}
+.mission-told-float:focus-visible,.mission-review-link:focus-visible{outline:3px solid #fff;outline-offset:3px}
+.mission-review-link{cursor:pointer;text-align:left}.gate-action{display:block;margin-top:6px;color:#c4e2ff}
+.mission-gate-review{margin-top:10px;border:1px solid #365574;border-radius:10px;background:#091b2e;scroll-margin-top:20px}
+.mission-gate-review>summary{min-height:44px;padding:12px;cursor:pointer;font-weight:bold}
+.mission-gate-review-body{padding:0 12px 14px}.mission-gate-review-body p{line-height:1.5}.mission-gate-review-body .notam-panel{margin-top:8px}
+.mission-gate-review-body .notam-panel>div:first-child{flex-wrap:wrap}
+.mission-gate-review-body .notam-panel button{max-width:100%;white-space:normal;min-height:44px}
+#opsView,#f900bmissionView{padding-bottom:86px}
+@media(max-width:850px){.mission-told-float{bottom:calc(86px + env(safe-area-inset-bottom));right:12px}}
+@media print{.mission-told-float{display:none!important}}

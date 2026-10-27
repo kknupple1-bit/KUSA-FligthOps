@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.26",
-  "release": "5.26.26-deployment.1",
+  "build": "5.26.27",
+  "release": "5.26.27-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -13,27 +13,27 @@
     {
       "path": "package-lock.json",
       "size_bytes": 31244,
-      "sha256": "96eda2df099b3c16726f2359690d0f2928535a311450ed6fc5d9a7b290f4b8f6"
+      "sha256": "c4fe0179ccd7b8da134bb9c14679d9492a14f287d52e2070247f0a6e63eaa642"
     },
     {
       "path": "package.json",
-      "size_bytes": 1595,
-      "sha256": "31c16075e2d8f42dc85288c35e5e7695dbac1ce3680721ad2e72cb12bfc3df95"
+      "size_bytes": 1628,
+      "sha256": "dc0763388a20040d62bb7009187f04af24b68f59cabe39d815b8298a5dc7f31f"
     },
     {
       "path": "platform.js",
       "size_bytes": 55851,
-      "sha256": "a8d4ab15103b0a1e8cc73ab9ac067fbd60c57e91772d554ce7957e4aafc52135"
+      "sha256": "8151611ed563d7d3d8c50710dddce8219d478adcb642fa9f0a6eab1d70ed5490"
     },
     {
       "path": "public/account.html",
       "size_bytes": 9677,
-      "sha256": "83b0af9b708e6b15964fe6485a478d420d2783f466d0376f5591709ceaf05088"
+      "sha256": "9b5f90d08b026178f57318da8f6f22a39f1aafa7f071ecbb0de39dad05abcda8"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 12690,
-      "sha256": "371ee0f26c49be06f74090b3ddbf471149a4fb4703a874e335f6d6e1c4d83131"
+      "sha256": "4169b5ef2ca7e7bfb6a52afcf49706d4b8d5520cf354ef79b805b3bff4e3b1c2"
     },
     {
       "path": "public/config.js",
@@ -312,18 +312,28 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 699323,
-      "sha256": "ab9e823c6635ec8f9ba2de54dae595b8d8444993b3eb462db28031fb0daf3074"
+      "size_bytes": 700595,
+      "sha256": "4df872f7457765ab17e29911941114577126e520b33efe334ff9aa1f2f953366"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 6957,
-      "sha256": "13917bc127e1114f77aa78460ff50d6135d966a174a4223e5528c3a760fb6646"
+      "sha256": "218064fcb1bd1552cb3c597d699aec33a35fb5aeade3fe2d46b2fa7e8dd4da3e"
     },
     {
       "path": "public/manifest.webmanifest",
       "size_bytes": 309,
       "sha256": "62b8b5eef85815350af978f6e1615b6ac7b797573ec36b4f098d41e891223b39"
+    },
+    {
+      "path": "public/mission-review.css",
+      "size_bytes": 1274,
+      "sha256": "0da9d8ca036ef1a53cfe7d6580c364769a275ed5bbc780a52f97b95e6c96b36b"
+    },
+    {
+      "path": "public/mission-review.js",
+      "size_bytes": 4925,
+      "sha256": "8b5f597f7bbafdcda2288ca034ce84d921a5b11c4f89a7825c10bf764190c0eb"
     },
     {
       "path": "public/numeric-entry.css",
@@ -338,12 +348,12 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4279,
-      "sha256": "3caf1cc34c4eb5a905634053defd67222f91410dc3af29f049cfc4ee8be67e0e"
+      "sha256": "3fb0143907156b6fc05f9ee2c93cb3ed0c5fba8d37bb487993e16bfa78cc97e9"
     },
     {
       "path": "public/sw.js",
-      "size_bytes": 8271,
-      "sha256": "7793944e030fbc5843907bed74b6d83b8c29e323bfbe4c8999d690df5d5c436a"
+      "size_bytes": 8314,
+      "sha256": "e6fa7cc2a39a0f8ad952e196f0c580bc88a796f656081adfc05af09d6343efa5"
     },
     {
       "path": "scripts/database-storage.cjs",
@@ -357,18 +367,18 @@
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 1858,
-      "sha256": "6dde40663242e9624c5e604e9842dc7fb159fada5dc7158744f25ec2e2a1e228"
+      "size_bytes": 1917,
+      "sha256": "ba844434484972975984275896a4898810090d22558f57cde5fe27931475fd7e"
     },
     {
       "path": "scripts/verify-release.cjs",
-      "size_bytes": 5233,
-      "sha256": "2643e5619d5edb396f5778a0c3559d07c498648cf24ae0c57e1f03a9a9e339cb"
+      "size_bytes": 5261,
+      "sha256": "3d61d89690b9383828d7db37e813a4089424422a1fcd1a5dbae9481c9cd2d5ae"
     },
     {
       "path": "server.js",
       "size_bytes": 840753,
-      "sha256": "04e9881488faef7065038ac996e52ead16ed0c477652c3babcfbe946092ae1ae"
+      "sha256": "8daaf963243c6f3143a628966932a039cb4d4c0954cf268af5b6849a8616fe4d"
     }
   ]
 }
