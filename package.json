@@ -10,7 +10,7 @@
     "start": "node server.js",
     "dev": "node server.js",
     "prestart": "node scripts/verify-release.cjs",
-    "build": "npm run release:check",
+    "build": "npm run release:verify",
     "release:manifest": "node scripts/release-manifest.cjs",
     "release:verify": "node scripts/verify-release.cjs",
     "release:smoke": "node scripts/smoke-release.cjs",

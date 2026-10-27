@@ -17,8 +17,8 @@
     },
     {
       "path": "package.json",
-      "size_bytes": 810,
-      "sha256": "6561f5b0b96e2a09e3997e2499e5567ea0836cdf33a8f7d16350262e4d522b42"
+      "size_bytes": 811,
+      "sha256": "9ec8b9bea7187da09ccce574056299dae55e4911b6d60e415538706041d56f6c"
     },
     {
       "path": "platform.js",
