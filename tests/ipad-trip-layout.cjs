@@ -88,6 +88,7 @@ const widths = [320, 375, 390, 393, 430, 600, 700, 701, 744, 768, 810, 820, 834,
               window.textOf = id => window.$(id)?.textContent || '';
               window.missionAttentionNavigate = target => { window.lastAttentionTarget = target; };
               window.eval(attentionRenderers);
+              document.querySelectorAll('#attentionTestButton').forEach(el => el.removeAttribute('id'));
               const isF9 = view === 'f900bView';
               const box = document.getElementById(isF9 ? 'f9ToldOverall' : 'toldOverall');
               const gates = ['f9GateWB','f9GateFOB','f9GateWx','f9GateNotam','f9GateRunwayPerf','f9GateReturn','f9GateLocalData'];
