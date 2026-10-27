@@ -113,3 +113,7 @@ uploads, sign-in failures, ownership protection and storage rollback. The
 WebKit layout suite covers 22 widths and includes the Flight Plans Refresh
 button (176 cases across two locales). These tests do not establish whether a
 specific user plan has uploaded from a physical device.
+
+## v5.26.20 — TOLD attention contrast
+
+Override the shared blue button theme for both aircraft TOLD attention links. Review-required controls use amber backgrounds, borders and warning symbols; an explicitly recorded F50 obstacle conflict uses red and STOP text. The cleared summary uses green. This changes presentation only: no aircraft limits, fuel calculations, verification decisions or user records are changed. The separately reported taxi/landing-fuel calculation defect remains unresolved and is outside this visual patch.
