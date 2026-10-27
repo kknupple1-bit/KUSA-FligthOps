@@ -52,3 +52,8 @@ Pull-to-refresh
 - Offline use does not falsely claim a live refresh; local calculations remain available and the indicator reports that live refresh is unavailable.
 - If no mission is active, the gesture falls back to a normal page reload with refresh context preserved.
 
+
+Pull-refresh release review
+- A caught operational-refresh failure is returned to the gesture so it shows failure instead of completion.
+- Completion wording directs the pilot to the weather/NOTAM status rather than implying all live sources are available.
+- Executable gesture tests cover triggering, cancellation, offline behavior, failure, active mission refresh and inactive-page reload.

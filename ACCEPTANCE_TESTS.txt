@@ -131,9 +131,12 @@ Expected:
 - Indicator changes from Pull to refresh to Release to refresh.
 - On release, current draft state is retained.
 - Live mission/weather/NOTAM data refreshes through the existing operational refresh path.
-- Indicator reports Refresh complete.
+- Indicator reports Refresh finished — check weather / NOTAM status; confirm source-specific status independently.
 3. Repeat with N699BG.
 Expected: same behavior through the F900B operational refresh path.
 4. Disconnect network and repeat.
 Expected: indicator states Offline — live refresh unavailable; no false live-data refresh is shown.
 
+
+G. PULL-REFRESH FAILURE
+- Simulate an operational refresh error. The indicator must show refresh failure, never the finished message.

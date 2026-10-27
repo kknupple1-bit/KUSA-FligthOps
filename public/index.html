@@ -4711,9 +4711,9 @@ async function toldRunwayChanged(which,value){
 }
 function closeToldMoreMenu(){const d=$("toldMoreMenu");if(d)d.open=false}
 async function refreshToldOperationalData(){
- if(window.currentMissionMeta?.aircraft==="F900B"){await f9LoadOperationalData(true);scheduleDraftSave();return;}
+ if(window.currentMissionMeta?.aircraft==="F900B"){await f9LoadOperationalData(true);scheduleDraftSave();return true;}
  const depValue=$("depRunway")?.value||"",destValue=$("destRunway")?.value||"";
- try{await loadMission({preserveManualWeather:true,quiet:true});if(depValue&&$("depRunway")?.querySelector(`option[value="${CSS.escape(depValue)}"]`))$("depRunway").value=depValue;if(destValue&&$("destRunway")?.querySelector(`option[value="${CSS.escape(destValue)}"]`))$("destRunway").value=destValue;selectedRunwayChanged();await Promise.allSettled([refreshDepartureNotams(true),refreshNotams()]);recalculate();updateToldCard();syncToldRunwaySelectors();scheduleDraftSave();}catch(e){alert(`Unable to refresh current TOLD data: ${e.message||e}`)}
+ try{await loadMission({preserveManualWeather:true,quiet:true});if(depValue&&$("depRunway")?.querySelector(`option[value="${CSS.escape(depValue)}"]`))$("depRunway").value=depValue;if(destValue&&$("destRunway")?.querySelector(`option[value="${CSS.escape(destValue)}"]`))$("destRunway").value=destValue;selectedRunwayChanged();await Promise.allSettled([refreshDepartureNotams(true),refreshNotams()]);recalculate();updateToldCard();syncToldRunwaySelectors();scheduleDraftSave();return true;}catch(e){alert(`Unable to refresh current TOLD data: ${e.message||e}`);return false;}
 }
 function loadManualWeatherForm(){
  const which=$("manualWxTarget")?.value||"dep",p=wxPoint(which),st=manualWeather[which];
@@ -8947,13 +8947,14 @@ window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true
      }
      try{if(window.currentMissionMeta&&!window.currentMissionMeta.completed)saveCurrentDraft();}catch(_){}
      if(window.currentMissionMeta){
-       await refreshToldOperationalData();
+       const refreshed=await refreshToldOperationalData();
+       if(refreshed===false)throw new Error("Operational data refresh did not complete");
      }else{
        persistRefreshContext({saveDraft:true});
        window.location.reload();
        return;
      }
-     setIndicator("Refresh complete",true,90);
+     setIndicator("Refresh finished — check weather / NOTAM status",true,90);
      await new Promise(resolve=>setTimeout(resolve,550));
    }catch(e){
      console.warn("Pull-to-refresh failed",e);
