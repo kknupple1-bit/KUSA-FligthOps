@@ -17,8 +17,8 @@
     },
     {
       "path": "package.json",
-      "size_bytes": 1209,
-      "sha256": "37919717af8ecfea0c1a5a229da58ca73b2f8a74095f5852f813ffaa4023d806"
+      "size_bytes": 1322,
+      "sha256": "3645a324edb992b6c8e33d135f41f1a8985642c87854b46f06b85eb35efe7fc3"
     },
     {
       "path": "platform.js",
@@ -312,8 +312,8 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 689975,
-      "sha256": "c384b3a5d7091332d0607406c815c17ff68b723dbeb56f638fc789e2f13537b8"
+      "size_bytes": 693505,
+      "sha256": "152ea06b1718f6d48b99628d6f581c95283e8a36cbd3e70dc0c3de6c9b67a8cd"
     },
     {
       "path": "public/invite.html",
