@@ -7,6 +7,7 @@ const {webkit} = require('playwright');
 const root = path.resolve(__dirname, '..');
 const source = fs.readFileSync(path.join(root, 'public/index.html'), 'utf8');
 const html = source.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+const attentionRenderers = source.slice(source.indexOf('function renderToldAttentionIssues('), source.indexOf('function installF50PilotReviewPanel('));
 const widths = [320, 375, 390, 393, 430, 600, 700, 701, 744, 768, 810, 820, 834, 850, 851, 1000, 1024, 1100, 1180, 1194, 1366, 1440];
 
 (async () => {
@@ -77,10 +78,61 @@ const widths = [320, 375, 390, 393, 430, 600, 700, 701, 744, 768, 810, 820, 834,
         await refresh.tap();
         assert.equal(await page.evaluate(() => window.refreshTapCount), 1);
         cases++;
+        if ([375, 768, 1440].includes(width)) {
+          for (const view of ['toldView', 'f900bView']) {
+            const result = await page.evaluate(({view, attentionRenderers}) => {
+              for (const id of ['homeView', 'newtripView', 'opsView', 'f900bmissionView', 'toldView', 'f900bView', 'archiveView']) {
+                const el = document.getElementById(id); if (el) el.style.display = id === view ? 'block' : 'none';
+              }
+              window.$ = id => document.getElementById(id);
+              window.textOf = id => window.$(id)?.textContent || '';
+              window.missionAttentionNavigate = target => { window.lastAttentionTarget = target; };
+              window.eval(attentionRenderers);
+              const isF9 = view === 'f900bView';
+              const box = document.getElementById(isF9 ? 'f9ToldOverall' : 'toldOverall');
+              const gates = ['f9GateWB','f9GateFOB','f9GateWx','f9GateNotam','f9GateRunwayPerf','f9GateReturn','f9GateLocalData'];
+              const style = el => {const c = getComputedStyle(el); return {background:c.backgroundColor, color:c.color, border:c.borderLeftColor, text:el.textContent};};
+              if (isF9) {
+                gates.forEach(id => {document.getElementById(id).textContent = 'PASS';});
+                document.getElementById('f9GateNotam').textContent = 'CHECK';
+                renderF9ToldAttentionIssues();
+              } else renderToldAttentionIssues([{label:'NOTAM VERIFICATION REQUIRED',target:'missionDestinationRunwayReview'}]);
+              const button = box.querySelector('button');
+              button.id = 'attentionTestButton';
+              const warn = style(button);
+              const rect = button.getBoundingClientRect();
+              let stop;
+              if (!isF9) {
+                renderToldAttentionIssues([{label:'PILOT OBSTACLE CONFLICT RECORDED',severity:'bad',target:'missionPilotReviewPanel'}]);
+                stop = style(box.querySelector('button'));
+                renderToldAttentionIssues([]);
+              } else {gates.forEach(id => {document.getElementById(id).textContent = 'PASS';});renderF9ToldAttentionIssues();}
+              const clear = style(box);
+              if (isF9) {document.getElementById('f9GateNotam').textContent = 'CHECK';renderF9ToldAttentionIssues();}
+              else renderToldAttentionIssues([{label:'NOTAM VERIFICATION REQUIRED',target:'missionDestinationRunwayReview'}]);
+              box.querySelector('button').id = 'attentionTestButton';
+              return {warn,stop,clear,height:rect.height,width:rect.width,buttonCount:box.querySelectorAll('button').length};
+            }, {view, attentionRenderers});
+            const label = `${locale} ${width}px ${view} attention`;
+            assert.equal(result.warn.background, 'rgb(122, 82, 0)', label + ': warning must remain amber after shared theme');
+            assert.equal(result.warn.color, 'rgb(255, 242, 191)', label + ': warning contrast');
+            assert(result.warn.text.startsWith('⚠ '), label + ': non-color warning cue');
+            assert(result.height >= 44 && result.width > 0, label + ': touch target');
+            if (result.stop) {
+              assert.equal(result.stop.background, 'rgb(119, 31, 41)', label + ': explicit conflict red');
+              assert(result.stop.text.startsWith('STOP — '), label + ': non-color stop cue');
+            }
+            assert.equal(result.clear.background, 'rgb(18, 59, 42)', label + ': cleared summary green');
+            assert(result.clear.text.includes('SUMMARY CURRENT'), label + ': clear text');
+            await page.locator('#attentionTestButton').tap();
+            assert.equal(await page.evaluate(() => window.lastAttentionTarget), view === 'f900bView' ? 'f9CanonicalPerformanceCard' : 'missionDestinationRunwayReview', label + ': review navigation');
+            cases++;
+          }
+        }
       }
       await context.close();
     }
-    console.log(`PASS WebKit tablet/mobile form layout: ${cases} cases, ${widths.length} widths, 2 locales, New Trip, both aircraft Mission forms and Flight Plans Refresh.`);
+    console.log(`PASS WebKit tablet/mobile form layout: ${cases} cases, ${widths.length} widths, 2 locales, New Trip, both aircraft Mission forms Flight Plans Refresh and TOLD attention severity.`);
     console.log('Emulated WebKit coverage; physical iPad Safari/PWA acceptance remains separate.');
   } finally { await browser.close(); }
 })().catch(error => {console.error(error); process.exitCode = 1;});
