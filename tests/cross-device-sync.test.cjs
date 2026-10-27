@@ -189,6 +189,76 @@ test('Flight Plans Refresh and cross-device draft/archive continuity', {timeout:
       assert.equal(open.drafts().find(r=>r.id==='active-plan').state.marker,'initial');
       assert.equal(open.drafts().find(r=>r.id==='active-plan').server_sync_state,'conflict');
     });
+    await t.test('offline delete detaches an active draft, retries online and disappears on another device',async()=>{
+      ipad.putDraft(record('delete-me'));ipad.queue('delete-me');await ipad.run('refreshFlightPlans()');await phone.run('refreshFlightPlans()');
+      ipad.context.window.currentMissionMeta={id:'delete-me',completed:false};
+      ipad.context.navigator.onLine=false;ipad.run('requestMissionDeletion("delete-me")');
+      assert.equal(ipad.context.window.currentMissionMeta,null);
+      assert.equal(ipad.drafts().find(r=>r.id==='delete-me').server_delete_pending,true);
+      assert.equal(await ipad.run('refreshFlightPlans()'),false);
+      // A stale offline edit cannot resurrect the deleted cloud plan.
+      const stale=phone.drafts().find(r=>r.id==='delete-me');stale.state.marker='offline edit';stale.updated_at=new Date().toISOString();phone.putDraft(stale);phone.queue(stale.id);
+      ipad.context.navigator.onLine=true;await ipad.run('refreshFlightPlans()');await phone.run('refreshFlightPlans()');
+      assert.equal(ipad.drafts().some(r=>r.id==='delete-me'),false);
+      assert.equal(phone.drafts().some(r=>r.id==='delete-me'),false);
+      await ipad.run('refreshFlightPlans()');assert.equal(ipad.drafts().some(r=>r.id==='delete-me'),false);
+      // Capture the real autosave guard: a stale tab must stop before capturing/re-saving inputs.
+      const saveCode=html.slice(html.indexOf('function saveCurrentDraft(){'),html.indexOf('function scheduleDraftSave(){'));
+      vm.runInContext(saveCode,phone.context);phone.context.draftRecord=()=>{throw new Error('Deleted form must not autosave')};
+      phone.context.window.currentMissionMeta={id:'delete-me'};phone.run('saveCurrentDraft()');assert.equal(phone.context.window.currentMissionMeta,null);
+    });
+    await t.test('lost delete acknowledgement is resolved by the server tombstone',async()=>{
+      ipad.putDraft(record('delete-lost'));ipad.queue('delete-lost');await ipad.run('refreshFlightPlans()');
+      const cookie=await session();let lost=false;
+      ipad.configure({override:async(route,options)=>{
+        if(options.method==='DELETE'&&!lost){lost=true;await fetch(base+route,{...options,headers:{Cookie:cookie}});throw new Error('Lost delete acknowledgement')}
+      }});
+      ipad.run('requestMissionDeletion("delete-lost")');await ipad.run('refreshFlightPlans()');ipad.configure({override:null});
+      assert(lost);assert.equal(ipad.drafts().some(r=>r.id==='delete-lost'),false);
+      await phone.run('refreshFlightPlans()');assert.equal(phone.drafts().some(r=>r.id==='delete-lost'),false);
+    });
+    await t.test('delete resolves a lost create acknowledgement without leaving a cloud draft',async()=>{
+      ipad.putDraft(record('delete-lost-create'));ipad.queue('delete-lost-create');
+      const cookie=await session();let lost=false;
+      ipad.configure({override:async(route,options)=>{
+        if(route==='/api/missions'&&options.method==='POST'&&!lost){lost=true;await fetch(base+route,{...options,headers:{...options.headers,Cookie:cookie}});throw new Error('Lost create acknowledgement')}
+      }});
+      await ipad.run('flushMissionSyncQueue()');assert.equal(ipad.drafts().find(r=>r.id==='delete-lost-create').server_mission_id,undefined);
+      ipad.configure({override:null});ipad.run('requestMissionDeletion("delete-lost-create")');await ipad.run('refreshFlightPlans()');await phone.run('refreshFlightPlans()');
+      assert.equal(phone.drafts().some(r=>r.id==='delete-lost-create'),false);
+      const dead=await fetch(base+'/api/missions?status=deleted',{headers:{Cookie:cookie}}).then(r=>r.json());
+      assert.equal(dead.missions.filter(m=>m.local_mission_id==='delete-lost-create').length,1);
+    });
+    await t.test('a late upload acknowledgement cannot cancel a pending deletion',async()=>{
+      ipad.putDraft(record('delete-during-upload'));ipad.queue('delete-during-upload');await ipad.run('refreshFlightPlans()');
+      const edit=ipad.drafts().find(r=>r.id==='delete-during-upload');edit.state.marker='pending';ipad.putDraft(edit);ipad.queue(edit.id);
+      let requested=false;ipad.configure({override:async(route,options)=>{
+        if(options.method==='PUT'&&!requested){requested=true;ipad.run('requestMissionDeletion("delete-during-upload")')}
+      }});
+      await ipad.run('refreshFlightPlans()');ipad.configure({override:null});await ipad.run('refreshFlightPlans()');await phone.run('refreshFlightPlans()');
+      assert(requested);assert.equal(ipad.drafts().some(r=>r.id==='delete-during-upload'),false);assert.equal(phone.drafts().some(r=>r.id==='delete-during-upload'),false);
+    });
+    await t.test('completed plans delete across device archive stores too',async()=>{
+      const archived=ipad.archive()[0];assert(archived);ipad.run(`requestMissionDeletion(${JSON.stringify(archived.id)})`);
+      await ipad.run('refreshFlightPlans()');await phone.run('refreshFlightPlans()');
+      assert.equal(ipad.archive().some(r=>r.id===archived.id),false);assert.equal(phone.archive().some(r=>r.id===archived.id),false);
+    });
+    await t.test('deletion requires authentication, isolates owners, and cannot be undone by stale archive/create calls',async()=>{
+      ipad.putDraft(record('delete-security'));ipad.queue('delete-security');await ipad.run('refreshFlightPlans()');
+      const plan=ipad.drafts().find(r=>r.id==='delete-security'),cookie=await session();
+      assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id,{method:'DELETE'})).status,401);
+      const {DatabaseSync}=require('node:sqlite');const db=new DatabaseSync(path.join(temp,'test.sqlite'));
+      db.prepare("INSERT INTO users(id,email,display_name,password_salt,password_hash,status,created_at,updated_at) SELECT 'other-delete-user','other@flightops.invalid','Other',password_salt,password_hash,status,created_at,updated_at FROM users WHERE email=?").run(email);db.close();
+      const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'other@flightops.invalid',password})});
+      const otherCookie=login.headers.get('set-cookie').split(';')[0];
+      assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id,{method:'DELETE',headers:{Cookie:otherCookie}})).status,404);
+      for(let attempt=0;attempt<2;attempt++)assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id,{method:'DELETE',headers:{Cookie:cookie}})).status,200);
+      assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id+'/archive',{method:'POST',headers:{Cookie:cookie}})).status,410);
+      const aircraft=await fetch(base+'/api/aircraft',{headers:{Cookie:cookie}}).then(r=>r.json());
+      const recreate=await fetch(base+'/api/missions',{method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify({aircraft_id:aircraft.aircraft.find(a=>a.registration==='N33AP').id,payload:{local_mission_id:plan.id}})});
+      assert.equal(recreate.status,410);
+      const hidden=await fetch(base+'/api/missions?status=deleted',{headers:{Cookie:otherCookie}}).then(r=>r.json());assert.equal(hidden.missions.length,0);
+    });
   } finally {
     if(child.exitCode===null){const exited=once(child,'exit');child.kill('SIGTERM');const timer=setTimeout(()=>child.kill('SIGKILL'),2000);try{await exited;}finally{clearTimeout(timer);}}
     fs.rmSync(temp,{recursive:true,force:true});

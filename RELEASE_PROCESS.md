@@ -131,3 +131,11 @@ Includes the earlier PR #6 corrections: synchronize TOLD and draft save after ev
 ## v5.26.24 — Durable account and draft storage
 
 Production requires an explicit database path outside application/temporary directories and refuses a missing database unless an empty installation is explicitly enabled. See DURABLE_DATABASE.md for the required pre-deployment Published snapshot, private backup, maintenance window, configuration switch and rollback. The SQLite snapshot includes committed WAL records and preserves account IDs, sessions and draft ownership. Migration/persistence tests are part of the release gate. Aircraft calculations and source datasets are unchanged.
+
+## v5.26.25 — Draft deletion, update guidance and iPad entry
+
+Delete now synchronizes an owner-scoped soft deletion with the server. The deleted status and original history remain in SQLite to prevent stale/offline devices from resurrecting a plan. Devices download those deletion markers, stop active-draft auto-save and discard matching local copies. Offline or failed deletion remains visibly pending and retries after reconnecting. Archive and bulk-delete controls use the same path. Deletion confirmations describe account/device scope; old-account copies are removed only locally. No schema migration or aircraft calculation changes.
+
+A persistent Update Now notice explains version differences, saves the current draft locally and preserves refresh context before reloading, and mentions signing in again if prompted. Offline/save failures do not reload the page. Version checks run at startup, foreground return and successful pull refresh. Refresh Data Status remains a status check, not an installer. Existing 5.26.24 clients still need a normal reload to obtain this new prompt.
+
+iPad numeric initialization is consolidated so older handlers cannot overwrite the requested keypad mode or change text fields back to number/telephone inputs. Whole numbers use text/numeric/pattern hints; signed/decimal entries use decimal hints and retain the sign control. Tests cover iPad and desktop-mode iPad DOM configuration, focus and decimal/negative entry, but native keyboard presentation requires physical iPad acceptance. The earlier reported TOLD color difference remains outside this patch pending comparison of matching environments/trips.
