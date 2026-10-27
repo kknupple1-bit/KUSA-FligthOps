@@ -65,7 +65,7 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   if (!read('public/index.html').includes(`const expected="${manifest.build}"`)) throw new Error('Browser build mismatch');
   for (const page of ['account', 'admin-users', 'invite', 'reset-password'])
     if (!read(`public/${page}.html`).includes(`v${manifest.build}`)) throw new Error(`${page} build mismatch`);
-  for (const file of ['server.js', 'platform.js', 'public/sw.js', 'public/numeric-entry.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs']) new vm.Script(read(file), {filename: file});
+  for (const file of ['server.js', 'platform.js', 'public/sw.js', 'public/numeric-entry.js', 'public/mission-review.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs']) new vm.Script(read(file), {filename: file});
   return manifest;
 }
 if (require.main === module) {

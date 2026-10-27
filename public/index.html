@@ -1245,13 +1245,14 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <link rel="stylesheet" href="/numeric-entry.css"/>
+<link rel="stylesheet" href="/mission-review.css"/>
 </head>
 <body>
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 <div id="pullRefreshIndicator" aria-live="polite" style="position:fixed;left:50%;top:max(10px,env(safe-area-inset-top));transform:translate(-50%,-72px);z-index:100000;min-width:170px;max-width:calc(100vw - 24px);padding:9px 14px;border:1px solid #31506f;border-radius:999px;background:#06182c;color:#d7e6f7;text-align:center;font-size:12px;font-weight:800;box-shadow:0 5px 18px rgba(0,0,0,.32);opacity:0;pointer-events:none;transition:transform .14s ease,opacity .14s ease">Pull to refresh</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.26 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.27 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1274,7 +1275,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.26 — build identification stays in the header, clear of navigation. */
+/* v5.26.27 — build identification stays in the header, clear of navigation. */
 #buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
   background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
   line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
@@ -1283,7 +1284,7 @@ details summary{cursor:pointer;margin-top:8px}
   .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
-/* v5.26.26 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.27 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1359,7 +1360,7 @@ canvas,svg,img{max-width:100%}
 </style>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.26</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.27</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -1475,7 +1476,7 @@ canvas,svg,img{max-width:100%}
 </div>
 </div>
 </div>
-<div id="opsView" style="display:none">
+<div id="opsView" style="display:none"><button type="button" class="mission-told-float" onclick="showPlatformView('told')">Open TOLD ↗</button>
 <div class="mission-actionbar">
 <button onclick="showPlatformView('home')" type="button">← Menu</button>
 <button onclick="completeMission()" type="button">Complete &amp; Archive Flight Plan</button>
@@ -2509,7 +2510,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 </div>
 </div>
 </div>
-<div id="f900bmissionView" style="display:none">
+<div id="f900bmissionView" style="display:none"><button type="button" class="mission-told-float" onclick="showPlatformView('told')">Open TOLD ↗</button>
 <div class="f900b-shell">
 <div class="mission-actionbar">
 <button onclick="showPlatformView('home')" type="button">← Menu</button>
@@ -2857,7 +2858,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Refresh Takeoff</label><button onclick="refreshF900BMission()" type="button">Refresh Takeoff</button></div>
 </div>
 <div class="small" id="f9mToSource" style="margin-top:8px">Falcon 900B QRH1 Rev02 • DTM9823/AFM source package • bounded interpolation</div>
-<div class="notam-panel" style="margin-top:12px">
+<div id="f9MissionDepartureRunwayReview" class="notam-panel" style="margin-top:12px">
 <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><h3 style="margin:0">Departure Runway / NOTAM Assessment</h3><div class="small">Selected departure runway, published/usable length and FAA NMS review.</div></div><button onclick="refreshF900BMission()" style="width:auto" type="button">Refresh NOTAMs</button></div>
 <div class="notam-grid" style="margin-top:10px">
 <div class="notam-box"><span class="small">NOTAM Status</span><b id="f9DepNotamStatusCanonical">—</b><span class="small">FAA NMS / mission backend</span></div>
@@ -2919,7 +2920,7 @@ Aircraft-prep and TOLD values mirror the active FlightOps calculation. Structura
 <div><label>Landing Runway Condition</label><select id="legacyF9CanonicalLandingSurface"><option value="DRY">DRY</option><option value="WET">WET / ADVISORY</option></select></div>
 <div></div>
 </div>
-<div class="notam-panel" style="margin-top:12px">
+<div id="f9MissionDestinationRunwayReview" class="notam-panel" style="margin-top:12px">
 <div style="display:flex;justify-content:space-between;gap:10px;align-items:center"><div><h3 style="margin:0">Destination Runway / NOTAM Assessment</h3><div class="small">Runway availability and usable-length restrictions are assessed separately from weather.</div></div><button onclick="refreshF900BMission()" style="width:auto" type="button">Refresh NOTAMs</button></div>
 <div class="notam-grid" style="margin-top:10px">
 <div class="notam-box"><span class="small">NOTAM Status</span><b id="f9DestNotamStatusCanonical">—</b><span class="small">FAA NMS / mission backend</span></div>
@@ -8077,16 +8078,35 @@ function updateDepartureRunwayAssessment(){
  else if(departureNotams.status==="CHECKED"){const margin=Number.isFinite(bfl)?Math.round(a.usable-bfl).toLocaleString():"—";gate.textContent="PASS";note.textContent=`FAA NMS checked • RWY ${r.runway_id} ${a.state} • usable ${Math.round(a.usable).toLocaleString()} ft${margin!=="—"?` • margin ${margin} ft`:""}`;box.className="runway-gate ok";}
  else{gate.textContent="NOTAM REVIEW REQUIRED";note.textContent="Runway data loaded; FAA NMS departure review is not complete.";box.className="runway-gate warn";}
 }
+function escapeNotamText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+async function requestAirportNotams(airport){
+ for(let attempt=0;attempt<2;attempt++){
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),25000);
+  try{
+   const response=await fetch(`/api/notams?icao=${encodeURIComponent(airport)}`,{cache:'no-store',signal:controller.signal});
+   let data;try{data=await response.json()}catch{const error=new Error(`NOTAM service returned an unreadable response (HTTP ${response.status})`);error.retryable=response.status>=500;throw error;}
+   if(!response.ok||!data.ok){const error=new Error(`${data.message||'NOTAM service unavailable'} (HTTP ${response.status})`);error.retryable=[502,503,504].includes(response.status);throw error;}
+   return data;
+  }catch(error){
+   const retryable=error.retryable===true||error.name==='AbortError'||error instanceof TypeError;
+   if(attempt===0&&retryable)continue;
+   if(error.name==='AbortError')throw new Error('NOTAM request timed out after retry');
+   throw error;
+  }finally{clearTimeout(timeout);}
+ }
+}
 async function refreshDepartureNotams(force=false){
  await checkNotamConnection();const dep=cleanICAO($("dep")?.value||""),r=selectedDepartureRunway();if(!dep)return;
+ departureNotams={status:"CHECKING",source:"FAA NMS",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
  if($("depNotamStatus")){$("depNotamStatus").textContent="CHECKING…";$("depNotamStatus").className="warn"}if($("depNotamList"))$("depNotamList").textContent="Requesting current departure NOTAM data…";
- try{const res=await fetch(`/api/notams?icao=${encodeURIComponent(dep)}`),j=await res.json();if(!res.ok||!j.ok)throw new Error(j.message||"FAA NMS unavailable");
+ let stage="retrieval";
+ try{const j=await requestAirportNotams(dep);stage="assessment";
    const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);departureNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,runway_parse:parsed,checked_at:j.checked_at||new Date().toISOString()};
    if($("depNotamStatus")){$("depNotamStatus").textContent="CHECKED";$("depNotamStatus").className="ok"}if($("depNotamSource"))$("depNotamSource").textContent=departureNotams.source;
    if($("depNotamImpact"))$("depNotamImpact").textContent=runwayImpactSummary(parsed,r?r.runway_id:null);
-   if($("depNotamList"))$("depNotamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
+   if($("depNotamList"))$("depNotamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${escapeNotamText(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
    const hits=classifyObstacleNotams(items);departureObstacleReview={status:hits.length?"FLAGGED":"REVIEWED",airport:dep,items:hits,checked_at:departureNotams.checked_at,message:null};renderDepartureObstacleReview();
- }catch(e){departureNotams={status:"UNAVAILABLE",source:"ERROR",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};if($("depNotamStatus")){ $("depNotamStatus").textContent="NOT AVAILABLE";$("depNotamStatus").className="warn"}if($("depNotamSource"))$("depNotamSource").textContent=String(e.message||e);if($("depNotamList"))$("depNotamList").textContent="Manual departure NOTAM verification required.";}
+ }catch(e){departureNotams={status:"UNAVAILABLE",source:"ERROR",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};if($("depNotamStatus")){ $("depNotamStatus").textContent="NOT AVAILABLE";$("depNotamStatus").className="warn"}if($("depNotamSource"))$("depNotamSource").textContent=`${dep}: NOTAM ${stage} failed — ${String(e.message||e)}. Retry using Refresh / Evaluate NOTAMs.`;if($("depNotamList"))$("depNotamList").textContent="Manual departure NOTAM verification required.";}
  updateDepartureRunwayAssessment();syncTakeoffSection();updateToldCard();scheduleDraftSave();return departureNotams;
 }
 
@@ -8326,23 +8346,22 @@ async function refreshNotams(){
  await checkNotamConnection();
  const dest=cleanICAO($("dest").value),r=selectedLandingRunway();
  if(!dest){alert("Enter/load a destination first.");return}
+ currentNotams={status:"CHECKING",source:"FAA NMS",items:[],runway_state:null,usable_length_ft:null,checked_at:null};
  $("notamStatus").textContent="CHECKING…";$("notamStatus").className="warn";$("notamList").textContent="Requesting current NOTAM data…";
+ let stage="retrieval";
  try{
-   const res=await fetch(`/api/notams?icao=${encodeURIComponent(dest)}`),j=await res.json();
-   if(!res.ok||!j.ok){
-     currentNotams={status:"UNAVAILABLE",source:j.source||"NONE",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};
-     $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent=j.message||"FAA NMS unavailable.";if($("notamConnectionState")){const m=String(j.message||"");$("notamConnectionState").textContent=j.configured===false?"FAA NMS OAUTH2 NOT CONFIGURED":(m?`FAA NMS ERROR — ${m.replace(/NMS OAuth2 token request failed:\s*/i,"")}`:"FAA NMS UNAVAILABLE");$("notamConnectionState").className="small bad";}
-     $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();updateToldCard();return;
-   }
+   const j=await requestAirportNotams(dest);
+   stage="assessment";
    const items=Array.isArray(j.items)?j.items:[],parsed=parseRunwayClosureFromNotams(items,r?r.runway_id:null);
    currentNotams={status:"CHECKED",source:j.source||"FAA NMS",items,runway_state:parsed.state,usable_length_ft:parsed.usable,runway_parse:parsed,checked_at:j.checked_at||new Date().toISOString()};
    $("notamStatus").textContent="CHECKED";$("notamStatus").className="ok";$("notamSource").textContent=currentNotams.source;if($("notamConnectionState")){ $("notamConnectionState").textContent="AUTHENTICATED"; $("notamConnectionState").className="small ok";}
    if($("notamRunwayImpact"))$("notamRunwayImpact").textContent=runwayImpactSummary(parsed,r?r.runway_id:null);
-   $("notamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${esc(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
+   $("notamList").innerHTML=items.length?items.slice(0,50).map(n=>`<div class="notam-item">${escapeNotamText(n.raw||n.text||n.message||String(n))}</div>`).join(""):"No NOTAMs returned for this airport.";
    updateLandingRunwayAssessment();applyLandingRunwayGateToStatus();updateToldCard();scheduleDraftSave();
  }catch(e){
    currentNotams={status:"UNAVAILABLE",source:"ERROR",items:[],runway_state:null,usable_length_ft:null,checked_at:new Date().toISOString()};
-   $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent="NOTAM request failed.";
+   $("notamStatus").textContent="NOT AVAILABLE";$("notamStatus").className="warn";$("notamSource").textContent=`${dest}: NOTAM ${stage} failed — ${String(e.message||e)}. Retry using Refresh / Evaluate NOTAMs.`;
+   if($("notamConnectionState")){$("notamConnectionState").textContent="DESTINATION CHECK FAILED";$("notamConnectionState").className="small warn";}
    $("notamList").textContent="Manual NOTAM verification required.";updateLandingRunwayAssessment();applyLandingRunwayGateToStatus();updateToldCard();
  }
 }
@@ -8664,7 +8683,7 @@ function refreshMenuCounts(){
  requestAnimationFrame(()=>{updateHomeDraftCount();updateHomeArchiveCount()});
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
-const APP_UPDATE_BUILD="5.26.26";
+const APP_UPDATE_BUILD="5.26.27";
 function setAppUpdateNotice(serverBuild,browserBuild=APP_UPDATE_BUILD){
  const notice=$("appUpdateNotice"),message=$("appUpdateMessage"),title=$("appUpdateTitle");
  if(!notice||!/^\d+\.\d+\.\d+$/.test(String(serverBuild||"")))return;
@@ -8695,7 +8714,7 @@ async function updateFlightOpsApp(){
 }
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkAppVersion()});
 async function startupCheck(manual=false){
- const expected="5.26.26",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.27",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8867,8 +8886,8 @@ function operationalGateState(box){
  const primary=[...box.querySelectorAll('b')].map(el=>el.textContent).join(' ')||[...box.childNodes].filter(n=>!n.classList?.contains('gate-state-label')).map(n=>n.textContent).join(' ');
  const text=primary.toUpperCase();
  if(box.matches('.bad')||box.querySelector('.bad')||/NO[- ]GO|NOT READY|BLOCK(?:ED|ING)?|CLOSED|FAIL|INVALID|UNAVAILABLE|SOURCE LOCKED|NOT (?:FULLY )?EVALUATED/.test(text))return 'stop';
- if(box.matches('.warn')||box.querySelector('.warn')||/CHECK|REVIEW|CAUTION|LIMITED|PENDING|INCOMPLETE|REQUIRED/.test(text))return 'caution';
- if(box.matches('.ok')||box.querySelector('.ok')||/(?:VERIFIED|PASS|READY|CLEARED|SOURCE-CONTROLLED|SOURCE-GATED|LOADED|GO)/.test(text))return 'clear';
+ if(box.matches('.warn')||box.querySelector('.warn')||/\b(?:NOT CHECKED|CHECK|CHECKING|REVIEW|CAUTION|LIMITED|PENDING|INCOMPLETE|REQUIRED)\b/.test(text))return 'caution';
+ if(box.matches('.ok')||box.querySelector('.ok')||/(?:VERIFIED|CHECKED|PASS|READY|CLEARED|SOURCE-CONTROLLED|SOURCE-GATED|LOADED|GO)/.test(text))return 'clear';
  return 'caution';
 }
 function classifyOperationalGates(root=document){
@@ -8877,7 +8896,7 @@ function classifyOperationalGates(root=document){
    for(const name of ['clear','caution','stop'])box.classList.toggle('gate-'+name,name===state);
    let label=box.querySelector(':scope > .gate-state-label');
    if(!label){label=document.createElement('span');label.className='gate-state-label';box.prepend(label);}
-   const text={stop:'✕ BLOCKING',caution:'⚠ REVIEW / CAUTION',clear:'✓ CLEARED'}[state];
+   const text=(state==='clear'&&box.dataset.reviewKind==='source')?'✓ SOURCE VERIFIED':(state==='clear'&&box.dataset.reviewKind==='notam')?'✓ CHECK COMPLETE':{stop:'✕ BLOCKING',caution:'⚠ REVIEW / CAUTION',clear:'✓ CLEARED'}[state];
    if(label.textContent!==text)label.textContent=text;
  });
 }
@@ -8958,7 +8977,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.26: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.27: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8968,7 +8987,7 @@ document.addEventListener("input",e=>{if(window.currentMissionMeta&&!window.curr
 document.addEventListener("change",e=>{if(window.currentMissionMeta&&!window.currentMissionMeta.completed&&(e.target.closest("#opsView")||e.target.closest("#f900bmissionView")||e.target.closest("#f900bView")))scheduleDraftSave()});
 window.addEventListener("beforeunload",()=>persistRefreshContext({saveDraft:true}));
 
-/* v5.26.26 — in-app pull-to-refresh for iPhone/iPad/PWA.
+/* v5.26.27 — in-app pull-to-refresh for iPhone/iPad/PWA.
    Refreshes the active mission's live operational data instead of relying on
    browser chrome pull-to-reload, which is unavailable in some standalone/PWA contexts. */
 (function installPullToRefresh(){
@@ -9047,7 +9066,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.26",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.27",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -9104,8 +9123,8 @@ function f9RenderCanonicalParityFields(){
     const depUs=$('f9mDepUsableDetail')?.textContent||'—', destUs=$('f9mDestUsableDetail')?.textContent||'—';
     if($('f9DepUsableCanonical')) $('f9DepUsableCanonical').textContent=(depUs.match(/[0-9,]+\s*ft/i)||[])[0]||'—';
     if($('f9DestUsableCanonical')) $('f9DestUsableCanonical').textContent=(destUs.match(/[0-9,]+\s*ft/i)||[])[0]||'—';
-    if($('f9DepNotamStatusCanonical')) $('f9DepNotamStatusCanonical').textContent=(($('f9mDepNotamDetail')?.textContent||'').match(/CHECKED|UNAVAILABLE|NOT CHECKED/i)||['—'])[0].toUpperCase();
-    if($('f9DestNotamStatusCanonical')) $('f9DestNotamStatusCanonical').textContent=(($('f9mDestNotamDetail')?.textContent||'').match(/CHECKED|UNAVAILABLE|NOT CHECKED/i)||['—'])[0].toUpperCase();
+    if($('f9DepNotamStatusCanonical')) $('f9DepNotamStatusCanonical').textContent=textOf('depNotamStatus');
+    if($('f9DestNotamStatusCanonical')) $('f9DestNotamStatusCanonical').textContent=textOf('notamStatus');
     if($('f9CanonicalTOW')) $('f9CanonicalTOW').value=Math.round(Number(window.f900bWBLatest?.tow||0))||'';
     const fob=Math.max(0,Number($('f9mFOB')?.value)||0),mission=Math.max(0,Number($('f9mMissionFuel')?.value)||0),taxi=Math.max(0,Number($('f9mTaxiFuel')?.value)||0);
     const wb=window.f900bWBLatest,landing=Number.isFinite(Number(wb?.ldgFuel))?Number(wb.ldgFuel):Math.max(0,fob-taxi-mission);
@@ -9121,11 +9140,11 @@ function f9RenderCanonicalParityFields(){
  function read(id){const x=el(id); if(!x)return '—'; if(x.tagName==='SELECT'){const o=x.options[x.selectedIndex]; return (o&&o.textContent||x.value||'—').trim()} if('value' in x && x.tagName!=='B' && x.tagName!=='SPAN' && x.tagName!=='TD'){return String(x.value||'—').trim()} return String(x.textContent||'—').trim()}
  function put(id,v,suffix=''){const x=el(id); if(x)x.textContent=(v&&v!=='—')?v+suffix:'—'}
  function sync(){
-  put('f50CanonDepNotam',read('depNotamStatus')); put('f50CanonDestNotam',read('notamStatus'));
+  syncMissionNotamGate('f50CanonDepNotam','dep'); syncMissionNotamGate('f50CanonDestNotam','dest');
   put('f50CanonToConfig',read('toConfig')); put('f50CanonToAI',read('toAntiIce')); put('f50CanonToSurface',read('toRunwayCondition')); put('f50CanonToRunway',read('depNotamRunwaySelect'));
   put('f50CanonTOW',read('perfTOW'),' lb'); put('f50CanonBFL',read('perfBFL'),' ft'); put('f50CanonV1',read('perfV1'),' kt'); put('f50CanonVR',read('perfVR'),' kt'); put('f50CanonGrad',read('perfGrad'),'%'); put('f50CanonToMargin',read('toRwyMargin')); put('f50CanonToStatus',read('toStatus'));
   put('f50CanonLdgConfig',read('landConfig')); put('f50CanonLdgAI',read('landAntiIce')); put('f50CanonLdgSurface',read('landRunwayCondition')); put('f50CanonLdgRunway',read('destNotamRunwaySelect')); put('f50CanonLDW',read('landWt'),' lb'); put('f50CanonLFL',read('landFieldLen'),' ft'); put('f50CanonVREF',read('landVref'),' kt'); put('f50CanonLdgMargin',read('landRwyMargin')); put('f50CanonLdgStatus',read('landStatus'));
-  put('f9CanonDepNotam',read('f9DepNotamStatusCanonical')); put('f9CanonDestNotam',read('f9DestNotamStatusCanonical'));
+  syncMissionNotamGate('f9CanonDepNotam','dep'); syncMissionNotamGate('f9CanonDestNotam','dest');
   put('f9CanonToConfig',read('f9mToConfig')); put('f9CanonToAI',read('f9mToAI')); put('f9CanonToSurface',read('f9mToSurface')); put('f9CanonToRunway',read('f9DepRunwayCanonical')); put('f9CanonTOW',read('f9CalcTOW')); put('f9CanonBFL',read('f9pBFL')!=='—'?read('f9pBFL'):read('f9mBFL')); put('f9CanonV1',read('f9pV1')); put('f9CanonVR',read('f9pVR')); put('f9CanonGrad',read('f9mGCLB2')); put('f9CanonToMargin',read('f9mToMargin')); put('f9CanonToStatus',read('f9mToStatus'));
   put('f9CanonLdgConfig',read('f9mAbnormalConfigSummary')!=='—'?read('f9mAbnormalConfigSummary'):'40° Flaps + Slats'); put('f9CanonLdgAI',read('f9mLdgAI')); put('f9CanonLdgSurface','DRY / SOURCE'); put('f9CanonLdgRunway',read('f9DestRunwayCanonical')); put('f9CanonLDW',read('f9sLDW')); put('f9CanonLFL',read('f9mLdgRequired')); put('f9CanonVREF',read('f9mLdgVref')); put('f9CanonLdgMargin',read('f9mLdgMargin')); put('f9CanonLdgStatus',read('f9mLdgStatus'));
  }
@@ -9134,7 +9153,8 @@ function f9RenderCanonicalParityFields(){
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
 <script src="/numeric-entry.js"></script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.26'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script src="/mission-review.js"></script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.27'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 
