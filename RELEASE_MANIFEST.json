@@ -1,9 +1,9 @@
 {
   "schema": "kusa.flightops.release.v1",
   "build": "5.26.23",
-  "release": "5.26.23-obstacle-exception.1",
+  "release": "5.26.23-deployment.1",
   "status": "READY FOR REVIEW",
-  "scope": "Exception-driven F50 obstacle-NOTAM review logic plus release packaging integrity; not aircraft performance or flight-use approval.",
+  "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
     {
       "path": "data/runways.json",
@@ -312,8 +312,8 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 689211,
-      "sha256": "27d2695d2a367e0b97d362c30d60803783db1c529965cd680018a9351347120b"
+      "size_bytes": 689975,
+      "sha256": "c384b3a5d7091332d0607406c815c17ff68b723dbeb56f638fc789e2f13537b8"
     },
     {
       "path": "public/invite.html",

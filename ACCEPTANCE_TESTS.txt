@@ -117,3 +117,9 @@ E. REGRESSION
 - Verify explicit pilot obstacle conflict remains blocking.
 - Verify N699BG workflows are unchanged by this F50-specific obstacle-review revision.
 
+
+F. INCOMPLETE SCREEN / REFRESH CONSISTENCY
+- NOT_CHECKED, CHECKING and unknown obstacle-screen states remain pending, including with a saved no-conflict selection.
+- An explicit conflict remains red NO-GO after navigating to TOLD or recalculating.
+- Missing climb gradient/limit cannot be cleared by pilot obstacle disposition.
+- PERFORMANCE PASS with obstacle review required/unavailable remains amber in TOLD.

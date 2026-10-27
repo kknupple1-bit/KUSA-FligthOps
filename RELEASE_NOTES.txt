@@ -36,3 +36,10 @@ Regression protection
 Build
 - Browser/server/platform/service-worker/account/admin/invite/reset-password labels aligned at 5.26.23.
 
+
+Release-review corrections
+- Unknown/not-checked obstacle screens stay pending in both Evaluate and refresh.
+- Climb readiness is checked independently even after a pilot exception disposition.
+- Explicit pilot conflicts remain NO-GO on refresh as well as evaluation.
+- Review-required or unavailable statuses cannot turn green merely because their text contains PERFORMANCE PASS.
+- Executable gate regressions replace source-text matching checks.

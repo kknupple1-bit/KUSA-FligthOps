@@ -6537,7 +6537,7 @@ function updateToldCard(){
  $("opTakeoffStatus").textContent=textOf("toStatus");
  {
  const takeoffStatusText=textOf("toStatus");
- const takeoffStatusOk=takeoffStatusText.includes("PASS")||takeoffStatusText.includes("TABLE DATA READY")||takeoffStatusText.includes("CLIMB NOT LIMITING");
+ const takeoffStatusOk=!/PENDING|REQUIRED|UNAVAILABLE|INCOMPLETE|LOCKED|NO-GO|CONFLICT/.test(takeoffStatusText)&&(takeoffStatusText.includes("PASS")||takeoffStatusText.includes("TABLE DATA READY")||takeoffStatusText.includes("CLIMB NOT LIMITING"));
  $("opTakeoffStatus").className=`told-op-status ${takeoffStatusOk?"ok":takeoffStatusText.includes("NO-GO")?"bad":"warn"}`;
 }
  setToldVspeed("opV1",textOf("vsV1"));
@@ -6627,6 +6627,7 @@ function updateToldCard(){
  if(obsEff.state==="CONFLICT")issues.push({label:"PILOT OBSTACLE CONFLICT RECORDED",severity:"bad",target:"missionPilotReviewPanel",focus:"perfObs"});
  else if(obsEff.state==="FLAGGED")issues.push({label:`OBSTACLE NOTAM REVIEW REQUIRED • ${obs.items.length} FLAGGED`,target:"missionPilotReviewPanel",focus:"perfObs"});
  else if(obsEff.state==="UNAVAILABLE")issues.push({label:"OBSTACLE NOTAM SCREEN UNAVAILABLE • PILOT REVIEW REQUIRED",target:"missionPilotReviewPanel",focus:"perfObs"});
+ else if(obsEff.state==="PENDING")issues.push({label:"OBSTACLE NOTAM SCREEN NOT CHECKED",target:"missionPilotReviewPanel",focus:"missionTakeoffEvaluateBtn"});
  if(!$("fobVerified")?.checked)issues.push({label:"FOB VERIFICATION REQUIRED",target:"missionSetupSection",focus:"fobVerified"});
  if(lowFuel&&!confirmed)issues.push({label:"LOW LANDING FUEL CONFIRMATION REQUIRED",target:"lowFuelConfirmBox",focus:"lowFuelConfirm"});
  const ts=textOf("toStatus"),n1Issue=f50N1Attention(takeoffN1),n1Only=f50N1OnlyPending(ts,takeoffN1);
@@ -7062,10 +7063,11 @@ function syncTakeoffSection(){
  if(climb.pass===false)pending.push("CLIMB FAIL");
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
- if(obsEff.state==="CONFLICT")pending.push("PILOT OBSTACLE CONFLICT");
+ if(obsEff.state==="CONFLICT"){$("toStatus").textContent="NO-GO • PILOT OBSTACLE CONFLICT";$("toStatus").className="bad";return a;}
  else if(obsEff.state==="FLAGGED")pending.push("OBSTACLE NOTAM REVIEW REQUIRED");
  else if(obsEff.state==="UNAVAILABLE")pending.push("OBSTACLE NOTAM SCREEN UNAVAILABLE");
- else if(obsEff.state==="CLIMB_PENDING")pending.push("OEI CLIMB CHECK PENDING");
+ else if(obsEff.state==="PENDING")pending.push("OBSTACLE NOTAM SCREEN NOT CHECKED");
+ if(!obstacleBaselineClimbReady())pending.push("OEI CLIMB CHECK PENDING");
 
  if(climb.pass===false){
    $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
@@ -8246,7 +8248,7 @@ function classifyObstacleNotams(items){
 function obstacleBaselineClimbReady(){
  try{
    const climb=autoClimbAssessment();
-   return !!(climb&&climb.pass===true&&Number.isFinite(climb.gradient));
+   return !!(climb&&climb.pass===true&&Number.isFinite(climb.gradient)&&Number.isFinite(climb.limit));
  }catch(_){return false}
 }
 function effectiveObstacleReview(){
@@ -8254,7 +8256,8 @@ function effectiveObstacleReview(){
  const pilot=$("perfObs")?.value||"";
  const baselineClimbReady=obstacleBaselineClimbReady();
  if(pilot==="false")return {state:"CONFLICT",auto,pilotReviewed:true,cleared:false,manualReviewRequired:true,baselineClimbReady};
- if(pilot==="true")return {state:"REVIEWED_NO_CONFLICT",auto,pilotReviewed:true,cleared:true,manualReviewRequired:false,baselineClimbReady};
+ if(!["REVIEWED","FLAGGED","UNAVAILABLE"].includes(auto.status))return {state:"PENDING",auto,pilotReviewed:false,cleared:false,manualReviewRequired:false,baselineClimbReady};
+ if(pilot==="true"&&["FLAGGED","UNAVAILABLE"].includes(auto.status))return {state:"REVIEWED_NO_CONFLICT",auto,pilotReviewed:true,cleared:true,manualReviewRequired:false,baselineClimbReady};
  if(auto.status==="FLAGGED")return {state:"FLAGGED",auto,pilotReviewed:false,cleared:false,manualReviewRequired:true,baselineClimbReady};
  if(auto.status==="UNAVAILABLE")return {state:"UNAVAILABLE",auto,pilotReviewed:false,cleared:false,manualReviewRequired:true,baselineClimbReady};
  if(auto.status==="REVIEWED"&&baselineClimbReady)return {state:"BASELINE_CLEAR",auto,pilotReviewed:false,cleared:true,manualReviewRequired:false,baselineClimbReady};
@@ -8266,7 +8269,7 @@ function renderDepartureObstacleReview(){
  const r=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const eff=effectiveObstacleReview();
  const pilotControl=$("pilotObstacleReviewControl"),pilot=$("perfObs");
- const showPilot=eff.manualReviewRequired||!!(pilot&&pilot.value);
+ const showPilot=eff.manualReviewRequired||eff.state==="REVIEWED_NO_CONFLICT"||eff.state==="CONFLICT";
  if(pilotControl)pilotControl.style.display=showPilot?"":"none";
  if(eff.state==="CONFLICT"){
    b.textContent="PILOT CONFLICT • DO NOT USE RUNWAY";b.className="bad";
@@ -8568,7 +8571,8 @@ async function evaluateTakeoff(){
    }
    if(obsEff.state==="FLAGGED")pending.push("OBSTACLE NOTAM REVIEW REQUIRED");
    else if(obsEff.state==="UNAVAILABLE")pending.push("OBSTACLE NOTAM SCREEN UNAVAILABLE");
-   else if(obsEff.state==="CLIMB_PENDING")pending.push("OEI CLIMB CHECK PENDING");
+   else if(obsEff.state==="PENDING")pending.push("OBSTACLE NOTAM SCREEN NOT CHECKED");
+   if(!obstacleBaselineClimbReady())pending.push("OEI CLIMB CHECK PENDING");
 
    if(j.status==="GO"&&!pending.length){
      if(obsEff.state==="REVIEWED_NO_CONFLICT")
