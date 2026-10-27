@@ -77,3 +77,43 @@ outputs at identical controlled input points.
    abnormal landing modes and printing.
 
 Acceptance remains pending until physical-device and deployed-service checks pass.
+
+5.26.23 OBSTACLE EXCEPTION-GATE ACCEPTANCE
+
+A. CLEAN BASELINE
+1. Load an N33AP mission with departure NOTAM data available.
+2. Select a runway/conditions where OEI second-segment climb data is valid and passes.
+3. Confirm no obstacle-related FAA NMS NOTAM is flagged.
+Expected:
+- Obstacle / NOTAM Screen = NO OBSTACLE NOTAM FLAG • CLIMB DATA READY.
+- Pilot Obstacle Review control is not required/shown.
+- TOLD does not show an obstacle-review-required warning.
+- Any future-trip N1 day-of-flight gate remains independently visible.
+
+B. FLAGGED OBSTACLE NOTAM
+1. Use a test/mission condition where the NMS text scan returns obstacle-related text.
+Expected:
+- Obstacle review shows REVIEW REQUIRED.
+- Pilot exception control is shown.
+- Takeoff/TOLD remains pending until pilot disposition.
+- Pilot conflict produces NO-GO.
+
+C. NMS UNAVAILABLE
+1. Exercise the unavailable/error path without changing stored credentials.
+Expected:
+- Obstacle NOTAM screen unavailable.
+- Pilot exception review is required.
+- No false green clearance is displayed.
+
+D. CLIMB DATA NOT READY
+1. Exercise a point outside validated OEI climb source coverage.
+Expected:
+- Clear obstacle-NOTAM screen alone does not clear the gate.
+- OEI CLIMB CHECK PENDING or existing climb source-coverage warning remains.
+
+E. REGRESSION
+- Verify N1 day-of-flight logic remains independent.
+- Verify departure runway closure/BFL gates remain independent.
+- Verify explicit pilot obstacle conflict remains blocking.
+- Verify N699BG workflows are unchanged by this F50-specific obstacle-review revision.
+
