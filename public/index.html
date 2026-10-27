@@ -6621,7 +6621,7 @@ function updateToldCard(){
  if(c.fuelOK===false)issues.push({label:"TAXI + TRIP BURN EXCEEDS FUEL ON BOARD",severity:"bad",target:"missionSetupSection",focus:"missionFuel"});
  if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push({label:"PASSENGER SEATING CHECK REQUIRED",target:"missionPassengerSection",focus:"paxRequested"});
  if(!dr||!lr)issues.push({label:"RUNWAY SELECTION REQUIRED",target:"missionSetupSection",focus:!dr?"depRunway":"destRunway"});
- if(currentNotams.status!=="CHECKED")issues.push({label:"NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
+ if(currentNotams.status!=="CHECKED")issues.push({label:"DESTINATION RUNWAY NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
  if(obsEff.state==="CONFLICT")issues.push({label:"PILOT OBSTACLE CONFLICT RECORDED",severity:"bad",target:"missionPilotReviewPanel",focus:"perfObs"});
@@ -6633,7 +6633,7 @@ function updateToldCard(){
  if(lowFuel&&!confirmed)issues.push({label:"LOW LANDING FUEL CONFIRMATION REQUIRED",target:"lowFuelConfirmBox",focus:"lowFuelConfirm"});
  const ts=textOf("toStatus"),n1Issue=f50N1Attention(takeoffN1),n1Only=f50N1OnlyPending(ts,takeoffN1);
  if(n1Issue)issues.push(n1Issue);
- if((ts.includes("PENDING")||ts.includes("LOCKED"))&&!n1Only)issues.push({label:"TAKEOFF PERFORMANCE REVIEW REQUIRED",target:"missionPilotReviewPanel",focus:"missionTakeoffEvaluateBtn"});
+ if((ts.includes("PENDING")||ts.includes("LOCKED"))&&!n1Only)issues.push({label:`TAKEOFF EVALUATION: ${ts}`,target:"missionPilotReviewPanel",focus:"missionTakeoffEvaluateBtn"});
  else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push({label:"TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE",target:"missionPilotReviewPanel",focus:"perfObs"});
  const lts=textOf("landStatus");
  if(lts.includes("PENDING")||lts.includes("LOCKED"))issues.push({label:"LANDING LIMITS NOT FULLY EVALUATED",target:"missionLandingPerformanceSection",focus:"landConfig"});
@@ -8585,6 +8585,10 @@ async function evaluateTakeoff(){
  }catch(e){
    $("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";
    $("toLimit").textContent=String(e.message||e);
+ }finally{
+   // Refresh TOLD for success, failure and early exits using the same N1 gate.
+   updateToldCard();
+   scheduleDraftSave();
  }
 }
 

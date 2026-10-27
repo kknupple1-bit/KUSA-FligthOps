@@ -312,8 +312,8 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 686928,
-      "sha256": "bf52bccb11ca9ab95f7027c876ac498a05e86305916c7f912ce45d53fd4976fd"
+      "size_bytes": 687073,
+      "sha256": "d9cf7ec0ba6913e92b7870ac8dc2a735ea556b5e6ede4b0cb04f569d500366ce"
     },
     {
       "path": "public/invite.html",
