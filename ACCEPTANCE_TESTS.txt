@@ -123,3 +123,17 @@ F. INCOMPLETE SCREEN / REFRESH CONSISTENCY
 - An explicit conflict remains red NO-GO after navigating to TOLD or recalculating.
 - Missing climb gradient/limit cannot be cleared by pilot obstacle disposition.
 - PERFORMANCE PASS with obstacle review required/unavailable remains amber in TOLD.
+
+F. MOBILE PULL-TO-REFRESH
+1. On iPhone/iPad or installed PWA, open an active N33AP mission and scroll to the top.
+2. Pull down past the release threshold.
+Expected:
+- Indicator changes from Pull to refresh to Release to refresh.
+- On release, current draft state is retained.
+- Live mission/weather/NOTAM data refreshes through the existing operational refresh path.
+- Indicator reports Refresh complete.
+3. Repeat with N699BG.
+Expected: same behavior through the F900B operational refresh path.
+4. Disconnect network and repeat.
+Expected: indicator states Offline — live refresh unavailable; no false live-data refresh is shown.
+
