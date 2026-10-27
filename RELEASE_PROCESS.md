@@ -121,3 +121,9 @@ Override the shared blue button theme for both aircraft TOLD attention links. Re
 ## v5.26.21 — Separate taxi and trip-burn accounting
 
 F50 landing fuel now equals FOB minus taxi burn minus takeoff-to-landing trip burn, matching the existing F900B convention. Landing weight, fuel moment/CG path, reserve display, landing performance inputs, summaries and newly calculated archives consume the corrected result. Invalid taxi-plus-trip plans block the F50 W&B/fuel readiness indicators and show an explicit red attention message; clamped zero landing fuel cannot clear the gate. Input labels now state that trip burn excludes taxi. Stored numeric inputs and historical archive summaries are retained; previously saved plans require review under the clarified convention. No aircraft source tables, limits or fuel-moment schedules changed.
+
+## v5.26.22 — Explicit N1 day-of-flight planning status
+
+Keep the F50 trip-date/weather/source interlocks and numeric table unchanged. A non-current trip date displays amber PLANNING ONLY / N1 DAY-OF-FLIGHT VERIFICATION PENDING without operational N1 numbers. The TOLD attention action names the N1 requirement and navigates to weather; an N1-only pending condition no longer generates the generic takeoff-performance/obstacle action. Mixed pending requirements remain visible. Evaluate Takeoff now consumes the same N1 gate as automatic synchronization so it cannot transiently clear date/weather/source locks. Existing independent no-go conditions retain priority. Same-day numeric/source evaluation is software calculation status, not independent pilot verification or flight-use approval.
+
+Includes the earlier PR #6 corrections: synchronize TOLD and draft save after every evaluation outcome (including early NO-GO and errors), explicitly identify destination runway NOTAM verification, and show the actual takeoff status for other pending requirements. PR #7 supersedes that earlier review branch.

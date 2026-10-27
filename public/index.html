@@ -1249,7 +1249,7 @@ details summary{cursor:pointer;margin-top:8px}
 <div id="secureOfflineBanner" style="display:none;position:sticky;top:0;z-index:99999;background:#5d430d;color:#ffe8a3;border-bottom:1px solid #b98a1f;padding:8px 12px;text-align:center;font-weight:700">SECURE OFFLINE MODE — trusted-device authorization active. Live weather, NOTAM and server write functions require a network connection.</div>
 
 <style id="v52613-ux-cleanup">
-/* v5.26.21 — responsive V-speeds + operational gate hierarchy */
+/* v5.26.22 — responsive V-speeds + operational gate hierarchy */
 /* Desktop and iPad: V-speeds remain one left-to-right row. */
 #toldView .told-speeds,#f900bView .told-speeds{grid-template-columns:repeat(5,minmax(0,1fr))!important}
 /* Mission speed groups also stay horizontal on tablet-class displays. */
@@ -1272,7 +1272,7 @@ details summary{cursor:pointer;margin-top:8px}
 }
 </style>
 <style id="v52616-mobile-stabilization">
-/* v5.26.21 — build identification stays in the header, clear of navigation. */
+/* v5.26.22 — build identification stays in the header, clear of navigation. */
 #buildBadge{position:static;display:inline-block;margin-top:6px;padding:4px 8px;
   background:#061829;border:1px solid #31506f;border-radius:6px;font:11px Arial;
   line-height:1.4;color:#b8cfe4;max-width:100%;box-sizing:border-box}
@@ -1281,7 +1281,7 @@ details summary{cursor:pointer;margin-top:8px}
   .platform-tabs{grid-template-columns:repeat(6,minmax(0,1fr))}
 }
 
-/* v5.26.21 — shared Mobile / Responsive Stabilization; final cascade. */
+/* v5.26.22 — shared Mobile / Responsive Stabilization; final cascade. */
 main,.card,.told-card,.told-panel,.told-op-panel,.f900b-shell,.canonical-post-card,
 .row,.told-grid,.told-op-metrics,.told-op-grid,.told-op-details,.told-prep-grid,
 .canonical-perf-source,.canonical-perf-grid,.f900b-inputs,.f900b-results{
@@ -1357,7 +1357,7 @@ canvas,svg,img{max-width:100%}
 </style>
 
 <header>
-<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.21</div></div>
+<div class="brand-block"><h1><span class="brand-main">KUSA FlightOps</span><span class="brand-suffix">Performance + W&amp;B</span></h1><div class="sub">N33AP • Falcon 50-4 + N699BG • Falcon 900B • Hosted Web / iOS-Ready</div><div id="buildBadge">FlightOps v5.26.22</div></div>
 <div class="platform-tabs">
 <button class="active" id="homeTabBtn" onclick="showPlatformView('home')" type="button">Menu</button>
 <button id="newtripTabBtn" onclick="openNewTripForm()" type="button">New Trip</button>
@@ -3770,21 +3770,42 @@ function f50Dash4TakeoffN1(pa,tempC,antiIce="OFF"){
 }
 
 
+function f50N1PendingLabel(n1){
+ if(n1.ok)return null;
+ if(n1.reason==="DAY_OF_PENDING")return "N1 DAY-OF-FLIGHT VERIFICATION PENDING";
+ if(n1.text==="SOURCE LOCKED")return "TAKEOFF N1 SOURCE COVERAGE REQUIRED";
+ if(n1.text==="A/I NOT PERMITTED")return "TAKEOFF N1 / A-I CONDITION NOT PERMITTED";
+ if(n1.text==="WEATHER REQUIRED")return "TAKEOFF N1 DEPARTURE WEATHER REQUIRED";
+ return "TAKEOFF N1 VERIFICATION REQUIRED";
+}
+function f50PendingTakeoffStatus(pending){
+ return pending.length===1&&pending[0]==="N1 DAY-OF-FLIGHT VERIFICATION PENDING"
+   ?"PLANNING ONLY — N1 DAY-OF-FLIGHT VERIFICATION PENDING"
+   :`PENDING • ${pending.join(" • ")}`;
+}
+function f50N1Attention(n1){
+ if(n1.ok)return null;
+ return {label:f50N1PendingLabel(n1),target:"manualWeatherCard",focus:"manualWxActionBtn"};
+}
+function f50N1OnlyPending(status,n1){
+ return !n1.ok&&status===f50PendingTakeoffStatus([f50N1PendingLabel(n1)]);
+}
+
 function currentF50TakeoffN1(){
  const ai=$("toAntiIce")?.value||"OFF";
  if(!isCurrentTripToday()){
-   return{ok:false,text:"DAY-OF WX REQUIRED",source:`Trip ${tripDateDisplay(currentTripDate())} • refresh current departure METAR on day of flight before using N1`};
+   return{ok:false,reason:"DAY_OF_PENDING",text:"N1 DAY-OF-FLIGHT VERIFICATION PENDING",source:`PLANNING ONLY • Trip ${tripDateDisplay(currentTripDate())} • departure weather and source-supported N1 must be rechecked on the trip date; no operational N1 is released`};
  }
  const pa=perfTakeoffPA(),temp=perfTakeoffTemp();
  if(![pa,temp].every(Number.isFinite)){
-   return{ok:false,text:"WEATHER REQUIRED",source:"Departure SAT and pressure altitude required"};
+   return{ok:false,reason:"WEATHER_REQUIRED",text:"WEATHER REQUIRED",source:"Departure SAT and pressure altitude required"};
  }
  if(ai==="ON" && temp>10){
-   return{ok:false,text:"A/I NOT PERMITTED",source:"DTM813 §1.20: engine anti-ice must not be used above +10°C • select A/I OFF or verify conditions"};
+   return{ok:false,reason:"AI_NOT_PERMITTED",text:"A/I NOT PERMITTED",source:"DTM813 §1.20: engine anti-ice must not be used above +10°C • select A/I OFF or verify conditions"};
  }
  const n=f50Dash4TakeoffN1(pa,temp,ai);
  if(!n){
-   return{ok:false,text:"SOURCE LOCKED",source:`${F50_DASH4_N1_SOURCE[ai==="ON"?"ON":"OFF"]} • PA/OAT outside bounded digitized table coverage • no extrapolation`};
+   return{ok:false,reason:"SOURCE_LOCKED",text:"SOURCE LOCKED",source:`${F50_DASH4_N1_SOURCE[ai==="ON"?"ON":"OFF"]} • PA/OAT outside bounded digitized table coverage • no extrapolation`};
  }
  const wxSource=formatWeatherSource("dep");
  const paBasis=n.paBoundaryApplied?`PA ${Math.round(pa).toLocaleString()} ft → published 0-ft AFMS boundary`:`PA ${Math.round(pa).toLocaleString()} ft`;
@@ -6476,7 +6497,7 @@ function updateToldCard(){
  if($("toldSecondSegment"))$("toldSecondSegment").textContent=Number.isFinite(secondSegmentGradient)?`${secondSegmentGradient.toFixed(2)}% • OEI • GROSS • QRH REFERENCE`:"SOURCE LOCKED";
  if($("toldAccelStop")){const asd=f50BalancedAccelStop();$("toldAccelStop").textContent=asd?`${Math.round(asd.distance).toLocaleString()} ft • BALANCED V1 • ASD = BFL`:`SOURCE LOCKED — BFL/V1 REQUIRED`; }
  const takeoffN1=currentF50TakeoffN1();
- if($("toldTakeoffN1"))$("toldTakeoffN1").textContent=takeoffN1.text;
+ if($("toldTakeoffN1")){$("toldTakeoffN1").textContent=takeoffN1.text;$("toldTakeoffN1").className=takeoffN1.ok?"ok":"warn";}
  if($("toldTakeoffN1Source"))$("toldTakeoffN1Source").textContent=takeoffN1.source;
  $("toldTOStatus").textContent=textOf("toStatus");
  setToldVspeed("toldV1",textOf("vsV1"));
@@ -6528,7 +6549,7 @@ function updateToldCard(){
  $("opTakeoffWind").textContent=dr?`HW ${esc(dw.headwind_kt)} • TW ${esc(dw.tailwind_kt)} • XW ${esc(dw.crosswind_kt)} kt`:"—";
  if($("opSecondSegment"))$("opSecondSegment").textContent=Number.isFinite(secondSegmentGradient)?`${secondSegmentGradient.toFixed(2)}% GROSS`:"SOURCE LOCKED";
  if($("opAccelStop")){const asd=f50BalancedAccelStop();$("opAccelStop").textContent=asd?`${Math.round(asd.distance).toLocaleString()} ft • BALANCED V1`:`SOURCE LOCKED • BFL/V1 REQUIRED`; }
- if($("opTakeoffN1"))$("opTakeoffN1").textContent=takeoffN1.text;
+ if($("opTakeoffN1")){$("opTakeoffN1").textContent=takeoffN1.text;$("opTakeoffN1").className=takeoffN1.ok?"ok":"warn";}
 
  const requestedReturnBurn=Math.max(0,num("emerReturnBurn"));
  const availableTakeoffFuel=Math.max(0,Math.min(maxFuel,num("fuel"))-Math.max(0,num("taxiFuel")));
@@ -6600,7 +6621,7 @@ function updateToldCard(){
  if(c.fuelOK===false)issues.push({label:"TAXI + TRIP BURN EXCEEDS FUEL ON BOARD",severity:"bad",target:"missionSetupSection",focus:"missionFuel"});
  if(passengers.length!==seatAssignments.filter(Boolean).length)issues.push({label:"PASSENGER SEATING CHECK REQUIRED",target:"missionPassengerSection",focus:"paxRequested"});
  if(!dr||!lr)issues.push({label:"RUNWAY SELECTION REQUIRED",target:"missionSetupSection",focus:!dr?"depRunway":"destRunway"});
- if(currentNotams.status!=="CHECKED")issues.push({label:"NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
+ if(currentNotams.status!=="CHECKED")issues.push({label:"DESTINATION RUNWAY NOTAM VERIFICATION REQUIRED",target:"missionDestinationRunwayReview",focus:"destNotamRunwaySelect"});
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
  if(obsEff.state==="CONFLICT")issues.push({label:"PILOT OBSTACLE CONFLICT RECORDED",severity:"bad",target:"missionPilotReviewPanel",focus:"perfObs"});
@@ -6610,8 +6631,9 @@ function updateToldCard(){
  }
  if(!$("fobVerified")?.checked)issues.push({label:"FOB VERIFICATION REQUIRED",target:"missionSetupSection",focus:"fobVerified"});
  if(lowFuel&&!confirmed)issues.push({label:"LOW LANDING FUEL CONFIRMATION REQUIRED",target:"lowFuelConfirmBox",focus:"lowFuelConfirm"});
- const ts=textOf("toStatus");
- if(ts.includes("PENDING")||ts.includes("LOCKED"))issues.push({label:"TAKEOFF PERFORMANCE REVIEW REQUIRED",target:"missionPilotReviewPanel",focus:"missionTakeoffEvaluateBtn"});
+ const ts=textOf("toStatus"),n1Issue=f50N1Attention(takeoffN1),n1Only=f50N1OnlyPending(ts,takeoffN1);
+ if(n1Issue)issues.push(n1Issue);
+ if((ts.includes("PENDING")||ts.includes("LOCKED"))&&!n1Only)issues.push({label:`TAKEOFF EVALUATION: ${ts}`,target:"missionPilotReviewPanel",focus:"missionTakeoffEvaluateBtn"});
  else if(ts.includes("PERFORMANCE PASS")&&!obsEff.cleared)issues.push({label:"TAKEOFF PERFORMANCE EVALUATED • AUTO OBSTACLE REVIEW INCOMPLETE",target:"missionPilotReviewPanel",focus:"perfObs"});
  const lts=textOf("landStatus");
  if(lts.includes("PENDING")||lts.includes("LOCKED"))issues.push({label:"LANDING LIMITS NOT FULLY EVALUATED",target:"missionLandingPerformanceSection",focus:"landConfig"});
@@ -6619,7 +6641,8 @@ function updateToldCard(){
 
  // Make section-level warning / no-go badges actionable too.
  let takeoffTarget=null,takeoffFocus=null;
- if(ts.includes("OBSTACLE")){takeoffTarget="missionPilotReviewPanel";takeoffFocus="perfObs";}
+ if(n1Only){takeoffTarget="manualWeatherCard";takeoffFocus="manualWxActionBtn";}
+ else if(ts.includes("OBSTACLE")){takeoffTarget="missionPilotReviewPanel";takeoffFocus="perfObs";}
  else if(ts.includes("PENDING")||ts.includes("LOCKED")||ts.includes("NO-GO")){takeoffTarget="missionPilotReviewPanel";takeoffFocus="missionTakeoffEvaluateBtn";}
  setToldActionableStatus($("opTakeoffStatus"),takeoffTarget,takeoffFocus,"N33AP");
  const landingActionable=lts.includes("PENDING")||lts.includes("LOCKED")||lts.includes("NO-GO");
@@ -7036,13 +7059,8 @@ function syncTakeoffSection(){
  if(departureNotams.status!=="CHECKED")pending.push("DEPARTURE NOTAM REVIEW");
  if(!Number.isFinite(autoFieldWt))pending.push("FIELD LIMIT");
  if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
- const n1Gate=currentF50TakeoffN1();
- if(!n1Gate.ok){
-   if(n1Gate.text==="SOURCE LOCKED")pending.push("TAKEOFF N1 SOURCE COVERAGE");
-   else if(n1Gate.text==="A/I NOT PERMITTED")pending.push("TAKEOFF N1 / A-I CONDITION");
-   else if(n1Gate.text==="WEATHER REQUIRED")pending.push("TAKEOFF N1 WEATHER");
-   else if(n1Gate.text==="DAY-OF WX REQUIRED")pending.push("TAKEOFF N1 DAY-OF WX");
- }
+ const n1Gate=currentF50TakeoffN1(),n1Pending=f50N1PendingLabel(n1Gate);
+ if(n1Pending)pending.push(n1Pending);
  if(climb.pass===false)pending.push("CLIMB FAIL");
  const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
  const obsEff=effectiveObstacleReview();
@@ -7056,7 +7074,7 @@ function syncTakeoffSection(){
  if(climb.pass===false){
    $("toStatus").textContent="NO-GO • SECOND-SEGMENT CLIMB";$("toStatus").className="bad";
  }else if(pending.length){
-   $("toStatus").textContent=`PENDING • ${pending.join(" • ")}`;$("toStatus").className="warn";
+   $("toStatus").textContent=f50PendingTakeoffStatus(pending);$("toStatus").className="warn";
  }else{
    $("toStatus").textContent=climb.noLimitation?"TABLE DATA READY • CLIMB NOT LIMITING":"TABLE DATA READY • CLIMB PASS";$("toStatus").className="ok";
  }
@@ -8531,6 +8549,8 @@ async function evaluateTakeoff(){
    if(departureNotams.status!=="CHECKED")pending.push("DEPARTURE NOTAM REVIEW");
    if(!Number.isFinite(fieldWt))pending.push("FIELD LIMIT");
    if(!Number.isFinite(climb.limit))pending.push("AFMS CLIMB SOURCE COVERAGE PENDING");
+   const n1Pending=f50N1PendingLabel(currentF50TakeoffN1());
+   if(n1Pending)pending.push(n1Pending);
    const obs=departureObstacleReview||{status:"NOT_CHECKED",items:[]};
    const obsEff=effectiveObstacleReview();
    if(obsEff.state==="CONFLICT"){
@@ -8548,11 +8568,11 @@ async function evaluateTakeoff(){
      else
        $("toStatus").textContent=climb.noLimitation?"PASS • TAKEOFF PERFORMANCE • AUTO OBSTACLE REVIEW COMPLETE":"PASS • TAKEOFF PERFORMANCE / CLIMB • AUTO OBSTACLE REVIEW COMPLETE";
      $("toStatus").className="ok";
-   }else if(j.status==="GO"&&Number.isFinite(fieldWt)&&Number.isFinite(climb.limit)){
+   }else if(j.status==="GO"&&pending.length&&pending.every(reason=>reason.startsWith("AUTO OBSTACLE"))&&Number.isFinite(fieldWt)&&Number.isFinite(climb.limit)){
      $("toStatus").textContent=obs.status==="FLAGGED"?"PERFORMANCE PASS • OBSTACLE NOTAM REVIEW REQUIRED":"PERFORMANCE PASS • AUTO OBSTACLE REVIEW INCOMPLETE";
      $("toStatus").className="warn";
    }else{
-     $("toStatus").textContent=pending.length?`PENDING • ${pending.join(" • ")}`:"TABLE DATA READY";
+     $("toStatus").textContent=pending.length?f50PendingTakeoffStatus(pending):"TABLE DATA READY";
      $("toStatus").className="warn";
    }
    updateDepartureRunwayAssessment();
@@ -8565,6 +8585,10 @@ async function evaluateTakeoff(){
  }catch(e){
    $("toStatus").textContent="EVALUATION ERROR";$("toStatus").className="bad";
    $("toLimit").textContent=String(e.message||e);
+ }finally{
+   // Refresh TOLD for success, failure and early exits using the same N1 gate.
+   updateToldCard();
+   scheduleDraftSave();
  }
 }
 
@@ -8617,7 +8641,7 @@ function refreshMenuCounts(){
  setTimeout(()=>{updateHomeDraftCount();updateHomeArchiveCount()},150);
 }
 async function startupCheck(manual=false){
- const expected="5.26.21",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
+ const expected="5.26.22",bs=$("startupBuildStatus"),bn=$("startupBuildNote"),ps=$("startupPerfStatus"),pn=$("startupPerfNote"),rs=$("startupRunwayStatus"),rn=$("startupRunwayNote"),ls=$("startupLiveStatus"),ln=$("startupLiveNote"),notice=$("startupDataNotice"),btn=$("refreshDataStatusBtn");
  if(btn)btn.disabled=true;
  if(bs){bs.textContent="CHECKING";bs.className="warn"} if(bn)bn.textContent="Verifying app/server build…";
  if(ps){ps.textContent="CHECKING";ps.className="warn"} if(pn)pn.textContent="Verifying N33AP + Falcon 900B performance + N699BG W&B datasets…";
@@ -8871,7 +8895,7 @@ initializeMenuLanding();
 window.addEventListener("DOMContentLoaded",()=>{
   try{updateHomeDraftCount();updateHomeArchiveCount();configureNumericKeypads();classifyOperationalGates(document);}catch(e){console.warn("Menu initialization failed",e)}
 });
-// v5.26.21: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
+// v5.26.22: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
@@ -8890,7 +8914,7 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&$("opsVie
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
     try {
-      await navigator.serviceWorker.register("/sw.js?v=5.26.21",{scope:"/"});
+      await navigator.serviceWorker.register("/sw.js?v=5.26.22",{scope:"/"});
     } catch(e) { console.warn("FlightOps service worker registration failed",e); }
   });
 }
@@ -8976,7 +9000,7 @@ function f9RenderCanonicalParityFields(){
 })();
 try{installF50PilotReviewPanel();}catch(e){}
 </script>
-<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.21'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
+<script>(function(){async function post(m){if(!('serviceWorker' in navigator))return;try{const r=await navigator.serviceWorker.ready,t=navigator.serviceWorker.controller||r.active||r.waiting;if(t)t.postMessage(m)}catch{}}window.kusaSyncOfflineGrant=async function(){let g=null;try{g=JSON.parse(localStorage.getItem('kusa_offline_grant')||'null')}catch{}if(g)await post({type:'KUSA_OFFLINE_GRANT',grant:{token:g.token,expires_at:g.expires_at,device_id:g.device_id,device_key:g.device_key,public_key:g.public_key,build:g.build||'5.26.22'}})};function banner(){const b=document.getElementById('secureOfflineBanner');if(b)b.style.display=navigator.onLine?'none':'block'}window.addEventListener('online',()=>{banner();kusaSyncOfflineGrant()});window.addEventListener('offline',banner);if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').then(()=>kusaSyncOfflineGrant()).catch(()=>{});banner()})();</script>
 <script>setTimeout(()=>{updateCloudSyncStatus();if(navigator.onLine)flushMissionSyncQueue()},900);</script>
 </body></html>
 
