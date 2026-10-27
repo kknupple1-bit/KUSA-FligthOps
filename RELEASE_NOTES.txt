@@ -43,3 +43,12 @@ Release-review corrections
 - Explicit pilot conflicts remain NO-GO on refresh as well as evaluation.
 - Review-required or unavailable statuses cannot turn green merely because their text contains PERFORMANCE PASS.
 - Executable gate regressions replace source-text matching checks.
+
+Pull-to-refresh
+- Added an in-app touch pull-to-refresh gesture for iPhone/iPad/PWA operation.
+- Pulling down from the top now refreshes the active mission's live operational data using the same controlled refresh path as the existing TOLD refresh action.
+- Current mission/draft state is saved before refresh.
+- The gesture shows Pull / Release / Refreshing / Complete feedback.
+- Offline use does not falsely claim a live refresh; local calculations remain available and the indicator reports that live refresh is unavailable.
+- If no mission is active, the gesture falls back to a normal page reload with refresh context preserved.
+
