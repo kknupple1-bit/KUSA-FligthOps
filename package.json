@@ -1,6 +1,6 @@
 {
   "name": "kusa-flightops",
-  "version": "5.26.25",
+  "version": "5.26.26",
   "private": true,
   "main": "server.js",
   "engines": {
@@ -16,7 +16,7 @@
     "release:smoke": "node scripts/smoke-release.cjs",
     "release:test-gates": "node --test tests/release-gates.test.cjs",
     "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:smoke",
-    "release:layout": "node tests/ipad-trip-layout.cjs && node tests/numeric-keypads.cjs",
+    "release:layout": "node tests/ipad-trip-layout.cjs && node tests/numeric-keypads.cjs && node tests/app-number-pad.cjs",
     "release:test-n1": "node --test tests/n1-gates.test.cjs",
     "release:test-fuel": "node --test tests/fuel-accounting.test.cjs",
     "release:test-sync": "node --test tests/cross-device-sync.test.cjs",

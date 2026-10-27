@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.25",
-  "release": "5.26.25-deployment.1",
+  "build": "5.26.26",
+  "release": "5.26.26-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -13,27 +13,27 @@
     {
       "path": "package-lock.json",
       "size_bytes": 31244,
-      "sha256": "e23d680e7c0864fca9f74a893871f7c23febe9921f8efa9643b78e817b57e6ad"
+      "sha256": "96eda2df099b3c16726f2359690d0f2928535a311450ed6fc5d9a7b290f4b8f6"
     },
     {
       "path": "package.json",
-      "size_bytes": 1562,
-      "sha256": "eab69f5578a40833353404891a5c6c7772faf9adafa59487ce400d8d37707d83"
+      "size_bytes": 1595,
+      "sha256": "31c16075e2d8f42dc85288c35e5e7695dbac1ce3680721ad2e72cb12bfc3df95"
     },
     {
       "path": "platform.js",
       "size_bytes": 55851,
-      "sha256": "41f7575f0e9fbe8a10211d62fa1b53c9d6563c74ec0c373137fbfb768a300d2a"
+      "sha256": "a8d4ab15103b0a1e8cc73ab9ac067fbd60c57e91772d554ce7957e4aafc52135"
     },
     {
       "path": "public/account.html",
       "size_bytes": 9677,
-      "sha256": "eabbe49675427646592b909e5cb39a26025839d19af94785eb33b5d1196fd97f"
+      "sha256": "83b0af9b708e6b15964fe6485a478d420d2783f466d0376f5591709ceaf05088"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 12690,
-      "sha256": "7219448a235b9cae5b55cb7cd1b03d77894a88f3637df8ce72270579c32f0ef9"
+      "sha256": "371ee0f26c49be06f74090b3ddbf471149a4fb4703a874e335f6d6e1c4d83131"
     },
     {
       "path": "public/config.js",
@@ -312,13 +312,13 @@
     },
     {
       "path": "public/index.html",
-      "size_bytes": 699199,
-      "sha256": "bf6e2285bdbe02adafb692c6757a34f6911cda25add879dc9cd14bb6238b3433"
+      "size_bytes": 699323,
+      "sha256": "ab9e823c6635ec8f9ba2de54dae595b8d8444993b3eb462db28031fb0daf3074"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 6957,
-      "sha256": "610702b44469924145f94e33af9b8a9755e4e0153f2bbb0d7a71e41b42034b4b"
+      "sha256": "13917bc127e1114f77aa78460ff50d6135d966a174a4223e5528c3a760fb6646"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -326,14 +326,24 @@
       "sha256": "62b8b5eef85815350af978f6e1615b6ac7b797573ec36b4f098d41e891223b39"
     },
     {
+      "path": "public/numeric-entry.css",
+      "size_bytes": 2235,
+      "sha256": "008df5bd90ee42b6b02798b0d40479090c8bab73c4099bdd5bb10a4cff1da989"
+    },
+    {
+      "path": "public/numeric-entry.js",
+      "size_bytes": 6528,
+      "sha256": "771a4d9bae57d8ad4973f4ff15dcb2212b31a49e16b398e7cf12cfada96bbe6b"
+    },
+    {
       "path": "public/reset-password.html",
       "size_bytes": 4279,
-      "sha256": "ecee06baa7d1bf544afcbb44cc401cc1360834041e4c231ad99fb2c278ffcfb0"
+      "sha256": "3caf1cc34c4eb5a905634053defd67222f91410dc3af29f049cfc4ee8be67e0e"
     },
     {
       "path": "public/sw.js",
-      "size_bytes": 8230,
-      "sha256": "f43d6ca61a745bff8d426783059a1f852af2801f9fb061c7fa911245490874f9"
+      "size_bytes": 8271,
+      "sha256": "7793944e030fbc5843907bed74b6d83b8c29e323bfbe4c8999d690df5d5c436a"
     },
     {
       "path": "scripts/database-storage.cjs",
@@ -347,18 +357,18 @@
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 1801,
-      "sha256": "38d4a088bc8fed59cf6d0891f38e805cda750c8465ad6cfc757e89864f25b719"
+      "size_bytes": 1858,
+      "sha256": "6dde40663242e9624c5e604e9842dc7fb159fada5dc7158744f25ec2e2a1e228"
     },
     {
       "path": "scripts/verify-release.cjs",
-      "size_bytes": 5206,
-      "sha256": "5b180fbd76f355c46b69dfb97b9752f70b291030980aa467f547f96167196076"
+      "size_bytes": 5233,
+      "sha256": "2643e5619d5edb396f5778a0c3559d07c498648cf24ae0c57e1f03a9a9e339cb"
     },
     {
       "path": "server.js",
       "size_bytes": 840753,
-      "sha256": "3ed494c6be439b447f982b6e70d7ed11be29b990576a16835d5355f9fe2ef5e1"
+      "sha256": "04e9881488faef7065038ac996e52ead16ed0c477652c3babcfbe946092ae1ae"
     }
   ]
 }
