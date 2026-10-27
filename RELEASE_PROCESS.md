@@ -25,8 +25,11 @@ approval for flight use.
 1. Preserve the currently published commit on a named rollback branch before
    changing the live deployment. A rollback branch preserves code, not the database.
 2. In GoDaddy, update Preview from the checked `main` commit. `npm run build`
-   runs the same checks. `npm start` also runs the lightweight `prestart`
-   integrity/dependency check. It refuses to start incomplete or altered packages.
+   runs the release integrity/dependency/syntax checks. Full isolated-server and
+   WebKit tests run in required GitHub CI: GoDaddy disallows the temporary server
+   port used by the smoke test during its build. `npm start` also runs the
+   lightweight `prestart` integrity/dependency check. It refuses to start
+   incomplete or altered packages.
    Do not bypass these hooks or regenerate the manifest on the hosting server.
 3. Confirm the exact Preview commit, browser/server build agreement, both aircraft,
    login, existing draft reopening, weather/NOTAM status, and the affected device
