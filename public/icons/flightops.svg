@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>KUSA FlightOps</title>
+  <rect width="512" height="512" fill="#071b33"/>
+  <circle cx="256" cy="170" r="112" fill="#123b61"/>
+  <path d="M244 68 Q256 49 268 68 L276 134 L356 190 L356 212 L273 185 L270 231 L299 252 L299 267 L256 252 L213 267 L213 252 L242 231 L239 185 L156 212 L156 190 L236 134Z" fill="#f3f8ff"/>
+  <text x="256" y="363" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="91" letter-spacing="2" fill="#f3f8ff">KUSA</text>
+  <text x="256" y="420" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="38" letter-spacing="3" fill="#8cc9ff">FLIGHTOPS</text>
+</svg>

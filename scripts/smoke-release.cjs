@@ -80,6 +80,19 @@ async function smokeRelease() {
     const account = await request('/account.html');
     assert.equal(account.status, 200);
     assert((await account.text()).includes(`v${manifest.build}`));
+    // Home-screen installation must work before sign-in, including Apple's root fallback.
+    for (const route of ['/apple-touch-icon.png', '/icons/icon-152.png', '/icons/icon-167.png', '/icons/icon-180.png', '/icons/icon-192.png', '/icons/icon-512.png']) {
+      const icon = await request(route);
+      assert.equal(icon.status, 200, route);
+      assert(icon.headers.get('content-type').startsWith('image/png'), route);
+      const png = Buffer.from(await icon.arrayBuffer());
+      assert.equal(png.subarray(1, 4).toString(), 'PNG', route);
+      const expected = route === '/apple-touch-icon.png' ? 180 : Number(route.match(/icon-(\d+)/)[1]);
+      assert.equal(png.readUInt32BE(16), expected, route);
+      assert.equal(png.readUInt32BE(20), expected, route);
+    }
+    const appManifest = await json('/manifest.webmanifest');
+    assert.deepEqual(appManifest.body.icons.map(icon => icon.sizes), ['192x192', '512x512']);
     result = await json('/api/auth/login', {method: 'POST', headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({email, password: 'incorrect-release-test-password'})});
     assert.equal(result.response.status, 401);

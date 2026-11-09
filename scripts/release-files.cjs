@@ -28,6 +28,7 @@ const requiredFiles = [
   'public/weather-math.js', 'public/mission-review.js', 'public/mission-review.css',
   'public/index.html', 'public/account.html', 'public/admin-users.html',
   'public/invite.html', 'public/reset-password.html', 'public/sw.js',
+  'public/apple-touch-icon.png', 'public/icons/icon-152.png', 'public/icons/icon-167.png', 'public/icons/icon-180.png',
   'public/manifest.webmanifest', 'public/icons/icon-192.png', 'public/icons/icon-512.png',
   'public/data/f900b_qrh_rev02.json', 'public/data/f900b_n699bg_wb_v52543.json',
   'public/data/f900b_operational_overlays_v52541.json',
