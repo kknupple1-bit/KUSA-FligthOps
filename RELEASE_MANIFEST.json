@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.28",
-  "release": "5.26.28-deployment.1",
+  "build": "5.26.29",
+  "release": "5.26.29-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -13,27 +13,32 @@
     {
       "path": "package-lock.json",
       "size_bytes": 31244,
-      "sha256": "f9aacb855753173a818d670fde88b04d4973efb56358efb505d3ed91bc5262f2"
+      "sha256": "2a15086d5d2d67e71b75585f1688d96bc1602b4a0941fbd0fbaf88a18c528fdd"
     },
     {
       "path": "package.json",
       "size_bytes": 1731,
-      "sha256": "de08edbf16863eee5c675396661af0af7c963bc8d6089a0ad6aba5b635a573a2"
+      "sha256": "2915816550268c8e7ef38938cbd7efe706783a986959d3785600ea65d3521ed7"
     },
     {
       "path": "platform.js",
-      "size_bytes": 55851,
-      "sha256": "e942ae5002eb5fb0830df7b8003ba7f9bd16b37ad2212d42d689baaf4bd8edfd"
+      "size_bytes": 55882,
+      "sha256": "f4534bdcbbacd314fbd5c65fb0fda817d283d76db129b25057cd428a78e7453f"
     },
     {
       "path": "public/account.html",
-      "size_bytes": 9677,
-      "sha256": "e9ca50b8e2dbfa2a44413a5fb43cac5de74e7b3d68c4760e5ec1647af55a850f"
+      "size_bytes": 10134,
+      "sha256": "6a4ecc553e2ed4f05b79f58444d7b924bae67cd94b37a660aa0f8880c46da6f9"
     },
     {
       "path": "public/admin-users.html",
-      "size_bytes": 12690,
-      "sha256": "5d2077654d0e2a027ac2198e80e01285a1bf91ca01f10cd8be9abe2b7348e9ba"
+      "size_bytes": 13147,
+      "sha256": "6f354f48a0a4eee0f2dcb8a08b43571b6ddb73445fe5fc8bda2fd1c188db303f"
+    },
+    {
+      "path": "public/apple-touch-icon.png",
+      "size_bytes": 5202,
+      "sha256": "1d2ccddaefcf369ee22468921404bd4c5dabd3f300abe963e4f8540e6752e56e"
     },
     {
       "path": "public/config.js",
@@ -292,38 +297,58 @@
     },
     {
       "path": "public/icon-192.png",
-      "size_bytes": 1397,
-      "sha256": "6db2a2d732916739571382ca3a6f3938ed82f5c9af7c502c5e357ff9a4fc12af"
+      "size_bytes": 5603,
+      "sha256": "beb62a0224365fd2b877acf94c1619f30b5945fcb0f7e8775b47ae732dc0c8f6"
     },
     {
       "path": "public/icon-512.png",
-      "size_bytes": 3110,
-      "sha256": "6e9a67af230039c47b096dc2f12baac8d27ac7ab40881c18dc4c16c6a5baafd9"
+      "size_bytes": 16990,
+      "sha256": "bf5644e08c4582bed90749a589fc1d2f9630fbe2345c3d105208a79e7f629a94"
+    },
+    {
+      "path": "public/icons/flightops.svg",
+      "size_bytes": 728,
+      "sha256": "734687ea0596fd26390c1b1868565b1ff889544890d56b9af67b1ce478622182"
+    },
+    {
+      "path": "public/icons/icon-152.png",
+      "size_bytes": 4486,
+      "sha256": "6c90c30e9f5814bc1f4cd912622303076b4794ced2de92a416f4db8c61d33d6d"
+    },
+    {
+      "path": "public/icons/icon-167.png",
+      "size_bytes": 4893,
+      "sha256": "23ff4c083a9518569d4d1ad0c1da65ef08d2c96134a31d0d9908099dcb443056"
+    },
+    {
+      "path": "public/icons/icon-180.png",
+      "size_bytes": 5202,
+      "sha256": "1d2ccddaefcf369ee22468921404bd4c5dabd3f300abe963e4f8540e6752e56e"
     },
     {
       "path": "public/icons/icon-192.png",
-      "size_bytes": 1397,
-      "sha256": "6db2a2d732916739571382ca3a6f3938ed82f5c9af7c502c5e357ff9a4fc12af"
+      "size_bytes": 5603,
+      "sha256": "beb62a0224365fd2b877acf94c1619f30b5945fcb0f7e8775b47ae732dc0c8f6"
     },
     {
       "path": "public/icons/icon-512.png",
-      "size_bytes": 3110,
-      "sha256": "6e9a67af230039c47b096dc2f12baac8d27ac7ab40881c18dc4c16c6a5baafd9"
+      "size_bytes": 16990,
+      "sha256": "bf5644e08c4582bed90749a589fc1d2f9630fbe2345c3d105208a79e7f629a94"
     },
     {
       "path": "public/index.html",
-      "size_bytes": 700895,
-      "sha256": "78faa6bb84a6b457e6b1c68dfe71010455cd29735acf64e127055fcfbc2d8a2f"
+      "size_bytes": 701241,
+      "sha256": "57c42816ebc30b6e026613da3e64f7fa05728d34a6af1fcda7b9ed819cec31e9"
     },
     {
       "path": "public/invite.html",
-      "size_bytes": 6957,
-      "sha256": "6258c8b3fe8e5308dfc90125f18581091d62242deba7e1e3b48c472866608760"
+      "size_bytes": 7414,
+      "sha256": "05a36857daa897b956995010eb66cac2d229f2d5b8c1d81de1b6b601775d5e62"
     },
     {
       "path": "public/manifest.webmanifest",
-      "size_bytes": 309,
-      "sha256": "62b8b5eef85815350af978f6e1615b6ac7b797573ec36b4f098d41e891223b39"
+      "size_bytes": 611,
+      "sha256": "40e43b70a0e1ed930cc19b6827aac2ae25949a1c1390bcac283d442d1c77856b"
     },
     {
       "path": "public/mission-review.css",
@@ -347,13 +372,13 @@
     },
     {
       "path": "public/reset-password.html",
-      "size_bytes": 4279,
-      "sha256": "42c6aaaefab82e2f1b3fe329531012002e174e3126e5203fe5a9c2277b8af980"
+      "size_bytes": 4736,
+      "sha256": "771a079c17f5434df05b91c11b01777397496d505340b95cd9b0d49bfe88567c"
     },
     {
       "path": "public/sw.js",
-      "size_bytes": 8333,
-      "sha256": "7315f388d3814a468d688b5b3baf295da0324537a5f462fc4cc76dad73a6687b"
+      "size_bytes": 8423,
+      "sha256": "a5037d30ce5ad422edbcf0c53026062dc96bcab30ea715fd068bdbdbecc3ea8f"
     },
     {
       "path": "public/weather-math.js",
@@ -372,8 +397,8 @@
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 1943,
-      "sha256": "4cc51e8419222047a4b489445301a43a2420fd82f4147b7def1d24bc0209ceee"
+      "size_bytes": 2063,
+      "sha256": "512c39fa944a18a6aa1d34a2342254154c208a6923a6504a75fa931789ac4b8a"
     },
     {
       "path": "scripts/verify-release.cjs",
@@ -383,7 +408,7 @@
     {
       "path": "server.js",
       "size_bytes": 842439,
-      "sha256": "88bcb6b8546b555fbf28202d939eeb0509cc9cc03b2e56fe07f78fcb603c89ec"
+      "sha256": "1a768ab1fb62648953dd6657f8c3dc30ae1470a2f4e7d08a259504919bee9eb6"
     }
   ]
 }

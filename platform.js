@@ -1053,6 +1053,7 @@ function installPlatform(app,{build='5.26.28'}={}){
       '/reset-password.html',
       '/sw.js',
       '/manifest.webmanifest',
+      '/apple-touch-icon.png',
       '/api/health',
       '/api/offline/public-key'
     ]);
