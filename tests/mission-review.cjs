@@ -37,12 +37,15 @@ async function refreshTests(){
    async function refreshNotams(){actionCalls.push('dest')}
    async function refreshF900BMission(){actionCalls.push('f9')}
    function f9RenderMissionParity(){}function f9RenderCanonicalParityFields(){}
+   var windowRecord=null,cloudSyncUser=null,departureObstacleReview={items:[]};
+   function selectedRunwayObj(){return null}function cleanICAO(x){return x}function $(id){return document.getElementById(id)}
+   function findLocalMissionRecord(){return windowRecord}
   `+fn('operationalGateState')+'\n'+fn('classifyOperationalGates')});
   await page.addScriptTag({content:fs.readFileSync(path.join(root,'public/mission-review.js'),'utf8')});
   for(const aircraft of ['f50','f9']){
    const view=aircraft==='f50'?'opsView':'f900bmissionView';
    await page.evaluate(view=>{for(const id of ['homeView','newtripView','opsView','toldView','f900bmissionView','f900bView','archiveView'])document.getElementById(id).style.display=id===view?'block':'none';},view);
-   for(const [status,state,tone]of [['CHECKED','OPEN','clear'],['CHECKED','CLOSED','stop'],['CHECKED','RESTRICTED','caution'],['NOT_CHECKED',null,'caution'],['CHECKING',null,'caution'],['UNAVAILABLE',null,'caution']]){
+   for(const [status,state,tone]of [['CHECKED','OPEN','caution'],['CHECKED','CLOSED','stop'],['CHECKED','RESTRICTED','caution'],['NOT_CHECKED',null,'caution'],['CHECKING',null,'caution'],['UNAVAILABLE',null,'caution']]){
     await page.evaluate(({aircraft,status,state})=>{departureNotams={status,runway_state:state};syncMissionNotamGate(aircraft+'CanonDepNotam','dep');classifyOperationalGates();},{aircraft,status,state});
     assert(await page.locator('#'+aircraft+'CanonDepNotam').evaluate((el,tone)=>el.parentElement.classList.contains('gate-'+tone),tone));checks++;
    }

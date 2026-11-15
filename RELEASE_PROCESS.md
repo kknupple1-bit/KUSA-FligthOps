@@ -1,5 +1,10 @@
 # FlightOps controlled software release
 
+For the 5.26.30 aircraft-sharing and individual-review transition, follow
+[REVISION_NOTES_v5.26.30.md](REVISION_NOTES_v5.26.30.md) in addition to this process.
+Existing owner-only cloud plans become visible through aircraft assignments;
+review those assignments and take a verified database backup before deployment.
+
 Status: READY FOR REVIEW. These checks establish software packaging and basic
 application behavior; they do not establish aircraft performance accuracy or
 approval for flight use.
