@@ -22,8 +22,8 @@
     },
     {
       "path": "package.json",
-      "size_bytes": 1881,
-      "sha256": "4619f0dbf2f6ef5a4a1fec723ed8766482009bde4d0c3549344b918edbf6094c"
+      "size_bytes": 2155,
+      "sha256": "d3259d490f4e02a718ebb57e1c16b4330d5adc81c38a4b7b33b7474b8689e7cf"
     },
     {
       "path": "platform.js",
@@ -391,6 +391,11 @@
       "sha256": "640de822a8a3a41903a7d2bd50929b8428de8951a13a5f5792505b85d89bcd5d"
     },
     {
+      "path": "scripts/check-nms-release.cjs",
+      "size_bytes": 3867,
+      "sha256": "3b0fe15c332f8364c42d5f648c418b4dc979b182892a33f17ebae15091da5083"
+    },
+    {
       "path": "scripts/database-storage.cjs",
       "size_bytes": 1934,
       "sha256": "9180a7e5b8e984245b5a5736c072a7a79aab6425dc9b200a5d739f2ae98a2242"
@@ -402,13 +407,13 @@
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 2107,
-      "sha256": "2222cd50d2bc687217da65e19eedfca9ffcb04624b1f8f849c6732b7a1063411"
+      "size_bytes": 2173,
+      "sha256": "c35dc8df21598b964f533cea958a666c26331433823c34d574481ed8c25e78d0"
     },
     {
       "path": "scripts/verify-release.cjs",
-      "size_bytes": 5309,
-      "sha256": "b7e0455e225eb391f1daa5e361935a07e6a59f2ef7254f0f81e7d2ff33a56148"
+      "size_bytes": 5532,
+      "sha256": "d1ca92c622022caab17217e31d6561ff9d33d6ee5737c37b2407f86946d67ea4"
     },
     {
       "path": "server.js",

@@ -9,6 +9,37 @@ Status: READY FOR REVIEW. These checks establish software packaging and basic
 application behavior; they do not establish aircraft performance accuracy or
 approval for flight use.
 
+## Mandatory FAA NMS acceptance
+
+Preview and Published have separate secret stores. Before each deployment,
+confirm that the target environment has the existing FAA NMS client ID/secret,
+approved production endpoint URLs and GEOJSON response format. Do not use a
+whole-environment secret sync to repair NMS: database paths and unrelated settings
+must remain environment-specific.
+
+`npm start` now runs `release:service-config` through its required prestart hook
+and refuses missing/blank NMS credentials, substituted endpoints or unsupported
+response formats. The packaging verifier rejects removal of this hook. GoDaddy
+exposes secrets at runtime; the build remains a packaging check. This is a startup
+configuration guard, not proof of provider availability or valid credentials.
+
+On the target deployment host, run `npm run release:services` with the runtime
+environment. It performs OAuth authentication and one actual KBPT NOTAM request,
+accepts only a recognized GeoJSON collection, exits nonzero on failure and never
+logs credentials, access tokens or provider response bodies. Do not put credentials
+in command arguments, public files, source control or release evidence. Local/CI
+tests mock these requests and do not establish real FAA availability.
+
+After deployment, verify `/api/notams/config`, `/api/notams?icao=KBPT` and the
+signed-in app's live-service status for that same environment. Record the build,
+commit, environment, time and successful authenticated retrieval separately for
+Preview and Published. **PARTIAL, NOT AVAILABLE or unconfigured is a failed live
+acceptance check and must not be marked publish-ready.** Retain all runway,
+performance and individual review gates regardless of service-check success.
+
+Never deploy the new startup guard over a target known to lack credentials: first
+restore just the NMS configuration, verify it, then update that target's code.
+
 ## Prepare and verify
 
 1. Work on a release branch. Keep `package.json` and `package-lock.json` together.

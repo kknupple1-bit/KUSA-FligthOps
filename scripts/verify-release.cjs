@@ -14,6 +14,8 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('Node.js 22+ is required');
   if (typeof require('node:sqlite').DatabaseSync !== 'function') throw new Error('SQLite is unavailable');
   const pkg = JSON.parse(read('package.json'));
+  if(pkg.scripts?.prestart!=='node scripts/verify-release.cjs && node scripts/check-nms-release.cjs')
+    throw new Error('Required deployment integrity/NMS configuration gate is missing');
   const lock = JSON.parse(read('package-lock.json'));
   if (manifest.build !== pkg.version || lock.packages?.['']?.version !== pkg.version)
     throw new Error('Release/package/lockfile build mismatch');
@@ -65,7 +67,7 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   if (!read('public/index.html').includes(`const expected="${manifest.build}"`)) throw new Error('Browser build mismatch');
   for (const page of ['account', 'admin-users', 'invite', 'reset-password'])
     if (!read(`public/${page}.html`).includes(`v${manifest.build}`)) throw new Error(`${page} build mismatch`);
-  for (const file of ['server.js', 'platform.js', 'mission-service.js', 'public/sw.js', 'public/numeric-entry.js', 'public/weather-math.js', 'public/mission-review.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs']) new vm.Script(read(file), {filename: file});
+  for (const file of ['server.js', 'platform.js', 'mission-service.js', 'public/sw.js', 'public/numeric-entry.js', 'public/weather-math.js', 'public/mission-review.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs']) new vm.Script(read(file), {filename: file});
   return manifest;
 }
 if (require.main === module) {

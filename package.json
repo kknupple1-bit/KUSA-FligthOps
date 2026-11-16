@@ -9,13 +9,13 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "prestart": "node scripts/verify-release.cjs",
+    "prestart": "node scripts/verify-release.cjs && node scripts/check-nms-release.cjs",
     "build": "npm run release:verify",
     "release:manifest": "node scripts/release-manifest.cjs",
     "release:verify": "node scripts/verify-release.cjs",
     "release:smoke": "node scripts/smoke-release.cjs",
     "release:test-gates": "node --test tests/release-gates.test.cjs",
-    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:test-weather && npm run release:test-revisions && npm run release:smoke",
+    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:test-weather && npm run release:test-revisions && npm run release:test-nms && npm run release:smoke",
     "release:layout": "node tests/ipad-trip-layout.cjs && node tests/numeric-keypads.cjs && node tests/app-number-pad.cjs && node tests/mission-review.cjs && node tests/revisions-browser.cjs",
     "release:test-n1": "node --test tests/n1-gates.test.cjs",
     "release:test-fuel": "node --test tests/fuel-accounting.test.cjs",
@@ -25,7 +25,10 @@
     "release:test-storage": "node --test tests/database-storage.test.cjs",
     "release:test-update": "node --test tests/app-update.test.cjs",
     "release:test-weather": "node --test tests/live-weather.test.cjs",
-    "release:test-revisions": "node --test tests/flightops-revisions.test.cjs"
+    "release:test-revisions": "node --test tests/flightops-revisions.test.cjs",
+    "release:service-config": "node scripts/check-nms-release.cjs",
+    "release:services": "node scripts/check-nms-release.cjs --live",
+    "release:test-nms": "node --test tests/nms-release-gate.test.cjs"
   },
   "dependencies": {
     "express": "4.21.2"

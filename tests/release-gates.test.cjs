@@ -17,6 +17,16 @@ function fixture(run, withDependencies = true) {
   } finally { fs.rmSync(dir, {recursive: true, force: true}); }
 }
 test('accepts the intact release', () => assert.equal(verifyRelease(root).build, build));
+
+test('blocks removal of the required NMS deployment gate even with fresh hashes',()=>fixture(dir=>{
+  const pkgFile=path.join(dir,'package.json'),pkg=JSON.parse(fs.readFileSync(pkgFile));
+  pkg.scripts.prestart='node scripts/verify-release.cjs';fs.writeFileSync(pkgFile,JSON.stringify(pkg));
+  const mf=path.join(dir,'RELEASE_MANIFEST.json'),manifest=JSON.parse(fs.readFileSync(mf));
+  const bytes=fs.readFileSync(pkgFile),entry=manifest.files.find(f=>f.path==='package.json');
+  entry.size_bytes=bytes.length;entry.sha256=crypto.createHash('sha256').update(bytes).digest('hex');
+  fs.writeFileSync(mf,JSON.stringify(manifest));
+  assert.throws(()=>verifyRelease(dir),/NMS configuration gate is missing/);
+}));
 test('blocks the original missing-dependency failure', () => fixture(dir => {
   assert.throws(() => verifyRelease(dir), /Cannot find module 'express'/);
 }, false));
