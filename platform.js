@@ -293,8 +293,6 @@ function allowedAircraft(userId){
     ORDER BY a.registration
   `).all(userId,userId);
 }
-function canUseAircraft(userId, aircraftId){ return allowedAircraft(userId).some(a=>a.id===aircraftId); }
-function safeMission(row){ if(!row)return null; const x={...row}; try{x.payload=JSON.parse(x.payload_json||'{}')}catch{x.payload={}} delete x.payload_json; return x; }
 
 function installPlatform(app,{build='5.26.28'}={}){
   app.get('/api/platform/status',(req,res)=>{
@@ -895,71 +893,7 @@ function installPlatform(app,{build='5.26.28'}={}){
     res.json({ok:true,organization_id:organizationId,audit:rows});
   });
 
-  app.get('/api/missions',requireAuth,(req,res)=>{
-    const status=String(req.query.status||'draft');
-    if(status==='deleted'){
-      const missions=state.db.prepare("SELECT id,owner_user_id,revision,updated_at,json_extract(payload_json,'$.local_mission_id') AS local_mission_id FROM missions WHERE owner_user_id=? AND status='deleted'").all(req.flightopsSession.user_id);
-      return res.json({ok:true,missions});
-    }
-    const rows=state.db.prepare('SELECT * FROM missions WHERE owner_user_id=? AND status=? ORDER BY updated_at DESC LIMIT 250').all(req.flightopsSession.user_id,status).map(safeMission);
-    res.json({ok:true,missions:rows});
-  });
-
-  app.post('/api/missions',requireAuth,(req,res)=>{
-    const body=req.body||{},aircraftId=String(body.aircraft_id||'');
-    if(!canUseAircraft(req.flightopsSession.user_id,aircraftId)) return res.status(403).json({ok:false,error:'AIRCRAFT_ACCESS_DENIED'});
-    const orgs=membershipsFor(req.flightopsSession.user_id); const orgId=orgs[0]?.organization_id; if(!orgId)return res.status(403).json({ok:false,error:'NO_ORGANIZATION'});
-    const mid=id('mis'),now=isoNow(),payload=body.payload&&typeof body.payload==='object'?body.payload:{};
-    // A mobile connection can drop after commit but before the response arrives.
-    // Reuse this owner's existing client mission rather than create a duplicate.
-    const localMissionId=typeof payload.local_mission_id==='string'?payload.local_mission_id.trim():'';
-    if(localMissionId && localMissionId.length<=200){
-      const existing=state.db.prepare("SELECT * FROM missions WHERE owner_user_id=? AND aircraft_id=? AND json_extract(payload_json,'$.local_mission_id')=? ORDER BY created_at DESC LIMIT 1")
-        .get(req.flightopsSession.user_id,aircraftId,localMissionId);
-      if(existing){
-        if(existing.status==='deleted')return res.status(410).json({ok:false,error:'MISSION_DELETED',mission:safeMission(existing)});
-        return res.json({ok:true,mission:safeMission(existing),reused:true});
-      }
-    }
-    state.db.prepare(`INSERT INTO missions(id,organization_id,aircraft_id,owner_user_id,trip_number,status,revision,mission_date,departure,destination,alternate,payload_json,created_at,updated_at) VALUES(?,?,?,?,?,'draft',1,?,?,?,?,?,?,?)`).run(mid,orgId,aircraftId,req.flightopsSession.user_id,body.trip_number||null,body.mission_date||null,body.departure||null,body.destination||null,body.alternate||null,JSON.stringify(payload),now,now);
-    state.db.prepare('INSERT INTO mission_revisions(id,mission_id,revision,user_id,payload_json,created_at) VALUES(?,?,?,?,?,?)').run(id('rev'),mid,1,req.flightopsSession.user_id,JSON.stringify(payload),now);
-    res.status(201).json({ok:true,mission:safeMission(state.db.prepare('SELECT * FROM missions WHERE id=?').get(mid))});
-  });
-
-  app.get('/api/missions/:id',requireAuth,(req,res)=>{
-    const row=state.db.prepare('SELECT * FROM missions WHERE id=? AND owner_user_id=?').get(req.params.id,req.flightopsSession.user_id);
-    if(!row)return res.status(404).json({ok:false,error:'MISSION_NOT_FOUND'}); res.json({ok:true,mission:safeMission(row)});
-  });
-
-  app.put('/api/missions/:id',requireAuth,(req,res)=>{
-    const row=state.db.prepare('SELECT * FROM missions WHERE id=? AND owner_user_id=?').get(req.params.id,req.flightopsSession.user_id);
-    if(!row)return res.status(404).json({ok:false,error:'MISSION_NOT_FOUND'});
-    if(row.status==='deleted')return res.status(410).json({ok:false,error:'MISSION_DELETED'});
-    if(row.status!=='draft')return res.status(409).json({ok:false,error:'MISSION_NOT_DRAFT'});
-    const expected=Number(req.body?.expected_revision); if(!Number.isInteger(expected)||expected!==row.revision) return res.status(409).json({ok:false,error:'REVISION_CONFLICT',current_revision:row.revision});
-    const payload=req.body?.payload&&typeof req.body.payload==='object'?req.body.payload:JSON.parse(row.payload_json||'{}');
-    const rev=row.revision+1,now=isoNow();
-    state.db.prepare(`UPDATE missions SET trip_number=?,mission_date=?,departure=?,destination=?,alternate=?,payload_json=?,revision=?,updated_at=? WHERE id=?`).run(req.body.trip_number??row.trip_number,req.body.mission_date??row.mission_date,req.body.departure??row.departure,req.body.destination??row.destination,req.body.alternate??row.alternate,JSON.stringify(payload),rev,now,row.id);
-    state.db.prepare('INSERT INTO mission_revisions(id,mission_id,revision,user_id,payload_json,created_at) VALUES(?,?,?,?,?,?)').run(id('rev'),row.id,rev,req.flightopsSession.user_id,JSON.stringify(payload),now);
-    res.json({ok:true,mission:safeMission(state.db.prepare('SELECT * FROM missions WHERE id=?').get(row.id))});
-  });
-
-  app.post('/api/missions/:id/archive',requireAuth,(req,res)=>{
-    const row=state.db.prepare('SELECT * FROM missions WHERE id=? AND owner_user_id=?').get(req.params.id,req.flightopsSession.user_id);
-    if(!row)return res.status(404).json({ok:false,error:'MISSION_NOT_FOUND'});
-    if(row.status==='deleted')return res.status(410).json({ok:false,error:'MISSION_DELETED'});
-    const now=isoNow(); state.db.prepare("UPDATE missions SET status='archived',archived_at=?,updated_at=? WHERE id=?").run(now,now,row.id);
-    res.json({ok:true,mission:safeMission(state.db.prepare('SELECT * FROM missions WHERE id=?').get(row.id))});
-  });
-
-  app.delete('/api/missions/:id',requireAuth,(req,res)=>{
-    const row=state.db.prepare('SELECT * FROM missions WHERE id=? AND owner_user_id=?').get(req.params.id,req.flightopsSession.user_id);
-    if(!row)return res.status(404).json({ok:false,error:'MISSION_NOT_FOUND'});
-    // Retain a tombstone so an offline device cannot recreate a deleted plan.
-    if(row.status!=='deleted')state.db.prepare("UPDATE missions SET status='deleted',revision=revision+1,updated_at=? WHERE id=?").run(isoNow(),row.id);
-    res.json({ok:true,deleted:true,mission_id:row.id});
-  });
-
+  if(state.ok)require('./mission-service')(app,{db:state.db,requireAuth,id,isoNow});
 
   // v5.26.8 trusted-device / signed offline authorization foundation.
   app.get('/api/offline/public-key',(req,res)=>{

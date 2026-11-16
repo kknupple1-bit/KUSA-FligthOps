@@ -1,6 +1,6 @@
 {
   "name": "kusa-flightops",
-  "version": "5.26.29",
+  "version": "5.26.30",
   "private": true,
   "main": "server.js",
   "engines": {
@@ -15,8 +15,8 @@
     "release:verify": "node scripts/verify-release.cjs",
     "release:smoke": "node scripts/smoke-release.cjs",
     "release:test-gates": "node --test tests/release-gates.test.cjs",
-    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:test-weather && npm run release:smoke",
-    "release:layout": "node tests/ipad-trip-layout.cjs && node tests/numeric-keypads.cjs && node tests/app-number-pad.cjs && node tests/mission-review.cjs",
+    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:test-weather && npm run release:test-revisions && npm run release:smoke",
+    "release:layout": "node tests/ipad-trip-layout.cjs && node tests/numeric-keypads.cjs && node tests/app-number-pad.cjs && node tests/mission-review.cjs && node tests/revisions-browser.cjs",
     "release:test-n1": "node --test tests/n1-gates.test.cjs",
     "release:test-fuel": "node --test tests/fuel-accounting.test.cjs",
     "release:test-sync": "node --test tests/cross-device-sync.test.cjs",
@@ -24,7 +24,8 @@
     "release:test-pull-refresh": "node --test tests/pull-refresh.test.cjs",
     "release:test-storage": "node --test tests/database-storage.test.cjs",
     "release:test-update": "node --test tests/app-update.test.cjs",
-    "release:test-weather": "node --test tests/live-weather.test.cjs"
+    "release:test-weather": "node --test tests/live-weather.test.cjs",
+    "release:test-revisions": "node --test tests/flightops-revisions.test.cjs"
   },
   "dependencies": {
     "express": "4.21.2"

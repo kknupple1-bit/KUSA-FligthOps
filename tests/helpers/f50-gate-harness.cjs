@@ -5,7 +5,7 @@ function fn(name){let start=html.indexOf('function '+name+'(');assert(start>=0,n
 function device({today=false,weather=true,source=true,ai='OFF',temp=20,conflict=false,climbFail=false,closed=false,notams=true,serverStatus='GO'}={}){
  const events=[];const elements=new Map(),$=id=>{if(!elements.has(id))elements.set(id,{value:'',textContent:'',className:'',style:{}});return elements.get(id);};
  Object.entries({toConfig:'S20',toAntiIce:ai,toRunwayCondition:'DRY',perfObs:'true',perfBFL:1000,perfV1:100,perfVR:110}).forEach(([id,value])=>$(id).value=value);
- const ctx=vm.createContext({$,console,missionData:{},isCurrentTripToday:()=>today,currentTripDate:()=>today?'2026-10-26':'2026-10-30',tripDateDisplay:x=>x,
+ const ctx=vm.createContext({$,console,missionNotamReviewed:()=>true,individualObstacleDisposition:()=>true,missionData:{},isCurrentTripToday:()=>today,currentTripDate:()=>today?'2026-10-26':'2026-10-30',tripDateDisplay:x=>x,
  perfTakeoffPA:()=>weather?0:null,perfTakeoffTemp:()=>weather?temp:null,perfTakeoffWeightLb:()=>30000,perfTakeoffRunwayLen:()=>7002,perfIsManual:()=>false,
  formatWeatherSource:()=> 'LIVE • test weather',f50Dash4TakeoffN1:()=>source?{side:95.5,center:95.5,source:'bounded test table'}:null,F50_DASH4_N1_SOURCE:{OFF:'source',ON:'source'},
  autoTO:()=>({cfg:'S20',v1:100,vr:110,vfr:125,v15vs:150,bfl:1000}),autoFieldLimitedWeight:()=>40000,

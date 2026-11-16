@@ -4,7 +4,7 @@ const path = require('node:path');
 
 // Runtime-owned data (SQLite, shared trips, and public/assets) is not a release asset.
 function releaseFiles(root) {
-  const files = ['server.js', 'platform.js', 'package.json', 'package-lock.json',
+  const files = ['server.js', 'platform.js', 'mission-service.js', 'package.json', 'package-lock.json',
     'data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs',
     'scripts/database-storage.cjs', 'scripts/migrate-database.cjs'];
   function visit(relative) {
@@ -22,7 +22,7 @@ function releaseFiles(root) {
 
 // These paths are part of the application's delivery contract, not optional fallbacks.
 const requiredFiles = [
-  'server.js', 'platform.js', 'package.json', 'package-lock.json', 'data/runways.json',
+  'server.js', 'platform.js', 'mission-service.js', 'package.json', 'package-lock.json', 'data/runways.json',
   'scripts/database-storage.cjs', 'scripts/migrate-database.cjs',
   'public/numeric-entry.js', 'public/numeric-entry.css',
   'public/weather-math.js', 'public/mission-review.js', 'public/mission-review.css',

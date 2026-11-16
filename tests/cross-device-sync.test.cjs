@@ -211,7 +211,7 @@ test('Flight Plans Refresh and cross-device draft/archive continuity', {timeout:
       ipad.putDraft(record('delete-lost'));ipad.queue('delete-lost');await ipad.run('refreshFlightPlans()');
       const cookie=await session();let lost=false;
       ipad.configure({override:async(route,options)=>{
-        if(options.method==='DELETE'&&!lost){lost=true;await fetch(base+route,{...options,headers:{Cookie:cookie}});throw new Error('Lost delete acknowledgement')}
+        if(options.method==='DELETE'&&!lost){lost=true;await fetch(base+route,{...options,headers:{...options.headers,Cookie:cookie}});throw new Error('Lost delete acknowledgement')}
       }});
       ipad.run('requestMissionDeletion("delete-lost")');await ipad.run('refreshFlightPlans()');ipad.configure({override:null});
       assert(lost);assert.equal(ipad.drafts().some(r=>r.id==='delete-lost'),false);
@@ -243,6 +243,31 @@ test('Flight Plans Refresh and cross-device draft/archive continuity', {timeout:
       await ipad.run('refreshFlightPlans()');await phone.run('refreshFlightPlans()');
       assert.equal(ipad.archive().some(r=>r.id===archived.id),false);assert.equal(phone.archive().some(r=>r.id===archived.id),false);
     });
+    await t.test('assigned second pilot downloads and edits a shared plan using the shipped client',async()=>{
+      const {DatabaseSync}=require('node:sqlite');const db=new DatabaseSync(path.join(temp,'test.sqlite'));
+      const owner=db.prepare('SELECT * FROM users WHERE email=?').get(email),org=db.prepare('SELECT organization_id FROM memberships WHERE user_id=?').get(owner.id).organization_id;
+      db.prepare("INSERT INTO users(id,email,display_name,password_salt,password_hash,status,created_at,updated_at) SELECT 'shared-pilot','shared@flightops.invalid','Shared Pilot',password_salt,password_hash,status,created_at,updated_at FROM users WHERE id=?").run(owner.id);
+      db.prepare("INSERT INTO memberships VALUES('shared-membership',?,'shared-pilot','pilot',?)").run(org,new Date().toISOString());
+      const aircraft=db.prepare("SELECT id FROM aircraft WHERE registration='N33AP'").get().id;
+      db.prepare("INSERT INTO aircraft_access VALUES('shared-access',?,'shared-pilot','pilot',?)").run(aircraft,new Date().toISOString());db.close();
+      const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'shared@flightops.invalid',password})});
+      const shared=device(base,login.headers.get('set-cookie').split(';')[0]);
+      ipad.putDraft(record('department-shared'));ipad.queue('department-shared');await ipad.run('refreshFlightPlans()');
+      assert.equal(await shared.run('refreshFlightPlans()'),true);
+      assert.equal(shared.drafts().some(r=>r.aircraft==='F900B'),false,'unassigned aircraft is excluded');
+      const plan=shared.drafts().find(r=>r.id==='department-shared');assert(plan);assert.equal(plan.server_permissions.write,true);assert.equal(plan.server_permissions.delete,false);
+      const originalOwner=plan.server_owner_user_id;plan.state.marker='second pilot edit';plan.updated_at=new Date().toISOString();shared.putDraft(plan);shared.queue(plan.id);
+      assert.equal(await shared.run('refreshFlightPlans()'),true);assert.equal(shared.drafts().find(r=>r.id===plan.id).server_sync_state,'synced');
+      await ipad.run('refreshFlightPlans()');assert.equal(ipad.drafts().find(r=>r.id===plan.id).state.marker,'second pilot edit');
+      assert.equal(ipad.drafts().find(r=>r.id===plan.id).server_owner_user_id,originalOwner);
+      const stale={...plan,state:{marker:'stale edit'},updated_at:new Date().toISOString()};ipad.putDraft(stale);ipad.queue(stale.id);await ipad.run('refreshFlightPlans()');
+      assert.equal(ipad.drafts().find(r=>r.id===plan.id).server_sync_state,'conflict');
+      ipad.context.confirm=()=>true;ipad.context.showPlatformView=()=>{};
+      await ipad.run(`reloadSharedMission(${JSON.stringify(plan.id)})`);
+      assert.equal(ipad.drafts().find(r=>r.id===plan.id).state.marker,'second pilot edit');
+      const backup=JSON.parse(ipad.memory.get('kusaFlightOpsConflictBackups:v1'));
+      assert.equal(backup.at(-1).record.state.marker,'stale edit','explicit conflict recovery retains original local edits');
+    });
     await t.test('deletion requires authentication, isolates owners, and cannot be undone by stale archive/create calls',async()=>{
       ipad.putDraft(record('delete-security'));ipad.queue('delete-security');await ipad.run('refreshFlightPlans()');
       const plan=ipad.drafts().find(r=>r.id==='delete-security'),cookie=await session();
@@ -252,7 +277,7 @@ test('Flight Plans Refresh and cross-device draft/archive continuity', {timeout:
       const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:'other@flightops.invalid',password})});
       const otherCookie=login.headers.get('set-cookie').split(';')[0];
       assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id,{method:'DELETE',headers:{Cookie:otherCookie}})).status,404);
-      for(let attempt=0;attempt<2;attempt++)assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id,{method:'DELETE',headers:{Cookie:cookie}})).status,200);
+      for(let attempt=0;attempt<2;attempt++)assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id,{method:'DELETE',headers:{Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify({expected_revision:plan.server_revision})})).status,200);
       assert.equal((await fetch(base+'/api/missions/'+plan.server_mission_id+'/archive',{method:'POST',headers:{Cookie:cookie}})).status,410);
       const aircraft=await fetch(base+'/api/aircraft',{headers:{Cookie:cookie}}).then(r=>r.json());
       const recreate=await fetch(base+'/api/missions',{method:'POST',headers:{Cookie:cookie,'Content-Type':'application/json'},body:JSON.stringify({aircraft_id:aircraft.aircraft.find(a=>a.registration==='N33AP').id,payload:{local_mission_id:plan.id}})});
