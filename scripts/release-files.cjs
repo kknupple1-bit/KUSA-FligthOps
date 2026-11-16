@@ -6,7 +6,7 @@ const path = require('node:path');
 function releaseFiles(root) {
   const files = ['server.js', 'platform.js', 'mission-service.js', 'package.json', 'package-lock.json',
     'data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs',
-    'scripts/database-storage.cjs', 'scripts/migrate-database.cjs'];
+    'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs'];
   function visit(relative) {
     for (const entry of fs.readdirSync(path.join(root, relative), {withFileTypes: true})) {
       const name = `${relative}/${entry.name}`;
@@ -23,7 +23,7 @@ function releaseFiles(root) {
 // These paths are part of the application's delivery contract, not optional fallbacks.
 const requiredFiles = [
   'server.js', 'platform.js', 'mission-service.js', 'package.json', 'package-lock.json', 'data/runways.json',
-  'scripts/database-storage.cjs', 'scripts/migrate-database.cjs',
+  'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs',
   'public/numeric-entry.js', 'public/numeric-entry.css',
   'public/weather-math.js', 'public/mission-review.js', 'public/mission-review.css',
   'public/index.html', 'public/account.html', 'public/admin-users.html',
