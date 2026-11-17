@@ -5,15 +5,31 @@ const path=require('node:path');
 const {fork}=require('node:child_process');
 const {extractPlan,validDate}=require('./foreflight-parser');
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
+const pdfMessages={
+ PDF_TIMEOUT:'The Preview PDF reader timed out. No trip was created. Report the reference below so we can check the hosted reader.',
+ PDF_READER_UNAVAILABLE:'The PDF reader could not start on Preview. This is a hosting problem, not a Shortcut setting. No trip was created.',
+ PDF_READER_FAILED:'The hosted PDF reader stopped unexpectedly. No trip was created. Report the reference below.',
+ PDF_PASSWORD_REQUIRED:'The PDF is password-protected. Share an unprotected ForeFlight Navlog / flight-plan PDF. No trip was created.',
+ PDF_PAGE_LIMIT:'The PDF exceeds the 20-page limit. Share the flight Navlog / flight-plan PDF without the full briefing. No trip was created.',
+ PDF_NO_TEXT:'No readable text was found in the PDF. It may contain scanned pages or images. No trip was created.',
+ PDF_TEXT_LIMIT:'The PDF contains more text than this import supports. Share the flight Navlog / flight-plan PDF only. No trip was created.',
+ PDF_INVALID:'The received PDF could not be decoded. Please share the same ForeFlight PDF with support for format testing. No trip was created.',
+ PDF_NOT_READABLE:'The PDF reader could not decode this document. Please share the same PDF with support for format testing. No trip was created.',
+ PDF_LAYOUT_NOT_RECOGNIZED:'The PDF was read, but its flight-plan layout was not recognized. We need this sample to support its format. No trip was created.',
+ IMPORT_STORAGE_FAILED:'The PDF was read, but the incoming plan could not be stored. No trip was created. Report the reference below.'
+};
+const fault=code=>Object.assign(Error(code),{code});
 function readPdf(bytes){return new Promise((resolve,reject)=>{
  const env=Object.fromEntries(['PATH','SystemRoot','SYSTEMROOT','TEMP','TMP'].filter(k=>process.env[k]).map(k=>[k,process.env[k]]));
- const worker=fork(path.join(__dirname,'scripts/foreflight-pdf-worker.cjs'),[],{execArgv:['--max-old-space-size=128'],env,stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});
- const timer=setTimeout(()=>{worker.kill();reject(Error('PDF_NOT_READABLE'));},10000);
+ let worker;
+ try{worker=fork(path.join(__dirname,'scripts/foreflight-pdf-worker.cjs'),[],{execArgv:['--max-old-space-size=128'],env,stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});}
+ catch{reject(fault('PDF_READER_UNAVAILABLE'));return;}
+ const timer=setTimeout(()=>{worker.kill();reject(fault('PDF_TIMEOUT'));},10000);
  const finish=()=>{clearTimeout(timer);worker.kill();};
- worker.once('message',r=>{finish();r.ok?resolve(r):reject(Error('PDF_NOT_READABLE'));});
- worker.once('error',()=>{finish();reject(Error('PDF_NOT_READABLE'));});
- worker.once('exit',()=>{clearTimeout(timer);reject(Error('PDF_NOT_READABLE'));});
- worker.send(bytes.toString('base64'));
+ worker.once('message',r=>{finish();r.ok?resolve(r):reject(fault(Object.hasOwn(pdfMessages,r.error)?r.error:'PDF_NOT_READABLE'));});
+ worker.once('error',()=>{finish();reject(fault('PDF_READER_UNAVAILABLE'));});
+ worker.once('exit',()=>{clearTimeout(timer);reject(fault('PDF_READER_FAILED'));});
+ worker.send(bytes.toString('base64'),error=>{if(error){finish();reject(fault('PDF_READER_UNAVAILABLE'));}});
 });}
 module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReader=readPdf}){
  db.exec(`CREATE TABLE IF NOT EXISTS foreflight_connections (
@@ -70,8 +86,10 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
   const recent=db.prepare('SELECT COUNT(*) n FROM foreflight_imports WHERE user_id=? AND created_at>?').get(c.user_id,new Date(Date.now()-3600000).toISOString()).n;
   if(recent>=12||busy>=2)return res.status(429).json({ok:false,error:'TRY_AGAIN_LATER'});
   busy++;
+  const started=Date.now();let stage='pdf_decode',pageCount;
   try{
-   const pdf=await pdfReader(req.body),parsed=extractPlan(pdf.text);
+   const pdf=await pdfReader(req.body);pageCount=pdf.pages;stage='plan_recognition';
+   const parsed=extractPlan(pdf.text);stage='import_storage';
    // Recheck authority after asynchronous PDF work (revocation can happen meanwhile).
    const still=db.prepare('SELECT c.id FROM foreflight_connections c JOIN sessions s ON s.id=c.session_id JOIN users u ON u.id=c.user_id WHERE c.id=? AND c.revoked_at IS NULL AND c.expires_at>? AND s.revoked_at IS NULL AND s.expires_at>? AND u.status=\'active\'').get(c.id,isoNow(),isoNow());
    if(!still||!writable(c.user_id).length)return res.status(401).json({ok:false,error:'UPLOAD_CONNECTION_EXPIRED_OR_REVOKED'});
@@ -79,7 +97,14 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
    db.prepare('INSERT OR IGNORE INTO foreflight_imports VALUES(?,?,?,?,?,?,?,NULL)').run(iid,c.user_id,c.id,sha,JSON.stringify({...parsed,pages:pdf.pages}),isoNow(),new Date(Date.now()+48*3600000).toISOString());
    const stored=db.prepare('SELECT id FROM foreflight_imports WHERE user_id=? AND content_sha256=?').get(c.user_id,sha);
    return res.status(201).json({ok:true,open_url:importUrl(req,stored.id)});
-  }catch{return res.status(422).json({ok:false,error:'PDF_NOT_READABLE_OR_UNSUPPORTED',message:'Share a text-based ForeFlight Navlog / flight-plan PDF (20 pages maximum). No trip was created.'});}
+  }catch(error){
+   const code=stage==='plan_recognition'?(error.message==='DOCUMENT_TEXT_LIMIT'?'PDF_TEXT_LIMIT':'PDF_LAYOUT_NOT_RECOGNIZED'):stage==='import_storage'?'IMPORT_STORAGE_FAILED':Object.hasOwn(pdfMessages,error.code)?error.code:'PDF_NOT_READABLE';
+   const reference=crypto.randomBytes(6).toString('hex');
+   // No keys, PDF text, filenames, routes, identity, hashes, URLs or provider bodies.
+   console.warn('[ForeFlight import]',JSON.stringify({reference,stage,code,pdf_bytes:req.body.length,pages:pageCount,elapsed_ms:Date.now()-started}));
+   const status=code==='IMPORT_STORAGE_FAILED'?500:['PDF_TIMEOUT','PDF_READER_UNAVAILABLE','PDF_READER_FAILED'].includes(code)?503:422;
+   return res.status(status).json({ok:false,error:code,message:pdfMessages[code],reference});
+  }
   finally{busy--;}
  });
  app.use('/api/foreflight/upload',(err,req,res,next)=>{if(err)return res.status(err.type==='entity.too.large'?413:400).json({ok:false,error:'PDF_UPLOAD_REJECTED'});next();});

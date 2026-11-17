@@ -20,6 +20,7 @@ test('parser only proposes explicit unambiguous fields and pounds',()=>{
 test('real PDF worker extracts text, rejects malformed input and cleans up',async()=>{
  const result=await install.readPdf(pdf(plan('N33AP')));assert.equal(result.pages,1);const p=extractPlan(result.text);assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.departure,'KDTO');
  await assert.rejects(()=>install.readPdf(Buffer.from('%PDF-invalid')));
+ await assert.rejects(()=>install.readPdf(pdf('')),e=>e.code==='PDF_NO_TEXT');
 });
 test('upload-only connections and reviewed trip creation enforce identity, access and idempotency',async t=>{
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
@@ -38,7 +39,8 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
  const app=express();app.use(express.json({limit:'1mb'}));
  const requireAuth=(req,res,next)=>{const u=req.get('X-Test-User');if(!u)return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});req.flightopsSession={user_id:u,id:u+'s',expires_at:expiry};next();};
  const opts={db,requireAuth,id:p=>p+'_'+crypto.randomBytes(12).toString('hex'),isoNow:()=>new Date().toISOString()};
- require('../mission-service')(app,opts);install(app,{...opts,pdfReader:async bytes=>({text:bytes.toString().slice(6),pages:1})});
+ let pdfFailure=null;
+ require('../mission-service')(app,opts);install(app,{...opts,pdfReader:async bytes=>{if(pdfFailure)throw pdfFailure;return {text:bytes.toString().slice(6),pages:1};}});
  const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));const base=`http://127.0.0.1:${server.address().port}`;
  async function api(user,url,method='GET',body,headers={}){const r=await fetch(base+url,{method,headers:{...(user?{'X-Test-User':user}:{}),'Content-Type':'application/json','X-FlightOps-Action':'foreflight',...headers},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,...await r.json()};}
  async function upload(key,text=plan('N33AP'),headers={}){const r=await fetch(base+'/api/foreflight/upload',{method:'POST',headers:{'Content-Type':'application/pdf',...(key?{'X-FlightOps-Upload-Key':key}:{}),...headers},body:Buffer.from('%PDF-\n'+text)});return {status:r.status,...await r.json()};}
@@ -68,6 +70,24 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
    assert.equal((await upload(key,plan('N33AP'),{'Content-Type':'application/octet-stream'})).status,400);
    assert.equal((await upload(key,'x'.repeat(4*1024*1024))).status,413);
    assert.equal((await upload(key,plan('N33AP'),{'Content-Encoding':'gzip'})).status,400);
+  });
+  await t.test('document and hosting failures have distinct safe messages and trace references',async()=>{
+   const events=[],previous=console.warn;console.warn=(...args)=>events.push(args.join(' '));
+   try{
+    for(const code of ['PDF_PASSWORD_REQUIRED','PDF_PAGE_LIMIT','PDF_NO_TEXT','PDF_READER_UNAVAILABLE','PDF_READER_FAILED','PDF_TIMEOUT']){
+     pdfFailure=Object.assign(Error('SENSITIVE_PROVIDER_DETAIL'),{code});
+     const r=await upload(key,'ForeFlight failure fixture '+code);
+     assert.equal(r.status,['PDF_READER_UNAVAILABLE','PDF_READER_FAILED','PDF_TIMEOUT'].includes(code)?503:422);
+     assert.equal(r.error,code);assert.match(r.reference,/^[a-f0-9]{12}$/);assert(r.message.includes('No trip was created'));
+     assert(!JSON.stringify(r).includes('SENSITIVE_PROVIDER_DETAIL'));
+    }
+    pdfFailure=null;
+    const unrecognized=await upload(key,'An unrecognized document layout');
+    assert.equal(unrecognized.error,'PDF_LAYOUT_NOT_RECOGNIZED');assert.equal(unrecognized.status,422);
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM missions').get().n,0);
+    assert(events.every(s=>!s.includes(key)&&!s.includes('SENSITIVE_PROVIDER_DETAIL')&&!s.includes('An unrecognized document')));
+    assert(events.some(s=>s.includes('pdf_decode')));assert(events.some(s=>s.includes('plan_recognition')));
+   }finally{pdfFailure=null;console.warn=previous;}
   });
   await t.test('review, valid fuel and tail matching required; no inherited reviews',async()=>{
    for(const b of [{reviewed:false},{fob_lb:100},{trip_lb:'3000'},{aircraft_id:'f900'},{date:'2026-02-30'},{departure:'ZZZZ'}])assert.equal((await api('pilot',`/api/foreflight/imports/${iid}/create`,'POST',{...reviewed,...b})).status,400);
