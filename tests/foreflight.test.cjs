@@ -8,6 +8,8 @@ test('parser only proposes explicit unambiguous fields and pounds',()=>{
  const p=extractPlan(plan('N33AP'));assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.trip_lb,3000);assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');
  assert.equal(extractPlan(plan('N33AP')+'\nDeparture: KOPF').fields.departure,null);
  assert.equal(extractPlan(plan('N33AP').replace('9,000 lbs','9000 kg')).fields.fob_lb,null);
+ assert.equal(extractPlan('ForeFlight\nBlock Fuel: 9,000 lbs').fields.fob_lb,null,'Block Fuel must never be silently treated as ramp FOB');
+ const header=extractPlan('Navlog\nKDTO – KBPT (November 17, 2026) in N33AP (FA50)');assert.equal(header.fields.registration,'N33AP');assert.equal(header.fields.departure,'KDTO');assert.equal(header.fields.destination,'KBPT');assert.equal(header.fields.date,'2026-11-17');
  assert.equal(extractPlan('ForeFlight\nFlight Date: 11/12/2026').fields.date,null);
  assert.equal(validDate('2026-02-30'),false);assert.equal(validDate('2026-11-17'),true);
  assert.throws(()=>extractPlan('Some other document'));

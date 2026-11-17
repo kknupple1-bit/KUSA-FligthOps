@@ -41,6 +41,9 @@ are left blank/rejected, not guessed. Explicit pounds are recognized; kg/gallons
 are not silently converted. The user confirms local date, aircraft, airports,
 ramp fuel, takeoff-to-landing trip burn and separate taxi. The configured 200-lb
 taxi default is explicitly labeled when absent from the document.
+ForeFlight Block Fuel is displayed as a reference only, never silently mapped to
+ramp FOB. Only explicitly labeled ramp/FOB pounds prefill that input. Navlog
+route/date/tail headers and English named-month dates are also recognized.
 
 The review's selected aircraft must be currently writable and must match a
 detected tail. Confirmation creates one aircraft/department-scoped draft in a
