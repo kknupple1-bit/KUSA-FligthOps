@@ -1,6 +1,6 @@
 {
   "name": "kusa-flightops",
-  "version": "5.26.30",
+  "version": "5.26.31",
   "private": true,
   "main": "server.js",
   "engines": {
@@ -15,7 +15,7 @@
     "release:verify": "node scripts/verify-release.cjs",
     "release:smoke": "node scripts/smoke-release.cjs",
     "release:test-gates": "node --test tests/release-gates.test.cjs",
-    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:test-weather && npm run release:test-revisions && npm run release:test-nms && npm run release:smoke",
+    "release:check": "npm run release:verify && npm run release:test-gates && npm run release:test-update && npm run release:test-storage && npm run release:test-sync && npm run release:test-fuel && npm run release:test-n1 && npm run release:test-obstacle && npm run release:test-pull-refresh && npm run release:test-weather && npm run release:test-revisions && npm run release:test-nms && npm run release:test-foreflight && npm run release:smoke",
     "release:layout": "node tests/ipad-trip-layout.cjs && node tests/numeric-keypads.cjs && node tests/app-number-pad.cjs && node tests/mission-review.cjs && node tests/revisions-browser.cjs",
     "release:test-n1": "node --test tests/n1-gates.test.cjs",
     "release:test-fuel": "node --test tests/fuel-accounting.test.cjs",
@@ -28,10 +28,12 @@
     "release:test-revisions": "node --test tests/flightops-revisions.test.cjs",
     "release:service-config": "node scripts/check-nms-release.cjs",
     "release:services": "node scripts/check-nms-release.cjs --live",
-    "release:test-nms": "node --test tests/nms-release-gate.test.cjs"
+    "release:test-nms": "node --test tests/nms-release-gate.test.cjs",
+    "release:test-foreflight": "node --test tests/foreflight.test.cjs"
   },
   "dependencies": {
-    "express": "4.21.2"
+    "express": "4.22.3",
+    "pdf-parse": "2.4.5"
   },
   "devDependencies": {
     "playwright": "1.61.0"

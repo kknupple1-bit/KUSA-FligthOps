@@ -894,6 +894,7 @@ function installPlatform(app,{build='5.26.28'}={}){
   });
 
   if(state.ok)require('./mission-service')(app,{db:state.db,requireAuth,id,isoNow});
+  if(state.ok)require('./foreflight-service')(app,{db:state.db,requireAuth,id,isoNow});
 
   // v5.26.8 trusted-device / signed offline authorization foundation.
   app.get('/api/offline/public-key',(req,res)=>{
