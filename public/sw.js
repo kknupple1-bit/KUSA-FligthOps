@@ -1,4 +1,4 @@
-const BUILD="5.26.30";
+const BUILD="5.26.31";
 const PUBLIC_CACHE=`kusa-flightops-public-v${BUILD}`;
 const PROTECTED_CACHE=`kusa-flightops-protected-v${BUILD}`;
 const DB_NAME="kusa-flightops-offline", DB_VERSION=1, STORE="meta";
@@ -41,6 +41,7 @@ self.addEventListener('activate',e=>e.waitUntil((async()=>{
 })()));
 self.addEventListener('message',e=>{const m=e.data||{};if(m.type==='KUSA_OFFLINE_GRANT')e.waitUntil((async()=>{const r=m.grant||{},v=await verifyGrantRecord(r);if(!v.ok){await purgeProtected();return}await dbPut('grant',r);await caches.delete(PROTECTED_CACHE);await cacheProtectedFoundation()})());else if(m.type==='KUSA_OFFLINE_REVOKE')e.waitUntil(purgeProtected());else if(m.type==='KUSA_OFFLINE_REFRESH')e.waitUntil(cacheProtectedFoundation())});
 self.addEventListener('fetch',e=>{const req=e.request;if(req.method!=='GET')return;const u=new URL(req.url);if(u.origin!==self.location.origin)return;
+ if(u.pathname.startsWith('/foreflight')){e.respondWith(fetch(req).catch(()=>deniedHtml('ForeFlight sharing requires an online connection. No incoming trip was created.')));return}
  if(PUBLIC_ASSETS.includes(u.pathname)||u.pathname.startsWith('/icons/')){e.respondWith((async()=>{const c=await caches.open(PUBLIC_CACHE);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch{return(await c.match(req))||new Response('Offline',{status:503})}})());return}
  if(u.pathname.startsWith('/api/weather')||u.pathname.startsWith('/api/notams')||u.pathname.startsWith('/api/runway')||u.pathname.startsWith('/api/diagnostics')||u.pathname.startsWith('/api/shared-trips')){e.respondWith(fetch(req).catch(()=>offlineJson('LIVE_DATA_NETWORK_REQUIRED')));return}
  if(u.pathname.startsWith('/api/data/')||u.pathname.startsWith('/data/')){e.respondWith((async()=>{const g=await currentGrant();if(!g.ok)return fetch(req).catch(()=>offlineJson('OFFLINE_AUTH_REQUIRED'));const c=await caches.open(PROTECTED_CACHE);try{const r=await fetch(req);if(r.ok)await c.put(req,r.clone());return r}catch{return(await c.match(req))||offlineJson('OFFLINE_DATA_NOT_CACHED')}})());return}

@@ -86,6 +86,7 @@ module.exports = function installMissions(app, {db, requireAuth, id, isoNow}) {
     if(!p||typeof p!=='object'||Array.isArray(p))return res.status(400).json({ok:false,error:'INVALID_PAYLOAD'});
     // Client retry identity and aircraft are immutable, even for another editor.
     const prior=JSON.parse(row.payload_json);p.local_mission_id=prior.local_mission_id;
+    if(prior.foreflight_import)p.foreflight_import=prior.foreflight_import;
     const comparable=value=>{
       const copy=JSON.parse(JSON.stringify(value));delete copy.local_updated_at;
       // Cache bookkeeping is regenerated on every browser capture. The cached

@@ -24,7 +24,13 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   const appRequire = createRequire(path.join(root, 'package.json'));
   for (const dependency of Object.keys(pkg.dependencies || {})) {
     appRequire(dependency); // Load transitive dependencies, not just a directory-presence check.
-    const installed = appRequire(`${dependency}/package.json`).version;
+    // Packages may intentionally omit package.json from their exports map.
+    let directory=path.dirname(appRequire.resolve(dependency)),installed;
+    while(directory!==path.dirname(directory)){
+      const metadata=path.join(directory,'package.json');
+      if(fs.existsSync(metadata)){const value=JSON.parse(fs.readFileSync(metadata,'utf8'));if(value.name===dependency){installed=value.version;break;}}
+      directory=path.dirname(directory);
+    }
     const expected = lock.packages?.[`node_modules/${dependency}`]?.version;
     if (!expected || installed !== expected) throw new Error(`Installed ${dependency} does not match lockfile; run npm ci`);
   }
@@ -67,7 +73,7 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   if (!read('public/index.html').includes(`const expected="${manifest.build}"`)) throw new Error('Browser build mismatch');
   for (const page of ['account', 'admin-users', 'invite', 'reset-password'])
     if (!read(`public/${page}.html`).includes(`v${manifest.build}`)) throw new Error(`${page} build mismatch`);
-  for (const file of ['server.js', 'platform.js', 'mission-service.js', 'public/sw.js', 'public/numeric-entry.js', 'public/weather-math.js', 'public/mission-review.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs']) new vm.Script(read(file), {filename: file});
+  for (const file of ['server.js', 'platform.js', 'mission-service.js', 'foreflight-service.js','foreflight-parser.js','scripts/foreflight-pdf-worker.cjs','public/foreflight.js','public/foreflight-open.js','public/sw.js', 'public/numeric-entry.js', 'public/weather-math.js', 'public/mission-review.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs']) new vm.Script(read(file), {filename: file});
   return manifest;
 }
 if (require.main === module) {

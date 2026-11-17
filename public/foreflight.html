@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Create KUSA Trip — ForeFlight</title><link rel="stylesheet" href="/foreflight.css"></head>
+<body><main><header><a href="/">FlightOps</a><span>Preview integration • v5.26.31</span></header>
+<h1>Create KUSA Trip</h1><p>Send a ForeFlight Navlog / flight-plan PDF straight from its Share menu. No email or saving to Files.</p>
+<p id="status" role="status">Checking your account…</p>
+<section id="setup" hidden>
+<h2>Connect this iPad</h2><p>One-time setup in Apple Shortcuts is required. After setup, choose <b>Create KUSA Trip</b> in ForeFlight’s PDF Share menu.</p>
+<p>The connection can only upload PDFs. It cannot read missions, create a trip, or record pilot reviews. It expires after seven days or when the linked sign-in is revoked. You can revoke it here at any time.</p>
+<label>Connection name<input id="deviceLabel" maxlength="60" value="ForeFlight iPad"></label><button id="connect">Create upload connection</button>
+<div id="credentials" hidden><p class="warning">Copy these values into your own iPad Shortcut. Keep the upload key private. It is shown only now; it is not a FlightOps password.</p>
+<label>Upload URL<textarea id="uploadUrl" readonly rows="3" spellcheck="false"></textarea></label><button id="copyUrl">Copy upload URL</button>
+<label>Upload key<input id="uploadKey" type="password" readonly autocomplete="off"></label><button id="copyKey">Copy upload key</button>
+<p id="expiry"></p><button id="hideKey">Hide and clear key</button></div>
+<h2>Set up the Share action</h2>
+<ol><li>Open Apple <b>Shortcuts</b>, create a shortcut named <b>Create KUSA Trip</b>, enable <b>Show in Share Sheet</b>, and set its input to <b>PDFs</b>. Set no input to <b>Stop and Respond</b>.</li>
+<li>Add <b>Count</b> for Shortcut Input, then <b>If</b> Count is not 1: <b>Show Alert</b> “Share one combined Navlog / flight-plan PDF” and <b>Stop This Shortcut</b>.</li>
+<li>Add <b>URL</b> and paste the Upload URL above. Keep the Preview URL for testing; do not substitute the Live address.</li>
+<li>Add <b>Get Contents of URL</b>: Method <b>POST</b>; Headers <b>Content-Type</b> = <b>application/pdf</b> and <b>X-FlightOps-Upload-Key</b> = your upload key; Request Body <b>File</b> = <b>Shortcut Input</b>.</li>
+<li>Add <b>Get Dictionary Value</b>: key <b>open_url</b> from Contents of URL. Add <b>If</b> Dictionary Value has any value → <b>Open URLs</b> using that value. Otherwise <b>Show Alert</b> using Contents of URL; do not retry in a loop.</li>
+<li>In ForeFlight <b>Flights → Send To → Share PDF</b>, select Navlog and flight-plan form, then <b>Create KUSA Trip</b>. Allow the connection to this Preview host when iPad asks. The browser opens this review screen; sign in if prompted.</li></ol>
+<p class="warning">Preview’s GoDaddy access layer must also allow the Shortcut request. Use the shared Preview URL on this iPad first. If the Shortcut returns a GoDaddy sign-in page instead of a review link, report it here; the private Preview gateway needs verification before this can be accepted on iPad.</p>
+<p>Text-based PDFs only, up to 4 MB / 20 pages. Image-only/scanned or password-protected documents are rejected. Missing or conflicting fields are left for your review. No third-party AI or email service receives the PDF.</p>
+<h2>Your upload connections</h2><div id="connections"></div><h2>Recent incoming plans</h2><p>Use the review link returned by your Shortcut. Pending plans expire after 48 hours. Sending the same PDF again returns the same review; it does not create another trip.</p>
+</section>
+<section id="review" hidden><h2>Review the incoming plan</h2><p id="source"></p><div id="warnings" class="warning"></div><dl id="evidence"></dl>
+<form id="tripForm"><label>Aircraft<select id="aircraft" required></select></label>
+<div class="grid"><label>Trip date (local)<input id="date" type="date" required></label><label>Departure ICAO<input id="departure" maxlength="4" pattern="[A-Z]{4}" autocapitalize="characters" required></label><label>Destination ICAO<input id="destination" maxlength="4" pattern="[A-Z]{4}" autocapitalize="characters" required></label><label>Alternate ICAO<input id="alternate" maxlength="4" pattern="[A-Z]{4}" autocapitalize="characters"></label></div>
+<div class="grid"><label>Ramp fuel / FOB (lb)<input id="fob_lb" type="number" min="1" max="50000" step="any" required></label><label>Trip burn, excludes taxi (lb)<input id="trip_lb" type="number" min="0" max="50000" step="any" required></label><label>Taxi burn (lb)<input id="taxi_lb" type="number" min="0" max="50000" step="any" required></label></div>
+<p id="defaults"></p><p>No crew, passengers, baggage, weather, runway selections, FOB verification or pilot signoffs transfer from ForeFlight. Review loading and performance in the new trip.</p>
+<label class="check"><input id="reviewed" type="checkbox" required> I checked the aircraft, airports, local date, fuel units and definitions against my plan. FOB is ramp fuel; trip burn excludes taxi, reserves and fuel remaining at landing.</label><button id="createTrip" type="submit">Create trip and open FlightOps</button></form>
+<a id="existing" hidden>Open the trip already created from this PDF</a></section>
+</main><script src="/foreflight.js" defer></script></body></html>

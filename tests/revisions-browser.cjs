@@ -76,6 +76,37 @@ const root=path.resolve(__dirname,'..');
   assert.deepEqual(await page.evaluate(()=>['f9wb_pilot','f9wb_copilot','f9wbTaxi'].map(id=>Number($(id).value))),[215,201,0]);
   assert.equal(await page.evaluate(()=>window.f900bWBLatest.ldgFuel),6000);
   assert.deepEqual(errors,[],'no uncaught runtime errors in either aircraft');
+  const {pdf,plan}=require('./foreflight-fixtures.cjs');
+  await page.waitForLoadState('networkidle');
+  const connection=await context.request.post(base+'/api/foreflight/connections',{headers:{'X-FlightOps-Action':'foreflight'},data:{label:'Synthetic browser test'}});
+  assert.equal(connection.status(),201);const pairing=await connection.json();
+  for(const [tail,fob]of [['N33AP',9000],['N699BG',15000]]){
+   const incoming=await context.request.post(base+'/api/foreflight/upload',{headers:{'Content-Type':'application/pdf','X-FlightOps-Upload-Key':pairing.upload_key},data:pdf(plan(tail).replace('9,000 lbs',fob+' lbs'))});
+   assert.equal(incoming.status(),201);const link=await incoming.json();
+   await page.goto(link.open_url);
+   await page.getByRole('button',{name:'Create trip and open FlightOps',exact:true}).waitFor({state:'visible'});
+   assert.equal(await page.locator('#fob_lb').inputValue(),String(fob));
+   assert.equal(await page.locator('#departure').inputValue(),'KDTO');
+   for(const width of [390,834,1194]){
+    await page.setViewportSize({width,height:1000});
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false,'incoming review has no horizontal overflow');
+   }
+   await page.setViewportSize({width:834,height:1194});
+   await page.locator('#reviewed').check();
+   const creating=page.waitForResponse(r=>r.url().includes('/api/foreflight/imports/')&&r.url().endsWith('/create')&&r.request().method()==='POST');
+   await page.getByRole('button',{name:'Create trip and open FlightOps',exact:true}).click();
+   const created=await (await creating).json();
+   await page.waitForFunction(mid=>window.currentMissionMeta?.server_mission_id===mid,created.mission_id);
+   assert.equal(await page.evaluate(()=>window.currentMissionMeta.aircraft),tail==='N699BG'?'F900B':'N33AP');
+   if(tail==='N33AP')assert.deepEqual(await page.evaluate(()=>['captWt','foWt','taxiFuel'].map(id=>Number($(id).value))),[190,190,200]);
+   else assert.deepEqual(await page.evaluate(()=>['f9mCaptainWt','f9mFOWt','f9mTaxiFuel'].map(id=>Number($(id).value))),[170,170,200]);
+   assert.equal(await page.evaluate(()=>missionNotamReviewed('dep')),false,'import never inherits pilot acknowledgment');
+   await page.waitForLoadState('networkidle');
+   await page.goto(link.open_url);await page.getByText('This PDF already has a trip.',{exact:false}).waitFor();
+   assert.equal(await page.locator('#tripForm').isVisible(),false,'re-sharing cannot create duplicate');
+  }
+  assert.deepEqual(errors,[],'no uncaught ForeFlight review or trip-opening errors');
+  console.log('PASS ForeFlight direct handoff: actual PDF extraction, review, both aircraft, responsive review form, trip opens in full app, configured defaults, no signoff inheritance, duplicate protection. iPad Shortcut and GoDaddy gateway remain physical acceptance checks.');
   console.log('PASS complete WebKit app: defaults, saved crew/taxi overrides, W&B/fuel flow, authenticated NOTAM acknowledgment, closure hard stop, individual audit record, both aircraft, no uncaught runtime errors. Synthetic NOTAM/weather only.');
  }finally{
   if(browser)await browser.close();if(child.exitCode===null){const done=once(child,'exit');child.kill();await done;}
