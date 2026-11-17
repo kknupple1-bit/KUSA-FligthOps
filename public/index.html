@@ -9041,6 +9041,7 @@ window.addEventListener("DOMContentLoaded",()=>{
 });
 // v5.26.31: ordinary launches start on Menu; browser/pull-down reloads restore the active mission/view in place.
 window.addEventListener("load",()=>{
+ if(new URLSearchParams(location.search).has('foreflightMission')){restoringRefreshContext=false;return;}
  if(openSharedContentFromHash()){restoringRefreshContext=false;return;}
  restoreRefreshContext();
 });
