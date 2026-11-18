@@ -1,8 +1,11 @@
 'use strict';
+const {startupReason}=require('./foreflight-pdf-runtime.cjs');
 process.once('message',async encoded=>{
  let parser,stage='startup';
  try{
-  const {PDFParse}=require('pdf-parse');
+  // Resolve in the parent, which already passed the deployment dependency gate.
+  // The worker must not rediscover packages via a different host module path.
+  const {PDFParse}=require(process.argv[2]);
   stage='document';
   parser=new PDFParse({data:new Uint8Array(Buffer.from(encoded,'base64')),isEvalSupported:false,useSystemFonts:false,disableFontFace:true,stopAtErrors:true});
   const info=await parser.getInfo();
@@ -15,7 +18,7 @@ process.once('message',async encoded=>{
  }catch(error){
   const known=['PDF_PAGE_LIMIT','PDF_NO_TEXT','PDF_TEXT_LIMIT'];
   const code=known.includes(error.code)?error.code:stage==='startup'?'PDF_READER_UNAVAILABLE':error.name==='PasswordException'?'PDF_PASSWORD_REQUIRED':error.name==='InvalidPDFException'?'PDF_INVALID':'PDF_NOT_READABLE';
-  process.send({ok:false,error:code});
+  process.send({ok:false,error:code,...(stage==='startup'?{reason:startupReason(error)}:{})});
  }
  finally{if(parser)await parser.destroy().catch(()=>{});}
 });

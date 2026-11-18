@@ -25,6 +25,14 @@ jobs:
         run: npm ci --ignore-scripts --no-audit --no-fund
       - name: Check packaging and isolated application workflows
         run: npm run release:check
+      - name: Use the official HTTPS Ubuntu package mirror
+        shell: bash
+        run: |
+          # Regional HTTP mirror downloads consumed most of the preceding jobs.
+          # Only change the disposable runner's mirror; APT signatures remain on.
+          if [ -f /etc/apt/apt-mirrors.txt ]; then
+            printf '%s\n' 'https://archive.ubuntu.com/ubuntu/' | sudo tee /etc/apt/apt-mirrors.txt >/dev/null
+          fi
       - name: Install WebKit for isolated tablet layout checks
         run: npx playwright install --with-deps webkit
       - name: Check Trip Date and Alternate field layout

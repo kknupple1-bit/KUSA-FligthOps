@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.32",
-  "release": "5.26.32-deployment.1",
+  "build": "5.26.33",
+  "release": "5.26.33-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -17,8 +17,8 @@
     },
     {
       "path": "foreflight-service.js",
-      "size_bytes": 15010,
-      "sha256": "e689e1cd26705aa5a3aa4ca01027b437d29e0d573cac5c23832433e542549607"
+      "size_bytes": 16103,
+      "sha256": "ee0e314fad6dea6970acf83865897071c69beacc8033cf7bb9835e29d912d8bd"
     },
     {
       "path": "mission-service.js",
@@ -28,12 +28,12 @@
     {
       "path": "package-lock.json",
       "size_bytes": 40620,
-      "sha256": "7f24d84d694e2dd6b047be86e03e2bb1d3d7f3598dc1aceb4c2a408e8a4e0973"
+      "sha256": "f2e5514081889223a985b5c456dff016cdc22f70ab39c8c515b4e782e36696bd"
     },
     {
       "path": "package.json",
       "size_bytes": 2288,
-      "sha256": "3d08be5e723e094ad6438dfcfd714872e83cdc0016eb3e094ae09dcc36e1b2f6"
+      "sha256": "47037e4b07aa24d08c4d95ae3c74914974b7d3e6e7a106a1382e89323759fa4a"
     },
     {
       "path": "platform.js",
@@ -43,12 +43,12 @@
     {
       "path": "public/account.html",
       "size_bytes": 10134,
-      "sha256": "1145225fa00ae17b97ef77f7938864b60a37a84ad73b64e4c8ff333ac69e4686"
+      "sha256": "37e6a364449fbbd58230fc1f1171b69e610c113bb2d1ea0af4ec5b8abd15f308"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 13147,
-      "sha256": "2fdf0e93f4faccca181c683c2e0974287f2b315bbddcb7b1e6f270219b55cbde"
+      "sha256": "76f31a47e78f3cce7a7f8eafce752711c32da936e1a069e17202b86a49e173c7"
     },
     {
       "path": "public/apple-touch-icon.png",
@@ -322,13 +322,13 @@
     },
     {
       "path": "public/foreflight.html",
-      "size_bytes": 5424,
-      "sha256": "5206a9b4dc550d47b979380b5bef7598897c1125cc1f7f058dd47172cde6cb40"
+      "size_bytes": 5378,
+      "sha256": "1583316cb7500e0d529320feb05e9eed4a37a9ea3157161306dcce690b7256c9"
     },
     {
       "path": "public/foreflight.js",
-      "size_bytes": 5593,
-      "sha256": "2bc92a3eba248f3c16f5c1e0b84d6b37ab481581945b2266ea9f3a2d22ecc02e"
+      "size_bytes": 6320,
+      "sha256": "1073d44fd20e2e6a9451a04322440f4a07733922b6a12b61864a2784af307de7"
     },
     {
       "path": "public/icon-192.png",
@@ -373,12 +373,12 @@
     {
       "path": "public/index.html",
       "size_bytes": 707655,
-      "sha256": "57fd5b2729339fd82883b50c17cae43103d2704e69ee7ae673fbf9dc9075d639"
+      "sha256": "3e148612176fe58e40aa419fef103661873ec4511e0e1c869d342bf7f060136c"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 7414,
-      "sha256": "cb94be58e2a274ba0b92790b405d6e4f2fd820e63a25797783fcf9cb2b915283"
+      "sha256": "ad3fe84459607be9773b221a3b331d0203253292a1334471c95beeafa7d30bd7"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -408,12 +408,12 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4736,
-      "sha256": "de803b0599716b73df2694accb9881b8d7f4fbfb9fc15d576e9a9573728b9a20"
+      "sha256": "8e9aad271e6bd51a8a32678a3487124999ce4519f5bc335adf04f026dd69024f"
     },
     {
       "path": "public/sw.js",
       "size_bytes": 8604,
-      "sha256": "9e00e5005a5d6d3c3dc95e9b55a8635a2a312b8376f988dfccb640ef36d56697"
+      "sha256": "e17801a05f991bc7724322cbe0fe831f1c69b80f7e5461ee302569beb57faf53"
     },
     {
       "path": "public/weather-math.js",
@@ -431,9 +431,14 @@
       "sha256": "9180a7e5b8e984245b5a5736c072a7a79aab6425dc9b200a5d739f2ae98a2242"
     },
     {
+      "path": "scripts/foreflight-pdf-runtime.cjs",
+      "size_bytes": 2107,
+      "sha256": "eb379783b99448bf369217c17c3df25ebacc77b03c344eb3236f5c5a1434773d"
+    },
+    {
       "path": "scripts/foreflight-pdf-worker.cjs",
-      "size_bytes": 1132,
-      "sha256": "37bb65132746bd03e935461c718a054df5fe11b4ffcc949179e79fbb02b3a1d3"
+      "size_bytes": 1415,
+      "sha256": "1f6c6b4d67e59658cd48aa689e7f5d9c90026413ebe7c07bcddbb754b33e376d"
     },
     {
       "path": "scripts/migrate-database.cjs",
@@ -442,18 +447,18 @@
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 2448,
-      "sha256": "2b1d9a7505d6d5b5bf3d31e0a7dac0421922dae7cfe6891f351094e85efd344a"
+      "size_bytes": 2522,
+      "sha256": "196a1b1d40f3138c34d358cb320fb436b5ae2f4cf5c91021b75d7695a567e808"
     },
     {
       "path": "scripts/verify-release.cjs",
-      "size_bytes": 6049,
-      "sha256": "43a6e5c4cde99ea6261f626f8a86e3d3b45c50d03275750339a663b60d458cc5"
+      "size_bytes": 6158,
+      "sha256": "17e80b86620c531b4f62475cd8efe21e6206e74aabc65f6fa24c2b9783acd2d3"
     },
     {
       "path": "server.js",
       "size_bytes": 842439,
-      "sha256": "c40b9f3b34d075381c93fbd5b8d301d715176d13c38d168737f05d0a095c1ed4"
+      "sha256": "6dc7fa540334e8d6218995e62c13983437efc9d919b9f063990938715faf1810"
     }
   ]
 }

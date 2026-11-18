@@ -5,7 +5,7 @@ const path = require('node:path');
 // Runtime-owned data (SQLite, shared trips, and public/assets) is not a release asset.
 function releaseFiles(root) {
   const files = ['server.js', 'platform.js', 'mission-service.js', 'foreflight-service.js', 'foreflight-parser.js', 'scripts/foreflight-pdf-worker.cjs', 'package.json', 'package-lock.json',
-    'data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs',
+    'scripts/foreflight-pdf-runtime.cjs','data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs',
     'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs'];
   function visit(relative) {
     for (const entry of fs.readdirSync(path.join(root, relative), {withFileTypes: true})) {
@@ -22,7 +22,7 @@ function releaseFiles(root) {
 
 // These paths are part of the application's delivery contract, not optional fallbacks.
 const requiredFiles = [
-  'foreflight-service.js','foreflight-parser.js','scripts/foreflight-pdf-worker.cjs',
+  'foreflight-service.js','foreflight-parser.js','scripts/foreflight-pdf-worker.cjs','scripts/foreflight-pdf-runtime.cjs',
   'public/foreflight.html','public/foreflight.css','public/foreflight.js','public/foreflight-open.js',
   'server.js', 'platform.js', 'mission-service.js', 'package.json', 'package-lock.json', 'data/runways.json',
   'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs',
