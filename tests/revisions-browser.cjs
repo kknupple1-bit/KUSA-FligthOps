@@ -88,6 +88,17 @@ const root=path.resolve(__dirname,'..');
   await page.waitForLoadState('networkidle');
   const connection=await context.request.post(base+'/api/foreflight/connections',{headers:{'X-FlightOps-Action':'foreflight'},data:{label:'Synthetic browser test'}});
   assert.equal(connection.status(),201);const pairing=await connection.json();
+  const {DatabaseSync}=require('node:sqlite'),connectionDb=new DatabaseSync(path.join(temp,'test.sqlite'));
+  const originalHash=connectionDb.prepare('SELECT token_hash FROM foreflight_connections WHERE id=?').get(pairing.connection.id).token_hash;
+  connectionDb.prepare("UPDATE foreflight_connections SET expires_at='2000-01-01' WHERE id=?").run(pairing.connection.id);
+  const expired=await context.request.post(base+'/api/foreflight/upload',{headers:{'Content-Type':'application/pdf','X-FlightOps-Upload-Key':pairing.upload_key},data:pdf(plan('N33AP'))});
+  assert.equal(expired.status(),401);const renewLink=await expired.json();assert.equal(renewLink.open_url,renewLink.reconnect_url);
+  await page.goto(renewLink.open_url);await page.getByRole('button',{name:'Reconnect Synthetic browser test',exact:true}).waitFor({state:'visible'});
+  assert.equal(await page.locator('.reconnect-target').count(),1);
+  const renewing=page.waitForResponse(r=>r.url().endsWith('/reconnect')&&r.request().method()==='POST');
+  await page.getByRole('button',{name:'Reconnect Synthetic browser test',exact:true}).click();assert.equal((await renewing).status(),200);
+  await page.getByText('Reconnected. Keep the same Shortcut and key.',{exact:false}).waitFor();
+  assert.equal(connectionDb.prepare('SELECT token_hash FROM foreflight_connections WHERE id=?').get(pairing.connection.id).token_hash,originalHash);connectionDb.close();
   for(const [tail,fob]of [['N33AP',8000],['N699BG',15000]]){
    const mobile=tail==='N33AP';
    const incoming=await context.request.post(base+'/api/foreflight/upload',{headers:{'Content-Type':'application/pdf','X-FlightOps-Upload-Key':pairing.upload_key},data:pdf(mobile?mobilePlan(tail):plan(tail).replace('9,000 lbs',fob+' lbs'))});

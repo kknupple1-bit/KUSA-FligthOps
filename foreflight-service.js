@@ -5,6 +5,7 @@ const path=require('node:path');
 const {fork}=require('node:child_process');
 const {extractPlan,validDate,proposeRampFuel}=require('./foreflight-parser');
 const {workerEnvironment,startupReason,safeReason,probePdf}=require('./scripts/foreflight-pdf-runtime.cjs');
+const {installerInfo}=require('./scripts/foreflight-shortcut-installer.cjs');
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 const pdfMessages={
  PDF_TIMEOUT:'The hosted PDF reader timed out. No trip was created. Report the reference below so we can check it.',
@@ -32,7 +33,7 @@ function readPdf(bytes){return new Promise((resolve,reject)=>{
  worker.once('exit',()=>{clearTimeout(timer);reject(fault('PDF_READER_FAILED'));});
  worker.send(bytes.toString('base64'),error=>{if(error){finish();reject(fault('PDF_READER_UNAVAILABLE','IPC_FAILED'));}});
 });}
-module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReader=readPdf}){
+module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReader=readPdf,shortcutInstaller}){
  db.exec(`CREATE TABLE IF NOT EXISTS foreflight_connections (
  id TEXT PRIMARY KEY,user_id TEXT NOT NULL REFERENCES users(id),session_id TEXT NOT NULL REFERENCES sessions(id),
  token_hash TEXT NOT NULL UNIQUE,label TEXT NOT NULL,created_at TEXT NOT NULL,expires_at TEXT NOT NULL,revoked_at TEXT);
@@ -47,14 +48,41 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
  function action(req,res,next){if(req.get('X-FlightOps-Action')!=='foreflight')return res.status(403).json({ok:false,error:'ACTION_REQUIRED'});next();}
  function safeConnection(c){const {id,label,created_at,expires_at,revoked_at}=c;return {id,label,created_at,expires_at,revoked_at};}
  function cleanup(){db.prepare('DELETE FROM foreflight_imports WHERE expires_at<? AND mission_id IS NULL').run(isoNow());}
+ function connectionExpiry(s){
+  const row=db.prepare("SELECT s.expires_at FROM sessions s JOIN users u ON u.id=s.user_id WHERE s.id=? AND s.user_id=? AND s.revoked_at IS NULL AND s.expires_at>? AND u.status='active'").get(s.id,s.user_id,isoNow());
+  const end=row&&Date.parse(row.expires_at);return Number.isFinite(end)&&end>Date.now()?new Date(Math.min(Date.now()+7*86400000,end)).toISOString():null;
+ }
+ function connectionWrite(work){let started=false;try{db.exec('BEGIN IMMEDIATE');started=true;const result=work();db.exec('COMMIT');return result;}catch{if(started)try{db.exec('ROLLBACK');}catch{}return {status:503,body:{ok:false,error:'CONNECTION_UPDATE_UNAVAILABLE',message:'The connection could not be updated. Nothing was changed. Try again shortly.'}};}}
+ app.get('/api/foreflight/installer',requireAuth,(req,res)=>{
+  if(!writable(req.flightopsSession.user_id).length)return res.status(403).json({ok:false,error:'AIRCRAFT_ACCESS_DENIED'});
+  res.json({ok:true,installer:installerInfo(req.get('host'),shortcutInstaller)});
+ });
  app.get('/api/foreflight/connections',requireAuth,(req,res)=>res.json({ok:true,connections:db.prepare('SELECT * FROM foreflight_connections WHERE user_id=? ORDER BY created_at DESC').all(req.flightopsSession.user_id).map(safeConnection)}));
  app.post('/api/foreflight/connections',requireAuth,action,(req,res)=>{
-  const s=req.flightopsSession;if(!writable(s.user_id).length)return res.status(403).json({ok:false,error:'AIRCRAFT_ACCESS_DENIED'});
-  const count=db.prepare('SELECT COUNT(*) n FROM foreflight_connections WHERE user_id=? AND revoked_at IS NULL AND expires_at>?').get(s.user_id,isoNow()).n;
-  if(count>=5)return res.status(429).json({ok:false,error:'REVOKE_AN_OLD_CONNECTION'});
-  const token=crypto.randomBytes(32).toString('base64url'),now=isoNow(),expires=new Date(Math.min(Date.now()+7*86400000,Date.parse(s.expires_at))).toISOString();
-  const cid=id('ffc');db.prepare('INSERT INTO foreflight_connections VALUES(?,?,?,?,?,?,?,NULL)').run(cid,s.user_id,s.id,digest(token),String(req.body?.label||'iPad').trim().slice(0,60)||'iPad',now,expires);
-  res.status(201).json({ok:true,connection:{id:cid,label:String(req.body?.label||'iPad').slice(0,60),expires_at:expires},upload_key:token});
+  const s=req.flightopsSession;
+  const result=connectionWrite(()=>{
+   if(!writable(s.user_id).length)return {status:403,body:{ok:false,error:'AIRCRAFT_ACCESS_DENIED'}};
+   const expires=connectionExpiry(s);if(!expires)return {status:401,body:{ok:false,error:'AUTH_REQUIRED'}};
+   const count=db.prepare('SELECT COUNT(*) n FROM foreflight_connections WHERE user_id=? AND revoked_at IS NULL AND expires_at>?').get(s.user_id,isoNow()).n;
+   if(count>=5)return {status:429,body:{ok:false,error:'REVOKE_AN_OLD_CONNECTION'}};
+   const token=crypto.randomBytes(32).toString('base64url'),now=isoNow(),label=String(req.body?.label||'iPad').trim().slice(0,60)||'iPad',cid=id('ffc');
+   db.prepare('INSERT INTO foreflight_connections VALUES(?,?,?,?,?,?,?,NULL)').run(cid,s.user_id,s.id,digest(token),label,now,expires);
+   return {status:201,body:{ok:true,connection:{id:cid,label,expires_at:expires},upload_key:token}};
+  });res.status(result.status).json(result.body);
+ });
+ app.post('/api/foreflight/connections/:id/reconnect',requireAuth,action,(req,res)=>{
+  const s=req.flightopsSession;
+  const result=connectionWrite(()=>{
+   if(!writable(s.user_id).length)return {status:403,body:{ok:false,error:'AIRCRAFT_ACCESS_DENIED'}};
+   const expires=connectionExpiry(s);if(!expires)return {status:401,body:{ok:false,error:'AUTH_REQUIRED'}};
+   const c=db.prepare('SELECT * FROM foreflight_connections WHERE id=? AND user_id=?').get(req.params.id,s.user_id);
+   if(!c)return {status:404,body:{ok:false,error:'CONNECTION_NOT_FOUND'}};
+   if(c.revoked_at)return {status:409,body:{ok:false,error:'CONNECTION_REVOKED_CREATE_NEW'}};
+   const count=db.prepare('SELECT COUNT(*) n FROM foreflight_connections WHERE user_id=? AND id<>? AND revoked_at IS NULL AND expires_at>?').get(s.user_id,c.id,isoNow()).n;
+   if(count>=5)return {status:429,body:{ok:false,error:'REVOKE_AN_OLD_CONNECTION'}};
+   db.prepare('UPDATE foreflight_connections SET session_id=?,expires_at=? WHERE id=? AND user_id=? AND revoked_at IS NULL').run(s.id,expires,c.id,s.user_id);
+   return {status:200,body:{ok:true,connection:safeConnection({...c,session_id:s.id,expires_at:expires})}};
+  });res.status(result.status).json(result.body);
  });
  app.delete('/api/foreflight/connections/:id',requireAuth,action,(req,res)=>{
   db.prepare('UPDATE foreflight_connections SET revoked_at=? WHERE id=? AND user_id=?').run(isoNow(),req.params.id,req.flightopsSession.user_id);res.json({ok:true});
@@ -80,10 +108,13 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
   const a=attempts.get(ip)||{n:0,until:now+60000};a.n++;if(attempts.size<1000||attempts.has(ip))attempts.set(ip,a);
   if(a.n>40)return res.status(429).json({ok:false,error:'TRY_AGAIN_LATER'});
   const raw=req.get('X-FlightOps-Upload-Key')||'';
-  const c=/^[A-Za-z0-9_-]{43}$/.test(raw)&&db.prepare(`SELECT c.* FROM foreflight_connections c JOIN users u ON u.id=c.user_id
- JOIN sessions s ON s.id=c.session_id WHERE c.token_hash=? AND c.revoked_at IS NULL AND c.expires_at>?
- AND u.status='active' AND s.revoked_at IS NULL AND s.expires_at>?`).get(digest(raw),isoNow(),isoNow());
-  if(!c||!writable(c.user_id).length)return res.status(401).json({ok:false,error:'UPLOAD_CONNECTION_EXPIRED_OR_REVOKED'});
+  const c=/^[A-Za-z0-9_-]{43}$/.test(raw)&&db.prepare(`SELECT c.*,s.revoked_at session_revoked_at,s.expires_at session_expires_at,u.status user_status FROM foreflight_connections c JOIN users u ON u.id=c.user_id
+ JOIN sessions s ON s.id=c.session_id WHERE c.token_hash=?`).get(digest(raw));
+  if(!c||c.revoked_at||c.user_status!=='active'||!writable(c.user_id).length)return res.status(401).json({ok:false,error:'UPLOAD_CONNECTION_EXPIRED_OR_REVOKED',message:'This upload connection is unavailable. Sign in to FlightOps to check this iPad connection.'});
+  if(c.expires_at<=isoNow()||c.session_revoked_at||c.session_expires_at<=isoNow()){
+   const u=new URL(importUrl(req,'unused'));u.searchParams.delete('import');u.searchParams.set('reconnect',c.id);
+   return res.status(401).json({ok:false,error:'UPLOAD_CONNECTION_EXPIRED_OR_REVOKED',message:'Sign in to FlightOps and tap Reconnect for this iPad. Keep the existing Shortcut and key, then share the PDF again.',reconnect_url:u.href,open_url:u.href});
+  }
   req.foreflightConnection=c;next();
  }
  function importUrl(req,iid){

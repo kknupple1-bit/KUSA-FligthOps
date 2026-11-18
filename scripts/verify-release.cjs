@@ -14,6 +14,8 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   if (Number(process.versions.node.split('.')[0]) < 22) throw new Error('Node.js 22+ is required');
   if (typeof require('node:sqlite').DatabaseSync !== 'function') throw new Error('SQLite is unavailable');
   const pkg = JSON.parse(read('package.json'));
+  if(!require('./foreflight-shortcut-installer.cjs').validateInstaller(JSON.parse(read('data/foreflight-shortcut-installer.json'))))
+    throw new Error('Reviewed ForeFlight installer is missing');
   if(pkg.scripts?.prestart!=='node scripts/verify-release.cjs && node scripts/check-nms-release.cjs')
     throw new Error('Required deployment integrity/NMS configuration gate is missing');
   const lock = JSON.parse(read('package-lock.json'));
