@@ -3,7 +3,11 @@
 function extractPlan(text) {
   if(typeof text!=='string'||text.length>120000)throw Error('DOCUMENT_TEXT_LIMIT');
   const source=text.replace(/\r/g,'').replace(/[\u00a0\t]+/g,' ');
-  if(!/foreflight|nav\s*log|navigation\s*log|\(\s*FPL-/i.test(source))throw Error('NOT_A_FLIGHT_PLAN_DOCUMENT');
+  const headers=[...source.matchAll(/(?:^|\n)\s*([A-Z]{4})\s*(?:[–—-]|to)\s*([A-Z]{4})\s*\(([^)\n]{1,80})\)\s+in\s+(N[0-9][A-Z0-9]{0,5})\b/gi)];
+  // ForeFlight Mobile's combined export has no product/Navlog title. Require
+  // its route/date/tail header and independent summary/fuel/form sections.
+  const mobileNavlog=headers.length>0&&/\bSUMMARY\s*&\s*TIMES\b/.test(source)&&/\bFUEL\s*&\s*WEIGHTS\b/.test(source)&&/\bICAO FLIGHT PLAN\b/.test(source)&&['Block Fuel','Taxi Fuel','Flight Fuel'].every(label=>source.includes(label));
+  if(!mobileNavlog&&!/foreflight|nav\s*log|navigation\s*log|\(\s*FPL-/i.test(source))throw Error('NOT_A_FLIGHT_PLAN_DOCUMENT');
   const warnings=[],fields={},evidence={},candidates={};
   function put(name,values,label){
     candidates[name]=[...(candidates[name]||[]),...values];
@@ -13,10 +17,9 @@ function extractPlan(text) {
     if(unique.length>1)warnings.push(`Conflicting ${name.replaceAll('_',' ')}; enter it after checking the PDF.`);
   }
   const matches=re=>[...source.matchAll(re)].map(m=>m[1].trim());
-  const headers=[...source.matchAll(/(?:^|\n)\s*([A-Z]{4})\s*(?:[–—-]|to)\s*([A-Z]{4})\s*\(([^)\n]{1,80})\)\s+in\s+(N[0-9][A-Z0-9]{0,5})\b/gi)];
   put('registration',matches(/\b(?:Aircraft(?:\s+(?:ID|Identification|Registration))?|Registration|Tail(?:\s+Number)?)\s*[:#]?\s*(N[0-9][A-Z0-9]{0,5})\b/gi).concat(matches(/\(\s*FPL-([A-Z0-9]{2,7})-/g),headers.map(m=>m[4])).map(v=>v.toUpperCase()),'Aircraft / Navlog header / ICAO flight plan');
   for(const [name,label] of [['departure','Departure|Origin|From'],['destination','Destination|To'],['alternate','Alternate(?:\s+1)?']])
-    put(name,matches(new RegExp(`(?:^|\\n)\\s*(?:${label})\\s*[:]?\\s*([A-Z]{4})\\b`,'gi')).map(v=>v.toUpperCase()),'Labeled airport');
+    put(name,matches(new RegExp(`(?:^|\\n)\\s*(?:${label})(?!\\s*(?:Fuel|Burn)\\b)\\s*[:]?\\s*([A-Z]{4})\\b`,'gi')).map(v=>v.toUpperCase()),'Labeled airport');
   if(headers.length){put('departure',headers.map(m=>m[1].toUpperCase()),'Navlog route/date/tail header');put('destination',headers.map(m=>m[2].toUpperCase()),'Navlog route/date/tail header');}
   // ICAO message fields are extracted only from a complete FPL message.
   const messages=source.match(/\(\s*FPL-[\s\S]*?\)/g)||[];
@@ -34,9 +37,18 @@ function extractPlan(text) {
   const headerDates=headers.flatMap(h=>{const m=h[3].match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s|$)/);if(!m)return [];const month=monthNames.indexOf(m[1].slice(0,3).toLowerCase())+1;return month?[`${m[3]}-${String(month).padStart(2,'0')}-${m[2].padStart(2,'0')}`]:[];});
   put('date',matches(/(?:^|\n)\s*(?:Flight Date|Date|Departure Date)\s*:?\s*(\d{4}-\d{2}-\d{2})\b/gi).concat(dof,headerDates),'Navlog date / ISO date / ICAO DOF (verify local trip date)');
   if(fields.date&&!validDate(fields.date)){fields.date=null;evidence.date='Invalid date';}
-  for(const [name,label] of [['fob_lb','Ramp Fuel|Fuel on Board|FOB'],['block_fuel_lb','Block Fuel'],['trip_lb','Flight Fuel|Trip Fuel(?: Burn)?'],['taxi_lb','Taxi Fuel|Taxi Burn']]){
+  for(const [name,label] of [['fob_lb','Ramp Fuel|Fuel on Board|FOB'],['block_fuel_lb','Block Fuel'],['trip_lb','Trip Fuel(?: Burn)?'],['flight_fuel_lb','Flight Fuel'],['taxi_lb','Taxi Fuel|Taxi Burn'],['tow_lb','TOW'],['elw_lb','ELW'],['landing_fuel_lb','Landing Fuel']]){
     const pattern=new RegExp(`(?:^|\\n)\\s*(?:${label})\\s*:?\\s*([0-9][0-9,]*(?:\\.[0-9]+)?)\\s*(?:lb|lbs|pounds)\\b`,'gi');
     put(name,matches(pattern).map(v=>Number(v.replaceAll(',',''))),'Explicitly labeled pounds; verify fuel definition');
+  }
+  if(fields.flight_fuel_lb!==null){
+    const {flight_fuel_lb:flight,taxi_lb:taxi,tow_lb:tow,elw_lb:elw,block_fuel_lb:block,landing_fuel_lb:landing}=fields;
+    // This export's cumulative Flight Fuel includes taxi. Confirm both the
+    // airborne weight loss and block-to-landing balance before subtracting it.
+    if(mobileNavlog&&[flight,taxi,tow,elw,block,landing].every(Number.isFinite)&&flight>=taxi&&tow>=elw&&Math.abs((tow-elw)-(flight-taxi))<=1&&Math.abs((block-landing)-flight)<=1){
+      put('trip_lb',[flight-taxi],'ForeFlight Flight Fuel minus Taxi Fuel; verified against TOW − ELW and Block Fuel − Landing Fuel');
+      warnings.push('This ForeFlight Flight Fuel total includes taxi. Proposed trip burn subtracts the separately imported taxi fuel; verify both values.');
+    }else warnings.push('Flight Fuel is reference only: its taxi inclusion could not be verified. Enter airborne trip burn separately after checking the PDF.');
   }
   put('route',matches(/(?:^|\n)\s*Route\s*:\s*([^\n]{1,500})/gi),'Labeled route');
   warnings.push('Check every field against the ForeFlight PDF. Dates may be UTC; confirm the intended local trip date.');

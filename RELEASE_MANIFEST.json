@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.31",
-  "release": "5.26.31-deployment.1",
+  "build": "5.26.32",
+  "release": "5.26.32-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -12,13 +12,13 @@
     },
     {
       "path": "foreflight-parser.js",
-      "size_bytes": 4665,
-      "sha256": "7cb481106066a7e319998e349b383af02bb011eb3338428adbd3597b10f1cd02"
+      "size_bytes": 6137,
+      "sha256": "620f8c132a6b88a2b4a1d155e89cb1d40259aff38d5e2f7ee28562b828420f4e"
     },
     {
       "path": "foreflight-service.js",
-      "size_bytes": 12502,
-      "sha256": "947cea92705f1ddf9c73f374590b4ee0fbaf064c9395b6e259cd3a3769baf617"
+      "size_bytes": 15010,
+      "sha256": "e689e1cd26705aa5a3aa4ca01027b437d29e0d573cac5c23832433e542549607"
     },
     {
       "path": "mission-service.js",
@@ -28,12 +28,12 @@
     {
       "path": "package-lock.json",
       "size_bytes": 40620,
-      "sha256": "a560024de44cf69e56358531aafb630cb4157e953190b84030a11b2999a99dc2"
+      "sha256": "7f24d84d694e2dd6b047be86e03e2bb1d3d7f3598dc1aceb4c2a408e8a4e0973"
     },
     {
       "path": "package.json",
       "size_bytes": 2288,
-      "sha256": "11c90c6387f9ce6675d45b616f3ac81dc226881ee5dc3ecdd86fc0bd05522cd9"
+      "sha256": "3d08be5e723e094ad6438dfcfd714872e83cdc0016eb3e094ae09dcc36e1b2f6"
     },
     {
       "path": "platform.js",
@@ -43,12 +43,12 @@
     {
       "path": "public/account.html",
       "size_bytes": 10134,
-      "sha256": "c8da7657f77d2b665e89e9c05f4f4c2d4b4c5848a7231af6393a5de170464d70"
+      "sha256": "1145225fa00ae17b97ef77f7938864b60a37a84ad73b64e4c8ff333ac69e4686"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 13147,
-      "sha256": "ca2bf81278d74827a20ac4567578db3d1dd1ad8800723db061ba87f6b66b7436"
+      "sha256": "2fdf0e93f4faccca181c683c2e0974287f2b315bbddcb7b1e6f270219b55cbde"
     },
     {
       "path": "public/apple-touch-icon.png",
@@ -323,7 +323,7 @@
     {
       "path": "public/foreflight.html",
       "size_bytes": 5424,
-      "sha256": "28cf88117e4fc3450baec1ae7ca002e6f7f6783ae4ab510ddbfffcb3dfd6bc39"
+      "sha256": "5206a9b4dc550d47b979380b5bef7598897c1125cc1f7f058dd47172cde6cb40"
     },
     {
       "path": "public/foreflight.js",
@@ -373,12 +373,12 @@
     {
       "path": "public/index.html",
       "size_bytes": 707655,
-      "sha256": "0b0ffd6da6f93ac0ef1d64a2c20c511e9f2a31d361e8c9708ad0e20fc786dd79"
+      "sha256": "57fd5b2729339fd82883b50c17cae43103d2704e69ee7ae673fbf9dc9075d639"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 7414,
-      "sha256": "2db4ce91bb9dc789369c8810d69839cee99bbe59f100c6f19bc38af3cdc4db90"
+      "sha256": "cb94be58e2a274ba0b92790b405d6e4f2fd820e63a25797783fcf9cb2b915283"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -408,12 +408,12 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4736,
-      "sha256": "9834db67ad10a26c600f43048717df88ba7a2ea8bb3ad74a87b812b0ac1d5592"
+      "sha256": "de803b0599716b73df2694accb9881b8d7f4fbfb9fc15d576e9a9573728b9a20"
     },
     {
       "path": "public/sw.js",
       "size_bytes": 8604,
-      "sha256": "a62f932d630187e7c9778e821d414b1b2c5bb1c12a00b5b504320e096b4fc934"
+      "sha256": "9e00e5005a5d6d3c3dc95e9b55a8635a2a312b8376f988dfccb640ef36d56697"
     },
     {
       "path": "public/weather-math.js",
@@ -432,8 +432,8 @@
     },
     {
       "path": "scripts/foreflight-pdf-worker.cjs",
-      "size_bytes": 686,
-      "sha256": "ae8d005ebceffb06e067f333aeb025dfac9a1e51556dbc5ae985829ea31af695"
+      "size_bytes": 1132,
+      "sha256": "37bb65132746bd03e935461c718a054df5fe11b4ffcc949179e79fbb02b3a1d3"
     },
     {
       "path": "scripts/migrate-database.cjs",
@@ -453,7 +453,7 @@
     {
       "path": "server.js",
       "size_bytes": 842439,
-      "sha256": "acfdaf2c13c688c14c33eb5e29ced5da8bef8ca5a6f895f749f5074ce277c735"
+      "sha256": "c40b9f3b34d075381c93fbd5b8d301d715176d13c38d168737f05d0a095c1ed4"
     }
   ]
 }

@@ -3,7 +3,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const express=require('express'),{DatabaseSync}=require('node:sqlite');
 const {extractPlan,validDate}=require('../foreflight-parser');
 const install=require('../foreflight-service');
-const {pdf,plan}=require('./foreflight-fixtures.cjs');
+const {pdf,plan,mobilePlan}=require('./foreflight-fixtures.cjs');
 test('parser only proposes explicit unambiguous fields and pounds',()=>{
  const p=extractPlan(plan('N33AP'));assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.trip_lb,3000);assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');
  assert.equal(extractPlan(plan('N33AP')+'\nDeparture: KOPF').fields.departure,null);
@@ -19,7 +19,24 @@ test('parser only proposes explicit unambiguous fields and pounds',()=>{
 });
 test('real PDF worker extracts text, rejects malformed input and cleans up',async()=>{
  const result=await install.readPdf(pdf(plan('N33AP')));assert.equal(result.pages,1);const p=extractPlan(result.text);assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.departure,'KDTO');
+ const mobile=extractPlan((await install.readPdf(pdf(mobilePlan('N33AP')))).text);assert.equal(mobile.fields.trip_lb,2500);assert.equal(mobile.fields.fob_lb,null);
  await assert.rejects(()=>install.readPdf(Buffer.from('%PDF-invalid')));
+ await assert.rejects(()=>install.readPdf(pdf('')),e=>e.code==='PDF_NO_TEXT');
+});
+
+test('Mobile combined export is recognized structurally and reconciles taxi exactly once',()=>{
+ const text=mobilePlan('N33AP')+'\nAlternate Fuel\n0 lbs',p=extractPlan(text);
+ assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');assert.equal(p.fields.destination,'KBPT');assert.equal(p.fields.date,'2026-11-17');
+ assert.equal(p.fields.fob_lb,null);assert.equal(p.fields.block_fuel_lb,8000);assert.equal(p.fields.taxi_lb,200);assert.equal(p.fields.flight_fuel_lb,2700);assert.equal(p.fields.trip_lb,2500);
+ assert.equal(p.fields.alternate,null,'Alternate Fuel is not an alternate airport called FUEL');
+ assert.equal(p.fields.taxi_lb+p.fields.trip_lb,2700);
+ assert.equal(extractPlan(text.replaceAll('27500 lbs','27400 lbs')).fields.trip_lb,null,'inconsistent weights need manual trip burn');
+ assert.equal(extractPlan(text.replace('5300 lbs','5200 lbs')).fields.trip_lb,null,'inconsistent fuel balance needs manual trip burn');
+ assert.equal(extractPlan(text+'\nTrip Fuel: 2600 lbs').fields.trip_lb,null,'explicit versus derived conflicts remain unresolved');
+ assert.equal(extractPlan(text+'\nTaxi Fuel: 250 lbs').fields.trip_lb,null,'conflicting taxi cannot be subtracted');
+ assert.equal(extractPlan('ForeFlight\nFlight Fuel: 2700 lbs\nTaxi Fuel: 200 lbs').fields.trip_lb,null,'a generic Flight Fuel label has no verified taxi definition');
+ for(const title of ['SUMMARY & TIMES','FUEL & WEIGHTS','ICAO FLIGHT PLAN'])assert.throws(()=>extractPlan(text.replace(title,'')));
+ assert.throws(()=>extractPlan('KDTO — KBPT (Nov 17, 2026) in N33AP\nBlock Fuel: 8000 lbs'));
 });
 test('upload-only connections and reviewed trip creation enforce identity, access and idempotency',async t=>{
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
@@ -38,7 +55,8 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
  const app=express();app.use(express.json({limit:'1mb'}));
  const requireAuth=(req,res,next)=>{const u=req.get('X-Test-User');if(!u)return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});req.flightopsSession={user_id:u,id:u+'s',expires_at:expiry};next();};
  const opts={db,requireAuth,id:p=>p+'_'+crypto.randomBytes(12).toString('hex'),isoNow:()=>new Date().toISOString()};
- require('../mission-service')(app,opts);install(app,{...opts,pdfReader:async bytes=>({text:bytes.toString().slice(6),pages:1})});
+ let pdfFailure=null;
+ require('../mission-service')(app,opts);install(app,{...opts,pdfReader:async bytes=>{if(pdfFailure)throw pdfFailure;return {text:bytes.toString().slice(6),pages:1};}});
  const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));const base=`http://127.0.0.1:${server.address().port}`;
  async function api(user,url,method='GET',body,headers={}){const r=await fetch(base+url,{method,headers:{...(user?{'X-Test-User':user}:{}),'Content-Type':'application/json','X-FlightOps-Action':'foreflight',...headers},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,...await r.json()};}
  async function upload(key,text=plan('N33AP'),headers={}){const r=await fetch(base+'/api/foreflight/upload',{method:'POST',headers:{'Content-Type':'application/pdf',...(key?{'X-FlightOps-Upload-Key':key}:{}),...headers},body:Buffer.from('%PDF-\n'+text)});return {status:r.status,...await r.json()};}
@@ -68,6 +86,24 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
    assert.equal((await upload(key,plan('N33AP'),{'Content-Type':'application/octet-stream'})).status,400);
    assert.equal((await upload(key,'x'.repeat(4*1024*1024))).status,413);
    assert.equal((await upload(key,plan('N33AP'),{'Content-Encoding':'gzip'})).status,400);
+  });
+  await t.test('document and hosting failures have distinct safe messages and trace references',async()=>{
+   const events=[],previous=console.warn;console.warn=(...args)=>events.push(args.join(' '));
+   try{
+    for(const code of ['PDF_PASSWORD_REQUIRED','PDF_PAGE_LIMIT','PDF_NO_TEXT','PDF_READER_UNAVAILABLE','PDF_READER_FAILED','PDF_TIMEOUT']){
+     pdfFailure=Object.assign(Error('SENSITIVE_PROVIDER_DETAIL'),{code});
+     const r=await upload(key,'ForeFlight failure fixture '+code);
+     assert.equal(r.status,['PDF_READER_UNAVAILABLE','PDF_READER_FAILED','PDF_TIMEOUT'].includes(code)?503:422);
+     assert.equal(r.error,code);assert.match(r.reference,/^[a-f0-9]{12}$/);assert(r.message.includes('No trip was created'));
+     assert(!JSON.stringify(r).includes('SENSITIVE_PROVIDER_DETAIL'));
+    }
+    pdfFailure=null;
+    const unrecognized=await upload(key,'An unrecognized document layout');
+    assert.equal(unrecognized.error,'PDF_LAYOUT_NOT_RECOGNIZED');assert.equal(unrecognized.status,422);
+    assert.equal(db.prepare('SELECT COUNT(*) n FROM missions').get().n,0);
+    assert(events.every(s=>!s.includes(key)&&!s.includes('SENSITIVE_PROVIDER_DETAIL')&&!s.includes('An unrecognized document')));
+    assert(events.some(s=>s.includes('pdf_decode')));assert(events.some(s=>s.includes('plan_recognition')));
+   }finally{pdfFailure=null;console.warn=previous;}
   });
   await t.test('review, valid fuel and tail matching required; no inherited reviews',async()=>{
    for(const b of [{reviewed:false},{fob_lb:100},{trip_lb:'3000'},{aircraft_id:'f900'},{date:'2026-02-30'},{departure:'ZZZZ'}])assert.equal((await api('pilot',`/api/foreflight/imports/${iid}/create`,'POST',{...reviewed,...b})).status,400);
