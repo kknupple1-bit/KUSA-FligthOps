@@ -1,18 +1,21 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer"><title>Create KUSA Trip — ForeFlight</title><link rel="stylesheet" href="/foreflight.css"><link rel="stylesheet" href="/numeric-entry.css"></head>
-<body><main><header><a href="/">FlightOps</a><span>ForeFlight integration • v5.26.34</span></header>
+<body><main><header><a href="/">FlightOps</a><span>ForeFlight integration • v5.26.35</span></header>
 <h1>Create KUSA Trip</h1><p>Send a ForeFlight Navlog / flight-plan PDF straight from its Share menu. No email or saving to Files.</p>
 <p id="status" role="status">Checking your account…</p>
 <section id="setup" hidden>
-<h2>Connect this iPad</h2><p>One-time setup in Apple Shortcuts is required. After setup, choose <b>Create KUSA Trip</b> in ForeFlight’s PDF Share menu.</p>
+<h2>Connect this iPad</h2><p>Create your connection below, copy its key, then tap <b>Install Create KUSA Trip</b>. Paste the key when Shortcuts asks. The shortcut already contains the Live address and all its actions.</p>
+<p id="installerState" role="status">Checking the ready-made shortcut…</p><a id="liveSetupLink" hidden>Open Live setup</a>
 <p>The connection can only upload PDFs. It cannot read missions, create a trip, or record pilot reviews. It expires after seven days or when the linked sign-in is revoked. You can revoke it here at any time.</p>
 <p id="readerStatus" role="status">Checking PDF importing…</p>
 <label>Connection name<input id="deviceLabel" maxlength="60" value="ForeFlight iPad"></label><button id="connect" disabled>Create upload connection</button>
 <div id="credentials" hidden><p class="warning">Copy these values into your own iPad Shortcut. Keep the upload key private. It is shown only now; it is not a FlightOps password.</p>
-<label>Upload URL<textarea id="uploadUrl" readonly rows="3" spellcheck="false"></textarea></label><button id="copyUrl">Copy upload URL</button>
 <label>Upload key<input id="uploadKey" type="password" readonly autocomplete="off"></label><button id="copyKey">Copy upload key</button>
+<a id="installShortcut" class="install-button" target="_blank" rel="noopener noreferrer" hidden>Install Create KUSA Trip</a>
+<p>In Shortcuts, paste your own key into the setup question and finish adding the shortcut. Then use ForeFlight → Share PDF → <b>Create KUSA Trip - Installer</b>, the name of the ready-made share action.</p>
+<details><summary>Advanced connection details</summary><label>Upload URL<textarea id="uploadUrl" readonly rows="3" spellcheck="false"></textarea></label><button id="copyUrl">Copy upload URL</button></details>
 <p id="expiry"></p><button id="hideKey">Hide and clear key</button></div>
-<h2>Set up the Share action</h2>
+<details><summary>Advanced manual setup</summary>
 <ol><li>Open Apple <b>Shortcuts</b>, create a shortcut named <b>Create KUSA Trip</b>, enable <b>Show in Share Sheet</b>, and set its input to <b>PDFs</b>. Set no input to <b>Stop and Respond</b>.</li>
 <li>Add <b>Count</b> for Shortcut Input, then <b>If</b> Count is not 1: <b>Show Alert</b> “Share one combined Navlog / flight-plan PDF” and <b>Stop This Shortcut</b>.</li>
 <li>Add <b>URL</b> and paste the Upload URL above. Use the complete address exactly as provided on this site.</li>
@@ -20,8 +23,9 @@
 <li>Add <b>Get Dictionary Value</b>: key <b>open_url</b> from Contents of URL. Add <b>If</b> Dictionary Value has any value → <b>Open URLs</b> using that value. Otherwise <b>Show Alert</b> using Contents of URL; do not retry in a loop.</li>
 <li>In ForeFlight, choose <b>Share PDF → Create KUSA Trip</b>. Allow the connection to the Upload URL’s host when iPad asks. The browser opens this review screen; sign in if prompted.</li></ol>
 <p id="previewGateway" class="warning" hidden>Preview’s GoDaddy access layer must also allow the Shortcut request. Use the shared Preview URL on this iPad first. If the Shortcut returns a GoDaddy sign-in page instead of a review link, report it here.</p>
+</details>
 <p>Text-based PDFs only, up to 4 MB / 20 pages. Image-only/scanned or password-protected documents are rejected. Missing or conflicting fields are left for your review. No third-party AI or email service receives the PDF.</p>
-<h2>Your upload connections</h2><div id="connections"></div><h2>Recent incoming plans</h2><p>Use the review link returned by your Shortcut. Pending plans expire after 48 hours. Sending the same PDF again returns the same review; it does not create another trip.</p>
+<h2>Your upload connections</h2><p>When a connection expires, sign in here and tap <b>Reconnect</b> for that iPad. Keep the same Shortcut and key, then share the PDF again. A revoked connection requires a new setup.</p><div id="connections"></div><h2>Recent incoming plans</h2><p>Use the review link returned by your Shortcut. Pending plans expire after 48 hours. Sending the same PDF again returns the same review; it does not create another trip.</p>
 </section>
 <section id="review" hidden><h2>Review the incoming plan</h2><p id="source"></p><div id="warnings" class="warning"></div><dl id="evidence"></dl>
 <form id="tripForm"><label>Aircraft<select id="aircraft" required></select></label>

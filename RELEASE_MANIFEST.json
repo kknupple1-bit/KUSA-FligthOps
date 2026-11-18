@@ -1,10 +1,15 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.34",
-  "release": "5.26.34-deployment.1",
+  "build": "5.26.35",
+  "release": "5.26.35-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
+    {
+      "path": "data/foreflight-shortcut-installer.json",
+      "size_bytes": 335,
+      "sha256": "19c61f3ddb6b839c05122a3e7fc819604216d4fe1f9de37b7189e43eaba57de9"
+    },
     {
       "path": "data/runways.json",
       "size_bytes": 1965,
@@ -17,8 +22,8 @@
     },
     {
       "path": "foreflight-service.js",
-      "size_bytes": 16339,
-      "sha256": "aae36ba159808616a75e7030f323889d32c8f1af7552b9ba634aa2a647b0b4cf"
+      "size_bytes": 19328,
+      "sha256": "790d086298a1d151f58fb3c0c29718e651e7df2e6a9f5981cd156ee70a032f07"
     },
     {
       "path": "mission-service.js",
@@ -28,12 +33,12 @@
     {
       "path": "package-lock.json",
       "size_bytes": 40620,
-      "sha256": "aa34f01edfaa152327343c421ee6918ea8a58921f176a0e9c3e42c405c780e4b"
+      "sha256": "321e8b06fae2e2903bf89196be78517b60515c10e34bc2cf2b53204668dd77ea"
     },
     {
       "path": "package.json",
-      "size_bytes": 2324,
-      "sha256": "003f042fd8c7cc0bd9dff37176a16e61bc1ece1e45b54c6c6a07f1571ed434af"
+      "size_bytes": 2363,
+      "sha256": "7ac58dc24004ba186f81f63f10431fe9aefc7af28224e8a6aaac41c114626362"
     },
     {
       "path": "platform.js",
@@ -43,12 +48,12 @@
     {
       "path": "public/account.html",
       "size_bytes": 10134,
-      "sha256": "fa7d9ac6ed11721e11b63149cab0df5749bc20edb6706c4b814c6ba4d96a52c6"
+      "sha256": "4cd9a374ce61d2866e7baf9bd5ff9f1b5a3c7ccb98f7da8d75fa02c54f7f10b6"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 13147,
-      "sha256": "6bae46457e0b10aff9d18ec537a4e856f88ea9b870a680af5ab7364ae495a6e6"
+      "sha256": "18cd22c3685663e4354ea313b7ae48362ee119dae5da49e12c585061d7058907"
     },
     {
       "path": "public/apple-touch-icon.png",
@@ -317,18 +322,18 @@
     },
     {
       "path": "public/foreflight.css",
-      "size_bytes": 1916,
-      "sha256": "f4babbf27bec27dd7f6e59651e37a4b9a573e235db26a5b2c2e2479c80e75cb1"
+      "size_bytes": 2286,
+      "sha256": "8e3ddf4415c635dabb4dad4c7e02a67516c06d17c107858ac910a3bda6396d11"
     },
     {
       "path": "public/foreflight.html",
-      "size_bytes": 5474,
-      "sha256": "04e3cf414ce28fb21ad64b18c3ff5e5f26b8222c2e37aad05c90856bbcf84750"
+      "size_bytes": 6280,
+      "sha256": "b57b6fab94e79660f0e3e87a9e9fe4a5d94b1c8143446c7182f9912682ef13a7"
     },
     {
       "path": "public/foreflight.js",
-      "size_bytes": 6727,
-      "sha256": "c66bd81222116371f5bac30d078c2b17b9d308aa694030e50593eeff9301953c"
+      "size_bytes": 9406,
+      "sha256": "b9fbd0b89d5d9297d9a748fd8a07f5ceda50843da49f2316c03c2440df957b57"
     },
     {
       "path": "public/icon-192.png",
@@ -373,12 +378,12 @@
     {
       "path": "public/index.html",
       "size_bytes": 707655,
-      "sha256": "3c8bca85b39f3e2868f2c017320a82953167fbc56f30943e9de0bef92c63a8b1"
+      "sha256": "3c53cdd96d2f3dd218411096c3092a5a7bdf1f72b14ff42a82ca56a3ce18a8d9"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 7414,
-      "sha256": "03b44338851c0979276df19bace921602f1fd457bda318d85d2f6dda5c23a519"
+      "sha256": "21f9c2b644a08f157f94cba6cb41cb9968d90c0dfb2260cc6e537287d2ffaa2b"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -408,12 +413,12 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4736,
-      "sha256": "f409df89f19c7dff444a3af275021c9da35012ca7ab9def2cbba6d2d98102bfc"
+      "sha256": "7a5a49602157e013716492e908ef3621d89434fd1a5dee91f3db9c7b7e1b58dd"
     },
     {
       "path": "public/sw.js",
       "size_bytes": 8604,
-      "sha256": "138610c493df8ded9c32290ce62a62f944da0c0a0060fd8a8b902ae0152c85e4"
+      "sha256": "bac374cef12f0bd804eafd78888b3aebd8b6d7a7f460acab7dc26d8535abaf3b"
     },
     {
       "path": "public/weather-math.js",
@@ -441,24 +446,29 @@
       "sha256": "3bd899f99e84850ea3ebec6138fa31399319d92a0eb8139082329c92c67a3821"
     },
     {
+      "path": "scripts/foreflight-shortcut-installer.cjs",
+      "size_bytes": 1343,
+      "sha256": "531d4b75299e19b7603c5a0c56c79e1a0d69954b9d22cd4f29ec971d9f6c83d6"
+    },
+    {
       "path": "scripts/migrate-database.cjs",
       "size_bytes": 2619,
       "sha256": "f6d40306195eed45e73edba669998796341189d420193a84dec1483a1e597797"
     },
     {
       "path": "scripts/release-files.cjs",
-      "size_bytes": 2522,
-      "sha256": "196a1b1d40f3138c34d358cb320fb436b5ae2f4cf5c91021b75d7695a567e808"
+      "size_bytes": 2694,
+      "sha256": "b52383d4dd45b55ce6ab7b00d8e8ede27dfaa1982f0f60e41f84eba914721310"
     },
     {
       "path": "scripts/verify-release.cjs",
-      "size_bytes": 6426,
-      "sha256": "07c9a82b5775bba29feb5f65f4b6289da52d2c48876bc5d317b84304a3e47923"
+      "size_bytes": 6624,
+      "sha256": "776844fd8058aa3ddae25f4525206d950f0e67ff5145859b3cdae3e8d54294e3"
     },
     {
       "path": "server.js",
       "size_bytes": 842439,
-      "sha256": "2a7468e4e3a4340ff6bbb9365410eaa6f8edc1658fb1b00716086ffa3a35ec6b"
+      "sha256": "e63a5074bbe48eb072f49a44a99cf8bf32f905c97f5ca1322b8c04da06e20d0b"
     }
   ]
 }

@@ -5,6 +5,16 @@ const {extractPlan,validDate,proposeRampFuel}=require('../foreflight-parser');
 const install=require('../foreflight-service');
 const {pdf,plan,mobilePlan}=require('./foreflight-fixtures.cjs');
 const {workerEnvironment,startupReason,safeReason,probePdf}=require('../scripts/foreflight-pdf-runtime.cjs');
+const {validateInstaller,installerInfo}=require('../scripts/foreflight-shortcut-installer.cjs');
+const installerFixture={schema:'kusa.foreflight.shortcut-installer.v1',name:'Create KUSA Trip',template_version:1,target_origin:'https://flightops.kusaaviation.com',url:'https://www.icloud.com/shortcuts/'+'1'.repeat(32),workflow_sha256:'0'.repeat(64)};
+
+test('installer permits only a reviewed keyless Apple link and keeps Preview keys separate',()=>{
+ assert.equal(validateInstaller(installerFixture),true);
+ assert.equal(installerInfo('flightops.kusaaviation.com',installerFixture).available,true);
+ const preview=installerInfo('test.preview.c37.airoapp.ai',installerFixture);assert.equal(preview.available,false);assert.equal(preview.url,null);assert.equal(preview.reason,'LIVE_SETUP_REQUIRED');
+ assert.equal(installerInfo('localhost',{...installerFixture,url:null,workflow_sha256:null}).available,false);
+ for(const patch of [{url:'https://example.invalid/shortcuts/'+'1'.repeat(32)},{url:installerFixture.url+'?key=SECRET'},{url:installerFixture.url+'#SECRET'},{url:installerFixture.url.replace('https://','http://')},{workflow_sha256:null},{target_origin:'https://example.invalid'}])assert.throws(()=>validateInstaller({...installerFixture,...patch}));
+});
 
 test('reader inherits only loader paths and emits closed startup reasons',()=>{
  const inherited=workerEnvironment({PATH:'bin',NODE_PATH:'modules',LD_LIBRARY_PATH:'libraries',NODE_OPTIONS:'SENSITIVE',NMS_CLIENT_SECRET:'SECRET',FLIGHTOPS_ADMIN_PASSWORD:'SECRET',HOME:'private'});
@@ -93,10 +103,10 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
   for(const u of ['pilot','other','viewer'])db.prepare('INSERT INTO aircraft_access VALUES(?,?,?,?,?)').run(a+u,a,u,'pilot',now);
  }
  const app=express();app.use(express.json({limit:'1mb'}));
- const requireAuth=(req,res,next)=>{const u=req.get('X-Test-User');if(!u)return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});req.flightopsSession={user_id:u,id:u+'s',expires_at:expiry};next();};
+ const requireAuth=(req,res,next)=>{const u=req.get('X-Test-User');if(!u)return res.status(401).json({ok:false,error:'AUTH_REQUIRED'});req.flightopsSession={user_id:u,id:req.get('X-Test-Session')||u+'s',expires_at:expiry};next();};
  const opts={db,requireAuth,id:p=>p+'_'+crypto.randomBytes(12).toString('hex'),isoNow:()=>new Date().toISOString()};
  let pdfFailure=null;
- require('../mission-service')(app,opts);install(app,{...opts,pdfReader:async bytes=>{if(pdfFailure)throw pdfFailure;return {text:bytes.toString().slice(6),pages:1};}});
+ require('../mission-service')(app,opts);install(app,{...opts,shortcutInstaller:installerFixture,pdfReader:async bytes=>{if(pdfFailure)throw pdfFailure;return {text:bytes.toString().slice(6),pages:1};}});
  const server=app.listen(0,'127.0.0.1');await new Promise(r=>server.once('listening',r));const base=`http://127.0.0.1:${server.address().port}`;
  async function api(user,url,method='GET',body,headers={}){const r=await fetch(base+url,{method,headers:{...(user?{'X-Test-User':user}:{}),'Content-Type':'application/json','X-FlightOps-Action':'foreflight',...headers},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,...await r.json()};}
  async function upload(key,text=plan('N33AP'),headers={}){const r=await fetch(base+'/api/foreflight/upload',{method:'POST',headers:{'Content-Type':'application/pdf',...(key?{'X-FlightOps-Upload-Key':key}:{}),...headers},body:Buffer.from('%PDF-\n'+text)});return {status:r.status,...await r.json()};}
@@ -108,6 +118,9 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
    for(const u of ['viewer','outsider'])assert.equal((await api(u,'/api/foreflight/connections','POST',{})).status,403);
    assert.equal((await api('pilot','/api/foreflight/connections','POST',{}, {'X-FlightOps-Action':''})).status,403);
    assert.equal((await api(null,'/api/foreflight/reader-status')).status,401);
+   assert.equal((await api(null,'/api/foreflight/installer')).status,401);
+   for(const u of ['viewer','outsider'])assert.equal((await api(u,'/api/foreflight/installer')).status,403);
+   const info=await api('pilot','/api/foreflight/installer');assert.equal(info.installer.url,installerFixture.url);assert.equal(info.installer.upload_url,'https://flightops.kusaaviation.com/api/foreflight/upload');
    for(const u of ['viewer','outsider'])assert.equal((await api(u,'/api/foreflight/reader-status')).status,403);
    let health;for(let n=0;n<100;n++){health=await api('pilot','/api/foreflight/reader-status');if(health.reader.status!=='checking')break;await new Promise(r=>setTimeout(r,20));}
    assert.equal(health.reader.status,'ready');assert(health.reader.checked_at);
@@ -126,6 +139,41 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
    assert.equal((await upload(key)).open_url,r.open_url);
    assert.equal((await api('other','/api/foreflight/imports/'+iid)).status,404);
    assert.equal((await api(null,'/api/foreflight/imports/'+iid)).status,401);
+  });
+  await t.test('Reconnect renews only the owner key with current grants and a fresh active session',async()=>{
+   const fresh=await api('pilot','/api/foreflight/connections','POST',{label:'Reconnect test'}),connection=fresh.connection.id,token=fresh.upload_key;
+   const before=db.prepare('SELECT * FROM foreflight_connections WHERE id=?').get(connection);
+   db.prepare("UPDATE foreflight_connections SET expires_at='2000-01-01' WHERE id=?").run(connection);
+   const expired=await upload(token);assert.equal(expired.status,401);assert.equal(new URL(expired.open_url).searchParams.get('reconnect'),connection);assert.equal(expired.open_url,expired.reconnect_url);assert(!JSON.stringify(expired).includes(token));
+   for(const [u,status]of [[null,401],['other',404],['viewer',403],['outsider',403]])assert.equal((await api(u,`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,status);
+   assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST',null,{'X-FlightOps-Action':''})).status,403);
+   db.prepare('UPDATE sessions SET revoked_at=? WHERE id=?').run(now,'pilots');
+   assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,401);
+   const shortExpiry=new Date(Date.now()+86400000).toISOString();
+   db.prepare('INSERT INTO sessions VALUES(?,?,?,?,?,?,?,?,?)').run('new-pilot-session','pilot','new-session-hash',null,null,now,now,shortExpiry,null);
+   const renewed=await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST',null,{'X-Test-Session':'new-pilot-session'});
+   assert.equal(renewed.status,200);assert.equal(renewed.connection.expires_at,shortExpiry);assert(!JSON.stringify(renewed).includes(token));assert(!('upload_key'in renewed));
+   const after=db.prepare('SELECT * FROM foreflight_connections WHERE id=?').get(connection);assert.equal(after.token_hash,before.token_hash);assert.equal(after.user_id,'pilot');assert.equal(after.session_id,'new-pilot-session');
+   assert.equal((await upload(token)).status,200,'existing installed key resumes without editing');
+   assert.equal(db.prepare('SELECT COUNT(*) n FROM missions').get().n,0,'Reconnect creates no trip/signoff');
+   db.prepare('UPDATE sessions SET revoked_at=NULL WHERE id=?').run('pilots');
+   db.prepare("UPDATE memberships SET role='viewer' WHERE user_id=?").run('pilot');assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,403);db.prepare("UPDATE memberships SET role='pilot' WHERE user_id=?").run('pilot');
+   db.prepare("UPDATE users SET status='disabled' WHERE id='pilot'").run();assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,401);db.prepare("UPDATE users SET status='active' WHERE id='pilot'").run();
+   await api('pilot','/api/foreflight/connections/'+connection,'DELETE');assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,409);
+   const revoked=await upload(token);assert.equal(revoked.status,401);assert(!revoked.open_url,'revoked key cannot enter the renewal flow');
+  });
+  await t.test('Reconnect enforces the five-key cap and rolls back failed writes',async()=>{
+   const candidate=await api('pilot','/api/foreflight/connections','POST',{label:'Expired cap candidate'}),connection=candidate.connection.id;
+   db.prepare("UPDATE foreflight_connections SET expires_at='2000-01-01' WHERE id=?").run(connection);
+   const others=await Promise.all(Array.from({length:4},(_,n)=>api('pilot','/api/foreflight/connections','POST',{label:'Cap test '+n})));
+   assert(others.every(r=>r.status===201));assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,429);
+   assert.equal((await api('pilot','/api/foreflight/connections','POST',{})).status,429);
+   for(const other of others)await api('pilot','/api/foreflight/connections/'+other.connection.id,'DELETE');
+   const before=db.prepare('SELECT * FROM foreflight_connections WHERE id=?').get(connection);
+   db.exec("CREATE TRIGGER reject_reconnect BEFORE UPDATE ON foreflight_connections BEGIN SELECT RAISE(ABORT,'synthetic rollback'); END");
+   try{assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,503);assert.deepEqual(db.prepare('SELECT * FROM foreflight_connections WHERE id=?').get(connection),before);}finally{db.exec('DROP TRIGGER reject_reconnect');}
+   assert.equal((await api('pilot',`/api/foreflight/connections/${connection}/reconnect`,'POST')).status,200);
+   await api('pilot','/api/foreflight/connections/'+connection,'DELETE');
   });
   await t.test('wrong media, oversized and compressed bodies cannot reach PDF parsing',async()=>{
    assert.equal((await upload(key,plan('N33AP'),{'Content-Type':'application/octet-stream'})).status,400);

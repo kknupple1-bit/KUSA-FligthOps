@@ -5,3 +5,5 @@ input,select,textarea{min-width:0}
 #date{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;inline-size:100%;min-inline-size:0;max-inline-size:100%;min-height:46px;overflow:hidden;text-align:left}
 #date::-webkit-date-and-time-value{min-width:0;text-align:left}
 #date::-webkit-datetime-edit{min-width:0;padding:0}
+
+.install-button{display:inline-block;background:#246a9f;color:#fff;font-weight:bold;text-decoration:none;border:1px solid #718ca5;border-radius:8px;padding:12px;min-height:46px;margin:8px 10px 8px 0}.reconnect-target{border:2px solid #9ed1ff;padding:12px;border-radius:8px}details{margin:16px 0}summary{cursor:pointer;padding:8px 0}#connections button{min-height:46px}

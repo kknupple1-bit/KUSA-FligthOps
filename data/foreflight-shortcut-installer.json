@@ -1,0 +1,8 @@
+{
+  "schema": "kusa.foreflight.shortcut-installer.v1",
+  "name": "Create KUSA Trip",
+  "template_version": 1,
+  "target_origin": "https://flightops.kusaaviation.com",
+  "url": "https://www.icloud.com/shortcuts/bd579f7f12c5445a899d8225cdb00f3b",
+  "workflow_sha256": "9a336b9ed9732082cdc47f7df20da40c25cd96a55c665e877d27b2a813706142"
+}

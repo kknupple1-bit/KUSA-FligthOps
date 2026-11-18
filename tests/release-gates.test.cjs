@@ -18,6 +18,15 @@ function fixture(run, withDependencies = true) {
 }
 test('accepts the intact release', () => assert.equal(verifyRelease(root).build, build));
 
+test('blocks a missing reviewed installer even with fresh hashes',()=>fixture(dir=>{
+  const name='data/foreflight-shortcut-installer.json',file=path.join(dir,name),value=JSON.parse(fs.readFileSync(file));
+  value.url=null;value.workflow_sha256=null;fs.writeFileSync(file,JSON.stringify(value));
+  const mf=path.join(dir,'RELEASE_MANIFEST.json'),manifest=JSON.parse(fs.readFileSync(mf));
+  const bytes=fs.readFileSync(file),entry=manifest.files.find(f=>f.path===name);
+  entry.size_bytes=bytes.length;entry.sha256=crypto.createHash('sha256').update(bytes).digest('hex');fs.writeFileSync(mf,JSON.stringify(manifest));
+  assert.throws(()=>verifyRelease(dir),/Reviewed ForeFlight installer is missing/);
+}));
+
 test('blocks removal of the required NMS deployment gate even with fresh hashes',()=>fixture(dir=>{
   const pkgFile=path.join(dir,'package.json'),pkg=JSON.parse(fs.readFileSync(pkgFile));
   pkg.scripts.prestart='node scripts/verify-release.cjs';fs.writeFileSync(pkgFile,JSON.stringify(pkg));
