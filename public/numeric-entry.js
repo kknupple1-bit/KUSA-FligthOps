@@ -1,6 +1,7 @@
 (function(){
  "use strict";
  let current=null,dialog=null;
+ const rulesFor=el=>typeof window.numericEntryRules==='function'?window.numericEntryRules(el):{decimal:el.getAttribute('step')==='any'||String(el.getAttribute('step')||'1').includes('.'),signed:Number(el.getAttribute('min')||0)<0};
  const labelFor=el=>String(el.getAttribute("aria-label")||el.labels?.[0]?.textContent||el.parentElement?.querySelector("label")?.textContent||el.id||"Number").trim();
  function ensureDialog(){
   if(dialog)return dialog;
@@ -80,14 +81,14 @@
  function openPad(target){
   if(current||target.disabled||target.readOnly||target.dataset.padNative==="true")return;
   ensureDialog();
-  current={target,rules:numericEntryRules(target),value:String(target.value||""),replace:true,replaceNegative:false,error:""};
+  current={target,rules:rulesFor(target),value:String(target.value||""),replace:true,replaceNegative:false,error:""};
   dialog.querySelector("h2").textContent=labelFor(target);
   render();dialog.showModal();dialog.querySelector('[data-key="1"]').focus();
  }
  window.KUSANumberPad={
   configure(target){
    if(typeof HTMLDialogElement==="undefined"||typeof HTMLDialogElement.prototype.showModal!=="function")return false;
-   target.setAttribute("inputmode",target.dataset.padNative==="true"?(numericEntryRules(target).decimal||numericEntryRules(target).signed?"decimal":"numeric"):"none");
+   target.setAttribute("inputmode",target.dataset.padNative==="true"?(rulesFor(target).decimal||rulesFor(target).signed?"decimal":"numeric"):"none");
    target.dataset.appNumberPad="true";
    if(!target.dataset.padBound){
     target.addEventListener("focus",()=>{if(target.dataset.padRestoreFocus){delete target.dataset.padRestoreFocus;return}openPad(target)});

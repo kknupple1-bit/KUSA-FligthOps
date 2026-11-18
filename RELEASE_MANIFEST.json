@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.33",
-  "release": "5.26.33-deployment.1",
+  "build": "5.26.34",
+  "release": "5.26.34-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -12,13 +12,13 @@
     },
     {
       "path": "foreflight-parser.js",
-      "size_bytes": 6137,
-      "sha256": "620f8c132a6b88a2b4a1d155e89cb1d40259aff38d5e2f7ee28562b828420f4e"
+      "size_bytes": 7748,
+      "sha256": "0fa312d189ea8b76875f347ade40dcd5212b705595ad161f6680ed6936654b42"
     },
     {
       "path": "foreflight-service.js",
-      "size_bytes": 16205,
-      "sha256": "4015edddf7b003e9724253c67456247eb821ebdea41e37a137cbba7db6945e85"
+      "size_bytes": 16339,
+      "sha256": "aae36ba159808616a75e7030f323889d32c8f1af7552b9ba634aa2a647b0b4cf"
     },
     {
       "path": "mission-service.js",
@@ -28,12 +28,12 @@
     {
       "path": "package-lock.json",
       "size_bytes": 40620,
-      "sha256": "f2e5514081889223a985b5c456dff016cdc22f70ab39c8c515b4e782e36696bd"
+      "sha256": "aa34f01edfaa152327343c421ee6918ea8a58921f176a0e9c3e42c405c780e4b"
     },
     {
       "path": "package.json",
-      "size_bytes": 2288,
-      "sha256": "47037e4b07aa24d08c4d95ae3c74914974b7d3e6e7a106a1382e89323759fa4a"
+      "size_bytes": 2324,
+      "sha256": "003f042fd8c7cc0bd9dff37176a16e61bc1ece1e45b54c6c6a07f1571ed434af"
     },
     {
       "path": "platform.js",
@@ -43,12 +43,12 @@
     {
       "path": "public/account.html",
       "size_bytes": 10134,
-      "sha256": "37e6a364449fbbd58230fc1f1171b69e610c113bb2d1ea0af4ec5b8abd15f308"
+      "sha256": "fa7d9ac6ed11721e11b63149cab0df5749bc20edb6706c4b814c6ba4d96a52c6"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 13147,
-      "sha256": "76f31a47e78f3cce7a7f8eafce752711c32da936e1a069e17202b86a49e173c7"
+      "sha256": "6bae46457e0b10aff9d18ec537a4e856f88ea9b870a680af5ab7364ae495a6e6"
     },
     {
       "path": "public/apple-touch-icon.png",
@@ -317,18 +317,18 @@
     },
     {
       "path": "public/foreflight.css",
-      "size_bytes": 1415,
-      "sha256": "e1cd0e10e24dac32e74141818b6cfb91acaaf5a0f99f5bb1290546adbdfdad83"
+      "size_bytes": 1917,
+      "sha256": "acff482abd0ff45b186fd7b487ca27a18e2fdfa5a4bf5a09a1afc241909b8030"
     },
     {
       "path": "public/foreflight.html",
-      "size_bytes": 5378,
-      "sha256": "1583316cb7500e0d529320feb05e9eed4a37a9ea3157161306dcce690b7256c9"
+      "size_bytes": 5474,
+      "sha256": "04e3cf414ce28fb21ad64b18c3ff5e5f26b8222c2e37aad05c90856bbcf84750"
     },
     {
       "path": "public/foreflight.js",
-      "size_bytes": 6320,
-      "sha256": "1073d44fd20e2e6a9451a04322440f4a07733922b6a12b61864a2784af307de7"
+      "size_bytes": 6727,
+      "sha256": "c66bd81222116371f5bac30d078c2b17b9d308aa694030e50593eeff9301953c"
     },
     {
       "path": "public/icon-192.png",
@@ -373,12 +373,12 @@
     {
       "path": "public/index.html",
       "size_bytes": 707655,
-      "sha256": "3e148612176fe58e40aa419fef103661873ec4511e0e1c869d342bf7f060136c"
+      "sha256": "3c8bca85b39f3e2868f2c017320a82953167fbc56f30943e9de0bef92c63a8b1"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 7414,
-      "sha256": "ad3fe84459607be9773b221a3b331d0203253292a1334471c95beeafa7d30bd7"
+      "sha256": "03b44338851c0979276df19bace921602f1fd457bda318d85d2f6dda5c23a519"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -402,18 +402,18 @@
     },
     {
       "path": "public/numeric-entry.js",
-      "size_bytes": 6528,
-      "sha256": "771a4d9bae57d8ad4973f4ff15dcb2212b31a49e16b398e7cf12cfada96bbe6b"
+      "size_bytes": 6733,
+      "sha256": "b637df27da2989292dc88b18744f6b3aef59544b2ad548bc4b599e37c2c528d7"
     },
     {
       "path": "public/reset-password.html",
       "size_bytes": 4736,
-      "sha256": "8e9aad271e6bd51a8a32678a3487124999ce4519f5bc335adf04f026dd69024f"
+      "sha256": "f409df89f19c7dff444a3af275021c9da35012ca7ab9def2cbba6d2d98102bfc"
     },
     {
       "path": "public/sw.js",
       "size_bytes": 8604,
-      "sha256": "e17801a05f991bc7724322cbe0fe831f1c69b80f7e5461ee302569beb57faf53"
+      "sha256": "138610c493df8ded9c32290ce62a62f944da0c0a0060fd8a8b902ae0152c85e4"
     },
     {
       "path": "public/weather-math.js",
@@ -458,7 +458,7 @@
     {
       "path": "server.js",
       "size_bytes": 842439,
-      "sha256": "6dc7fa540334e8d6218995e62c13983437efc9d919b9f063990938715faf1810"
+      "sha256": "2a7468e4e3a4340ff6bbb9365410eaa6f8edc1658fb1b00716086ffa3a35ec6b"
     }
   ]
 }
