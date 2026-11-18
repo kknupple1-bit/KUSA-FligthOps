@@ -3,7 +3,17 @@
 Live 5.26.32 receives the iPad PDF but the subprocess reports unavailable at
 startup. Parent release verification successfully loads the dependency. The
 precise hosted startup exception was not exposed by 5.26.32; do not claim an
-exact root cause until the new hosted probe confirms it.
+exact root cause until the new hosted probe confirms it. The first Preview
+probe identified DOM_API_UNAVAILABLE: required DOM graphics globals are absent
+when PDF.js attempts its automatic canvas loading in the hosted child.
+
+Use upstream's documented pdf-parse/worker bootstrap before loading pdf-parse:
+initialize DOMMatrix/Path2D/ImageData with its CanvasFactory and configure its
+bundled worker data URL. Resolve both package entry points in the parent.
+Keep decoding offline with the pinned package's trusted worker code; no remote
+worker script, third-party upload, OCR, or new dependency is introduced.
+Regression coverage blocks optional automatic canvas resolution in a relocated
+subprocess and still requires successful PDF text extraction via the bootstrap.
 
 Pass the parent's absolute resolved pdf-parse module path to the subprocess.
 Preserve NODE_PATH and LD_LIBRARY_PATH for managed-host runtime loading, alongside

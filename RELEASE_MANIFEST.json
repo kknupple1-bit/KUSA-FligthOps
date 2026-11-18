@@ -17,8 +17,8 @@
     },
     {
       "path": "foreflight-service.js",
-      "size_bytes": 16103,
-      "sha256": "ee0e314fad6dea6970acf83865897071c69beacc8033cf7bb9835e29d912d8bd"
+      "size_bytes": 16139,
+      "sha256": "b8ed90beede247d8b558e69e2ddbeebe304d023107eb8abcbe96c2d29386e301"
     },
     {
       "path": "mission-service.js",
@@ -437,8 +437,8 @@
     },
     {
       "path": "scripts/foreflight-pdf-worker.cjs",
-      "size_bytes": 1415,
-      "sha256": "1f6c6b4d67e59658cd48aa689e7f5d9c90026413ebe7c07bcddbb754b33e376d"
+      "size_bytes": 1764,
+      "sha256": "ede58b19667ea3cd40a6c3975ad3964da2888bd63d2378fe5eb5a8431d5db1ce"
     },
     {
       "path": "scripts/migrate-database.cjs",
