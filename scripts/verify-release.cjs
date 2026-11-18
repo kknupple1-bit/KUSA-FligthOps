@@ -34,6 +34,8 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
     const expected = lock.packages?.[`node_modules/${dependency}`]?.version;
     if (!expected || installed !== expected) throw new Error(`Installed ${dependency} does not match lockfile; run npm ci`);
   }
+  if(typeof appRequire('@napi-rs/canvas/geometry').DOMMatrix!=='function')throw new Error('PDF JS geometry module is missing');
+  if(!fs.statSync(appRequire.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs')).isFile())throw new Error('Packaged PDF worker is missing');
   const recorded = new Map();
   for (const file of manifest.files) {
     if (typeof file.path !== 'string' || path.isAbsolute(file.path) || file.path.split('/').includes('..') || recorded.has(file.path))

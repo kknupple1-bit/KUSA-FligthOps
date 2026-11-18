@@ -23,7 +23,7 @@ const fault=(code,reason)=>Object.assign(Error(code),{code,...(reason?{reason:sa
 function readPdf(bytes){return new Promise((resolve,reject)=>{
  const env=workerEnvironment();
  let worker;
- try{worker=fork(path.join(__dirname,'scripts/foreflight-pdf-worker.cjs'),[require.resolve('pdf-parse'),require.resolve('pdf-parse/worker')],{execArgv:['--max-old-space-size=128'],env,stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});}
+ try{worker=fork(path.join(__dirname,'scripts/foreflight-pdf-worker.cjs'),[require.resolve('pdf-parse'),require.resolve('@napi-rs/canvas/geometry'),require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs')],{execArgv:['--max-old-space-size=128'],env,stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});}
  catch(error){reject(fault('PDF_READER_UNAVAILABLE',startupReason(error)));return;}
  const timer=setTimeout(()=>{worker.kill();reject(fault('PDF_TIMEOUT'));},10000);
  const finish=()=>{clearTimeout(timer);worker.kill();};

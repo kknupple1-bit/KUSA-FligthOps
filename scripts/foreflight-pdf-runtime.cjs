@@ -8,7 +8,7 @@ const reasons=new Set(['MODULE_MISSING','NATIVE_LIBRARY_UNAVAILABLE','DOM_API_UN
 const safeReason=value=>reasons.has(value)?value:'OTHER';
 function startupReason(error){
  if(error?.code==='MODULE_NOT_FOUND'||error?.code==='ERR_MODULE_NOT_FOUND')return 'MODULE_MISSING';
- if(error?.code==='ERR_DLOPEN_FAILED'||/Cannot find native binding/.test(String(error?.message)))return 'NATIVE_LIBRARY_UNAVAILABLE';
+ if(error?.code==='ERR_DLOPEN_FAILED'||/(?:Cannot find|Failed to load) native binding/.test(String(error?.message)))return 'NATIVE_LIBRARY_UNAVAILABLE';
  if(error?.name==='ReferenceError'&&/\b(?:DOMMatrix|ImageData|Path2D) is not defined\b/.test(String(error?.message)))return 'DOM_API_UNAVAILABLE';
  if(error?.code==='ERR_REQUIRE_ESM')return 'MODULE_FORMAT';
  if(['EACCES','EPERM','ERR_ACCESS_DENIED'].includes(error?.code))return 'SPAWN_DENIED';

@@ -18,17 +18,18 @@ test('relocated worker loads the parent-resolved dependency and reports missing 
  const os=require('node:os'),{fork}=require('node:child_process');
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'flightops-reader-'));
  for(const name of ['foreflight-pdf-worker.cjs','foreflight-pdf-runtime.cjs'])fs.copyFileSync(path.join(__dirname,'../scripts',name),path.join(dir,name));
- // Reproduce failure of PDF.js's optional automatic canvas resolution without
- // breaking normal CommonJS dependency imports used by the supported bootstrap.
- fs.writeFileSync(path.join(dir,'blocked-autoload.cjs'),`const original=process.getBuiltinModule;process.getBuiltinModule=name=>{const builtin=original(name);if(name!=='module')return builtin;return {...builtin,createRequire:(...args)=>{const normal=builtin.createRequire(...args);return name=>{if(name==='@napi-rs/canvas')throw Error('Synthetic autoload unavailable');return normal(name);};}};};require('./foreflight-pdf-worker.cjs');`);
- async function run(modulePath,blockAutoload=false){
-  const worker=fork(path.join(dir,blockAutoload?'blocked-autoload.cjs':'foreflight-pdf-worker.cjs'),[modulePath,require.resolve('pdf-parse/worker')],{env:workerEnvironment(),execArgv:['--max-old-space-size=128'],stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});
-  try{return await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('worker timed out')),10000);worker.once('message',r=>{clearTimeout(timer);resolve(r);});worker.once('error',e=>{clearTimeout(timer);reject(e);});worker.send(probePdf().toString('base64'));});}
+ // Block both optional automatic canvas loading and direct native imports.
+ // Real text extraction must still succeed with the pinned JS geometry module.
+ fs.writeFileSync(path.join(dir,'blocked-autoload.cjs'),`const Module=require('node:module'),load=Module._load;Module._load=function(name,...args){if(name==='@napi-rs/canvas'||name.endsWith('.node'))throw Error('Synthetic native graphics unavailable');return load.call(this,name,...args);};const original=process.getBuiltinModule;process.getBuiltinModule=name=>{const builtin=original(name);if(name!=='module')return builtin;return {...builtin,createRequire:(...args)=>{const normal=builtin.createRequire(...args);return name=>{if(name==='@napi-rs/canvas')throw Error('Synthetic autoload unavailable');return normal(name);};}};};require('./foreflight-pdf-worker.cjs');`);
+ async function run(modulePath,blockAutoload=false,bytes=probePdf()){
+  const worker=fork(path.join(dir,blockAutoload?'blocked-autoload.cjs':'foreflight-pdf-worker.cjs'),[modulePath,require.resolve('@napi-rs/canvas/geometry'),require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs')],{env:workerEnvironment(),execArgv:['--max-old-space-size=128'],stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});
+  try{return await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('worker timed out')),10000);worker.once('message',r=>{clearTimeout(timer);resolve(r);});worker.once('error',e=>{clearTimeout(timer);reject(e);});worker.send(bytes.toString('base64'));});}
   finally{worker.kill();await new Promise(r=>worker.exitCode!==null?r():worker.once('exit',r));}
  }
  try{
   const result=await run(require.resolve('pdf-parse'));assert.equal(result.ok,true);assert.match(result.text,/KUSA_PDF_READER_PROBE/);
-  const blocked=await run(require.resolve('pdf-parse'),true);assert.equal(blocked.ok,true);assert.match(blocked.text,/KUSA_PDF_READER_PROBE/,'supported bootstrap works with automatic canvas loading blocked');
+  const blocked=await run(require.resolve('pdf-parse'),true);assert.equal(blocked.ok,true);assert.match(blocked.text,/KUSA_PDF_READER_PROBE/,'text reader works with native graphics blocked');
+  const mobile=await run(require.resolve('pdf-parse'),true,pdf(mobilePlan('N33AP')));assert.equal(mobile.ok,true);assert.equal(extractPlan(mobile.text).fields.trip_lb,2500);
   const missing=await run(path.join(dir,'SENSITIVE_PROVIDER_DETAIL.cjs'));assert.deepEqual(missing,{ok:false,error:'PDF_READER_UNAVAILABLE',reason:'MODULE_MISSING'});
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });
