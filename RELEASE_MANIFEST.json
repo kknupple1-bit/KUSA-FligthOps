@@ -12,8 +12,8 @@
     },
     {
       "path": "foreflight-parser.js",
-      "size_bytes": 4665,
-      "sha256": "7cb481106066a7e319998e349b383af02bb011eb3338428adbd3597b10f1cd02"
+      "size_bytes": 6137,
+      "sha256": "620f8c132a6b88a2b4a1d155e89cb1d40259aff38d5e2f7ee28562b828420f4e"
     },
     {
       "path": "foreflight-service.js",

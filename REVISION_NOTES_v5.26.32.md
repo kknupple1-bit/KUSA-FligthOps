@@ -1,27 +1,34 @@
-# FlightOps 5.26.32 — actionable ForeFlight PDF failure diagnostics
+# FlightOps 5.26.32 — ForeFlight Mobile combined PDF import
 
-Preview only; Live remains 5.26.30. The iPad handoff has now reached the upload
-receiver with a PDF, but the combined 5.26.31 error did not distinguish document
-decoding, unsupported flight-plan layout, page/text limits or hosting failure.
-The user's exact ForeFlight PDF has not yet been reproduced or fixed.
+Preview only. Live remains 5.26.30.
 
-Return closed, actionable error codes/messages for password protection, invalid
-PDF, no extracted page text, too many pages/text, reader startup/exit/timeout,
-unrecognized layout and storage failure. Hosting failures use 503, document
-problems 422, and storage failure 500. Responses include a short random reference.
-Logs contain only that reference, a fixed stage/code, byte/page counts and elapsed
-milliseconds; never PDF text, routes, filenames, keys, identities, hashes, URLs or
-provider messages. Child process setup failure and IPC failure are classified too.
+Reproduced the reported failure with the original four-page Mobile combined
+export: PDF decoding succeeds, but the export lacks the ForeFlight / Navlog
+wording required by the old recognition gate. Recognize this layout from its
+route/date/tail header plus Summary & Times, Fuel & Weights, ICAO Flight Plan
+and fuel labels. Partial structural matches remain rejected.
 
-Use actual extracted page text to identify empty/image-only documents; PDF
-library-added page separators do not constitute readable text. No OCR, relaxed
-recognition, page/size increase or new permission is added. Failed uploads still
-create no trip or signoff. Existing iPad upload connections and settings are
-unchanged; keep the existing Shortcut configuration for the next test.
+Keep Flight Fuel as a reference total. In this recognized layout it includes
+taxi: propose airborne trip burn only when Flight Fuel minus Taxi Fuel agrees
+with TOW minus ELW, and Block Fuel minus Landing Fuel agrees with Flight Fuel
+(within one pound). Otherwise require manual trip burn. Conflicting explicit
+Trip Fuel remains blank. Block Fuel never becomes ramp FOB automatically.
+Exclude Alternate Fuel/Burn labels from alternate-airport extraction.
 
-New checks verify distinct document/hosting outcomes, safe diagnostics and trace
-references, no mission creation after errors, and an actual text-empty PDF. Full
-release and WebKit regression checks remain required. After deployment retry the
-same PDF once and inspect the new code/reference. If it is a format problem,
-obtain that exact PDF privately for reproduction; a synthetic PDF does not prove
-compatibility with the user's export.
+Retain closed diagnostic codes and random references for document limits,
+password/invalid/no-text PDFs, reader startup/exit/timeout, unrecognized layout
+and storage failure. Logs contain only stage/code, random reference, size/page
+counts and elapsed time; no document text, filenames, routes, keys, identities,
+hashes, URLs or provider detail. No OCR or increased document limits.
+
+Public regression fixtures use invented data. The private PDF and extracted
+pilot details remain outside the repository. Browser checks import the Mobile
+layout, require ramp FOB confirmation, verify airborne/taxi mapping through the
+complete trip, and reject duplicates. Access controls and individual reviews
+are unchanged. Preserve existing iPad upload connections and Shortcut settings.
+
+Required CI retains all application and tablet checks on fixed Ubuntu 24.04.
+Allow 35 minutes: system-package download previously consumed the entire
+20-minute job before tablet tests could finish. No checks are skipped.
+
+Physical iPad Share PDF acceptance remains required after Preview deployment.

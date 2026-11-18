@@ -3,7 +3,7 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const express=require('express'),{DatabaseSync}=require('node:sqlite');
 const {extractPlan,validDate}=require('../foreflight-parser');
 const install=require('../foreflight-service');
-const {pdf,plan}=require('./foreflight-fixtures.cjs');
+const {pdf,plan,mobilePlan}=require('./foreflight-fixtures.cjs');
 test('parser only proposes explicit unambiguous fields and pounds',()=>{
  const p=extractPlan(plan('N33AP'));assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.trip_lb,3000);assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');
  assert.equal(extractPlan(plan('N33AP')+'\nDeparture: KOPF').fields.departure,null);
@@ -19,8 +19,24 @@ test('parser only proposes explicit unambiguous fields and pounds',()=>{
 });
 test('real PDF worker extracts text, rejects malformed input and cleans up',async()=>{
  const result=await install.readPdf(pdf(plan('N33AP')));assert.equal(result.pages,1);const p=extractPlan(result.text);assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.departure,'KDTO');
+ const mobile=extractPlan((await install.readPdf(pdf(mobilePlan('N33AP')))).text);assert.equal(mobile.fields.trip_lb,2500);assert.equal(mobile.fields.fob_lb,null);
  await assert.rejects(()=>install.readPdf(Buffer.from('%PDF-invalid')));
  await assert.rejects(()=>install.readPdf(pdf('')),e=>e.code==='PDF_NO_TEXT');
+});
+
+test('Mobile combined export is recognized structurally and reconciles taxi exactly once',()=>{
+ const text=mobilePlan('N33AP')+'\nAlternate Fuel\n0 lbs',p=extractPlan(text);
+ assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');assert.equal(p.fields.destination,'KBPT');assert.equal(p.fields.date,'2026-11-17');
+ assert.equal(p.fields.fob_lb,null);assert.equal(p.fields.block_fuel_lb,8000);assert.equal(p.fields.taxi_lb,200);assert.equal(p.fields.flight_fuel_lb,2700);assert.equal(p.fields.trip_lb,2500);
+ assert.equal(p.fields.alternate,null,'Alternate Fuel is not an alternate airport called FUEL');
+ assert.equal(p.fields.taxi_lb+p.fields.trip_lb,2700);
+ assert.equal(extractPlan(text.replaceAll('27500 lbs','27400 lbs')).fields.trip_lb,null,'inconsistent weights need manual trip burn');
+ assert.equal(extractPlan(text.replace('5300 lbs','5200 lbs')).fields.trip_lb,null,'inconsistent fuel balance needs manual trip burn');
+ assert.equal(extractPlan(text+'\nTrip Fuel: 2600 lbs').fields.trip_lb,null,'explicit versus derived conflicts remain unresolved');
+ assert.equal(extractPlan(text+'\nTaxi Fuel: 250 lbs').fields.trip_lb,null,'conflicting taxi cannot be subtracted');
+ assert.equal(extractPlan('ForeFlight\nFlight Fuel: 2700 lbs\nTaxi Fuel: 200 lbs').fields.trip_lb,null,'a generic Flight Fuel label has no verified taxi definition');
+ for(const title of ['SUMMARY & TIMES','FUEL & WEIGHTS','ICAO FLIGHT PLAN'])assert.throws(()=>extractPlan(text.replace(title,'')));
+ assert.throws(()=>extractPlan('KDTO — KBPT (Nov 17, 2026) in N33AP\nBlock Fuel: 8000 lbs'));
 });
 test('upload-only connections and reviewed trip creation enforce identity, access and idempotency',async t=>{
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
