@@ -76,6 +76,9 @@ const root=path.resolve(__dirname,'..');
   assert.deepEqual(await page.evaluate(()=>['f9wb_pilot','f9wb_copilot','f9wbTaxi'].map(id=>Number($(id).value))),[215,201,0]);
   assert.equal(await page.evaluate(()=>window.f900bWBLatest.ldgFuel),6000);
   assert.deepEqual(errors,[],'no uncaught runtime errors in either aircraft');
+  // Finish the synthetic background NOTAM requests before unloading this
+  // document; Linux WebKit reports cancelled routed requests as access errors.
+  await page.waitForLoadState('networkidle');
   await page.goto(base+'/foreflight.html');
   await page.getByText('PDF importing is available.',{exact:true}).waitFor();
   assert.equal(await page.locator('#connect').isEnabled(),true);
