@@ -74,6 +74,7 @@ function verifyRelease(root = path.resolve(__dirname, '..')) {
   for (const page of ['account', 'admin-users', 'invite', 'reset-password'])
     if (!read(`public/${page}.html`).includes(`v${manifest.build}`)) throw new Error(`${page} build mismatch`);
   for (const file of ['server.js', 'platform.js', 'mission-service.js', 'foreflight-service.js','foreflight-parser.js','scripts/foreflight-pdf-worker.cjs','public/foreflight.js','public/foreflight-open.js','public/sw.js', 'public/numeric-entry.js', 'public/weather-math.js', 'public/mission-review.js', 'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs']) new vm.Script(read(file), {filename: file});
+  new vm.Script(read('scripts/foreflight-pdf-runtime.cjs'),{filename:'scripts/foreflight-pdf-runtime.cjs'});
   return manifest;
 }
 if (require.main === module) {

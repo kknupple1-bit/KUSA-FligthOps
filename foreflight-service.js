@@ -4,10 +4,11 @@ const crypto=require('node:crypto');
 const path=require('node:path');
 const {fork}=require('node:child_process');
 const {extractPlan,validDate}=require('./foreflight-parser');
+const {workerEnvironment,startupReason,safeReason,probePdf}=require('./scripts/foreflight-pdf-runtime.cjs');
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 const pdfMessages={
- PDF_TIMEOUT:'The Preview PDF reader timed out. No trip was created. Report the reference below so we can check the hosted reader.',
- PDF_READER_UNAVAILABLE:'The PDF reader could not start on Preview. This is a hosting problem, not a Shortcut setting. No trip was created.',
+ PDF_TIMEOUT:'The hosted PDF reader timed out. No trip was created. Report the reference below so we can check it.',
+ PDF_READER_UNAVAILABLE:'The hosted PDF reader could not start. This is a server problem, not a Shortcut setting. No trip was created.',
  PDF_READER_FAILED:'The hosted PDF reader stopped unexpectedly. No trip was created. Report the reference below.',
  PDF_PASSWORD_REQUIRED:'The PDF is password-protected. Share an unprotected ForeFlight Navlog / flight-plan PDF. No trip was created.',
  PDF_PAGE_LIMIT:'The PDF exceeds the 20-page limit. Share the flight Navlog / flight-plan PDF without the full briefing. No trip was created.',
@@ -18,18 +19,18 @@ const pdfMessages={
  PDF_LAYOUT_NOT_RECOGNIZED:'The PDF was read, but its flight-plan layout was not recognized. We need this sample to support its format. No trip was created.',
  IMPORT_STORAGE_FAILED:'The PDF was read, but the incoming plan could not be stored. No trip was created. Report the reference below.'
 };
-const fault=code=>Object.assign(Error(code),{code});
+const fault=(code,reason)=>Object.assign(Error(code),{code,...(reason?{reason:safeReason(reason)}:{})});
 function readPdf(bytes){return new Promise((resolve,reject)=>{
- const env=Object.fromEntries(['PATH','SystemRoot','SYSTEMROOT','TEMP','TMP'].filter(k=>process.env[k]).map(k=>[k,process.env[k]]));
+ const env=workerEnvironment();
  let worker;
- try{worker=fork(path.join(__dirname,'scripts/foreflight-pdf-worker.cjs'),[],{execArgv:['--max-old-space-size=128'],env,stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});}
- catch{reject(fault('PDF_READER_UNAVAILABLE'));return;}
+ try{worker=fork(path.join(__dirname,'scripts/foreflight-pdf-worker.cjs'),[require.resolve('pdf-parse')],{execArgv:['--max-old-space-size=128'],env,stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});}
+ catch(error){reject(fault('PDF_READER_UNAVAILABLE',startupReason(error)));return;}
  const timer=setTimeout(()=>{worker.kill();reject(fault('PDF_TIMEOUT'));},10000);
  const finish=()=>{clearTimeout(timer);worker.kill();};
- worker.once('message',r=>{finish();r.ok?resolve(r):reject(fault(Object.hasOwn(pdfMessages,r.error)?r.error:'PDF_NOT_READABLE'));});
- worker.once('error',()=>{finish();reject(fault('PDF_READER_UNAVAILABLE'));});
+ worker.once('message',r=>{finish();r.ok?resolve(r):reject(fault(Object.hasOwn(pdfMessages,r.error)?r.error:'PDF_NOT_READABLE',r.reason));});
+ worker.once('error',error=>{finish();reject(fault('PDF_READER_UNAVAILABLE',startupReason(error)));});
  worker.once('exit',()=>{clearTimeout(timer);reject(fault('PDF_READER_FAILED'));});
- worker.send(bytes.toString('base64'),error=>{if(error){finish();reject(fault('PDF_READER_UNAVAILABLE'));}});
+ worker.send(bytes.toString('base64'),error=>{if(error){finish();reject(fault('PDF_READER_UNAVAILABLE','IPC_FAILED'));}});
 });}
 module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReader=readPdf}){
  db.exec(`CREATE TABLE IF NOT EXISTS foreflight_connections (
@@ -60,6 +61,19 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
  });
  // This one route uses an upload-only key, never a browser session or API master key.
  const attempts=new Map();let busy=0;
+ // One bounded synthetic probe at each application start, sharing the same
+ // process/concurrency constraints as real imports. No key or PDF is needed.
+ let readerHealth={status:'checking'};
+ busy++;
+ readPdf(probePdf()).then(result=>{
+  if(!result.text.includes('KUSA_PDF_READER_PROBE'))throw fault('PDF_READER_FAILED','OTHER');
+  readerHealth={status:'ready',checked_at:isoNow()};
+ }).catch(error=>{readerHealth={status:'unavailable',code:Object.hasOwn(pdfMessages,error.code)?error.code:'PDF_READER_FAILED',reason:safeReason(error.reason),checked_at:isoNow()};})
+ .finally(()=>{busy--;console.info('[ForeFlight reader]',JSON.stringify(readerHealth));});
+ app.get('/api/foreflight/reader-status',requireAuth,(req,res)=>{
+  if(!writable(req.flightopsSession.user_id).length)return res.status(403).json({ok:false,error:'AIRCRAFT_ACCESS_DENIED'});
+  res.json({ok:true,reader:readerHealth});
+ });
  function uploadAuth(req,res,next){
   const now=Date.now(),ip=req.socket.remoteAddress||'unknown';
   for(const [key,value]of attempts)if(value.until<now)attempts.delete(key);
@@ -101,7 +115,7 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
    const code=stage==='plan_recognition'?(error.message==='DOCUMENT_TEXT_LIMIT'?'PDF_TEXT_LIMIT':'PDF_LAYOUT_NOT_RECOGNIZED'):stage==='import_storage'?'IMPORT_STORAGE_FAILED':Object.hasOwn(pdfMessages,error.code)?error.code:'PDF_NOT_READABLE';
    const reference=crypto.randomBytes(6).toString('hex');
    // No keys, PDF text, filenames, routes, identity, hashes, URLs or provider bodies.
-   console.warn('[ForeFlight import]',JSON.stringify({reference,stage,code,pdf_bytes:req.body.length,pages:pageCount,elapsed_ms:Date.now()-started}));
+   console.warn('[ForeFlight import]',JSON.stringify({reference,stage,code,...(error.reason?{reason:safeReason(error.reason)}:{}),pdf_bytes:req.body.length,pages:pageCount,elapsed_ms:Date.now()-started}));
    const status=code==='IMPORT_STORAGE_FAILED'?500:['PDF_TIMEOUT','PDF_READER_UNAVAILABLE','PDF_READER_FAILED'].includes(code)?503:422;
    return res.status(status).json({ok:false,error:code,message:pdfMessages[code],reference});
   }

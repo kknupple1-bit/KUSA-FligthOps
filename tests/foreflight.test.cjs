@@ -4,6 +4,30 @@ const express=require('express'),{DatabaseSync}=require('node:sqlite');
 const {extractPlan,validDate}=require('../foreflight-parser');
 const install=require('../foreflight-service');
 const {pdf,plan,mobilePlan}=require('./foreflight-fixtures.cjs');
+const {workerEnvironment,startupReason,safeReason,probePdf}=require('../scripts/foreflight-pdf-runtime.cjs');
+
+test('reader inherits only loader paths and emits closed startup reasons',()=>{
+ const inherited=workerEnvironment({PATH:'bin',NODE_PATH:'modules',LD_LIBRARY_PATH:'libraries',NODE_OPTIONS:'SENSITIVE',NMS_CLIENT_SECRET:'SECRET',FLIGHTOPS_ADMIN_PASSWORD:'SECRET',HOME:'private'});
+ assert.deepEqual(inherited,{PATH:'bin',NODE_PATH:'modules',LD_LIBRARY_PATH:'libraries'});
+ for(const [error,reason]of [[{code:'MODULE_NOT_FOUND'},'MODULE_MISSING'],[{code:'ERR_DLOPEN_FAILED'},'NATIVE_LIBRARY_UNAVAILABLE'],[{name:'ReferenceError',message:'DOMMatrix is not defined'},'DOM_API_UNAVAILABLE'],[{code:'EACCES'},'SPAWN_DENIED'],[{code:'ENOENT'},'SPAWN_NOT_FOUND']])assert.equal(startupReason(error),reason);
+ assert.equal(safeReason('SENSITIVE_PROVIDER_DETAIL'),'OTHER');
+ assert.equal(startupReason(Error('SENSITIVE_PROVIDER_DETAIL')),'OTHER');
+});
+
+test('relocated worker loads the parent-resolved dependency and reports missing modules safely',async()=>{
+ const os=require('node:os'),{fork}=require('node:child_process');
+ const dir=fs.mkdtempSync(path.join(os.tmpdir(),'flightops-reader-'));
+ for(const name of ['foreflight-pdf-worker.cjs','foreflight-pdf-runtime.cjs'])fs.copyFileSync(path.join(__dirname,'../scripts',name),path.join(dir,name));
+ async function run(modulePath){
+  const worker=fork(path.join(dir,'foreflight-pdf-worker.cjs'),[modulePath],{env:workerEnvironment(),execArgv:['--max-old-space-size=128'],stdio:['ignore','ignore','ignore','ipc'],windowsHide:true});
+  try{return await new Promise((resolve,reject)=>{const timer=setTimeout(()=>reject(Error('worker timed out')),10000);worker.once('message',r=>{clearTimeout(timer);resolve(r);});worker.once('error',e=>{clearTimeout(timer);reject(e);});worker.send(probePdf().toString('base64'));});}
+  finally{worker.kill();await new Promise(r=>worker.exitCode!==null?r():worker.once('exit',r));}
+ }
+ try{
+  const result=await run(require.resolve('pdf-parse'));assert.equal(result.ok,true);assert.match(result.text,/KUSA_PDF_READER_PROBE/);
+  const missing=await run(path.join(dir,'SENSITIVE_PROVIDER_DETAIL.cjs'));assert.deepEqual(missing,{ok:false,error:'PDF_READER_UNAVAILABLE',reason:'MODULE_MISSING'});
+ }finally{fs.rmSync(dir,{recursive:true,force:true});}
+});
 test('parser only proposes explicit unambiguous fields and pounds',()=>{
  const p=extractPlan(plan('N33AP'));assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.trip_lb,3000);assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');
  assert.equal(extractPlan(plan('N33AP')+'\nDeparture: KOPF').fields.departure,null);
@@ -67,6 +91,11 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
    assert.equal((await api(null,'/api/foreflight/connections','POST',{})).status,401);
    for(const u of ['viewer','outsider'])assert.equal((await api(u,'/api/foreflight/connections','POST',{})).status,403);
    assert.equal((await api('pilot','/api/foreflight/connections','POST',{}, {'X-FlightOps-Action':''})).status,403);
+   assert.equal((await api(null,'/api/foreflight/reader-status')).status,401);
+   for(const u of ['viewer','outsider'])assert.equal((await api(u,'/api/foreflight/reader-status')).status,403);
+   let health;for(let n=0;n<100;n++){health=await api('pilot','/api/foreflight/reader-status');if(health.reader.status!=='checking')break;await new Promise(r=>setTimeout(r,20));}
+   assert.equal(health.reader.status,'ready');assert(health.reader.checked_at);
+   assert.equal(db.prepare('SELECT COUNT(*) n FROM missions').get().n,0,'probe creates no mission');
   });
   await t.test('key is shown once, hashed at rest, upload-only and session bound',async()=>{
    const c=await api('pilot','/api/foreflight/connections','POST',{label:'Test iPad'});assert.equal(c.status,201);key=c.upload_key;cid=c.connection.id;
@@ -96,6 +125,7 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
      assert.equal(r.status,['PDF_READER_UNAVAILABLE','PDF_READER_FAILED','PDF_TIMEOUT'].includes(code)?503:422);
      assert.equal(r.error,code);assert.match(r.reference,/^[a-f0-9]{12}$/);assert(r.message.includes('No trip was created'));
      assert(!JSON.stringify(r).includes('SENSITIVE_PROVIDER_DETAIL'));
+     assert(!r.message.includes('Preview'),'server errors must not mislabel Live as Preview');
     }
     pdfFailure=null;
     const unrecognized=await upload(key,'An unrecognized document layout');
