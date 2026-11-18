@@ -2,6 +2,11 @@
 (()=>{
  const $=id=>document.getElementById(id),query=new URLSearchParams(location.search),iid=query.get('import');
  const status=t=>{$('status').textContent=t;};
+ const appleTouch=/iPad|iPhone|iPod/i.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ for(const id of ['fob_lb','trip_lb','taxi_lb']){
+  const input=$(id);input.setAttribute('inputmode','decimal');input.setAttribute('enterkeyhint','done');input.setAttribute('autocomplete','off');
+  if(appleTouch){input.type='text';window.KUSANumberPad?.configure(input);}
+ }
  async function api(url,method='GET',body){const r=await fetch(url,{method,credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','X-FlightOps-Action':'foreflight'},...(body?{body:JSON.stringify(body)}:{})});const j=await r.json().catch(()=>({}));if(!r.ok||!j.ok)throw Error(j.error||'Connection failed. Sign in and try again.');return j;}
  function withPreview(path){const u=new URL(path,location.origin);if(query.get('airoShareToken'))u.searchParams.set('airoShareToken',query.get('airoShareToken'));return u;}
  function openMission(mid){location.assign(withPreview('/?foreflightMission='+encodeURIComponent(mid)));}

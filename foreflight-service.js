@@ -3,7 +3,7 @@ const express=require('express');
 const crypto=require('node:crypto');
 const path=require('node:path');
 const {fork}=require('node:child_process');
-const {extractPlan,validDate}=require('./foreflight-parser');
+const {extractPlan,validDate,proposeRampFuel}=require('./foreflight-parser');
 const {workerEnvironment,startupReason,safeReason,probePdf}=require('./scripts/foreflight-pdf-runtime.cjs');
 const digest=b=>crypto.createHash('sha256').update(b).digest('hex');
 const pdfMessages={
@@ -124,12 +124,12 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
  app.use('/api/foreflight/upload',(err,req,res,next)=>{if(err)return res.status(err.type==='entity.too.large'?413:400).json({ok:false,error:'PDF_UPLOAD_REJECTED'});next();});
  function ownImport(req,res){cleanup();const row=db.prepare('SELECT * FROM foreflight_imports WHERE id=? AND user_id=? AND expires_at>?').get(req.params.id,req.flightopsSession.user_id,isoNow());if(!row)res.status(404).json({ok:false,error:'IMPORT_NOT_FOUND_OR_EXPIRED'});return row;}
  app.get('/api/foreflight/imports/:id',requireAuth,(req,res)=>{
-  const r=ownImport(req,res);if(!r)return;res.json({ok:true,import:{id:r.id,created_at:r.created_at,content_sha256:r.content_sha256,mission_id:r.mission_id,...JSON.parse(r.extracted_json)},aircraft:writable(req.flightopsSession.user_id).map(a=>({id:a.id,registration:a.registration,model:a.model}))});
+  const r=ownImport(req,res);if(!r)return;res.json({ok:true,import:{id:r.id,created_at:r.created_at,content_sha256:r.content_sha256,mission_id:r.mission_id,...proposeRampFuel(JSON.parse(r.extracted_json))},aircraft:writable(req.flightopsSession.user_id).map(a=>({id:a.id,registration:a.registration,model:a.model}))});
  });
  app.post('/api/foreflight/imports/:id/create',requireAuth,action,(req,res)=>{
   const r=ownImport(req,res);if(!r)return;const b=req.body||{},user=req.flightopsSession.user_id;
   const a=writable(user).find(a=>a.id===b.aircraft_id);if(!a)return res.status(403).json({ok:false,error:'AIRCRAFT_ACCESS_DENIED'});
-  const parsed=JSON.parse(r.extracted_json);
+  const parsed=proposeRampFuel(JSON.parse(r.extracted_json));
   if(parsed.fields.registration&&parsed.fields.registration!==a.registration)return res.status(400).json({ok:false,error:'AIRCRAFT_DOES_NOT_MATCH_PDF'});
   if(r.mission_id){const m=db.prepare('SELECT id,status FROM missions WHERE id=? AND aircraft_id=? AND organization_id=?').get(r.mission_id,a.id,a.organization_id);if(!m||m.status==='deleted')return res.status(409).json({ok:false,error:'IMPORTED_MISSION_UNAVAILABLE'});return res.json({ok:true,reused:true,mission_id:m.id});}
   const airport=v=>typeof v==='string'&&/^[A-Z]{4}$/.test(v)&&v!=='ZZZZ';
@@ -139,7 +139,7 @@ module.exports=function installForeflight(app,{db,requireAuth,id,isoNow,pdfReade
   const common={dep:b.departure,dest:b.destination,alt:b.alternate||'',trip_date:b.date,aircraft:f900?'F900B':'N33AP',registration:a.registration,note:'Imported from ForeFlight — loading and pilot reviews required',offline_mission_package:null};
   const fuel={fob_lb:b.fob_lb,mission_fuel_lb:b.trip_lb,taxi_fuel_lb:b.taxi_lb,fob_verified:false};
   const state=f900?{...common,f900b:{...fuel,captain_weight_lb:170,first_officer_weight_lb:170,passenger_count:0,total_baggage_lb:0}}:{...common,...fuel,captain_weight_lb:190,fo_weight_lb:190,passengers:[],seat_assignments:[],baggage:[0,0,0],fob_verified:false,low_fuel_confirmed:false,departure_notam_state:{status:'NOT_CHECKED',source:'NONE'},destination_notam_state:{status:'NOT_CHECKED',source:'NONE'}};
-  const provenance={source:'ForeFlight PDF',content_sha256:r.content_sha256,imported_at:now,imported_by:user,extracted_fields:parsed.fields,confirmed_fields:{aircraft_id:a.id,date:b.date,departure:b.departure,destination:b.destination,alternate:b.alternate||'',fob_lb:b.fob_lb,trip_lb:b.trip_lb,taxi_lb:b.taxi_lb}};
+  const provenance={source:'ForeFlight PDF',content_sha256:r.content_sha256,imported_at:now,imported_by:user,fob_source:parsed.fob_source||(parsed.fields.fob_lb!==null?'explicit_fob':'manual'),extracted_fields:parsed.fields,confirmed_fields:{aircraft_id:a.id,date:b.date,departure:b.departure,destination:b.destination,alternate:b.alternate||'',fob_lb:b.fob_lb,trip_lb:b.trip_lb,taxi_lb:b.taxi_lb}};
   const payload={local_mission_id:local,aircraft:common.aircraft,registration:a.registration,note:common.note,state,foreflight_import:provenance,archive_meta:{started_at:now}};
   db.exec('BEGIN IMMEDIATE');
   try{

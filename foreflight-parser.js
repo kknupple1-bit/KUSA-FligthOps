@@ -37,7 +37,7 @@ function extractPlan(text) {
   const headerDates=headers.flatMap(h=>{const m=h[3].match(/^([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})(?:\s|$)/);if(!m)return [];const month=monthNames.indexOf(m[1].slice(0,3).toLowerCase())+1;return month?[`${m[3]}-${String(month).padStart(2,'0')}-${m[2].padStart(2,'0')}`]:[];});
   put('date',matches(/(?:^|\n)\s*(?:Flight Date|Date|Departure Date)\s*:?\s*(\d{4}-\d{2}-\d{2})\b/gi).concat(dof,headerDates),'Navlog date / ISO date / ICAO DOF (verify local trip date)');
   if(fields.date&&!validDate(fields.date)){fields.date=null;evidence.date='Invalid date';}
-  for(const [name,label] of [['fob_lb','Ramp Fuel|Fuel on Board|FOB'],['block_fuel_lb','Block Fuel'],['trip_lb','Trip Fuel(?: Burn)?'],['flight_fuel_lb','Flight Fuel'],['taxi_lb','Taxi Fuel|Taxi Burn'],['tow_lb','TOW'],['elw_lb','ELW'],['landing_fuel_lb','Landing Fuel']]){
+  for(const [name,label] of [['fob_lb','Ramp Fuel|Fuel on Board|FOB'],['block_fuel_lb','Block Fuel'],['trip_lb','Trip Fuel(?: Burn)?'],['flight_fuel_lb','Flight Fuel'],['taxi_lb','Taxi Fuel|Taxi Burn'],['tow_lb','TOW'],['elw_lb','ELW'],['zfw_lb','ZFW'],['landing_fuel_lb','Landing Fuel']]){
     const pattern=new RegExp(`(?:^|\\n)\\s*(?:${label})\\s*:?\\s*([0-9][0-9,]*(?:\\.[0-9]+)?)\\s*(?:lb|lbs|pounds)\\b`,'gi');
     put(name,matches(pattern).map(v=>Number(v.replaceAll(',',''))),'Explicitly labeled pounds; verify fuel definition');
   }
@@ -55,7 +55,22 @@ function extractPlan(text) {
   warnings.push('FOB is ramp fuel. Trip burn excludes taxi, reserves and fuel remaining at landing. Confirm the ForeFlight fuel definitions before creating the trip.');
   if(fields.block_fuel_lb!==null)warnings.push('ForeFlight Block Fuel is reference only and is NOT automatically treated as ramp FOB. Enter/confirm actual ramp fuel, including the separate taxi allowance.');
   warnings.push('Crew, passengers, baggage, runways, weather and all pilot acknowledgments are not imported.');
-  return {fields,evidence,warnings};
+  return proposeRampFuel({fields,evidence,warnings,format:mobileNavlog?'foreflight-mobile-combined-v1':'generic-flight-plan'});
+}
+// Also applies to pending imports stored before planned FOB migration existed.
+// This proposes a plan value only; it never verifies actual fuel or edits a trip.
+function proposeRampFuel(parsed){
+ const f=parsed.fields,e=parsed.evidence;
+ if(!f||!e||f.fob_lb!==null||e.fob_lb==='Conflicting values')return parsed;
+ const mobile=parsed.format==='foreflight-mobile-combined-v1'||(!parsed.format&&e.departure==='Navlog route/date/tail header'&&String(e.trip_lb).startsWith('ForeFlight Flight Fuel minus Taxi Fuel;'));
+ const {block_fuel_lb:block,flight_fuel_lb:flight,taxi_lb:taxi,trip_lb:trip,tow_lb:tow,elw_lb:elw,landing_fuel_lb:landing,zfw_lb:zfw}=f;
+ if(!mobile||![block,flight,taxi,trip,tow,elw,landing].every(v=>Number.isFinite(v)&&v>=0)||block<=0||tow<elw||Math.abs(flight-taxi-trip)>1||Math.abs(tow-elw-trip)>1||Math.abs(block-flight-landing)>1)return parsed;
+ if(e.zfw_lb==='Conflicting values'||(zfw!==undefined&&zfw!==null&&(!Number.isFinite(zfw)||Math.abs(zfw+block-taxi-tow)>1||Math.abs(zfw+landing-elw)>1)))return parsed;
+ f.fob_lb=block;parsed.fob_source='planned_block_fuel';
+ e.fob_lb='ForeFlight planned ramp FOB from Block Fuel, including taxi; verify actual fuel';
+ parsed.warnings=(parsed.warnings||[]).filter(w=>!w.startsWith('ForeFlight Block Fuel is reference only'));
+ parsed.warnings.push('Planned ramp FOB is transferred from ForeFlight Block Fuel, including taxi. Confirm actual fuel before flight; the FOB verification remains unchecked.');
+ return parsed;
 }
 function validDate(v){return /^\d{4}-\d{2}-\d{2}$/.test(v)&&Number.isFinite(Date.parse(v))&&new Date(v+'T12:00:00Z').toISOString().slice(0,10)===v;}
-module.exports={extractPlan,validDate};
+module.exports={extractPlan,validDate,proposeRampFuel};

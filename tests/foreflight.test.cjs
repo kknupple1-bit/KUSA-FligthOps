@@ -1,7 +1,7 @@
 'use strict';
 const {test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const express=require('express'),{DatabaseSync}=require('node:sqlite');
-const {extractPlan,validDate}=require('../foreflight-parser');
+const {extractPlan,validDate,proposeRampFuel}=require('../foreflight-parser');
 const install=require('../foreflight-service');
 const {pdf,plan,mobilePlan}=require('./foreflight-fixtures.cjs');
 const {workerEnvironment,startupReason,safeReason,probePdf}=require('../scripts/foreflight-pdf-runtime.cjs');
@@ -48,7 +48,7 @@ test('parser only proposes explicit unambiguous fields and pounds',()=>{
 });
 test('real PDF worker extracts text, rejects malformed input and cleans up',async()=>{
  const result=await install.readPdf(pdf(plan('N33AP')));assert.equal(result.pages,1);const p=extractPlan(result.text);assert.equal(p.fields.fob_lb,9000);assert.equal(p.fields.departure,'KDTO');
- const mobile=extractPlan((await install.readPdf(pdf(mobilePlan('N33AP')))).text);assert.equal(mobile.fields.trip_lb,2500);assert.equal(mobile.fields.fob_lb,null);
+ const mobile=extractPlan((await install.readPdf(pdf(mobilePlan('N33AP')))).text);assert.equal(mobile.fields.trip_lb,2500);assert.equal(mobile.fields.fob_lb,8000);
  await assert.rejects(()=>install.readPdf(Buffer.from('%PDF-invalid')));
  await assert.rejects(()=>install.readPdf(pdf('')),e=>e.code==='PDF_NO_TEXT');
 });
@@ -56,16 +56,27 @@ test('real PDF worker extracts text, rejects malformed input and cleans up',asyn
 test('Mobile combined export is recognized structurally and reconciles taxi exactly once',()=>{
  const text=mobilePlan('N33AP')+'\nAlternate Fuel\n0 lbs',p=extractPlan(text);
  assert.equal(p.fields.registration,'N33AP');assert.equal(p.fields.departure,'KDTO');assert.equal(p.fields.destination,'KBPT');assert.equal(p.fields.date,'2026-11-17');
- assert.equal(p.fields.fob_lb,null);assert.equal(p.fields.block_fuel_lb,8000);assert.equal(p.fields.taxi_lb,200);assert.equal(p.fields.flight_fuel_lb,2700);assert.equal(p.fields.trip_lb,2500);
+ assert.equal(p.fields.fob_lb,8000);assert.equal(p.fob_source,'planned_block_fuel');assert.equal(p.fields.block_fuel_lb,8000);assert.equal(p.fields.taxi_lb,200);assert.equal(p.fields.flight_fuel_lb,2700);assert.equal(p.fields.trip_lb,2500);
  assert.equal(p.fields.alternate,null,'Alternate Fuel is not an alternate airport called FUEL');
  assert.equal(p.fields.taxi_lb+p.fields.trip_lb,2700);
  assert.equal(extractPlan(text.replaceAll('27500 lbs','27400 lbs')).fields.trip_lb,null,'inconsistent weights need manual trip burn');
  assert.equal(extractPlan(text.replace('5300 lbs','5200 lbs')).fields.trip_lb,null,'inconsistent fuel balance needs manual trip burn');
+ assert.equal(extractPlan(text.replace('5300 lbs','5200 lbs')).fields.fob_lb,null,'inconsistent fuel balance cannot propose FOB');
+ assert.equal(extractPlan(text+'\nZFW: 22000 lbs').fields.fob_lb,null,'inconsistent weight balance cannot propose FOB');
+ assert.equal(extractPlan(text+'\nRamp Fuel: 9000 lbs').fields.fob_lb,9000,'explicit FOB takes priority over a planned block value');
  assert.equal(extractPlan(text+'\nTrip Fuel: 2600 lbs').fields.trip_lb,null,'explicit versus derived conflicts remain unresolved');
  assert.equal(extractPlan(text+'\nTaxi Fuel: 250 lbs').fields.trip_lb,null,'conflicting taxi cannot be subtracted');
  assert.equal(extractPlan('ForeFlight\nFlight Fuel: 2700 lbs\nTaxi Fuel: 200 lbs').fields.trip_lb,null,'a generic Flight Fuel label has no verified taxi definition');
  for(const title of ['SUMMARY & TIMES','FUEL & WEIGHTS','ICAO FLIGHT PLAN'])assert.throws(()=>extractPlan(text.replace(title,'')));
  assert.throws(()=>extractPlan('KDTO — KBPT (Nov 17, 2026) in N33AP\nBlock Fuel: 8000 lbs'));
+});
+
+test('legacy pending import proposes planned FOB without mutating a saved trip',()=>{
+ const old=extractPlan(mobilePlan('N33AP'));delete old.format;delete old.fob_source;delete old.fields.zfw_lb;delete old.evidence.zfw_lb;
+ old.fields.fob_lb=null;old.evidence.fob_lb='Not found';
+ assert.equal(proposeRampFuel(structuredClone(old)).fields.fob_lb,8000);
+ const conflicting=structuredClone(old);conflicting.evidence.fob_lb='Conflicting values';assert.equal(proposeRampFuel(conflicting).fields.fob_lb,null);
+ const ambiguous=structuredClone(old);ambiguous.evidence.trip_lb='Labeled pounds';assert.equal(proposeRampFuel(ambiguous).fields.fob_lb,null);
 });
 test('upload-only connections and reviewed trip creation enforce identity, access and idempotency',async t=>{
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
@@ -157,6 +168,20 @@ test('upload-only connections and reviewed trip creation enforce identity, acces
    const count=db.prepare('SELECT COUNT(*) n FROM missions').get().n;
    assert.equal((await api('pilot',`/api/foreflight/imports/${id3}/create`,'POST',reviewed)).status,500);assert.equal(db.prepare('SELECT COUNT(*) n FROM missions').get().n,count);db.exec('DROP TRIGGER reject_import');
    db.prepare("UPDATE missions SET status='deleted' WHERE id=?").run(mid);assert.equal((await api('pilot',`/api/foreflight/imports/${iid}/create`,'POST',reviewed)).status,409);
+  });
+  await t.test('already uploaded pending import gains planned FOB and preserves confirmation gates',async()=>{
+   const incoming=await upload(key,mobilePlan('N33AP')),legacyId=new URL(incoming.open_url).searchParams.get('import');
+   const legacy=JSON.parse(db.prepare('SELECT extracted_json FROM foreflight_imports WHERE id=?').get(legacyId).extracted_json);
+   delete legacy.format;delete legacy.fob_source;legacy.fields.fob_lb=null;legacy.evidence.fob_lb='Not found';
+   const raw=JSON.stringify(legacy);db.prepare('UPDATE foreflight_imports SET extracted_json=? WHERE id=?').run(raw,legacyId);
+   const count=db.prepare('SELECT COUNT(*) n FROM missions').get().n;
+   const reopened=await api('pilot','/api/foreflight/imports/'+legacyId);assert.equal(reopened.import.fields.fob_lb,8000);assert.equal(reopened.import.fob_source,'planned_block_fuel');
+   assert.equal(db.prepare('SELECT extracted_json FROM foreflight_imports WHERE id=?').get(legacyId).extracted_json,raw,'opening does not rewrite retained source');
+   assert.equal(db.prepare('SELECT COUNT(*) n FROM missions').get().n,count);
+   const body={...reviewed,fob_lb:8000,trip_lb:2500};
+   assert.equal((await api('pilot',`/api/foreflight/imports/${legacyId}/create`,'POST',{...body,reviewed:false})).status,400);
+   const created=await api('pilot',`/api/foreflight/imports/${legacyId}/create`,'POST',body);assert.equal(created.status,201);
+   const m=(await api('other','/api/missions/'+created.mission_id)).mission;assert.equal(m.payload.state.fob_lb,8000);assert.equal(m.payload.state.fob_verified,false);assert.equal(m.payload.foreflight_import.fob_source,'planned_block_fuel');assert.equal(m.signoffs.length,0);
   });
   await t.test('revoked grants, sessions, connections and expired imports are blocked',async()=>{
    db.prepare("UPDATE foreflight_imports SET expires_at='2000-01-01' WHERE id=?").run(iid);assert.equal((await api('pilot','/api/foreflight/imports/'+iid)).status,404);

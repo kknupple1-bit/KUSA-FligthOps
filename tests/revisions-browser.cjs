@@ -88,14 +88,14 @@ const root=path.resolve(__dirname,'..');
   await page.waitForLoadState('networkidle');
   const connection=await context.request.post(base+'/api/foreflight/connections',{headers:{'X-FlightOps-Action':'foreflight'},data:{label:'Synthetic browser test'}});
   assert.equal(connection.status(),201);const pairing=await connection.json();
-  for(const [tail,fob]of [['N33AP',9000],['N699BG',15000]]){
+  for(const [tail,fob]of [['N33AP',8000],['N699BG',15000]]){
    const mobile=tail==='N33AP';
    const incoming=await context.request.post(base+'/api/foreflight/upload',{headers:{'Content-Type':'application/pdf','X-FlightOps-Upload-Key':pairing.upload_key},data:pdf(mobile?mobilePlan(tail):plan(tail).replace('9,000 lbs',fob+' lbs'))});
    assert.equal(incoming.status(),201);const link=await incoming.json();
    await page.goto(link.open_url);
    await page.getByRole('button',{name:'Create trip and open FlightOps',exact:true}).waitFor({state:'visible'});
-   assert.equal(await page.locator('#fob_lb').inputValue(),mobile?'':String(fob));
-   if(mobile){assert.equal(await page.locator('#trip_lb').inputValue(),'2500');assert.equal(await page.locator('#taxi_lb').inputValue(),'200');await page.locator('#fob_lb').fill(String(fob));}
+   assert.equal(await page.locator('#fob_lb').inputValue(),String(fob));
+   if(mobile){assert.equal(await page.locator('#trip_lb').inputValue(),'2500');assert.equal(await page.locator('#taxi_lb').inputValue(),'200');assert.equal(await page.locator('#reviewed').isChecked(),false);}
    assert.equal(await page.locator('#departure').inputValue(),'KDTO');
    for(const width of [390,834,1194]){
     await page.setViewportSize({width,height:1000});
@@ -111,7 +111,7 @@ const root=path.resolve(__dirname,'..');
    if(tail==='N33AP')assert.deepEqual(await page.evaluate(()=>['captWt','foWt','taxiFuel'].map(id=>Number($(id).value))),[190,190,200]);
    else assert.deepEqual(await page.evaluate(()=>['f9mCaptainWt','f9mFOWt','f9mTaxiFuel'].map(id=>Number($(id).value))),[170,170,200]);
    assert.equal(await page.evaluate(()=>missionNotamReviewed('dep')),false,'import never inherits pilot acknowledgment');
-   if(mobile)assert.equal(await page.evaluate(()=>Number($('missionFuel').value)),2500,'airborne trip burn excludes the separate taxi burn');
+   if(mobile){assert.equal(await page.evaluate(()=>Number($('missionFuel').value)),2500,'airborne trip burn excludes the separate taxi burn');assert.equal(await page.evaluate(()=>Number($('fuel').value)),8000,'planned ramp FOB migrates into the full trip');assert.equal(await page.evaluate(()=>captureCurrentPlanState().fob_verified),false,'importing planned fuel is not actual FOB verification');}
    await page.waitForLoadState('networkidle');
    await page.goto(link.open_url);await page.getByText('This PDF already has a trip.',{exact:false}).waitFor();
    assert.equal(await page.locator('#tripForm').isVisible(),false,'re-sharing cannot create duplicate');
