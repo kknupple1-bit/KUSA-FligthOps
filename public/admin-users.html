@@ -30,15 +30,19 @@ tr:last-child td{border-bottom:0}
 .muted{color:#9db2c7}.mono{font-family:Consolas,monospace;font-size:12px}
 .actions{display:flex;gap:6px;flex-wrap:wrap}.actions button,.actions select{font-size:12px;padding:6px 8px}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.invitation-grid{grid-template-columns:minmax(300px,2fr) minmax(160px,1fr) minmax(200px,1fr) auto;align-items:end}
+.invitation-grid>div{min-width:0}#inviteEmail{display:block;box-sizing:border-box;width:100%;min-width:0}
+@media(max-width:1050px){.invitation-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.invitation-email{grid-column:1/-1}}
+@media(max-width:600px){.invitation-grid{grid-template-columns:minmax(0,1fr)}}
 label{display:block;font-size:12px;color:#a9bed3;margin-bottom:5px}
 .notice{padding:10px;border:1px solid #6b5a23;background:#3a3013;border-radius:8px;color:#ffe8a3}
 pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;border-radius:8px;border:1px solid #31506f}
 </style>
 <meta name="apple-mobile-web-app-title" content="FlightOps"/>
-<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=5.26.35"/>
-<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=5.26.35"/>
-<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=5.26.35"/>
-<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=5.26.35"/>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=5.26.36"/>
+<link rel="apple-touch-icon" sizes="167x167" href="/icons/icon-167.png?v=5.26.36"/>
+<link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152.png?v=5.26.36"/>
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png?v=5.26.36"/>
 <link rel="manifest" href="/manifest.webmanifest"/>
 </head>
 <body>
@@ -46,9 +50,9 @@ pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;b
   <div class="top">
     <div>
       <h1>KUSA FlightOps — User Administration</h1>
-      <p class="sub">v5.26.35 controlled administrator actions with server-side authorization and audit logging.</p>
+      <p class="sub">v5.26.36 controlled administrator actions with server-side authorization and audit logging.</p>
     </div>
-    <div class="badge">v5.26.35</div>
+    <div class="badge">v5.26.36</div>
   </div>
 
   <div class="toolbar">
@@ -64,14 +68,14 @@ pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;b
 
   <div class="card">
     <h3>Create Invitation</h3>
-    <div class="notice">v5.26.35 creates secure invitation links and supports both new-account and existing-account acceptance. Automatic email delivery is not enabled yet.</div>
-    <div class="grid" style="margin-top:12px">
-      <div><label>Email</label><input id="inviteEmail" type="email" placeholder="pilot@example.com"></div>
-      <div><label>Role</label><select id="inviteRole"><option value="pilot">Pilot</option><option value="viewer">Viewer</option><option value="aircraft_manager">Aircraft Manager</option><option value="administrator">Administrator</option></select></div>
+    <div id="inviteMailStatus" class="notice" role="status">Checking invitation email connection…</div>
+    <div class="grid invitation-grid" style="margin-top:12px">
+      <div class="invitation-email"><label for="inviteEmail">Email</label><input id="inviteEmail" type="email" required inputmode="email" autocomplete="email" maxlength="254" placeholder="pilot@example.com"></div>
+      <div><label for="inviteRole">Role</label><select id="inviteRole"><option value="pilot">Pilot</option><option value="viewer">Viewer</option><option value="aircraft_manager">Aircraft Manager</option><option value="administrator">Administrator</option></select></div>
       <div><label>Initial Aircraft</label><div id="inviteAircraft" class="muted">Loading aircraft...</div></div>
-      <div style="align-self:end"><button id="inviteBtn">Create Invitation</button></div>
+      <div style="align-self:end"><button id="inviteBtn" disabled>Send invitation</button></div>
     </div>
-    <pre id="inviteResult" style="display:none"></pre>
+    <p>Invitations include a welcome and thank-you note, selected access, and a secure seven-day signup link.</p><pre id="inviteResult" role="status" style="display:none"></pre>
   </div>
 
   <div class="card">
@@ -95,7 +99,7 @@ pre{white-space:pre-wrap;word-break:break-word;background:#061829;padding:10px;b
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=s=>{if(!s)return '—';const d=new Date(s);return Number.isNaN(d.getTime())?esc(s):d.toLocaleString()};
-let model={org:null,users:[],me:null,aircraft:[]};
+let model={org:null,users:[],me:null,aircraft:[]},inviteMailReady=false,inviteAttempt=null;
 
 async function api(url,opt={}){
   const r=await fetch(url,{credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json',...(opt.headers||{})},...opt});
@@ -118,6 +122,10 @@ async function load(){
     model.aircraft=(me.aircraft||[]).filter(a=>!model.org||a.organization_id===model.org.organization_id);
     $('orgs').textContent=model.org?`${model.org.name} — ${model.org.role}`:'No administrator organization returned.';
     $('inviteAircraft').innerHTML=model.aircraft.map(a=>`<label style="display:block;margin:4px 0"><input type="checkbox" data-invite-ac="${esc(a.id)}" checked> ${esc(a.registration)} · ${esc(a.model)}</label>`).join('')||'<span class="muted">No active aircraft.</span>';
+    const mail=await api("/api/admin/invitation-mail");
+    inviteMailReady=!!mail.mail.configured;
+    $("inviteMailStatus").textContent=inviteMailReady?"Invitations send from "+mail.mail.from+". Microsoft 365 acceptance is reported separately from final delivery.":mail.mail.reason==="PREVIEW_EMAIL_DISABLED"?"Preview email is disabled. Invitations for pilots must be sent from Live FlightOps.":"Email sender: "+mail.mail.from+". The mail connection is not configured yet; no email will be sent.";
+    $("inviteBtn").disabled=!inviteMailReady;
     renderUsers();
     await loadAudit();
     $('status').className='status ok';$('status').textContent='Administrator authorization verified.';
@@ -191,24 +199,22 @@ $('rows').addEventListener('click',e=>{const b=e.target.closest('button[data-act
 
 $('inviteBtn').onclick=async()=>{
   const orgId=model.org?.organization_id,email=$('inviteEmail').value.trim(),role=$('inviteRole').value;
+  if(!$('inviteEmail').reportValidity()||!email)return;
   const aircraft_ids=[...document.querySelectorAll('[data-invite-ac]:checked')].map(x=>x.dataset.inviteAc);
-  $('inviteBtn').disabled=true;
+  const payload={organization_id:orgId,email,role,aircraft_ids,delivery:'email'},signature=JSON.stringify(payload);
+  if(!inviteAttempt||inviteAttempt.signature!==signature)inviteAttempt={signature,id:crypto.randomUUID()};
+  $('inviteBtn').disabled=true;$('inviteResult').style.display='block';$('inviteResult').textContent='Sending invitation…';
   try{
-    const j=await api('/api/admin/invitations',{method:'POST',body:JSON.stringify({organization_id:orgId,email,role,aircraft_ids})});
-    $('inviteResult').style.display='block';
-    const relative=j.invitation?.invite_path||'';
-    let full='';
-    if(relative){
-      const u=new URL(relative,location.origin);
-      const previewShareToken=location.hostname.includes('.preview.')?new URLSearchParams(location.search).get('airoShareToken'):null;
-      if(previewShareToken) u.searchParams.set('airoShareToken',previewShareToken);
-      full=u.toString();
-    }
-    $('inviteResult').textContent=`Invitation created.\n\nCopy this link to the recipient:\n${full}\n\nExpires: ${j.invitation?.expires_at||''}`;
-    $('inviteEmail').value='';
+    const j=await api('/api/admin/invitations',{method:'POST',headers:{'Content-Type':'application/json','X-FlightOps-Action':'invitation'},body:JSON.stringify({...payload,request_id:inviteAttempt.id})});
+    $('inviteResult').textContent=j.message;
+    if(j.delivery?.status==='accepted'){$('inviteEmail').value='';inviteAttempt=null;$('inviteBtn').textContent='Send invitation';}
+    else $('inviteBtn').textContent='Check send status';
     await loadAudit();
-  }catch(e){alert(`Invitation failed: ${e.code||e.message}`)}
-  finally{$('inviteBtn').disabled=false}
+  }catch(e){
+    $('inviteResult').textContent=e.payload?.message||('Invitation failed: '+(e.code||e.message));
+    if(e.payload?.delivery?.status==='failed'||e.code==='INVITATION_MAIL_NOT_CONFIGURED'){inviteAttempt=null;$('inviteBtn').textContent='Send invitation';}
+    else $('inviteBtn').textContent='Check send status';
+  }finally{$('inviteBtn').disabled=!inviteMailReady}
 };
 
 async function loadAudit(){

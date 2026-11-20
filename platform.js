@@ -294,7 +294,7 @@ function allowedAircraft(userId){
   `).all(userId,userId);
 }
 
-function installPlatform(app,{build='5.26.28'}={}){
+function installPlatform(app,{build='5.26.28',invitationMailer}={}){
   app.get('/api/platform/status',(req,res)=>{
     const s=state.ok?currentSession(req):null;
     res.json({ok:state.ok,build,database:state.ok?'sqlite':'unavailable',database_path:state.ok?path.basename(DB_PATH):null,auth_required:AUTH_REQUIRED,session_cookie:SESSION_COOKIE,authenticated:!!s,bootstrap_admin_configured:!!(process.env.FLIGHTOPS_ADMIN_EMAIL&&process.env.FLIGHTOPS_ADMIN_PASSWORD),error:state.error||null});
@@ -498,6 +498,8 @@ function installPlatform(app,{build='5.26.28'}={}){
     });
     res.json({ok:true,user_id:targetUserId,organization_id:organizationId,aircraft_ids:requested});
   });
+
+  if(state.ok)require('./invitation-mail-service')(app,{db:state.db,requireAuth,requireAdministrator,administeredOrganization,id,isoNow,writeAdminAudit,mailer:invitationMailer});
 
   app.post('/api/admin/invitations',requireAuth,requireAdministrator,(req,res)=>{
     const organizationId=String(req.body?.organization_id||'');

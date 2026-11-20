@@ -4,7 +4,7 @@ const path = require('node:path');
 
 // Runtime-owned data (SQLite, shared trips, and public/assets) is not a release asset.
 function releaseFiles(root) {
-  const files = ['server.js', 'platform.js', 'mission-service.js', 'foreflight-service.js', 'foreflight-parser.js', 'scripts/foreflight-pdf-worker.cjs', 'package.json', 'package-lock.json',
+  const files = ['server.js', 'platform.js', 'invitation-mail-service.js', 'scripts/invitation-mail.cjs', 'mission-service.js', 'foreflight-service.js', 'foreflight-parser.js', 'scripts/foreflight-pdf-worker.cjs', 'package.json', 'package-lock.json',
     'scripts/foreflight-pdf-runtime.cjs','scripts/foreflight-shortcut-installer.cjs','data/foreflight-shortcut-installer.json','data/runways.json', 'scripts/release-files.cjs', 'scripts/verify-release.cjs',
     'scripts/database-storage.cjs', 'scripts/migrate-database.cjs', 'scripts/check-nms-release.cjs'];
   function visit(relative) {
@@ -22,6 +22,7 @@ function releaseFiles(root) {
 
 // These paths are part of the application's delivery contract, not optional fallbacks.
 const requiredFiles = [
+  'invitation-mail-service.js','scripts/invitation-mail.cjs',
   'foreflight-service.js','foreflight-parser.js','scripts/foreflight-pdf-worker.cjs','scripts/foreflight-pdf-runtime.cjs','scripts/foreflight-shortcut-installer.cjs','data/foreflight-shortcut-installer.json',
   'public/foreflight.html','public/foreflight.css','public/foreflight.js','public/foreflight-open.js',
   'server.js', 'platform.js', 'mission-service.js', 'package.json', 'package-lock.json', 'data/runways.json',
