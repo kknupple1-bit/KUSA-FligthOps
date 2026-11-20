@@ -39,19 +39,44 @@ function missionNotamReviewed(which){
  if(report.status!=='CHECKED'||report.runway_state==='CLOSED'||(report.runway_state==='RESTRICTED'&&!Number.isFinite(report.usable_length_ft)))return false;
  return !!currentIndividualReview(which==='dep'?'departure_notam':'destination_notam',missionNotamContext(which));
 }
+function missionReviewSyncError(record){
+ if(!record)return 'The active mission was not found in local drafts. Reopen the saved mission before recording review.';
+ const state=record.server_sync_state,detail=String(record.server_sync_error||'');
+ if(state==='conflict')return 'A newer shared mission revision conflicts with this local copy. Open Flight Plans, preserve/download your local recovery copy and reconcile the latest shared revision before reviewing.';
+ if(state==='auth_required')return 'Cloud session expired. Sign in to your FlightOps account, then retry the mission review.';
+ if(state==='wrong_account')return 'This mission belongs to a different signed-in account. Use an authorized aircraft account before recording review.';
+ if(record.server_permissions?.write===false)return 'Your account has read-only access to this mission. An authorized aircraft pilot or manager must record this review.';
+ if(!record.server_mission_id)return 'The mission has not been created in the shared cloud workspace. Local data is retained. Check cloud sync status and retry after upload succeeds'+(detail?' ('+detail+')':'')+'.';
+ if(state==='queued'||state==='queued_offline')return 'Mission changes are still awaiting cloud synchronization. Local data is retained. Check network/server sync and retry'+(detail?' ('+detail+')':'')+'.';
+ return 'Mission review requires the current cloud-synced mission revision. Sync status: '+String(state||'unknown')+(detail?' ('+detail+')':'')+'.';
+}
+function missionReviewCurrentContext(kind){
+ return kind==='pilot_review'?missionPilotContext():missionNotamContext(kind==='destination_notam'?'dest':'dep');
+}
 async function recordIndividualSignoff(kind,outcome,context){
  if(!navigator.onLine)throw new Error('Reconnect to record your individual review.');
  await ensureCloudSyncUser(true);
+ const activeId=window.currentMissionMeta?.id;
+ if(!activeId)throw new Error('Open a saved mission before recording review.');
+ if(typeof draftSaveTimer!=='undefined')clearTimeout(draftSaveTimer);
  saveCurrentDraft();await flushMissionSyncQueue();
- const record=findLocalMissionRecord(window.currentMissionMeta?.id);
- if(!record?.server_mission_id||record.server_sync_state!=='synced')throw new Error('Save and resolve any mission conflict before recording review.');
+ const record=findLocalMissionRecord(activeId);
+ if(window.currentMissionMeta?.id!==activeId)throw new Error('The active mission changed during synchronization. Reopen the intended mission.');
+ if(!record?.server_mission_id||record.server_sync_state!=='synced')throw new Error(missionReviewSyncError(record));
+ if(!Number.isInteger(record.server_revision))throw new Error('Cloud mission revision is missing. Refresh the shared mission before recording review.');
+ if(JSON.stringify(context)!==JSON.stringify(missionReviewCurrentContext(kind)))throw new Error('Mission data or runway changed before recording. Review the current plan again.');
  const response=await fetch(`/api/missions/${encodeURIComponent(record.server_mission_id)}/signoffs`,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},
   body:JSON.stringify({expected_revision:record.server_revision,kind,outcome,context})});
- const body=await response.json();
- if(!response.ok)throw new Error(body.error||'Review could not be recorded');
- if(JSON.stringify(context)!==JSON.stringify(kind==='pilot_review'?missionPilotContext():missionNotamContext(kind==='destination_notam'?'dest':'dep')))throw new Error('Mission data or runway changed. Review the current plan again.');
+ const body=await response.json().catch(()=>({}));
+ if(!response.ok){
+  if(response.status===409||body.error==='REVISION_CONFLICT')throw new Error('The shared mission was changed by another session. Reopen the latest revision and review again; no signoff was recorded.');
+  throw new Error(body.error||'Review could not be recorded (HTTP '+response.status+').');
+ }
+ if(JSON.stringify(context)!==JSON.stringify(missionReviewCurrentContext(kind)))throw new Error('Mission data or runway changed while review was being recorded. Reopen the current plan and record a fresh review.');
  updateLocalMissionRecord(record.id,{server_signoffs:body.mission.signoffs});
- individualMissionReviews.set(individualReviewKey(kind,context),body.mission.signoffs.filter(s=>s.user_id===cloudSyncUser.id&&s.kind===kind&&s.revision===record.server_revision).at(-1));
+ const own=body.mission.signoffs.filter(s=>s.user_id===cloudSyncUser.id&&s.kind===kind&&s.revision===record.server_revision).at(-1);
+ if(!own)throw new Error('Server did not return an individual review for your account and mission revision.');
+ individualMissionReviews.set(individualReviewKey(kind,context),own);
  return body.mission;
 }
 async function recordMissionPilotReview(){
