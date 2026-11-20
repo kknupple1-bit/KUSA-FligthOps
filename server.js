@@ -29,7 +29,7 @@ function nmsConfigured(){return !!(NMS_CLIENT_ID&&NMS_CLIENT_SECRET&&NMS_AUTH_UR
 function nmsTokenValid(){return !!nmsTokenCache.accessToken && Date.now() < (nmsTokenCache.expiresAt-60000)}
 function nmsDiagBase(){
   return {
-    build:"5.26.36",
+    build:"5.26.37",
     provider:"FAA NMS",
     environment:NMS_ENVIRONMENT,
     auth_url:NMS_AUTH_URL,
@@ -55,7 +55,7 @@ async function getNmsAccessToken(force=false){
       "Authorization":`Basic ${basic}`,
       "Content-Type":"application/x-www-form-urlencoded",
       "Accept":"application/json",
-      "User-Agent":"KUSA-FlightOps/5.26.36"
+      "User-Agent":"KUSA-FlightOps/5.26.37"
     },
     body:"grant_type=client_credentials",
     cache:"no-store"
@@ -116,9 +116,9 @@ app.use((req,res,next)=>{
   res.set("Expires","0");
   next();
 });
-// v5.26.36 application-platform foundation: accounts, persistent sessions, aircraft access, and server-backed missions.
+// v5.26.37 application-platform foundation: accounts, persistent sessions, aircraft access, and server-backed missions.
 // Install platform routes and the mandatory auth gate BEFORE serving the FlightOps static application.
-installPlatform(app,{build:"5.26.36"});
+installPlatform(app,{build:"5.26.37"});
 
 app.use(express.static(path.join(__dirname,"public"),{maxAge:0,etag:false}));
 
@@ -379,12 +379,12 @@ app.get("/api/shared-trips/:id",(req,res)=>{
   }catch(e){res.status(500).json({error:"Unable to open shared trip."})}
 });
 
-app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.26.36",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02","N699BG_WB_V52543","F900B_DTM9823_DIGITIZATION_V52551"]}));
+app.get("/api/health",(req,res)=>res.json({ok:true,build:"5.26.37",platform:"GoDaddy Node.js",node:process.version,runway_airports_loaded:Object.keys(runwayDb).length,nms_environment:NMS_ENVIRONMENT,performance_models:["N33AP_F50_4","F900B_QRH1_REV02","N699BG_WB_V52543","F900B_DTM9823_DIGITIZATION_V52551"]}));
 app.get("/api/diagnostics",async(req,res)=>{
   let awcOk=false,awcMessage=null,nmsAuth=false,nmsMessage=null;
   try{awcOk=!!(await awc("metar",{ids:"KBPT",format:"json"}));}catch(e){awcMessage=String(e.message||e);}
   if(nmsConfigured()){try{await getNmsAccessToken();nmsAuth=true;}catch(e){nmsMessage=String(e.message||e);}}
-  res.json({backend:true,build:"5.26.36",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
+  res.json({backend:true,build:"5.26.37",awc_metar:awcOk,awc_message:awcMessage,runway_source:"packaged + FAA NASR nationwide live fallback",runway_airports_loaded:Object.keys(runwayDb).length,nasr_live:true,nms:{configured:nmsConfigured(),authenticated:nmsAuth,environment:NMS_ENVIRONMENT,response_format:NMS_RESPONSE_FORMAT,message:nmsMessage}});
 });
 
 app.get("/api/notams/config",async(req,res)=>{
@@ -454,7 +454,7 @@ app.get("/api/notams",async(req,res)=>{
       "Accept":"application/json",
       "Authorization":`Bearer ${t}`,
       "nmsResponseFormat":NMS_RESPONSE_FORMAT,
-      "User-Agent":"KUSA-FlightOps/5.26.36"
+      "User-Agent":"KUSA-FlightOps/5.26.37"
     },cache:"no-store"});
     let r=await request(token);
     // Retry once with a forced token refresh if the cached access token expired/revoked.
@@ -496,3 +496,5 @@ app.post("/api/performance/landing",(req,res)=>{try{res.json(evalLanding(req.bod
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
 
 app.listen(PORT,"0.0.0.0",()=>console.log(`KUSA FlightOps listening on ${PORT}`));
+const invitationMailConnection=require('./scripts/invitation-mail.cjs').createMailer();
+if(invitationMailConnection.status().configured)invitationMailConnection.verifyConnection().then(result=>console.log('[Invitation mail connection]',JSON.stringify(result))).catch(()=>console.warn('[Invitation mail connection] CHECK_UNAVAILABLE'));

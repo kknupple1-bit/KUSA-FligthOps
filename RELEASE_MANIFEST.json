@@ -1,7 +1,7 @@
 {
   "schema": "kusa.flightops.release.v1",
-  "build": "5.26.36",
-  "release": "5.26.36-deployment.1",
+  "build": "5.26.37",
+  "release": "5.26.37-deployment.1",
   "status": "READY FOR REVIEW",
   "scope": "Software packaging integrity; not aircraft performance or flight-use approval.",
   "files": [
@@ -27,8 +27,8 @@
     },
     {
       "path": "invitation-mail-service.js",
-      "size_bytes": 6694,
-      "sha256": "1eb47166404b6c193deabe44970444a8474234ef276b7d8eb839209a8db4dc35"
+      "size_bytes": 7028,
+      "sha256": "0147c7b4079d9391071d900a9b043da01089029b05ccd3259a6aff35c2371875"
     },
     {
       "path": "mission-service.js",
@@ -38,12 +38,12 @@
     {
       "path": "package-lock.json",
       "size_bytes": 40620,
-      "sha256": "f2c6c507282452e2059a9a154da20de8294936ac957d0a43a9f55e856e07fb8b"
+      "sha256": "a6c691d65abcb78d97e82d0397f7d925dc1568343dafccfeaa1f7e999dc00def"
     },
     {
       "path": "package.json",
       "size_bytes": 2523,
-      "sha256": "d0a86c4ce2d7c5dafb1e1f6c3e78a63e00a027d9114686bcac82f618842d336c"
+      "sha256": "164dd242b10ee9bd85b68ef5d5bf31b4b4877374dc5e07313014128d1dcf9ada"
     },
     {
       "path": "platform.js",
@@ -53,12 +53,12 @@
     {
       "path": "public/account.html",
       "size_bytes": 10134,
-      "sha256": "131b0f589debf31d91cc1de84bc567330c715c64a7be270c520932f83628b1a4"
+      "sha256": "6f7aedaf6c19e7a79f083fff33af12314a3c1b43630e28293a15b61152c3cc00"
     },
     {
       "path": "public/admin-users.html",
       "size_bytes": 14703,
-      "sha256": "fb4a3f3e6dd1322e0a6705fded83d4a3a631a47c378cd88854f83d015dab89b6"
+      "sha256": "787d1af30fa9ffffb2e4c8c9b202bc27a2076f6a4fce82ddfcc29bd02022283d"
     },
     {
       "path": "public/apple-touch-icon.png",
@@ -333,7 +333,7 @@
     {
       "path": "public/foreflight.html",
       "size_bytes": 6280,
-      "sha256": "536ffa26272a1e41c266b5da663fe1d7913c2d43b3feb0ab99b8d9e9ef597073"
+      "sha256": "dddc11acc2e1abb8ba72578fcf444ec00c552e36f690de8b19d1171082fce3fd"
     },
     {
       "path": "public/foreflight.js",
@@ -383,12 +383,12 @@
     {
       "path": "public/index.html",
       "size_bytes": 707655,
-      "sha256": "4901c27caa40d46c7b1dfd301d1d0a0713901570048297820d69b80b7e63c841"
+      "sha256": "f97fd6be2b72c38805ac5954f8e561a35a4c659cc2f46eb4f599bcd25bf403f9"
     },
     {
       "path": "public/invite.html",
       "size_bytes": 7414,
-      "sha256": "6d804b37cabaa649a679a1938177cecf5e2f35282fb68171957947ba29c577af"
+      "sha256": "f4d4fd16bfd321de7c91452cdcf2725ed436282fa33e1244c6dc487a88614f12"
     },
     {
       "path": "public/manifest.webmanifest",
@@ -418,12 +418,12 @@
     {
       "path": "public/reset-password.html",
       "size_bytes": 4736,
-      "sha256": "958ee4291c628c73752fcbbb2576b4e65d5e2de120fc034afaebeb270090adff"
+      "sha256": "3d350a9b041cb1a7a8a99c4c416c0dcd6f9a41a1f40dade54460542bbb0e3a81"
     },
     {
       "path": "public/sw.js",
       "size_bytes": 8604,
-      "sha256": "f8a0fa6bad638427258e15295abd52a0a8a051003fddccc64cd6dbcc508d5316"
+      "sha256": "6b644530ec2ae8e4d4f55c11b15354daaa5be29804eae27e6a0ac1677d275438"
     },
     {
       "path": "public/weather-math.js",
@@ -457,8 +457,8 @@
     },
     {
       "path": "scripts/invitation-mail.cjs",
-      "size_bytes": 3154,
-      "sha256": "85a1043a3bcb13e29f53fa6924dcdbd24b72a73c3f376f6941e2e76fa84cd7d8"
+      "size_bytes": 3769,
+      "sha256": "1c5e79775bf47cb584b68852d1ca63fd1f78a0eb50e7017ceee2292cfc6b62a0"
     },
     {
       "path": "scripts/migrate-database.cjs",
@@ -477,8 +477,8 @@
     },
     {
       "path": "server.js",
-      "size_bytes": 842439,
-      "sha256": "451faa87d3de9a6157600d17bd752547587dc901e5c7505e98780b921c728f89"
+      "size_bytes": 842775,
+      "sha256": "96fd98bff4ee9cc33ed29f238344bff7a492e68baef054b670f759a1db733477"
     }
   ]
 }

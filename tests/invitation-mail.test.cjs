@@ -3,6 +3,12 @@ const {test}=require('node:test'),assert=require('node:assert/strict'),fs=requir
 const {createMailer,FROM}=require('../scripts/invitation-mail.cjs');
 const env={FLIGHTOPS_INVITATION_MAIL_ENABLED:'true',FLIGHTOPS_MAIL_TENANT_ID:'11111111-1111-1111-1111-111111111111',FLIGHTOPS_MAIL_CLIENT_ID:'22222222-2222-2222-2222-222222222222',FLIGHTOPS_MAIL_CLIENT_SECRET:'invented-test-secret'};
 const message={email:'pilot@example.invalid',organization:'Test department',role:'pilot',aircraft:['N33AP'],invitePath:'/invite.html?token='+'A'.repeat(43),expiresAt:'2026-11-26T12:00:00Z'};
+test('connection diagnostic authenticates without sending and never exposes provider secrets',async()=>{
+ let calls=0;const request=async url=>{calls++;assert(url.startsWith('https://login.microsoftonline.com/'));return {ok:false,status:401,json:async()=>({error_description:'private provider body',error_codes:[7000215]})};};
+ const result=await createMailer({env,request}).verifyConnection();assert.equal(calls,1);assert.equal(result.authenticated,false);assert.equal(result.provider_code,7000215);assert.equal(result.http_status,401);assert(!JSON.stringify(result).includes('private provider body'));assert(!JSON.stringify(result).includes(env.FLIGHTOPS_MAIL_CLIENT_SECRET));
+ const ready=await createMailer({env,request:async()=>({ok:true,json:async()=>({access_token:'private-access-token'})})}).verifyConnection();assert.equal(ready.authenticated,true);assert(!JSON.stringify(ready).includes('private-access-token'));
+ const missing=await createMailer({env:{},request:async()=>{throw Error('must not request')}}).verifyConnection();assert.equal(missing.reason,'NOT_CONFIGURED');
+});
 test('Microsoft 365 message contains welcome/thanks, correct recipient, Live URL and no browser credentials',async()=>{
  const calls=[],mailer=createMailer({env,request:async(url,opt)=>{calls.push({url,opt});return calls.length===1?{ok:true,json:async()=>({access_token:'invented-access-token'})}:{status:202};}});
  assert.equal(mailer.status().configured,true);await mailer.send(message);assert.equal(calls.length,2);

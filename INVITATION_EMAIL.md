@@ -1,6 +1,6 @@
 # FlightOps invitation email
 
-v5.26.36 replaces the Admin copy-link workflow with Send invitation. The sender
+v5.26.37 replaces the Admin copy-link workflow with Send invitation. The sender
 is kusa@kusaaviation.com (verified in the Microsoft 365 tenant directory). The
 email includes a welcome, thank-you, selected role and aircraft, a private
 seven-day link, existing-account guidance and expiry. The email input is wider
@@ -47,6 +47,13 @@ and the Admin UI's responsive layout and send/error/retry states. Test traffic
 uses invented addresses/credentials, an isolated SQLite database and mocked
 Microsoft responses. No test may send invitations to actual users implicitly.
 Actual sender authorization and mailbox receipt remain hosted acceptance checks.
+
+v5.26.37 checks the saved Microsoft connection on startup when email is enabled.
+This check obtains an application token but sends no mail. Its log contains only
+connection success, a fixed failure reason, HTTP status and a numeric Microsoft
+error code. Failed sends likewise log their phase without provider text, tokens,
+recipient details or invitation links. This distinguishes rejected credentials
+from sending permission failures during hosted release checks.
 
 Microsoft documentation:
 https://learn.microsoft.com/en-us/graph/api/user-sendmail
